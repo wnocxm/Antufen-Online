@@ -73,3 +73,10 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .srow img { width: 28px; height: 28px; } .srow span { flex: 1; } .srow small { color: #a89878; } .srow em { font-style: normal; color: #ffd060; }
 .srow.on { border-color: #ffd870; } .srow.no { opacity: .55; }
 .skgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 4px; }
+
+#title { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; background: radial-gradient(ellipse at center, #5a0c08 0%, #1a0403 55%, #000 100%); }
+.tbox { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.tbox img { width: min(300px, 60vw); image-rendering: pixelated; margin-bottom: 8px; }
+.tbox button { width: 220px; padding: 11px; font-size: 16px; font-weight: 700; color: #ffe8a0; background: url(assets/ui/AnbufenUI_Resource_7032.png) center/100% 100%; border: 1px solid #8a6a30; }
+.tbox button:active { background-image: url(assets/ui/AnbufenUI_Resource_7033.png); color: #000; }
+#tinfo { color: #c8b890; font-size: 12px; }

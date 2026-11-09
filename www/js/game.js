@@ -9,7 +9,7 @@ const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 // Animasyon zamanlaması: orijinal karelerin süresi "tik" cinsinden. Saniyede ~14 tik.
 const TICK = 14;
 // Koşu döngüsü (8 kare = 2 adım) yerde yaklaşık 48 piksel ilerler; adımlar yürünen mesafeye bağlanır (ayak kayması olmaz)
-const STRIDE = 48, CELL_PX = 30, RUN = 3.0;
+const STRIDE = 66, CELL_PX = 30, RUN = 4.2;
 
 // Yön: 0 sağ-yukarı (-y), 1 sağ-aşağı (+x), 2 sol-aşağı (+y), 3 sol-yukarı (-x)
 // Karakter görselleri 4 çapraz yönde; ekranda düz sağ/sol/yukarı/aşağı giderken en yakın çapraz kullanılır.

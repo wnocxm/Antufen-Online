@@ -174,6 +174,7 @@ const UI = (() => {
     rb(vw - 92, VH - 30, 15, null, null, () => cycleTarget(), '◎');
     rb(vw - 30, VH - 122, 19, 'icon_res_item_1038', 'Çanta', () => open('bag'));
     rb(vw - 30, VH - 178, 19, 'icon_res_item_1125', 'Görev', () => open('quest'));
+    rb(vw - 30, VH - 234, 19, null, 'Menü', () => open('menu'), '☰');
     // orta alt: yarı saydam mesaj kutusu (orijinaldeki gibi)
     { const now = performance.now(), L = logs.filter(l => now - l.t < 10000).slice(-5);
       if (L.length) {
@@ -294,7 +295,7 @@ const UI = (() => {
       } else { cur = 'bag'; return render(); }
     } else if (cur === 'sys') {
       title = 'Ayarlar';
-      h = `<div class="iact"><button class="obtn" data-act="tsfx">Ses efektleri: ${SFX.opt.sfx ? 'Açık' : 'Kapalı'}</button><button class="obtn" data-act="tmus">Müzik: ${SFX.opt.music ? 'Açık' : 'Kapalı'}</button></div><br><button class="obtn" data-act="newchar">Yeni karakter oluştur</button><p class="hint">Oyun otomatik kaydedilir.</p>`;
+      h = `<div class="iact"><button class="obtn" data-act="tsfx">Ses efektleri: ${SFX.opt.sfx ? 'Açık' : 'Kapalı'}</button><button class="obtn" data-act="tmus">Müzik: ${SFX.opt.music ? 'Açık' : 'Kapalı'}</button></div><br><button class="obtn" data-act="totitle">Giriş ekranına dön</button> <button class="obtn" data-act="newchar">Yeni karakter oluştur</button><p class="hint">Oyun otomatik kaydedilir.</p>`;
     }
     ptitle.textContent = title; pbody.innerHTML = h;
   }
@@ -311,6 +312,7 @@ const UI = (() => {
     if (A === 'uneq') { unequip(b.dataset.slot); sel = null; render(); return; }
     if (b.dataset.open) { open(b.dataset.open); return; }
     if (b.dataset.use) { useItem(b.dataset.use); render(); return; }
+    if (b.dataset.act === 'totitle') { save(); location.reload(); return; }
     if (b.dataset.act === 'newchar') { if (b.dataset.sure) { localStorage.removeItem(SAVE_KEY); location.reload(); } else { b.dataset.sure = 1; b.textContent = 'Eminim, sil'; } }
   });
   $('#pclose').onclick = closeAll;
@@ -411,7 +413,13 @@ const UI = (() => {
     for (const k of ['icon_res_item_1038', 'AnbufenUI_Resource_7003', 'AnbufenUI_Resource_7002', 'AnbufenUI_Resource_7009', 'UIData_2067']) uiImg(k);
     $('#loading').classList.add('hidden');
     const s = load();
-    if (s) { Game.P = s; start(); } else showCreate();
+    if (s) {
+      // giriş ekranı: devam et ya da yeni karakter
+      const T = $('#title'); T.classList.remove('hidden'); SFX.Music.play('cover.mid');
+      $('#tinfo').textContent = `${s.name} · ${TR.cls[s.cls]} · Seviye ${s.lv}`;
+      $('#tcont').onclick = () => { T.classList.add('hidden'); Game.P = s; start(); };
+      $('#tnew').onclick = e => { const b = e.currentTarget; if (b.dataset.sure) { localStorage.removeItem(SAVE_KEY); T.classList.add('hidden'); showCreate(); } else { b.dataset.sure = 1; b.textContent = 'Eminim: eski karakter silinsin'; } };
+    } else showCreate();
     requestAnimationFrame(loop);
     window.__G = Game;
   }
