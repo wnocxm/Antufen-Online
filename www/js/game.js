@@ -338,7 +338,6 @@ function completeQuest(q) {
   const P = Game.P, r = q.reward; delete P.quests[q.id]; P.done[q.id] = true;
   if (r.gold) P.gold += r.gold; if (r.items) r.items.forEach(([id, n]) => addItem(id, n));
   gainXp(r.xp || 0); UI.log(`Ödül: ${r.xp} TP${r.gold ? ', ' + r.gold + ' altın' : ''}`, 'q');
-  if (q.teleport) { setTimeout(() => gotoScene('120005', null, [33, 20]), 400); }
   UI.refresh(); save();
 }
 function pickupNode(n) {
@@ -465,4 +464,4 @@ function tapWorld(sx, sy) {
   const path = findPath(Game.map, p.x, p.y, c.x, c.y);
   if (path) { p.path = path; setTarget(null); Game.goTarget = null; Game.fx.push(Object.assign(new Fx('路标-左上', Math.round(c.x), Math.round(c.y)), { len: 6 })); }
 }
-function revive() { const p = Game.player, s = stats(); p.dead = false; p.state = 'idle'; p.hp = Math.round(s.hp * 0.5); p.mp = Math.round(s.mp * 0.5); const town = Game.P.done[80003]; if (town) gotoScene('120005', null, [33, 20]); else { const r = Game.map.regionsOf(0)[0]; if (r) { p.x = r[2]; p.y = r[3]; } } }
+function revive() { const p = Game.player, s = stats(); p.dead = false; p.state = 'idle'; p.hp = Math.round(s.hp * 0.5); p.mp = Math.round(s.mp * 0.5); const town = Game.P.done[80003] || Game.P.quests[80003]; if (town) gotoScene('120005', null, [33, 20]); else { const r = Game.map.regionsOf(0)[0]; if (r) { p.x = r[2]; p.y = r[3]; } } }

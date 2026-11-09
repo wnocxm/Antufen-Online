@@ -161,6 +161,12 @@ const UI = (() => {
     const tx = dx - 34, ty = dy - 4; ctx.fillStyle = 'rgba(20,14,8,.75)'; ctx.beginPath(); ctx.arc(tx + 14, ty + 14, 14, 0, 7); ctx.fill(); ctx.strokeStyle = '#b89a50'; ctx.lineWidth = 1.5; ctx.stroke();
     ctx.textAlign = 'center'; ctx.font = 'bold 13px serif'; text('◎', tx + 14, ty + 19, '#ffe48a');
     hud.push([tx, ty, 28, 28, () => cycleTarget()]);
+    // çanta düğmesi (telefon için)
+    const bx = dx - 44, by = dy - 48, br = 19;
+    ctx.fillStyle = 'rgba(20,14,8,.8)'; ctx.beginPath(); ctx.arc(bx + br, by + br, br, 0, 7); ctx.fill(); ctx.strokeStyle = '#d8b860'; ctx.lineWidth = 2; ctx.stroke();
+    const bi = uiImg('icon_res_item_1038'); if (bi.complete && bi.naturalWidth) ctx.drawImage(bi, bx + br - 13, by + br - 14, 26, 26);
+    ctx.textAlign = 'center'; ctx.font = 'bold 8px "Noto Sans", sans-serif'; text('Çanta', bx + br, by + br * 2 + 9, '#ffe48a');
+    hud.push([bx - 4, by - 4, br * 2 + 8, br * 2 + 16, () => open('bag')]);
     // sanal kol
     const J = Input.joyState;
     if (J) { ctx.globalAlpha = 0.85; ctx.strokeStyle = '#c8a860'; ctx.lineWidth = 2; ctx.fillStyle = 'rgba(30,20,10,.35)'; ctx.beginPath(); ctx.arc(J.ox, J.oy, 34, 0, 7); ctx.fill(); ctx.stroke();
@@ -290,6 +296,7 @@ const UI = (() => {
     } else {
       const qs = questsFor(n.cn);
       btns = qs.map(q => { const st = questState(q); return `<button data-qid="${q.id}">${st === 'ready' ? '? ' : st === 'new' ? '! ' : '… '}${esc(q.title)}</button>`; }).join('');
+      if (n.cn === '观林镇传送员' && (P.quests[80003] || P.done[80003])) btns += `<button data-q="tp">✦ Guanlin Kasabası'na ışınlan</button>`;
       btns += `<button data-q="bye">Hoşça kal</button>`;
     }
     $('#dtext').textContent = txt; $('#dbtns').innerHTML = btns;
@@ -300,6 +307,8 @@ const UI = (() => {
     const a = b.dataset.q;
     if (a === 'bye') { closeAll(); return; }
     if (a === 'back') { dlgQ = null; renderDlg(); return; }
+    if (a === 'tp') { closeAll(); setTimeout(() => gotoScene('120005', null, [33, 20]), 300); return; }
+    if (a === 'accept' && dlgQ.teleport) { acceptQuest(dlgQ); dlgQ = null; closeAll(); setTimeout(() => gotoScene('120005', null, [33, 20]), 400); return; }
     if (a === 'accept') { acceptQuest(dlgQ); if (dlgQ.type === 'talk' && dlgQ.to === dlgNpc.cn) { Game.P.quests[dlgQ.id].ready = true; } dlgQ = null; renderDlg(); return; }
     if (a === 'complete') { const q = dlgQ; completeQuest(q); dlgQ = null; if (!q.teleport) renderDlg(); else closeAll(); return; }
   });
@@ -360,7 +369,7 @@ const UI = (() => {
   async function boot() {
     await Assets.init('assets/');
     Input.bind(cv);
-    for (const k of ['AnbufenUI_Resource_7003', 'AnbufenUI_Resource_7002', 'AnbufenUI_Resource_7009', 'UIData_2067']) uiImg(k);
+    for (const k of ['icon_res_item_1038', 'AnbufenUI_Resource_7003', 'AnbufenUI_Resource_7002', 'AnbufenUI_Resource_7009', 'UIData_2067']) uiImg(k);
     $('#loading').classList.add('hidden');
     const s = load();
     if (s) { Game.P = s; start(); } else showCreate();
