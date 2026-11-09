@@ -127,10 +127,11 @@ const Assets = (() => {
         const L = [];
         const pick = (part, gear) => {
           const suf = `_${act}_${look.sex}_${look.race}_${look.cls}`;
-          if (gear && gear[0]) { const n = `group${gear[0]}_${gear[1]}_${part}${suf}`; if (D.reg[n]) return D.reg[n]; }
+          if (typeof gear === 'string') { const n = `${gear}_${part}${suf}`; if (D.reg[n]) return D.reg[n]; }
+          else if (gear && gear[0]) { const n = `group${gear[0]}_${gear[1]}_${part}${suf}`; if (D.reg[n]) return D.reg[n]; }
           return D.reg[`default_${part}${suf}`] || null;
         };
-        L[0] = pick('body', look.body); L[1] = pick('head', look.head); L[2] = pick('weap', look.weap);
+        L[0] = pick('body', look.bodyG || look.body); L[1] = pick('head', look.headG || look.head); L[2] = pick('weap', look.weapG || look.weap);
         const o1 = D.reg[`group1_orn1${'_' + act}_${look.sex}_${look.race}_${look.cls}`];
         const o2 = D.reg[`group1_${look.orn2 || '白'}_orn2_${act}_${look.sex}_${look.race}_${look.cls}`] || Object.keys(D.reg).filter(k => k.startsWith('group1_') && k.includes('_orn2_' + act + '_' + look.sex + '_' + look.race + '_' + look.cls)).map(k => D.reg[k])[0];
         L[3] = look.race === '精灵' ? o1 : null; L[4] = look.aura ? (o2 || null) : null;

@@ -91,24 +91,58 @@ const Game = {
 // ---------------- Kayıt ----------------
 function newSave(name, cls, race, sex) {
   return { v: 1, name, cls, race, sex, lv: 1, xp: 0, gold: 30, hp: 1e9, mp: 1e9,
-    gear: { weap: 0, body: 0, head: 0 }, bag: [{ id: 'hp1', n: 5 }, { id: 'mp1', n: 3 }], quests: {}, done: {}, qitems: {},
+    gear: { weap: 0, body: 0, head: 0 }, eq: Object.assign({}, STARTER[cls]), bag: [{ id: 'hp1', n: 5 }, { id: 'mp1', n: 3 }], quests: {}, done: {}, qitems: {},
     scene: '120207', x: 11, y: 15, quick: ['s0', 's1', 's2', 's3', 'i:hp1', 'i:mp1', null, null], flags: {} };
 }
+// ---------------- Ekipman (orijinal eşya tablolarından) ----------------
+const STARTER = { '战士': { weap: '10003', body: '10004' }, '法师': { weap: '10006', body: '10007' }, '牧师': { weap: '10882', body: '10883' } };
+const NEWBIE = { '战士': ['10002', '10439'], '法师': ['10005', '10058'], '牧师': ['10881', '10884'] };
+const SLOTS = [['weap', 'Silah'], ['head', 'Başlık'], ['body', 'Zırh'], ['belt', 'Kemer'], ['shoe', 'Ayakkabı'], ['glove', 'Eldiven'], ['neck', 'Kolye'], ['ring', 'Yüzük']];
+const STATN = { atk: 'Saldırı', def: 'Savunma', hp: 'Can', mp: 'Mana', crit: 'Kritik %', dodge: 'Kaçınma %', hpreg: 'Can yenileme', mpreg: 'Mana yenileme', res: 'Büyü direnci' };
+let SHOPS = {};
+async function loadItems() {
+  const D = await fetch(Assets.base + 'items.json').then(r => r.json());
+  for (const [id, it] of Object.entries(D.items)) { it.ik = it.icon[0]; it.icon = it.icon[1]; if (it.slot) it.desc = it.desc || ''; ITEMS[id] = it; }
+  SHOPS = D.shops;
+}
+function iconSrc(it) { return `${Assets.base}ui/icon_res_${it.ik || 'item'}_${it.icon}.png`; }
+function canEquip(it) { const P = Game.P; if (it.cls && it.cls !== P.cls) return `Bu eşya ${TR.cls[it.cls]} içindir.`; if (P.lv < it.lv) return `${it.lv}. seviye gerekir.`; return null; }
+function equip(id) {
+  const P = Game.P, it = ITEMS[id]; if (!it || !it.slot || !countItem(id)) return;
+  const why = canEquip(it); if (why) return UI.toast(why);
+  removeItem(id); const old = P.eq[it.slot]; P.eq[it.slot] = id; if (old) addItem(old, 1, true);
+  UI.log(`${it.name} kuşanıldı.`, 'q'); clampVitals(); refreshLook();
+}
+function unequip(slot) { const P = Game.P, id = P.eq[slot]; if (!id) return; P.eq[slot] = null; addItem(id, 1, true); UI.log(`${ITEMS[id].name} çıkarıldı.`); clampVitals(); refreshLook(); }
+function clampVitals() { const p = Game.player, s = stats(); p.hp = Math.min(p.hp, s.hp); p.mp = Math.min(p.mp, s.mp); }
+function buyItem(id, n = 1) {
+  const P = Game.P, it = ITEMS[id], cost = it.price * n; if (P.gold < cost) return UI.toast('Yeterli altının yok.');
+  P.gold -= cost; addItem(id, n, true); UI.log(`${it.name} ×${n} satın alındı (−${cost} altın).`, 'loot'); save();
+}
+function sellItem(id) {
+  const P = Game.P, it = ITEMS[id]; if (!it || it.quest || !removeItem(id)) return;
+  const g = it.sell || Math.max(1, Math.floor((it.price || 0) / 10)); P.gold += g; UI.log(`${it.name} satıldı (+${g} altın).`, 'loot'); save();
+}
+// seviyeye ve sınıfa uygun rastgele ekipman (dükkân listelerinden)
+function randomGear(lv) {
+  const P = Game.P, pool = Object.entries(ITEMS).filter(([, it]) => it.slot && (!it.cls || it.cls === P.cls) && it.lv <= lv && it.lv >= lv - 12);
+  return pool.length ? pool[irnd(0, pool.length - 1)][0] : null;
+}
 function save() { const P = Game.P; if (!P || !Game.player) return; P.scene = Game.sceneId; P.x = Game.player.x; P.y = Game.player.y; P.hp = Game.player.hp; P.mp = Game.player.mp; try { localStorage.setItem(SAVE_KEY, JSON.stringify(P)); } catch (e) { } }
-function load() { try { const s = JSON.parse(localStorage.getItem(SAVE_KEY)); if (s && s.v === 1) return s; } catch (e) { } return null; }
+function load() { try { const s = JSON.parse(localStorage.getItem(SAVE_KEY)); if (s && s.v === 1) { if (!s.eq) { s.eq = Object.assign({}, STARTER[s.cls]); if (s.gear && s.gear.head) Object.assign(s.eq, { head: NEWBIE[s.cls][0], shoe: NEWBIE[s.cls][1] }); } return s; } } catch (e) { } return null; }
 
 function stats() {
   const P = Game.P, C = CLS[P.cls], L = P.lv - 1, g = P.gear;
-  const s = { hp: C.hp + C.ghp * L, mp: C.mp + C.gmp * L, atk: C.atk + C.gatk * L + g.weap * 6, def: C.def + C.gdef * L + g.body * 4 + g.head * 2 };
-  s.hp += g.body * 30 + g.head * 15;
+  const s = { hp: C.hp + C.ghp * L, mp: C.mp + C.gmp * L, atk: C.atk + C.gatk * L, def: C.def + C.gdef * L, crit: 0, dodge: 0, hpreg: 0, mpreg: 0, res: 0 };
+  for (const id of Object.values(P.eq || {})) { const it = id && ITEMS[id]; if (it && it.st) for (const k in it.st) s[k] = (s[k] || 0) + it.st[k]; }
   if (P.race === '精灵') { s.mp += 15; s.hp -= 5; } else { s.def += 2; }
   for (const b of Game.player?.buffs || []) { if (b.buff.atk) s.atk *= 1 + b.buff.atk; if (b.buff.def) s.def *= 1 + b.buff.def; }
   for (const k in s) s[k] = Math.round(s[k]);
   return s;
 }
 function look() {
-  const P = Game.P, col = CLS[P.cls].color, g = P.gear;
-  return { cls: P.cls, race: P.race, sex: P.sex, body: g.body ? [Math.min(4, g.body), col] : [0], head: g.head ? [Math.min(4, g.head), col] : [0], weap: g.weap ? [Math.min(6, g.weap), col] : [0] };
+  const P = Game.P, e = P.eq || {}, G = sl => (e[sl] && ITEMS[e[sl]] && ITEMS[e[sl]].gfx) || null;
+  return { cls: P.cls, race: P.race, sex: P.sex, bodyG: G('body'), headG: G('head'), weapG: G('weap') };
 }
 function xpNeed(l) { return Math.floor(40 * Math.pow(l, 1.85) + 20); }
 
@@ -234,10 +268,10 @@ async function gotoScene(sid, fromName, fixed) {
 }
 
 // ---------------- Savaş ----------------
-function dmgCalc(atk, def, mult) { const base = atk * mult * rnd(0.9, 1.1); const d = Math.max(1, Math.round(base * 100 / (100 + def * 3))); const crit = Math.random() < 0.08; return { d: crit ? Math.round(d * 1.8) : d, crit }; }
+function dmgCalc(atk, def, mult, critB = 0) { const base = atk * mult * rnd(0.9, 1.1); const d = Math.max(1, Math.round(base * 100 / (100 + def * 3))); const crit = Math.random() < 0.08 + critB / 100; return { d: crit ? Math.round(d * 1.8) : d, crit }; }
 function hitMob(m, mult, o = {}) {
   if (!m || m.dead) return;
-  const s = stats(); const r = dmgCalc(s.atk, m.d.lv * 2, mult);
+  const s = stats(); const r = dmgCalc(s.atk, m.d.lv * 2, mult, s.crit);
   m.hp -= r.d; m.aggro = true; m.state = 'hurt'; m.animT = 0; m.stateT = 0.3;
   if (o.slow) m.slowT = o.slow;
   UI.float(m, (r.crit ? '!' : '') + r.d, r.crit ? '#ffd040' : '#fff', r.crit ? 1.3 : 1);
@@ -252,13 +286,15 @@ function killMob(m) {
   const gold = irnd(m.d.lv, m.d.lv * 3) + (m.d.rank || 0) * 20; P.gold += gold;
   if (Math.random() < 0.1) addItem(P.lv > 10 ? 'hp2' : 'hp1', 1);
   if (Math.random() < 0.06) addItem(P.lv > 10 ? 'mp2' : 'mp1', 1);
-  if (m.d.rank && Math.random() < 0.5) { P.gear.weap = Math.max(P.gear.weap, Math.min(6, Math.ceil(m.d.lv / 4))); UI.log('Güçlü bir silah buldun!', 'q'); refreshLook(); }
+  if (m.d.rank && Math.random() < 0.6) { const g = randomGear(Math.max(1, m.d.lv + 2)); if (g) { addItem(g, 1, true); UI.log(`Ganimet: ${ITEMS[g].name}!`, 'q'); UI.toast(`Ganimet: ${ITEMS[g].name}`); } }
+  else if (!m.d.passive && Math.random() < 0.025) { const g = randomGear(Math.max(1, m.d.lv)); if (g) { addItem(g, 1, true); UI.log(`Ganimet: ${ITEMS[g].name}`, 'loot'); } }
   questKill(m.name);
   if (m.deathFx) Game.fx.push(new Fx(m.deathFx, m.x, m.y));
 }
 function hurtPlayer(m) {
   const p = Game.player; if (p.dead) return;
-  const s = stats(); const r = dmgCalc(m.d.atk, s.def, 1);
+  const s = stats(); if (Math.random() < s.dodge / 100) { UI.float(p, 'Iska', '#cfcfcf'); return; }
+  const r = dmgCalc(m.d.atk, s.def, 1);
   p.hp -= r.d; p.combatT = 5; UI.float(p, '-' + r.d, '#ff5040'); UI.hurt();
   if (p.hp <= 0) { p.hp = 0; p.dead = true; p.state = 'dead'; UI.death(); setTarget(null); }
 }
@@ -311,14 +347,16 @@ function countItem(id) { const e = Game.P.bag.find(b => b.id === id); return e ?
 function removeItem(id, n = 1) { const P = Game.P, e = P.bag.find(b => b.id === id); if (!e || e.n < n) return false; e.n -= n; if (e.n <= 0) P.bag.splice(P.bag.indexOf(e), 1); UI.refresh(); return true; }
 function useItem(id) {
   const it = ITEMS[id], p = Game.player, s = stats(); if (!it || !countItem(id) || p.dead) return;
+  if (it.slot) return equip(id);
   if (it.use) {
     if (it.use.hp) { if (p.hp >= s.hp) return UI.log('Canın dolu.'); p.hp = Math.min(s.hp, p.hp + it.use.hp); UI.float(p, '+' + it.use.hp, '#7bff8a'); }
     if (it.use.mp) { if (p.mp >= s.mp) return UI.log('Manan dolu.'); p.mp = Math.min(s.mp, p.mp + it.use.mp); UI.float(p, '+' + it.use.mp, '#6fb7ff'); }
     removeItem(id);
   } else if (it.growth) {
-    const P = Game.P, t = Math.max(1, Math.min(4, Math.ceil(P.lv / 5)));
-    P.gear.weap = Math.max(P.gear.weap, t); P.gear.body = Math.max(P.gear.body, t); P.gear.head = Math.max(P.gear.head, t);
-    removeItem(id); addItem('hp1', 10, true); addItem('mp1', 10, true);
+    const P = Game.P; removeItem(id);
+    for (const g of NEWBIE[P.cls]) { const sl = ITEMS[g].slot; if (!P.eq[sl]) P.eq[sl] = g; else addItem(g, 1, true); }
+    for (const [sl, g] of Object.entries(STARTER[P.cls])) if (!P.eq[sl]) P.eq[sl] = g;
+    addItem('hp1', 10, true); addItem('mp1', 10, true);
     UI.toast('Gelişim Paketi açıldı! Yeni ekipmanını kuşandın.'); refreshLook();
   }
 }
@@ -387,7 +425,7 @@ function update(dt) {
   if (p.stateT > 0) { p.stateT -= dt; if (p.stateT <= 0) p.state = 'idle'; }
   if (!p.dead) {
     const regen = Game.scene.name === '观林镇' ? 0.03 : p.combatT > 0 ? 0.003 : 0.012;
-    p.hp = Math.min(s.hp, p.hp + s.hp * regen * dt); p.mp = Math.min(s.mp, p.mp + s.mp * regen * 1.3 * dt);
+    p.hp = Math.min(s.hp, p.hp + (s.hp * regen + s.hpreg * 0.02) * dt); p.mp = Math.min(s.mp, p.mp + (s.mp * regen * 1.3 + s.mpreg * 0.02) * dt);
     const J = Input.joy();
     let moving = false;
     if (J) {

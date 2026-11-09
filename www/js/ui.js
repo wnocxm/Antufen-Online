@@ -230,11 +230,18 @@ const UI = (() => {
 
   // ---------- paneller (DOM, orijinal çerçeve görselleriyle) ----------
   const panel = $('#panel'), pbody = $('#pbody'), ptitle = $('#ptitle');
-  let cur = null;
+  let cur = null, sel = null, shopNpc = null, shopTab = 0;
+  const itemBox = (id, act) => { const it = ITEMS[id]; if (!it) return '';
+    const why = it.slot ? canEquip(it) : null;
+    const st = it.st ? Object.entries(it.st).map(([k, v]) => `<span>${STATN[k] || k} +${v}</span>`).join('') : '';
+    return `<div class="ibox"><img src="${iconSrc(it)}"><div><b>${esc(it.name)}</b>
+      <small>${it.slot ? `${SLOTS.find(x => x[0] === it.slot)[1]} · ${it.cls ? TR.cls[it.cls] : 'Tüm sınıflar'} · <i class="${Game.P.lv < it.lv ? 'bad' : ''}">Seviye ${it.lv}</i>` : esc(it.desc || '')}</small>
+      <div class="ist">${st}</div>${why ? `<small class="bad">${why}</small>` : ''}</div></div><div class="iact">${act}</div>`; };
   function panelOpen() { return !panel.classList.contains('hidden') || !$('#dlg').classList.contains('hidden'); }
-  function closeAll() { panel.classList.add('hidden'); $('#dlg').classList.add('hidden'); cur = null; }
+  function closeAll() { panel.classList.add('hidden'); $('#dlg').classList.add('hidden'); cur = null; sel = null; shopNpc = null; }
   function open(kind) {
     if (mode !== 'play') return;
+    if (kind !== cur) sel = null; if (kind !== 'bag' && kind !== 'shop') shopNpc = null;
     cur = kind; panel.classList.remove('hidden'); render(); if (kind === 'bag') questFlag('openBag');
   }
   function render() {
@@ -247,14 +254,18 @@ const UI = (() => {
       title = 'Karakter';
       h = `<div class="charp"><div class="sil"><img src="${Assets.base}ui/Portrait_${P.face}.png"></div><div class="cstats">
         <div class="cname">${esc(P.name)}</div><div class="csub">${TR.race[P.race]} · ${TR.cls[P.cls]} · Seviye ${P.lv}</div>
-        <table>${[['Can', s.hp], ['Mana', s.mp], ['Saldırı', s.atk], ['Savunma', s.def], ['Tecrübe', `${P.xp}/${xpNeed(P.lv)}`], ['Altın', P.gold]].map(([a, b]) => `<tr><td>${a}</td><td>${b}</td></tr>`).join('')}</table>
-        <div class="gear">Silah kademesi: <b>${P.gear.weap || '-'}</b> · Zırh: <b>${P.gear.body || '-'}</b> · Başlık: <b>${P.gear.head || '-'}</b></div></div></div>`;
+        <table>${[['Can', s.hp], ['Mana', s.mp], ['Saldırı', s.atk], ['Savunma', s.def], ['Kritik', (8 + s.crit) + '%'], ['Tecrübe', `${P.xp}/${xpNeed(P.lv)}`], ['Altın', P.gold]].map(([a, b]) => `<tr><td>${a}</td><td>${b}</td></tr>`).join('')}</table>
+        </div></div>
+        <div class="eqgrid">${SLOTS.map(([k, n]) => { const id = P.eq[k], it = id && ITEMS[id]; return `<button class="slot eq ${sel === 'eq:' + k ? 'on' : ''}" data-sel="eq:${k}">${it ? `<img src="${iconSrc(it)}">` : `<span>${n}</span>`}</button>`; }).join('')}</div>
+        ${sel && sel.startsWith('eq:') && P.eq[sel.slice(3)] ? itemBox(P.eq[sel.slice(3)], `<button class="obtn" data-act="uneq" data-slot="${sel.slice(3)}">Çıkar</button>`) : '<p class="hint">Bir ekipman yuvasına dokun. Yeni ekipmanı çantadan giyebilirsin.</p>'}`;
     } else if (cur === 'bag') {
       title = 'Çanta';
       const qi = []; for (const q of QUESTS) { const st = P.quests[q.id]; if (st && q.item && st.n) qi.push([q.item, st.n]); }
-      h = `<div class="grid">${P.bag.map(b => `<button class="slot" data-use="${b.id}" title="${esc(ITEMS[b.id].name)}"><img src="${Assets.base}ui/icon_res_item_${ITEMS[b.id].icon}.png"><em>${b.n}</em></button>`).join('')}
+      h = `<div class="gold">${P.gold} altın</div><div class="grid">${P.bag.map(b => { const it = ITEMS[b.id]; if (!it) return ''; return `<button class="slot ${sel === b.id ? 'on' : ''} ${it.slot && canEquip(it) ? 'no' : ''}" data-sel="${b.id}"><img src="${iconSrc(it)}"><em>${b.n > 1 ? b.n : ''}</em></button>`; }).join('')}
         ${qi.map(([n, c]) => `<div class="slot q" title="${esc(n)}"><img src="${Assets.base}ui/icon_res_item_${Q_ICONS[n] || 1125}.png"><em>${c}</em></div>`).join('')}
-        ${'<div class="slot e"></div>'.repeat(Math.max(0, 24 - P.bag.length - qi.length))}</div><p class="hint">Bir eşyaya dokunarak kullan. Görev eşyaları (sarı çerçeve) görev tamamlanınca teslim edilir.</p>`;
+        ${'<div class="slot e"></div>'.repeat(Math.max(0, 24 - P.bag.length - qi.length))}</div>`;
+      if (sel && countItem(sel)) { const it = ITEMS[sel]; h += itemBox(sel, (it.slot ? `<button class="obtn" data-act="use" data-id="${sel}">Giy</button>` : it.use || it.growth ? `<button class="obtn" data-act="use" data-id="${sel}">${it.growth ? 'Aç' : 'Kullan'}</button>` : '') + (shopNpc && !it.quest && !it.growth ? `<button class="obtn" data-act="sell" data-id="${sel}">Sat (+${it.sell || 1})</button>` : '')); }
+      else h += `<p class="hint">Bir eşyaya dokun: bilgisini gör, kullan ya da giy.${shopNpc ? ' Satmak için de seçebilirsin.' : ''} Görev eşyaları (sarı çerçeve) görev bitince teslim edilir.</p>`;
     } else if (cur === 'skill') {
       title = 'Beceriler';
       h = CLS[P.cls].skills.map((sk, i) => `<div class="skr ${P.lv < sk.lv ? 'lock' : ''}"><img src="${Assets.base}ui/icon_res_skill_${sk.icon}.png"><div><b>${sk.name}</b><br><small>${sk.mp} mana · ${sk.cd} sn · ${P.lv < sk.lv ? sk.lv + '. seviyede' : 'Kısayol ' + (i + 1)}</small></div></div>`).join('');
@@ -266,6 +277,14 @@ const UI = (() => {
     } else if (cur === 'map') {
       title = 'Dünya Haritası';
       h = `<div class="wmap"><img src="${Assets.base}ui/UIData_2047.png"><img src="${Assets.base}ui/UIData_2048.png"></div><p class="hint">Şu an: ${trName(Game.scene.name)}</p>`;
+    } else if (cur === 'shop') {
+      const tabs = SHOPS[shopNpc] || []; title = trName(shopNpc); if (shopTab >= tabs.length + 1) shopTab = 0;
+      h = `<div class="tabs">${tabs.map(([n], i) => `<button class="${i === shopTab ? 'on' : ''}" data-tab="${i}">${n}</button>`).join('')}<button class="${shopTab === tabs.length ? 'on' : ''}" data-tab="${tabs.length}">Sat</button><span class="gold">${P.gold} altın</span></div>`;
+      if (shopTab < tabs.length) {
+        const ids = tabs[shopTab][1].slice().sort((a, b) => { const A = ITEMS[a], B = ITEMS[b]; return ((A.cls && A.cls !== P.cls) - (B.cls && B.cls !== P.cls)) || (A.lv || 0) - (B.lv || 0); });
+        h += `<div class="shop">${ids.map(id => { const it = ITEMS[id], bad = it.slot && canEquip(it); return `<button class="srow ${sel === 's:' + id ? 'on' : ''} ${bad ? 'no' : ''}" data-sel="s:${id}"><img src="${iconSrc(it)}"><span>${esc(it.name)}${it.lv ? ` <small>Sv${it.lv}</small>` : ''}</span><em>${it.price}</em></button>`; }).join('')}</div>`;
+        if (sel && sel.startsWith('s:')) { const id = sel.slice(2), it = ITEMS[id]; h += itemBox(id, `<button class="obtn" data-act="buy" data-id="${id}" data-n="1">Satın al (${it.price})</button>${it.use ? `<button class="obtn" data-act="buy" data-id="${id}" data-n="10">10 tane (${it.price * 10})</button>` : ''}`); }
+      } else { cur = 'bag'; return render(); }
     } else if (cur === 'sys') {
       title = 'Ayarlar';
       h = `<button class="obtn" data-act="newchar">Yeni karakter oluştur</button><p class="hint">Oyun otomatik kaydedilir.</p>`;
@@ -273,7 +292,14 @@ const UI = (() => {
     ptitle.textContent = title; pbody.innerHTML = h;
   }
   pbody.addEventListener('click', e => {
-    const b = e.target.closest('[data-open],[data-use],[data-act]'); if (!b) return;
+    const b = e.target.closest('[data-open],[data-use],[data-act],[data-sel],[data-tab]'); if (!b) return;
+    if (b.dataset.sel) { sel = sel === b.dataset.sel ? null : b.dataset.sel; render(); return; }
+    if (b.dataset.tab) { shopTab = +b.dataset.tab; sel = null; render(); return; }
+    const A = b.dataset.act;
+    if (A === 'use') { useItem(b.dataset.id); if (!countItem(b.dataset.id)) sel = null; render(); return; }
+    if (A === 'sell') { sellItem(b.dataset.id); if (!countItem(b.dataset.id)) sel = null; render(); return; }
+    if (A === 'buy') { buyItem(b.dataset.id, +b.dataset.n); render(); return; }
+    if (A === 'uneq') { unequip(b.dataset.slot); sel = null; render(); return; }
     if (b.dataset.open) { open(b.dataset.open); return; }
     if (b.dataset.use) { useItem(b.dataset.use); render(); return; }
     if (b.dataset.act === 'newchar') { if (b.dataset.sure) { localStorage.removeItem(SAVE_KEY); location.reload(); } else { b.dataset.sure = 1; b.textContent = 'Eminim, sil'; } }
@@ -297,6 +323,7 @@ const UI = (() => {
       const qs = questsFor(n.cn);
       btns = qs.map(q => { const st = questState(q); return `<button data-qid="${q.id}">${st === 'ready' ? '? ' : st === 'new' ? '! ' : '… '}${esc(q.title)}</button>`; }).join('');
       if (n.cn === '观林镇传送员' && (P.quests[80003] || P.done[80003])) btns += `<button data-q="tp">✦ Guanlin Kasabası'na ışınlan</button>`;
+      if (SHOPS[n.cn]) btns = `<button data-q="shop">🛒 Alışveriş</button>` + btns;
       btns += `<button data-q="bye">Hoşça kal</button>`;
     }
     $('#dtext').textContent = txt; $('#dbtns').innerHTML = btns;
@@ -306,6 +333,7 @@ const UI = (() => {
     if (b.dataset.qid) { dlgQ = QBY[b.dataset.qid]; renderDlg(); return; }
     const a = b.dataset.q;
     if (a === 'bye') { closeAll(); return; }
+    if (a === 'shop') { const cn = dlgNpc.cn; closeAll(); shopNpc = cn; shopTab = 0; cur = 'shop'; panel.classList.remove('hidden'); render(); return; }
     if (a === 'back') { dlgQ = null; renderDlg(); return; }
     if (a === 'tp') { closeAll(); setTimeout(() => gotoScene('120005', null, [33, 20]), 300); return; }
     if (a === 'accept' && dlgQ.teleport) { acceptQuest(dlgQ); dlgQ = null; closeAll(); setTimeout(() => gotoScene('120005', null, [33, 20]), 400); return; }
@@ -326,7 +354,8 @@ const UI = (() => {
     document.querySelectorAll('[data-cls]').forEach(b => b.classList.toggle('on', b.dataset.cls === cre.cls));
     document.querySelectorAll('[data-race]').forEach(b => b.classList.toggle('on', b.dataset.race === cre.race));
     document.querySelectorAll('[data-sex]').forEach(b => b.classList.toggle('on', b.dataset.sex === cre.sex));
-    creDoll = new Assets.Paperdoll({ cls: cre.cls, race: cre.race, sex: cre.sex, body: [1, CLS[cre.cls].color], head: [1, CLS[cre.cls].color], weap: [1, CLS[cre.cls].color] });
+    const st = STARTER[cre.cls], gf = id => ITEMS[id] && ITEMS[id].gfx;
+    creDoll = new Assets.Paperdoll({ cls: cre.cls, race: cre.race, sex: cre.sex, bodyG: gf(st.body), headG: gf(NEWBIE[cre.cls][0]), weapG: gf(st.weap) });
   }
   $('#create').addEventListener('click', e => {
     const b = e.target.closest('button'); if (!b) return;
@@ -367,7 +396,7 @@ const UI = (() => {
     requestAnimationFrame(loop);
   }
   async function boot() {
-    await Assets.init('assets/');
+    await Assets.init('assets/'); await loadItems();
     Input.bind(cv);
     for (const k of ['icon_res_item_1038', 'AnbufenUI_Resource_7003', 'AnbufenUI_Resource_7002', 'AnbufenUI_Resource_7009', 'UIData_2067']) uiImg(k);
     $('#loading').classList.add('hidden');

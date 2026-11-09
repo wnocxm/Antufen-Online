@@ -56,3 +56,19 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .cpanel .face { padding: 0; width: 38px; height: 38px; background: #000; }
 .face img { width: 100%; height: 100%; display: block; }
 #cstart { margin-top: 4px; padding: 9px; font-size: 15px; font-weight: 700; color: #000 !important; background-image: url(assets/ui/AnbufenUI_Resource_7033.png) !important; border-color: #ffd870 !important; }
+/* eşya bilgisi, ekipman, dükkân */
+.slot.on { border-color: #ffd870; box-shadow: 0 0 0 1px #ffd870 inset; } .slot.no img { opacity: .45; filter: grayscale(.7); }
+.slot.eq span { font-size: 9.5px; color: #8a7a5a; text-align: center; }
+.eqgrid { display: grid; grid-template-columns: repeat(8, 44px); gap: 5px; margin: 8px 0 4px; }
+.ibox { display: flex; gap: 8px; margin-top: 8px; padding: 6px 8px; background: rgba(0,0,0,.45); border: 1px solid #5a4424; }
+.ibox img { width: 32px; height: 32px; flex: none; } .ibox b { color: #ffd870; } .ibox small { display: block; color: #c8b890; font-size: 11px; }
+.ist span { display: inline-block; margin-right: 8px; color: #8cf07a; font-size: 11.5px; } .bad { color: #ff7050 !important; font-style: normal; }
+.iact { display: flex; gap: 6px; margin-top: 6px; } .iact .obtn { padding: 6px 12px; }
+.gold { color: #ffd060; font-size: 12px; margin-bottom: 6px; } .tabs .gold { margin: 0 0 0 auto; align-self: center; }
+.tabs { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 6px; }
+.tabs button { padding: 5px 9px; font-size: 12px; background: url(assets/ui/AnbufenUI_Resource_7032.png) center/100% 100%; border: 1px solid #5a4424; color: #e8dcc0; }
+.tabs button.on { background-image: url(assets/ui/AnbufenUI_Resource_7033.png); color: #000; font-weight: 700; border-color: #ffd870; }
+.shop { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 4px; max-height: 38vh; overflow-y: auto; }
+.srow { display: flex; align-items: center; gap: 6px; padding: 3px 6px; background: #0e0806; border: 1px solid #4a3820; color: #e8dcc0; text-align: left; font-size: 12px; }
+.srow img { width: 28px; height: 28px; } .srow span { flex: 1; } .srow small { color: #a89878; } .srow em { font-style: normal; color: #ffd060; }
+.srow.on { border-color: #ffd870; } .srow.no { opacity: .55; }
