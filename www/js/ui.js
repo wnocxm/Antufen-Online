@@ -56,7 +56,7 @@ const UI = (() => {
 
   // ---------- dünya çizimi ----------
   function drawWorld() {
-    const map = Game.map, ox = Math.round(Game.cam.x - vw / 2), oy = Math.round(Game.cam.y - VH / 2);
+    const map = Game.map, ox = Math.round((Game.cam.x - vw / 2) * scale) / scale, oy = Math.round((Game.cam.y - VH / 2) * scale) / scale; // ekran pikseline yuvarla: akıcı kaydırma
     ctx.fillStyle = '#000'; ctx.fillRect(0, 0, vw, VH);
     // zemin
     const sx = Math.max(0, ox), sy = Math.max(0, oy), ex = Math.min(map.pw, ox + vw), ey = Math.min(map.ph, oy + VH);

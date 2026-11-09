@@ -8,10 +8,20 @@ const pick = a => a[Math.floor(Math.random() * a.length)];
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 
 // Yön: 0 sağ-yukarı (-y), 1 sağ-aşağı (+x), 2 sol-aşağı (+y), 3 sol-yukarı (-x)
+// Karakter görselleri 4 çapraz yönde; ekranda düz sağ/sol/yukarı/aşağı giderken en yakın çapraz kullanılır.
 function dirOf(dx, dy) {
-  if (Math.abs(dx) > Math.abs(dy)) return dx > 0 ? 1 : 3;
+  const ax = Math.abs(dx), ay = Math.abs(dy);
+  if (ax > 0 && ay > 0 && Math.abs(ax - ay) < 0.2 * Math.max(ax, ay)) {
+    if (dx > 0 && dy < 0) return 1;   // ekranda sağa
+    if (dx < 0 && dy > 0) return 3;   // ekranda sola
+    return dy > 0 ? 2 : 0;            // ekranda aşağı / yukarı
+  }
+  if (ax > ay) return dx > 0 ? 1 : 3;
   return dy > 0 ? 2 : 0;
 }
+// 8 yön: ekranda sağ, sağ-aşağı, aşağı, sol-aşağı, sol, sol-yukarı, yukarı, sağ-yukarı (kare vektörleri)
+const DIR8 = [[1, -1], [1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1], [0, -1]];
+function snapScreen8(sx, sy) { const i = ((Math.round(Math.atan2(sy, sx) / (Math.PI / 4)) % 8) + 8) % 8; return DIR8[i]; }
 // ekran vektöründen (sx, sy) kare vektörüne
 function screenToCellVec(sx, sy) { const a = sx / HW, b = sy / HH; return { x: (a + b) / 2, y: (b - a) / 2 }; }
 
@@ -354,9 +364,17 @@ function moveEnt(e, dx, dy) {
   if (!m.blocked(e.x + dx, e.y)) e.x += dx; else if (!m.blocked(e.x + dx, Math.round(e.y))) e.x += dx;
   if (!m.blocked(e.x, e.y + dy)) e.y += dy;
 }
+// Hedefe yalnızca 8 yönde (karo komşuları doğrultusunda) ilerle
 function stepTo(e, tx, ty, sp, dt) {
-  const dx = tx - e.x, dy = ty - e.y, d = Math.hypot(dx, dy); if (d < 0.05) return true;
-  const st = Math.min(d, sp * dt); moveEnt(e, dx / d * st, dy / d * st); e.dir = dirOf(dx, dy); return d <= st + 0.02;
+  const dx = tx - e.x, dy = ty - e.y;
+  if (Math.hypot(dx, dy) < 0.06) return true;
+  const eps = 0.04, sx = Math.abs(dx) > eps ? Math.sign(dx) : 0, sy = Math.abs(dy) > eps ? Math.sign(dy) : 0;
+  if (!sx && !sy) { if (!Game.map.blocked(tx, ty)) { e.x = tx; e.y = ty; } return true; }
+  const l = Math.hypot(sx, sy), st = sp * dt;
+  let mx = sx / l * st, my = sy / l * st;
+  if (Math.abs(mx) > Math.abs(dx)) mx = dx; if (Math.abs(my) > Math.abs(dy)) my = dy;
+  moveEnt(e, mx, my); e.dir = dirOf(sx, sy);
+  return Math.hypot(tx - e.x, ty - e.y) < 0.06;
 }
 function update(dt) {
   Game.time += dt; if (Game.arriveT > 0) Game.arriveT -= dt; if (Game.warnT > 0) Game.warnT -= dt;
@@ -374,8 +392,8 @@ function update(dt) {
     let moving = false;
     if (J) {
       p.path = null; p.pending = null; Game.goTarget = null;
-      const v = screenToCellVec(J.x, J.y), l = Math.hypot(v.x, v.y) || 1, sp = 3.2 * dt;
-      moveEnt(p, v.x / l * sp, v.y / l * sp); p.dir = dirOf(v.x, v.y); moving = true;
+      const [cx, cy] = snapScreen8(J.x, J.y), l = Math.hypot(cx, cy), sp = 3.2 * dt;
+      moveEnt(p, cx / l * sp, cy / l * sp); p.dir = dirOf(cx, cy); moving = true;
     } else if (p.state !== 'attack' && p.state !== 'cast') {
       const t = Game.target;
       if (p.pending != null && t && !t.dead) {
@@ -430,7 +448,7 @@ function update(dt) {
   }
   Game.fx = Game.fx.filter(f => !f.done);
   // kamera
-  const k = Math.min(1, dt * 6); Game.cam.x += (p.X - Game.cam.x) * k; Game.cam.y += (p.Y - 40 - Game.cam.y) * k;
+  Game.cam.x = p.X; Game.cam.y = p.Y - 40; // kamera karaktere kilitli: titreme olmaz
   Game.saveT = (Game.saveT || 0) + dt; if (Game.saveT > 8) { Game.saveT = 0; save(); }
 }
 
