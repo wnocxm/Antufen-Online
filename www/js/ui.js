@@ -295,7 +295,7 @@ const UI = (() => {
       } else { cur = 'bag'; return render(); }
     } else if (cur === 'sys') {
       title = 'Ayarlar';
-      h = `<div class="iact"><button class="obtn" data-act="tsfx">Ses efektleri: ${SFX.opt.sfx ? 'Açık' : 'Kapalı'}</button><button class="obtn" data-act="tmus">Müzik: ${SFX.opt.music ? 'Açık' : 'Kapalı'}</button></div><br><button class="obtn" data-act="totitle">Giriş ekranına dön</button> <button class="obtn" data-act="newchar">Yeni karakter oluştur</button><p class="hint">Oyun otomatik kaydedilir.</p>`;
+      h = `<div class="iact"><button class="obtn" data-act="tsfx">Ses efektleri: ${SFX.opt.sfx ? 'Açık' : 'Kapalı'}</button><button class="obtn" data-act="tmus">Müzik: ${SFX.opt.music ? 'Açık' : 'Kapalı'}</button></div><br><button class="obtn" data-act="totitle">Giriş ekranına dön</button> <button class="obtn" data-act="newchar">Yeni karakter oluştur</button><p class="hint">Oyun otomatik kaydedilir. Sürüm 11092140</p>`;
     }
     ptitle.textContent = title; pbody.innerHTML = h;
   }

@@ -80,3 +80,4 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .tbox button { width: 220px; padding: 11px; font-size: 16px; font-weight: 700; color: #ffe8a0; background: url(assets/ui/AnbufenUI_Resource_7032.png) center/100% 100%; border: 1px solid #8a6a30; }
 .tbox button:active { background-image: url(assets/ui/AnbufenUI_Resource_7033.png); color: #000; }
 #tinfo { color: #c8b890; font-size: 12px; }
+.ver { color: #7a6a4a; font-size: 10px; }
