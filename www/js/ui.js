@@ -21,6 +21,7 @@ const Input = (() => {
     cv.addEventListener('pointerdown', e => {
       window.SFX && SFX.init && SFX.init();
       const L = UI.toLogical(e.clientX, e.clientY);
+      if (Win.isOpen()) { Win.tap(L.x, L.y); e.preventDefault(); return; }
       const hit = UI.hudHit(L.x, L.y); if (hit) { hit(); e.preventDefault(); return; }
       if (L.x < Math.max(UI.vw * 0.33, 210) && L.y > VH * 0.45 && !joy) { const R = UI.rockerPos(); let dx = L.x - R.x, dy = L.y - R.y; const l = Math.hypot(dx, dy); if (l > 40) { dx = dx / l * 40; dy = dy / l * 40; } joy = { id: e.pointerId, ox: R.x, oy: R.y, dx, dy, active: true }; cv.setPointerCapture(e.pointerId); return; }
       pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
@@ -246,10 +247,11 @@ const UI = (() => {
     return `<div class="ibox"><img src="${iconSrc(it)}"><div><b>${esc(it.name)}</b>
       <small>${it.slot ? `${SLOTS.find(x => x[0] === it.slot)[1]} · ${it.cls ? TR.cls[it.cls] : 'Tüm sınıflar'} · <i class="${Game.P.lv < it.lv ? 'bad' : ''}">Seviye ${it.lv}</i>` : esc(it.desc || '')}</small>
       <div class="ist">${st}</div>${why ? `<small class="bad">${why}</small>` : ''}</div></div><div class="iact">${act}</div>`; };
-  function panelOpen() { return !panel.classList.contains('hidden') || !$('#dlg').classList.contains('hidden'); }
-  function closeAll() { panel.classList.add('hidden'); $('#dlg').classList.add('hidden'); cur = null; sel = null; shopNpc = null; }
+  function panelOpen() { return Win.isOpen() || !panel.classList.contains('hidden') || !$('#dlg').classList.contains('hidden'); }
+  function closeAll() { Win.close(); panel.classList.add('hidden'); $('#dlg').classList.add('hidden'); cur = null; sel = null; shopNpc = null; }
   function open(kind) {
     if (mode !== 'play') return;
+    if (kind === 'bag') { const sh = shopNpc; closeAll(); Win.open('bag', sh ? { shop: sh } : {}); return; }
     if (kind !== cur) sel = null; if (kind !== 'bag' && kind !== 'shop') shopNpc = null;
     cur = kind; panel.classList.remove('hidden'); SFX.play('menu_appear', 0.5); render(); if (kind === 'bag') questFlag('openBag');
   }
@@ -294,10 +296,10 @@ const UI = (() => {
         const ids = tabs[shopTab][1].slice().sort((a, b) => { const A = ITEMS[a], B = ITEMS[b]; return ((A.cls && A.cls !== P.cls) - (B.cls && B.cls !== P.cls)) || (A.lv || 0) - (B.lv || 0); });
         h += `<div class="shop">${ids.map(id => { const it = ITEMS[id], bad = it.slot && canEquip(it); return `<button class="srow ${sel === 's:' + id ? 'on' : ''} ${bad ? 'no' : ''}" data-sel="s:${id}"><img src="${iconSrc(it)}"><span>${esc(it.name)}${it.lv ? ` <small>Sv${it.lv}</small>` : ''}</span><em>${it.price}</em></button>`; }).join('')}</div>`;
         if (sel && sel.startsWith('s:')) { const id = sel.slice(2), it = ITEMS[id]; h += itemBox(id, `<button class="obtn" data-act="buy" data-id="${id}" data-n="1">Satın al (${it.price})</button>${it.use ? `<button class="obtn" data-act="buy" data-id="${id}" data-n="10">10 tane (${it.price * 10})</button>` : ''}`); }
-      } else { cur = 'bag'; return render(); }
+      } else { const sh = shopNpc; closeAll(); Win.open('bag', { shop: sh }); return; }
     } else if (cur === 'sys') {
       title = 'Ayarlar';
-      h = `<div class="iact"><button class="obtn" data-act="tsfx">Ses efektleri: ${SFX.opt.sfx ? 'Açık' : 'Kapalı'}</button><button class="obtn" data-act="tmus">Müzik: ${SFX.opt.music ? 'Açık' : 'Kapalı'}</button></div><br><button class="obtn" data-act="totitle">Giriş ekranına dön</button> <button class="obtn" data-act="newchar">Yeni karakter oluştur</button><p class="hint">Oyun otomatik kaydedilir. Sürüm 11092149</p>`;
+      h = `<div class="iact"><button class="obtn" data-act="tsfx">Ses efektleri: ${SFX.opt.sfx ? 'Açık' : 'Kapalı'}</button><button class="obtn" data-act="tmus">Müzik: ${SFX.opt.music ? 'Açık' : 'Kapalı'}</button></div><br><button class="obtn" data-act="totitle">Giriş ekranına dön</button> <button class="obtn" data-act="newchar">Yeni karakter oluştur</button><p class="hint">Oyun otomatik kaydedilir. Sürüm 11092207</p>`;
     }
     ptitle.textContent = title; pbody.innerHTML = h;
   }
@@ -403,14 +405,14 @@ const UI = (() => {
     ctx.setTransform(scale, 0, 0, scale, 0, 0); ctx.imageSmoothingEnabled = false;
     if (mode === 'play' && Game.map && Game.player) {
       if (!panelOpen()) update(dt);
-      drawWorld(); drawHud();
+      drawWorld(); drawHud(); Win.draw(ctx, vw, VH);
       if (fadeOn || fadeA > 0) { fadeA = clamp(fadeA + (fadeOn ? dt * 5 : -dt * 3), 0, 1); ctx.fillStyle = `rgba(0,0,0,${fadeA})`; ctx.fillRect(0, 0, vw, VH); }
       if (Game.player.dead) { ctx.fillStyle = 'rgba(40,0,0,.45)'; ctx.fillRect(0, 0, vw, VH); }
     } else if (mode === 'create') drawCreate();
     requestAnimationFrame(loop);
   }
   async function boot() {
-    await Assets.init('assets/'); await loadItems();
+    await Assets.init('assets/'); await loadItems(); await Forms.init('assets/');
     Input.bind(cv);
     for (const k of ['AnbufenUI_Resource_7005', 'AnbufenUI_Resource_7078', 'AnbufenUI_Resource_7125', 'AnbufenUI_Resource_7127', 'icon_res_item_1038', 'AnbufenUI_Resource_7003', 'AnbufenUI_Resource_7002', 'AnbufenUI_Resource_7009', 'UIData_2067']) uiImg(k);
     $('#loading').classList.add('hidden');
