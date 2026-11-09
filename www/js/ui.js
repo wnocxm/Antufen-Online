@@ -65,13 +65,13 @@ const UI = (() => {
     const list = [];
     for (const o of map.objs) {
       if (o.X < ox - 350 || o.X > ox + vw + 350 || o.Y < oy - 40 || o.Y > oy + VH + 450) continue;
-      if (o.flat) { o.sp.draw(ctx, o.anim, Game.time * 8, o.X - ox, o.Y - oy); continue; }
+      if (o.flat) { o.sp.draw(ctx, o.anim, Game.time * TICK, o.X - ox, o.Y - oy); continue; }
       list.push([o.depth, o]);
     }
     for (const e of Game.ents) { const X = e.X, Y = e.Y; if (X < ox - 100 || X > ox + vw + 100 || Y < oy - 20 || Y > oy + VH + 150) continue; list.push([e.x + e.y + 0.01, e]); }
     list.sort((a, b) => a[0] - b[0]);
     for (const [, o] of list) {
-      if (o.kind === 'obj') o.sp.draw(ctx, o.anim, Game.time * 8, o.X - ox, o.Y - oy);
+      if (o.kind === 'obj') o.sp.draw(ctx, o.anim, Game.time * TICK, o.X - ox, o.Y - oy);
       else {
         const X = o.X - ox, Y = o.Y - oy;
         if (o === Game.target) { ctx.strokeStyle = '#e03020'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.ellipse(X, Y, 15, 7, 0, 0, 7); ctx.stroke(); }

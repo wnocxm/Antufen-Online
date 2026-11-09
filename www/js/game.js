@@ -6,6 +6,10 @@ const rnd = (a, b) => a + Math.random() * (b - a);
 const irnd = (a, b) => Math.floor(rnd(a, b + 1));
 const pick = a => a[Math.floor(Math.random() * a.length)];
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+// Animasyon zamanlaması: orijinal karelerin süresi "tik" cinsinden. Saniyede ~14 tik.
+const TICK = 14;
+// Koşu döngüsü (8 kare = 2 adım) yerde yaklaşık 48 piksel ilerler; adımlar yürünen mesafeye bağlanır (ayak kayması olmaz)
+const STRIDE = 48, CELL_PX = 30, RUN = 3.0;
 
 // Yön: 0 sağ-yukarı (-y), 1 sağ-aşağı (+x), 2 sol-aşağı (+y), 3 sol-yukarı (-x)
 // Karakter görselleri 4 çapraz yönde; ekranda düz sağ/sol/yukarı/aşağı giderken en yakın çapraz kullanılır.
@@ -402,8 +406,9 @@ function moveEnt(e, dx, dy) {
   if (!m.blocked(e.x + dx, e.y)) e.x += dx; else if (!m.blocked(e.x + dx, Math.round(e.y))) e.x += dx;
   if (!m.blocked(e.x, e.y + dy)) e.y += dy;
 }
-// Hedefe yalnızca 8 yönde (karo komşuları doğrultusunda) ilerle
-function stepTo(e, tx, ty, sp, dt) {
+// Hedefe yalnızca 8 yönde (karo komşuları doğrultusunda) ilerle.
+// smooth: yol izlerken yön ancak ~0.12 sn aynı kalırsa değişir (zikzaklarda karakter titremesin)
+function stepTo(e, tx, ty, sp, dt, smooth) {
   const dx = tx - e.x, dy = ty - e.y;
   if (Math.hypot(dx, dy) < 0.06) return true;
   const eps = 0.04, sx = Math.abs(dx) > eps ? Math.sign(dx) : 0, sy = Math.abs(dy) > eps ? Math.sign(dy) : 0;
@@ -411,7 +416,10 @@ function stepTo(e, tx, ty, sp, dt) {
   const l = Math.hypot(sx, sy), st = sp * dt;
   let mx = sx / l * st, my = sy / l * st;
   if (Math.abs(mx) > Math.abs(dx)) mx = dx; if (Math.abs(my) > Math.abs(dy)) my = dy;
-  moveEnt(e, mx, my); e.dir = dirOf(sx, sy);
+  moveEnt(e, mx, my);
+  const nd = dirOf(sx, sy);
+  if (!smooth || nd === e.dir) { e.dir = nd; e.dirT = 0; }
+  else if ((e.dirT = (e.dirT || 0) + dt) > 0.12) { e.dir = nd; e.dirT = 0; }
   return Math.hypot(tx - e.x, ty - e.y) < 0.06;
 }
 function update(dt) {
@@ -419,7 +427,7 @@ function update(dt) {
   for (let i = timers.length - 1; i >= 0; i--) { timers[i].t -= dt; if (timers[i].t <= 0) { const f = timers[i].fn; timers.splice(i, 1); f(); } }
   const p = Game.player, P = Game.P, s = stats(), m = Game.map;
   // oyuncu
-  p.t += dt * 8; p.animT = (p.animT || 0) + dt * 12; p.combatT -= dt; p.atkT -= dt;
+  const px0 = p.x, py0 = p.y; p.animT = (p.animT || 0) + dt * TICK; p.combatT -= dt; p.atkT -= dt;
   for (const k in p.cds) p.cds[k] = Math.max(0, p.cds[k] - dt);
   p.buffs.forEach(b => b.t -= dt); p.buffs = p.buffs.filter(b => b.t > 0);
   if (p.stateT > 0) { p.stateT -= dt; if (p.stateT <= 0) p.state = 'idle'; }
@@ -430,16 +438,16 @@ function update(dt) {
     let moving = false;
     if (J) {
       p.path = null; p.pending = null; Game.goTarget = null;
-      const [cx, cy] = snapScreen8(J.x, J.y), l = Math.hypot(cx, cy), sp = 3.2 * dt;
+      const [cx, cy] = snapScreen8(J.x, J.y), l = Math.hypot(cx, cy), sp = RUN * dt;
       moveEnt(p, cx / l * sp, cy / l * sp); p.dir = dirOf(cx, cy); moving = true;
     } else if (p.state !== 'attack' && p.state !== 'cast') {
       const t = Game.target;
       if (p.pending != null && t && !t.dead) {
         const sk = CLS[P.cls].skills[p.pending];
-        if (Math.hypot(t.x - p.x, t.y - p.y) <= sk.range) useSkill(p.pending); else { stepTo(p, t.x, t.y, 3.2, dt); moving = true; }
+        if (Math.hypot(t.x - p.x, t.y - p.y) <= sk.range) useSkill(p.pending); else { stepTo(p, t.x, t.y, RUN, dt, true); moving = true; }
       } else if (t && t.kind === 'mob' && !t.dead && !p.path) {
         const C = CLS[P.cls], d = Math.hypot(t.x - p.x, t.y - p.y);
-        if (d > C.range) { stepTo(p, t.x, t.y, 3.2, dt); moving = true; }
+        if (d > C.range) { stepTo(p, t.x, t.y, RUN, dt, true); moving = true; }
         else if (p.atkT <= 0) {
           p.atkT = 1.1; p.combatT = 5; p.dir = dirOf(t.x - p.x, t.y - p.y);
           if (C.melee) { p.state = 'attack'; p.animT = 0; p.stateT = 0.45; later(0.25, () => { if (!t.dead && Math.hypot(t.x - p.x, t.y - p.y) < C.range + 0.6) hitMob(t, 1); }); }
@@ -447,18 +455,20 @@ function update(dt) {
         }
       }
       if (p.path && p.path.length) {
-        const [tx, ty] = p.path[0]; if (stepTo(p, tx, ty, 3.2, dt)) p.path.shift(); moving = true;
+        const [tx, ty] = p.path[0]; if (stepTo(p, tx, ty, RUN, dt, true)) p.path.shift(); moving = true;
         if (!p.path.length) { p.path = null; if (Game.goTarget) { const n = Game.goTarget; Game.goTarget = null; if (Math.hypot(n.x - p.x, n.y - p.y) < 2.2) interact(n); } }
       }
     }
     if (p.state === 'idle' || p.state === 'move') p.state = moving ? 'move' : 'idle';
+    const went = Math.hypot(p.x - px0, p.y - py0) * CELL_PX;
+    if (p.state === 'move') p.t += went * 8 / STRIDE; else p.t += dt * TICK;
     checkExits();
   }
   // canavarlar
   for (const e of Game.ents) {
-    if (e.kind === 'npc') { e.t += dt * 6; if (e.hidden && (e.respawnT -= dt) <= 0) e.hidden = false; continue; }
+    if (e.kind === 'npc') { e.t += dt * TICK * 0.8; if (e.hidden && (e.respawnT -= dt) <= 0) e.hidden = false; continue; }
     if (e.kind !== 'mob') continue;
-    e.t += dt * 8; e.animT = (e.animT || 0) + dt * 10;
+    e.t += dt * TICK; e.animT = (e.animT || 0) + dt * TICK;
     if (e.dead) { e.deadT += dt; if ((e.respawnT -= dt) <= 0) { Object.assign(e, { dead: false, hp: e.maxHp, x: e.home.x, y: e.home.y, aggro: false, state: 'idle' }); } continue; }
     e.atkT -= dt; e.slowT -= dt; if (e.stateT > 0) { e.stateT -= dt; if (e.stateT <= 0) e.state = 'idle'; }
     const dp = Math.hypot(p.x - e.x, p.y - e.y), dh = Math.hypot(e.x - e.home.x, e.y - e.home.y);
@@ -467,7 +477,7 @@ function update(dt) {
     if (e.aggro && (dh > 12 || p.dead)) { e.aggro = false; e.hp = e.maxHp; }
     if (e.state === 'hurt' || e.state === 'attack') continue;
     if (e.aggro && !p.dead) {
-      if (dp > 1.3) { stepTo(e, p.x, p.y, sp, dt); e.state = 'move'; }
+      if (dp > 1.3) { stepTo(e, p.x, p.y, sp, dt, true); e.state = 'move'; }
       else { e.dir = dirOf(p.x - e.x, p.y - e.y); if (e.atkT <= 0) { e.atkT = 1.6; e.state = 'attack'; e.animT = 0; e.stateT = 0.5; later(0.3, () => { if (!e.dead && Math.hypot(p.x - e.x, p.y - e.y) < 1.9) hurtPlayer(e); }); } else e.state = 'idle'; }
     } else {
       e.wanderT -= dt;
