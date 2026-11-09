@@ -22,10 +22,10 @@ const Input = (() => {
       window.SFX && SFX.init && SFX.init();
       const L = UI.toLogical(e.clientX, e.clientY);
       const hit = UI.hudHit(L.x, L.y); if (hit) { hit(); e.preventDefault(); return; }
-      if (L.x < UI.vw * 0.33 && L.y > VH * 0.45 && !joy) { joy = { id: e.pointerId, ox: L.x, oy: L.y, dx: 0, dy: 0, active: true }; cv.setPointerCapture(e.pointerId); return; }
+      if (L.x < UI.vw * 0.33 && L.y > VH * 0.45 && !joy) { const R = UI.rockerPos(); let dx = L.x - R.x, dy = L.y - R.y; const l = Math.hypot(dx, dy); if (l > 40) { dx = dx / l * 40; dy = dy / l * 40; } joy = { id: e.pointerId, ox: R.x, oy: R.y, dx, dy, active: true }; cv.setPointerCapture(e.pointerId); return; }
       pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
     });
-    cv.addEventListener('pointermove', e => { if (joy && e.pointerId === joy.id) { const L = UI.toLogical(e.clientX, e.clientY); let dx = L.x - joy.ox, dy = L.y - joy.oy; const l = Math.hypot(dx, dy), mx = 34; if (l > mx) { dx = dx / l * mx; dy = dy / l * mx; } joy.dx = dx; joy.dy = dy; } });
+    cv.addEventListener('pointermove', e => { if (joy && e.pointerId === joy.id) { const L = UI.toLogical(e.clientX, e.clientY); let dx = L.x - joy.ox, dy = L.y - joy.oy; const l = Math.hypot(dx, dy), mx = 40; if (l > mx) { dx = dx / l * mx; dy = dy / l * mx; } joy.dx = dx; joy.dy = dy; } });
     const end = e => { if (joy && e.pointerId === joy.id) joy = null; const s = pts.get(e.pointerId); if (s) { pts.delete(e.pointerId); if (Math.hypot(e.clientX - s.x, e.clientY - s.y) < 12 && UI.mode === 'play' && !UI.panelOpen()) tapWorld(e.clientX, e.clientY); } };
     cv.addEventListener('pointerup', end); cv.addEventListener('pointercancel', end);
     addEventListener('keydown', e => { if (e.target.tagName === 'INPUT') return; const k = e.key.length === 1 ? e.key.toLowerCase() : e.key; keys[k] = true;
@@ -115,6 +115,7 @@ const UI = (() => {
     ctx.fillStyle = g; ctx.fillRect(x + 1, y + 1, Math.max(0, (w - 2) * clamp(v, 0, 1)), h - 2);
     ctx.strokeStyle = '#6a5030'; ctx.lineWidth = 1; ctx.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
   }
+  function rockerPos() { return { x: 72, y: VH - 72 }; }
   function drawHud() {
     hud.length = 0;
     const P = Game.P, p = Game.player, s = stats();
@@ -139,44 +140,49 @@ const UI = (() => {
     drawMinimap(vw - 92, 4, 88, 66);
     hud.push([vw - 92, 4, 88, 66, () => open('map')]);
     ctx.textAlign = 'right'; ctx.font = 'bold 10px "Noto Sans", sans-serif'; text(trName(Game.scene.name), vw - 6, 82, '#ffe48a');
-    ctx.font = '9px "Noto Sans", sans-serif'; text(`${P.gold} altın`, vw - 6, 94, '#ffd060');
+    ctx.font = '9px "Noto Sans", sans-serif'; text(`(${Math.round(p.x)},${Math.round(p.y)})  ${P.gold} altın`, vw - 6, 94, '#ffd060');
     // görev takibi
     drawTracker();
     // alt orta: kısayol çubuğu (orijinal 7003)
-    const qb = U(7003), qx = Math.round(vw / 2 - 240), qy = VH - 89;
-    if (qb.complete) ctx.drawImage(qb, qx, qy);
+    // dar ekranda çubuk küçülür, ejderha ve sağdaki düğmelerle çakışmaz
+    const qk = Math.min(1, (vw - 142 - 110) / 480), qb = U(7003), qx = Math.round(Math.max(142, vw / 2 - 240 * qk)), qy = VH - 89 * qk;
+    ctx.save(); ctx.translate(qx, qy); ctx.scale(qk, qk);
+    if (qb.complete) ctx.drawImage(qb, 0, 0);
     const slots = [66, 113, 160, 229, 276, 323, 370, 417];
-    slots.forEach((cx, i) => {
-      const x = qx + cx - 16, y = qy + 54 - 16, sl = P.quick[i];
-      drawSlot(sl, x, y);
-      hud.push([x, y, 32, 32, () => quick(i)]);
-    });
-    hud.push([qx + 14, qy + 40, 34, 36, () => open('menu')]);
-    hud.push([qx + 430, qy + 40, 34, 36, () => open('bag')]);
-    // sağ alt: ejderha madalyonu = saldırı
-    const dm = U(7002), ds = 88, dx = vw - ds - 6, dy = VH - ds - 6;
-    if (dm.complete) ctx.drawImage(dm, dx, dy, ds, ds * 134 / 132);
-    hud.push([dx, dy, ds, ds, () => attack()]);
-    // hedef değiştir
-    const tx = dx - 34, ty = dy - 4; ctx.fillStyle = 'rgba(20,14,8,.75)'; ctx.beginPath(); ctx.arc(tx + 14, ty + 14, 14, 0, 7); ctx.fill(); ctx.strokeStyle = '#b89a50'; ctx.lineWidth = 1.5; ctx.stroke();
-    ctx.textAlign = 'center'; ctx.font = 'bold 13px serif'; text('◎', tx + 14, ty + 19, '#ffe48a');
-    hud.push([tx, ty, 28, 28, () => cycleTarget()]);
-    // çanta düğmesi (telefon için)
-    const bx = dx - 44, by = dy - 48, br = 19;
-    ctx.fillStyle = 'rgba(20,14,8,.8)'; ctx.beginPath(); ctx.arc(bx + br, by + br, br, 0, 7); ctx.fill(); ctx.strokeStyle = '#d8b860'; ctx.lineWidth = 2; ctx.stroke();
-    const bi = uiImg('icon_res_item_1038'); if (bi.complete && bi.naturalWidth) ctx.drawImage(bi, bx + br - 13, by + br - 14, 26, 26);
-    ctx.textAlign = 'center'; ctx.font = 'bold 8px "Noto Sans", sans-serif'; text('Çanta', bx + br, by + br * 2 + 9, '#ffe48a');
-    hud.push([bx - 4, by - 4, br * 2 + 8, br * 2 + 16, () => open('bag')]);
-    // sanal kol
-    const J = Input.joyState;
-    if (J) { ctx.globalAlpha = 0.85; ctx.strokeStyle = '#c8a860'; ctx.lineWidth = 2; ctx.fillStyle = 'rgba(30,20,10,.35)'; ctx.beginPath(); ctx.arc(J.ox, J.oy, 34, 0, 7); ctx.fill(); ctx.stroke();
-      const g = ctx.createRadialGradient(J.ox + J.dx - 4, J.oy + J.dy - 4, 2, J.ox + J.dx, J.oy + J.dy, 16); g.addColorStop(0, '#f0d890'); g.addColorStop(1, '#6a4a14'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(J.ox + J.dx, J.oy + J.dy, 15, 0, 7); ctx.fill(); ctx.globalAlpha = 1; }
-    else if (matchMedia('(pointer:coarse)').matches) { ctx.globalAlpha = 0.35; ctx.strokeStyle = '#c8a860'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(60, VH - 70, 34, 0, 7); ctx.stroke(); ctx.globalAlpha = 1; }
-    // günlük
-    ctx.textAlign = 'left'; ctx.font = '9px "Noto Sans", sans-serif';
-    const now = performance.now(); let ly = VH - 98;
-    for (let i = logs.length - 1; i >= 0 && ly > VH - 170; i--) { const L = logs[i]; if (now - L.t > 8000) continue; ctx.globalAlpha = Math.min(1, (8000 - (now - L.t)) / 1000); text(L.m, 6, ly, L.c); ly -= 11; }
-    ctx.globalAlpha = 1;
+    slots.forEach((cx, i) => drawSlot(P.quick[i], cx - 16, 54 - 16));
+    ctx.restore();
+    slots.forEach((cx, i) => hud.push([qx + (cx - 16) * qk, qy + 38 * qk, 32 * qk, 32 * qk, () => quick(i)]));
+    hud.push([qx + 14 * qk, qy + 40 * qk, 34 * qk, 36 * qk, () => open('menu')]);
+    hud.push([qx + 430 * qk, qy + 40 * qk, 34 * qk, 36 * qk, () => open('quest')]);
+    // sol alt: ejderha madalyonu = yürüme kolu (orijinal FORM_ROCKER, 134x134)
+    const R = rockerPos(), J = Input.joyState;
+    const dm = U(7002); if (dm.complete) ctx.drawImage(dm, R.x - 66, R.y - 67, 132, 134);
+    { const kx = R.x + (J ? J.dx : 0), ky = R.y + (J ? J.dy : 0), g = ctx.createRadialGradient(kx - 3, ky - 3, 1, kx, ky, 13);
+      g.addColorStop(0, '#fff2c0'); g.addColorStop(0.35, '#ff8a2a'); g.addColorStop(1, 'rgba(150,20,0,0)');
+      ctx.globalAlpha = J ? 1 : 0.75; ctx.fillStyle = g; ctx.beginPath(); ctx.arc(kx, ky, 13, 0, 7); ctx.fill(); ctx.globalAlpha = 1; }
+    // sağ kenar: yuvarlak düğmeler (saldırı, hedef, çanta)
+    const rb = (cx, cy, r, icon, label, fn, glyph) => {
+      ctx.fillStyle = 'rgba(16,10,6,.82)'; ctx.beginPath(); ctx.arc(cx, cy, r, 0, 7); ctx.fill();
+      ctx.strokeStyle = '#d8b860'; ctx.lineWidth = 2; ctx.stroke(); ctx.strokeStyle = 'rgba(0,0,0,.8)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(cx, cy, r + 1.5, 0, 7); ctx.stroke();
+      if (icon) { const im = uiImg(icon); if (im.complete && im.naturalWidth) ctx.drawImage(im, cx - r * 0.7, cy - r * 0.7, r * 1.4, r * 1.4); }
+      if (glyph) { ctx.textAlign = 'center'; ctx.font = `bold ${Math.round(r)}px serif`; text(glyph, cx, cy + r * 0.36, '#ffe48a'); }
+      if (label) { ctx.textAlign = 'center'; ctx.font = 'bold 8px "Noto Sans", sans-serif'; text(label, cx, cy + r + 9, '#ffe48a'); }
+      hud.push([cx - r - 4, cy - r - 4, r * 2 + 8, r * 2 + 8, fn]);
+    };
+    const sk0 = CLS[P.cls].skills[0];
+    rb(vw - 40, VH - 50, 28, 'icon_res_skill_' + sk0.icon, 'Saldır', () => attack());
+    rb(vw - 92, VH - 30, 15, null, null, () => cycleTarget(), '◎');
+    rb(vw - 30, VH - 122, 19, 'icon_res_item_1038', 'Çanta', () => open('bag'));
+    rb(vw - 30, VH - 178, 19, 'icon_res_item_1125', 'Görev', () => open('quest'));
+    // orta alt: yarı saydam mesaj kutusu (orijinaldeki gibi)
+    { const now = performance.now(), L = logs.filter(l => now - l.t < 10000).slice(-5);
+      if (L.length) {
+        const bw = Math.min(400, vw - 330), bx = Math.round(vw / 2 - bw / 2), bh = L.length * 11 + 6, by = VH - 92 - bh;
+        ctx.fillStyle = 'rgba(0,0,0,.5)'; ctx.fillRect(bx, by, bw, bh);
+        ctx.textAlign = 'left'; ctx.font = '9px "Noto Sans", sans-serif';
+        L.forEach((l, i) => { ctx.globalAlpha = Math.min(1, (10000 - (now - l.t)) / 1000); text(l.m, bx + 5, by + 12 + i * 11, l.c); });
+        ctx.globalAlpha = 1;
+      } }
     // duyurular
     if (zoneT > 0) { zoneT -= 1 / 60; ctx.globalAlpha = Math.min(1, zoneT); ctx.textAlign = 'center'; ctx.font = 'bold 20px "Noto Serif", serif'; text(zoneMsg, vw / 2, 92, '#ffe48a'); ctx.globalAlpha = 1; }
     if (toastT > 0) { toastT -= 1 / 60; ctx.globalAlpha = Math.min(1, toastT * 2); ctx.textAlign = 'center'; ctx.font = 'bold 13px "Noto Sans", sans-serif'; text(toastMsg, vw / 2, 130, '#ffd23a'); ctx.globalAlpha = 1; }
@@ -381,7 +387,7 @@ const UI = (() => {
     mode = 'loading'; $('#loading').classList.remove('hidden');
     await loadScene(Game.P.scene || '120207');
     $('#loading').classList.add('hidden'); mode = 'play';
-    if (!Object.keys(Game.P.done).length && !Object.keys(Game.P.quests).length) { toast('Rehber seni bekliyor: başında ! olan kişiye dokun'); log('Sol altta parmağını kaydırarak yürü ya da bir yere dokun.', '#ffd23a'); log('Canavara dokunursan saldırırsın. Sağ alttaki ejderha da saldırı düğmesidir.', '#ffd23a'); }
+    if (!Object.keys(Game.P.done).length && !Object.keys(Game.P.quests).length) { toast('Rehber seni bekliyor: başında ! olan kişiye dokun'); log('Sol alttaki ejderhayı parmağınla kaydırarak yürü ya da haritada bir yere dokun.', '#ffd23a'); log('Canavara dokunursan saldırırsın; sağ alttaki Saldır düğmesi de en yakın canavara saldırır.', '#ffd23a'); }
   }
   let last = performance.now();
   function loop(now) {
@@ -406,7 +412,7 @@ const UI = (() => {
     window.__G = Game;
   }
   return {
-    boot, toLogical, toWorld, hudHit, open, closeAll, panelOpen, dialog, say, attack,
+    boot, rockerPos, toLogical, toWorld, hudHit, open, closeAll, panelOpen, dialog, say, attack,
     get vw() { return vw; }, get mode() { return mode; },
     log, toast, zone(m) { zoneMsg = m; zoneT = 3; }, levelUp(n) { lvlN = n; lvlT = 2.5; }, hurt() { hurtT = 0.4; },
     float(e, txt, c, s = 1) { floats.push({ e, txt, c, s, t: 0 }); }, target() { }, refresh() { if (cur) render(); },
