@@ -72,3 +72,4 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .srow { display: flex; align-items: center; gap: 6px; padding: 3px 6px; background: #0e0806; border: 1px solid #4a3820; color: #e8dcc0; text-align: left; font-size: 12px; }
 .srow img { width: 28px; height: 28px; } .srow span { flex: 1; } .srow small { color: #a89878; } .srow em { font-style: normal; color: #ffd060; }
 .srow.on { border-color: #ffd870; } .srow.no { opacity: .55; }
+.skgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 4px; }

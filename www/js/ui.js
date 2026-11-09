@@ -30,7 +30,7 @@ const Input = (() => {
     cv.addEventListener('pointerup', end); cv.addEventListener('pointercancel', end);
     addEventListener('keydown', e => { if (e.target.tagName === 'INPUT') return; const k = e.key.length === 1 ? e.key.toLowerCase() : e.key; keys[k] = true;
       if (UI.mode !== 'play') return;
-      if ('1234'.includes(k)) useSkill(+k - 1); if (k === 'q') useItem('hp1'); if (k === 'e') useItem('mp1');
+      if ('123456'.includes(k)) useSkill(+k - 1); if (k === 'q') useItem('hp1'); if (k === 'e') useItem('mp1');
       if (k === 'Tab' || k === '9') { e.preventDefault(); cycleTarget(); } if (k === 'b' || k === '#') UI.open('bag'); if (k === 'c') UI.open('char'); if (k === 'm') UI.open('map'); if (k === 'j') UI.open('quest');
       if (k === ' ') { e.preventDefault(); UI.attack(); } if (k === 'Escape') UI.closeAll(); });
     addEventListener('keyup', e => { const k = e.key.length === 1 ? e.key.toLowerCase() : e.key; keys[k] = false; });
@@ -194,7 +194,7 @@ const UI = (() => {
     if (!sl) return;
     if (sl[0] === 's') {
       const i = +sl.slice(1), sk = CLS[P.cls].skills[i]; if (!sk) return;
-      const im = uiImg('icon_res_skill_' + sk.icon); if (im.complete) ctx.drawImage(im, x, y, 32, 32);
+      const im = uiImg(`icon_res_${sk.ik || 'skill'}_${sk.icon}`); if (im.complete && im.naturalWidth) ctx.drawImage(im, x, y, 32, 32);
       if (P.lv < sk.lv) { ctx.fillStyle = 'rgba(0,0,0,.7)'; ctx.fillRect(x, y, 32, 32); ctx.textAlign = 'center'; ctx.font = '8px sans-serif'; text('Sv' + sk.lv, x + 16, y + 20, '#ccc'); return; }
       const cd = p.cds[sk.id] || 0; if (cd > 0) { ctx.fillStyle = 'rgba(0,0,0,.65)'; ctx.fillRect(x, y + 32 * (1 - cd / sk.cd), 32, 32 * cd / sk.cd); ctx.textAlign = 'center'; ctx.font = 'bold 11px sans-serif'; text(Math.ceil(cd), x + 16, y + 21, '#fff'); }
       if (p.mp < sk.mp) { ctx.fillStyle = 'rgba(0,30,120,.45)'; ctx.fillRect(x, y, 32, 32); }
@@ -248,7 +248,7 @@ const UI = (() => {
   function open(kind) {
     if (mode !== 'play') return;
     if (kind !== cur) sel = null; if (kind !== 'bag' && kind !== 'shop') shopNpc = null;
-    cur = kind; panel.classList.remove('hidden'); render(); if (kind === 'bag') questFlag('openBag');
+    cur = kind; panel.classList.remove('hidden'); SFX.play('menu_appear', 0.5); render(); if (kind === 'bag') questFlag('openBag');
   }
   function render() {
     const P = Game.P, s = stats(); let h = '', title = '';
@@ -274,7 +274,8 @@ const UI = (() => {
       else h += `<p class="hint">Bir eşyaya dokun: bilgisini gör, kullan ya da giy.${shopNpc ? ' Satmak için de seçebilirsin.' : ''} Görev eşyaları (sarı çerçeve) görev bitince teslim edilir.</p>`;
     } else if (cur === 'skill') {
       title = 'Beceriler';
-      h = CLS[P.cls].skills.map((sk, i) => `<div class="skr ${P.lv < sk.lv ? 'lock' : ''}"><img src="${Assets.base}ui/icon_res_skill_${sk.icon}.png"><div><b>${sk.name}</b><br><small>${sk.mp} mana · ${sk.cd} sn · ${P.lv < sk.lv ? sk.lv + '. seviyede' : 'Kısayol ' + (i + 1)}</small></div></div>`).join('');
+      const row = (sk, i) => `<div class="skr ${P.lv < sk.lv ? 'lock' : ''}"><img src="${Assets.base}ui/icon_res_${sk.ik || 'skill'}_${sk.icon}.png"><div><b>${sk.name}</b> <small>${sk.pas ? '(edilgen)' : ''}</small><br><small>${esc(sk.desc || '')}</small><br><small>${sk.pas ? '' : `${sk.mp} mana · ${sk.cd} sn · `}${P.lv < sk.lv ? sk.lv + '. seviyede açılır' : sk.pas ? 'Etkin' : 'Kısayol ' + (i + 1)}</small></div></div>`;
+      const all = CLS[P.cls].skills; h = `<div class="skgrid">${all.map((sk, i) => row(sk, i)).join('')}</div>`;
     } else if (cur === 'quest') {
       title = 'Görevler';
       const act = QUESTS.filter(q => P.quests[q.id]);
@@ -293,14 +294,16 @@ const UI = (() => {
       } else { cur = 'bag'; return render(); }
     } else if (cur === 'sys') {
       title = 'Ayarlar';
-      h = `<button class="obtn" data-act="newchar">Yeni karakter oluştur</button><p class="hint">Oyun otomatik kaydedilir.</p>`;
+      h = `<div class="iact"><button class="obtn" data-act="tsfx">Ses efektleri: ${SFX.opt.sfx ? 'Açık' : 'Kapalı'}</button><button class="obtn" data-act="tmus">Müzik: ${SFX.opt.music ? 'Açık' : 'Kapalı'}</button></div><br><button class="obtn" data-act="newchar">Yeni karakter oluştur</button><p class="hint">Oyun otomatik kaydedilir.</p>`;
     }
     ptitle.textContent = title; pbody.innerHTML = h;
   }
   pbody.addEventListener('click', e => {
     const b = e.target.closest('[data-open],[data-use],[data-act],[data-sel],[data-tab]'); if (!b) return;
     if (b.dataset.sel) { sel = sel === b.dataset.sel ? null : b.dataset.sel; render(); return; }
-    if (b.dataset.tab) { shopTab = +b.dataset.tab; sel = null; render(); return; }
+    if (b.dataset.tab) { shopTab = +b.dataset.tab; sel = null; SFX.play('skill_pageflip'); render(); return; }
+    if (b.dataset.act === 'tsfx') { SFX.setSfx(!SFX.opt.sfx); render(); return; }
+    if (b.dataset.act === 'tmus') { SFX.setMusic(!SFX.opt.music); render(); return; }
     const A = b.dataset.act;
     if (A === 'use') { useItem(b.dataset.id); if (!countItem(b.dataset.id)) sel = null; render(); return; }
     if (A === 'sell') { sellItem(b.dataset.id); if (!countItem(b.dataset.id)) sel = null; render(); return; }
@@ -315,7 +318,7 @@ const UI = (() => {
   // ---------- NPC diyaloğu ----------
   let dlgNpc = null, dlgQ = null;
   function dialog(n) {
-    dlgNpc = n; dlgQ = null; $('#dlg').classList.remove('hidden'); renderDlg();
+    SFX.play('request', 0.6); dlgNpc = n; dlgQ = null; $('#dlg').classList.remove('hidden'); renderDlg();
   }
   function renderDlg() {
     const n = dlgNpc, P = Game.P; $('#dname').textContent = n.name;
@@ -352,6 +355,7 @@ const UI = (() => {
   const cre = { cls: '战士', race: '人类', sex: 'male', face: 1 };
   let creDoll = null;
   function showCreate() {
+    SFX.Music.play('cover.mid');
     mode = 'create'; $('#create').classList.remove('hidden'); renderCreate();
   }
   function renderCreate() {

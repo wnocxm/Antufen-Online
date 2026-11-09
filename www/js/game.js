@@ -54,29 +54,56 @@ const MON = {
 };
 
 // Sınıf değerleri ve yetenekler (orijinal efekt ve simgelerle)
+// Beceriler orijinal beceri ağaçlarından (all_skilltree / all_skill): adlar, simgeler, efektler ve sesler orijinal.
+// Etkin beceriler önce (kısayol sırası), edilgenler (pas) sonra gelir.
 const CLS = {
-  '战士': { hp: 150, mp: 50, atk: 14, def: 8, ghp: 26, gmp: 5, gatk: 3.2, gdef: 1.8, range: 1.4, color: '红', melee: true,
+  '战士': { hp: 150, mp: 50, atk: 14, def: 8, ghp: 26, gmp: 5, gatk: 3.2, gdef: 1.8, range: 1.4, color: '红', melee: true, snd: 'skill_sword',
     skills: [
-      { id: 'w1', name: 'Ağır Darbe', icon: 1081, mp: 6, cd: 3, mult: 1.9, range: 1.6, fx: '特效-刀光', lv: 1 },
-      { id: 'w2', name: 'Kasırga Kesiği', icon: 1088, mp: 14, cd: 7, mult: 1.4, aoe: 2.2, fx: '特效-疾风斩', lv: 3 },
-      { id: 'w3', name: 'Öfke', icon: 1075, mp: 15, cd: 25, buff: { atk: 0.3 }, dur: 15, fx: '特效-狂暴BUFF', lv: 6 },
-      { id: 'w4', name: 'Kanlı Yara', icon: 1035, mp: 12, cd: 8, mult: 2.4, range: 1.6, fx: '特效-大喷血', lv: 9 },
+      { id: 'w1', name: 'Temel Kılıç Ustalığı', icon: 1107, mp: 0, cd: 1.5, mult: 1.25, range: 1.6, fx: 'BLOOD', snd: 'skill_sword', lv: 1, desc: 'Yakın saldırı. Mana harcamaz.' },
+      { id: 'w2', name: 'Güçlü Savurma', icon: 1114, mp: 8, cd: 5, mult: 1.9, crit: 20, range: 1.6, fx: '特效-刀光-红', snd: 'skill_daoguang', lv: 3, desc: 'Güçlü yakın saldırı, kritik şansı yüksek.' },
+      { id: 'w3', name: 'Bıçak Fırlatma', icon: 1127, mp: 12, cd: 7, mult: 1.3, range: 6, proj: '特效-飞刀', hit: '特效-细碎爆炸', splash: 1.8, snd: 'skill_nife', snd2: 'skill_pilipala', lv: 6, desc: 'Uzaktan alan saldırısı.' },
+      { id: 'w4', name: 'Çifte Darbe', icon: 1112, mp: 14, cd: 8, mult: 1.3, hits: 2, range: 1.6, fx: '特效-刀光', fx2: '特效-大喷血', snd: 'skill_daoguang', lv: 10, desc: 'Art arda iki vuruş.' },
+      { id: 'w5', name: 'Hız Patlaması', icon: 1103, mp: 10, cd: 20, buff: { spd: 0.25, crit: 30 }, dur: 5, fx: '特性-聚气', snd: 'skill_juqi', lv: 13, desc: '5 saniye %25 hızlı koşarsın, kritik şansın artar.' },
+      { id: 'w6', name: 'Ruh Yaran', icon: 1132, mp: 18, cd: 10, mult: 2.2, range: 5, fx: '特效-刀光', fx2: '特效-死亡标记', snd: 'skill_deathtag', lv: 17, desc: 'Uzaktan karanlık saldırı.' },
+      { id: 'wp1', pas: { atk: 4 }, name: 'Silah Eğitimi', icon: 1136, lv: 2, desc: 'Saldırı +4.' },
+      { id: 'wp2', pas: { hpPct: 8 }, name: 'Gürbüzlük', icon: 1109, lv: 4, desc: 'Can sınırı +%8.' },
+      { id: 'wp3', pas: { dodge: 5 }, name: 'Çeviklik', icon: 1105, lv: 8, desc: 'Kaçınma +%5.' },
+      { id: 'wp4', pas: { def: 6, res: 6 }, name: 'Savunma Ustalığı', icon: 1063, lv: 11, desc: 'Savunma ve direnç +6.' },
+      { id: 'wp5', pas: { hpreg: 60 }, name: 'Hızlı İyileşme', icon: 1135, lv: 14, desc: 'Can yenilenmesi artar.' },
+      { id: 'wp6', pas: { dr: 8 }, name: 'Dayanıklılık Halesi', icon: 1110, lv: 18, desc: 'Alınan hasar −%8.' },
     ] },
-  '法师': { hp: 100, mp: 130, atk: 17, def: 4, ghp: 16, gmp: 15, gatk: 3.8, gdef: 1.0, range: 6, color: '蓝', bolt: '特效-蓝火球',
+  '法师': { hp: 100, mp: 130, atk: 17, def: 4, ghp: 16, gmp: 15, gatk: 3.8, gdef: 1.0, range: 6, color: '蓝', bolt: '特效-蓝火球', snd: 'skill_fire2',
     skills: [
-      { id: 'm1', name: 'Ateş Topu', icon: 1014, mp: 8, cd: 2.5, mult: 1.8, range: 7, proj: '特效-火球', hit: '特效-火爆炸', lv: 1 },
-      { id: 'm2', name: 'Buz Topu', icon: 1061, mp: 12, cd: 4, mult: 1.5, range: 7, proj: '特效-冰球', hit: '特效-冰块碎裂', slow: 3, lv: 3 },
-      { id: 'm3', name: 'Buz Halkası', icon: 1070, mp: 22, cd: 9, mult: 1.6, aoe: 2.6, fx: '特效-冰霜新星', slow: 3, lv: 6 },
-      { id: 'm4', name: 'Mana Kalkanı', icon: 1046, mp: 25, cd: 30, buff: { def: 0.6 }, dur: 15, fx: '特效-法力盾', lv: 9 },
+      { id: 'm1', name: 'Ateş Topu', icon: 1137, mp: 8, cd: 2.5, mult: 1.8, range: 7, proj: '特效-火球', hit: '特效-火爆炸', snd: 'skill_fireball', snd2: 'skill_bomb', lv: 1, desc: 'Uzaktan ateş büyüsü.' },
+      { id: 'm2', name: 'Dondurma', icon: 1132, mp: 12, cd: 5, mult: 1.6, crit: 15, range: 7, proj: '特效-冰球', hit: 'WATER_ATTACK', slow: 4, snd: 'skill_wind', snd2: 'skill_bubble', lv: 3, desc: 'Buz büyüsü; hedefi yavaşlatır.' },
+      { id: 'm3', name: 'Şifa', icon: 1135, mp: 18, cd: 10, heal: 0.3, fx: 'LIGHT_ATTACK', snd: 'skill_light', lv: 6, desc: 'Kendi canını yeniler.' },
+      { id: 'm4', name: 'Alev Yakışı', icon: 1114, mp: 20, cd: 8, mult: 2.0, aoe: 2.4, fx: 'FIRE_ATTACK', hit: '特效-火爆炸', snd: 'skill_fireball2', snd2: 'skill_bomb', lv: 10, desc: 'Yakın çevrendeki düşmanları yakar.' },
+      { id: 'm5', name: 'Büyü Kalkanı', icon: 1134, mp: 25, cd: 30, buff: { def: 0.6, dr: 30 }, dur: 10, fx: '特效-法力盾', snd: 'skill_juqi', lv: 13, desc: '10 saniye alınan hasarı azaltır.' },
+      { id: 'm6', name: 'Kar Fırtınası', icon: 1101, mp: 30, cd: 12, mult: 1.7, range: 7, proj: '特效-冰球', hit: '特效-冰块碎裂', splash: 2.6, slow: 4, snd: 'skill_wind', snd2: 'skill_ice', lv: 16, desc: 'Buz alan saldırısı.' },
+      { id: 'mp1', pas: { atk: 4 }, name: 'Büyü Çalışması', icon: 1133, lv: 2, desc: 'Büyü saldırısı +4.' },
+      { id: 'mp2', pas: { mpPct: 10 }, name: 'Mana Güçlendirme', icon: 1105, lv: 4, desc: 'Mana sınırı +%10.' },
+      { id: 'mp3', pas: { crit: 5 }, name: 'Mana Denetimi', icon: 1106, lv: 8, desc: 'İsabet ve kritik +%5.' },
+      { id: 'mp4', pas: { res: 10 }, name: 'Doğal Direnç', icon: 1108, lv: 11, desc: 'Tüm dirençler +10.' },
+      { id: 'mp5', pas: { mpreg: 60 }, name: 'Mana Yenilenmesi', icon: 1104, lv: 14, desc: 'Mana yenilenmesi artar.' },
+      { id: 'mp6', pas: { mpPct: 10 }, name: 'Mana Halesi', icon: 1111, lv: 19, desc: 'Mana sınırı +%10 daha.' },
     ] },
-  '牧师': { hp: 120, mp: 115, atk: 14, def: 6, ghp: 20, gmp: 13, gatk: 3.3, gdef: 1.4, range: 5.5, color: '金', bolt: '特效-黑暗火球',
+  '牧师': { hp: 120, mp: 115, atk: 14, def: 6, ghp: 20, gmp: 13, gatk: 3.3, gdef: 1.4, range: 5.5, color: '金', bolt: '特效-黑暗火球', snd: 'skill_wind',
     skills: [
-      { id: 'p1', name: 'Karanlık Ateş', icon: 1015, mp: 8, cd: 2.5, mult: 1.7, range: 7, proj: '特效-黑暗火球', hit: '特效-暗影冲击_红', lv: 1 },
-      { id: 'p2', name: 'Şifa', icon: 1102, mp: 16, cd: 6, heal: 0.35, fx: '特效-治疗buff', lv: 3 },
-      { id: 'p3', name: 'Kutsal Kalkan', icon: 1003, mp: 20, cd: 30, buff: { def: 0.5 }, dur: 20, fx: '特效-神圣之盾', lv: 6 },
-      { id: 'p4', name: 'İlahi Korku', icon: 1131, mp: 26, cd: 12, mult: 1.6, aoe: 2.6, fx: '特效-神之威慑', lv: 9 },
+      { id: 'p1', name: 'Gölge Darbesi', icon: 1062, mp: 8, cd: 2.5, mult: 1.7, range: 7, proj: '特效-黑暗火球', hit: '特效-冲击爆炸', snd: 'skill_wind', snd2: 'skill_bomb', lv: 1, desc: 'Uzaktan gölge saldırısı.' },
+      { id: 'p2', name: 'Çürüme', icon: 1066, mp: 12, cd: 6, mult: 0.5, dot: { mult: 0.45, n: 5 }, range: 7, fx: '特效-死亡标记', snd: 'skill_deathtag', lv: 3, desc: 'Hedefe lanet: 2 saniyede bir hasar verir.' },
+      { id: 'p3', name: 'İlahi Gözdağı', icon: 1094, mp: 20, cd: 15, mult: 0.8, aoe: 3, weak: 10, fx: '特效-神之威慑', snd: 'skill_juqi', lv: 6, desc: 'Çevredeki düşmanların savunmasını düşürür.' },
+      { id: 'p4', name: 'Şifa Pınarı', icon: 1100, ik: 'item', mp: 22, cd: 15, buff: { hot: 0.05 }, dur: 8, fx: '特效-治疗buff', snd: 'skill_light', lv: 10, desc: '8 saniye boyunca can yeniler.' },
+      { id: 'p5', name: 'Gölge Yakışı', icon: 1119, mp: 18, cd: 6, mult: 2.3, range: 7, proj: '特效-黑暗火球', hit: '特效-火爆炸', snd: 'skill_fire2', snd2: 'skill_bomb', lv: 13, desc: 'Karanlık ateşle yakar.' },
+      { id: 'p6', name: 'Kutsal Işık', icon: 1030, ik: 'item', mp: 26, cd: 12, heal: 0.4, fx: '特效-缓缓加红', snd: 'skill_light', lv: 16, desc: 'Canını yeniler.' },
+      { id: 'p7', name: 'İlahi Öfke', icon: 1110, mp: 30, cd: 40, buff: { atk: 0.25, def: 0.25 }, dur: 20, fx: '特效-狂暴BUFF', snd: 'skill_relive', lv: 19, desc: 'Saldırı ve savunman 20 saniye artar.' },
+      { id: 'pp1', pas: { atk: 4 }, name: 'Sofu İradesi', icon: 1244, ik: 'item', lv: 2, desc: 'Büyü saldırısı +4.' },
+      { id: 'pp2', pas: { crit: 5 }, name: 'Zorbalık', icon: 1078, lv: 5, desc: 'Kritik şansı +%5.' },
+      { id: 'pp3', pas: { atk: 3 }, name: 'Can Sömürüsü', icon: 1122, lv: 8, desc: 'Çürüme güçlenir (saldırı +3).' },
+      { id: 'pp4', pas: { hpreg: 40, mpreg: 40 }, name: 'İlahi Işık Dökümü', icon: 1065, lv: 11, desc: 'Can ve mana yenilenmesi artar.' },
+      { id: 'pp5', pas: { crit: 6 }, name: 'İlahi Ceza', icon: 1118, lv: 15, desc: 'Kritik şansı +%6.' },
     ] },
 };
+const QUICK0 = ['s0', 's1', 's2', 's3', 's4', 's5', 'i:hp1', 'i:mp1'];
 const ITEMS = {
   hp1: { name: 'Zayıf Can İksiri', icon: 1019, desc: '200 can yeniler.', price: 10, use: { hp: 200 } },
   hp2: { name: 'Can İksiri', icon: 1020, desc: '600 can yeniler.', price: 35, use: { hp: 600 } },
@@ -96,7 +123,7 @@ const Game = {
 function newSave(name, cls, race, sex) {
   return { v: 1, name, cls, race, sex, lv: 1, xp: 0, gold: 30, hp: 1e9, mp: 1e9,
     gear: { weap: 0, body: 0, head: 0 }, eq: Object.assign({}, STARTER[cls]), bag: [{ id: 'hp1', n: 5 }, { id: 'mp1', n: 3 }], quests: {}, done: {}, qitems: {},
-    scene: '120207', x: 11, y: 15, quick: ['s0', 's1', 's2', 's3', 'i:hp1', 'i:mp1', null, null], flags: {} };
+    scene: '120207', x: 11, y: 15, quick: QUICK0.slice(), sv: 2, flags: {} };
 }
 // ---------------- Ekipman (orijinal eşya tablolarından) ----------------
 const STARTER = { '战士': { weap: '10003', body: '10004' }, '法师': { weap: '10006', body: '10007' }, '牧师': { weap: '10882', body: '10883' } };
@@ -115,17 +142,17 @@ function equip(id) {
   const P = Game.P, it = ITEMS[id]; if (!it || !it.slot || !countItem(id)) return;
   const why = canEquip(it); if (why) return UI.toast(why);
   removeItem(id); const old = P.eq[it.slot]; P.eq[it.slot] = id; if (old) addItem(old, 1, true);
-  UI.log(`${it.name} kuşanıldı.`, 'q'); clampVitals(); refreshLook();
+  UI.log(`${it.name} kuşanıldı.`, 'q'); SFX.play('repair', 0.6); clampVitals(); refreshLook();
 }
 function unequip(slot) { const P = Game.P, id = P.eq[slot]; if (!id) return; P.eq[slot] = null; addItem(id, 1, true); UI.log(`${ITEMS[id].name} çıkarıldı.`); clampVitals(); refreshLook(); }
 function clampVitals() { const p = Game.player, s = stats(); p.hp = Math.min(p.hp, s.hp); p.mp = Math.min(p.mp, s.mp); }
 function buyItem(id, n = 1) {
   const P = Game.P, it = ITEMS[id], cost = it.price * n; if (P.gold < cost) return UI.toast('Yeterli altının yok.');
-  P.gold -= cost; addItem(id, n, true); UI.log(`${it.name} ×${n} satın alındı (−${cost} altın).`, 'loot'); save();
+  P.gold -= cost; SFX.play('coin'); addItem(id, n, true); UI.log(`${it.name} ×${n} satın alındı (−${cost} altın).`, 'loot'); save();
 }
 function sellItem(id) {
   const P = Game.P, it = ITEMS[id]; if (!it || it.quest || !removeItem(id)) return;
-  const g = it.sell || Math.max(1, Math.floor((it.price || 0) / 10)); P.gold += g; UI.log(`${it.name} satıldı (+${g} altın).`, 'loot'); save();
+  const g = it.sell || Math.max(1, Math.floor((it.price || 0) / 10)); P.gold += g; SFX.play('coin'); UI.log(`${it.name} satıldı (+${g} altın).`, 'loot'); save();
 }
 // seviyeye ve sınıfa uygun rastgele ekipman (dükkân listelerinden)
 function randomGear(lv) {
@@ -133,14 +160,17 @@ function randomGear(lv) {
   return pool.length ? pool[irnd(0, pool.length - 1)][0] : null;
 }
 function save() { const P = Game.P; if (!P || !Game.player) return; P.scene = Game.sceneId; P.x = Game.player.x; P.y = Game.player.y; P.hp = Game.player.hp; P.mp = Game.player.mp; try { localStorage.setItem(SAVE_KEY, JSON.stringify(P)); } catch (e) { } }
-function load() { try { const s = JSON.parse(localStorage.getItem(SAVE_KEY)); if (s && s.v === 1) { if (!s.eq) { s.eq = Object.assign({}, STARTER[s.cls]); if (s.gear && s.gear.head) Object.assign(s.eq, { head: NEWBIE[s.cls][0], shoe: NEWBIE[s.cls][1] }); } return s; } } catch (e) { } return null; }
+function load() { try { const s = JSON.parse(localStorage.getItem(SAVE_KEY)); if (s && s.v === 1) { if (!s.eq) { s.eq = Object.assign({}, STARTER[s.cls]); if (s.gear && s.gear.head) Object.assign(s.eq, { head: NEWBIE[s.cls][0], shoe: NEWBIE[s.cls][1] }); } if (s.sv !== 2) { s.sv = 2; s.quick = QUICK0.slice(); } return s; } } catch (e) { } return null; }
 
 function stats() {
   const P = Game.P, C = CLS[P.cls], L = P.lv - 1, g = P.gear;
   const s = { hp: C.hp + C.ghp * L, mp: C.mp + C.gmp * L, atk: C.atk + C.gatk * L, def: C.def + C.gdef * L, crit: 0, dodge: 0, hpreg: 0, mpreg: 0, res: 0 };
   for (const id of Object.values(P.eq || {})) { const it = id && ITEMS[id]; if (it && it.st) for (const k in it.st) s[k] = (s[k] || 0) + it.st[k]; }
+  s.dr = 0; s.spd = 0; let hpPct = 0, mpPct = 0;
+  for (const sk of C.skills) if (sk.pas && P.lv >= sk.lv) for (const k in sk.pas) { if (k === 'hpPct') hpPct += sk.pas[k]; else if (k === 'mpPct') mpPct += sk.pas[k]; else s[k] = (s[k] || 0) + sk.pas[k]; }
+  s.hp *= 1 + hpPct / 100; s.mp *= 1 + mpPct / 100;
   if (P.race === '精灵') { s.mp += 15; s.hp -= 5; } else { s.def += 2; }
-  for (const b of Game.player?.buffs || []) { if (b.buff.atk) s.atk *= 1 + b.buff.atk; if (b.buff.def) s.def *= 1 + b.buff.def; }
+  for (const b of Game.player?.buffs || []) { if (b.buff.atk) s.atk *= 1 + b.buff.atk; if (b.buff.def) s.def *= 1 + b.buff.def; if (b.buff.spd) s.spd += b.buff.spd; if (b.buff.crit) s.crit += b.buff.crit; if (b.buff.dr) s.dr += b.buff.dr; }
   for (const k in s) s[k] = Math.round(s[k]);
   return s;
 }
@@ -238,6 +268,7 @@ async function loadScene(sid, arrive) {
   Game.cam.x = Game.player.X; Game.cam.y = Game.player.Y;
   Game.arriveT = 1.5;
   UI.zone(trName(sc.name));
+  SFX.Music.play(sc.music);
   save();
   setTimeout(() => UI.fade(false), 80);
 }
@@ -275,7 +306,7 @@ async function gotoScene(sid, fromName, fixed) {
 function dmgCalc(atk, def, mult, critB = 0) { const base = atk * mult * rnd(0.9, 1.1); const d = Math.max(1, Math.round(base * 100 / (100 + def * 3))); const crit = Math.random() < 0.08 + critB / 100; return { d: crit ? Math.round(d * 1.8) : d, crit }; }
 function hitMob(m, mult, o = {}) {
   if (!m || m.dead) return;
-  const s = stats(); const r = dmgCalc(s.atk, m.d.lv * 2, mult, s.crit);
+  const s = stats(); const r = dmgCalc(s.atk, m.d.lv * 2 * (m.weakT > 0 ? 0.4 : 1), mult * (m.weakT > 0 ? 1.15 : 1), s.crit + (o.crit || 0));
   m.hp -= r.d; m.aggro = true; m.state = 'hurt'; m.animT = 0; m.stateT = 0.3;
   if (o.slow) m.slowT = o.slow;
   UI.float(m, (r.crit ? '!' : '') + r.d, r.crit ? '#ffd040' : '#fff', r.crit ? 1.3 : 1);
@@ -287,7 +318,7 @@ function killMob(m) {
   if (Game.target === m) setTarget(null);
   const P = Game.P, diff = m.d.lv - P.lv, xp = Math.max(1, Math.round(m.d.xp * clamp(1 + diff * 0.1, 0.2, 1.5)));
   gainXp(xp); UI.float(m, '+' + xp + ' TP', '#9fe060');
-  const gold = irnd(m.d.lv, m.d.lv * 3) + (m.d.rank || 0) * 20; P.gold += gold;
+  const gold = irnd(m.d.lv, m.d.lv * 3) + (m.d.rank || 0) * 20; P.gold += gold; SFX.play('kill', 0.7); later(0.35, () => SFX.play('coin', 0.5)); UI.log(`${gold} altın alındı`, 'loot');
   if (Math.random() < 0.1) addItem(P.lv > 10 ? 'hp2' : 'hp1', 1);
   if (Math.random() < 0.06) addItem(P.lv > 10 ? 'mp2' : 'mp1', 1);
   if (m.d.rank && Math.random() < 0.6) { const g = randomGear(Math.max(1, m.d.lv + 2)); if (g) { addItem(g, 1, true); UI.log(`Ganimet: ${ITEMS[g].name}!`, 'q'); UI.toast(`Ganimet: ${ITEMS[g].name}`); } }
@@ -298,13 +329,13 @@ function killMob(m) {
 function hurtPlayer(m) {
   const p = Game.player; if (p.dead) return;
   const s = stats(); if (Math.random() < s.dodge / 100) { UI.float(p, 'Iska', '#cfcfcf'); return; }
-  const r = dmgCalc(m.d.atk, s.def, 1);
+  const r = dmgCalc(m.d.atk, s.def, 1); r.d = Math.max(1, Math.round(r.d * (1 - Math.min(60, s.dr) / 100)));
   p.hp -= r.d; p.combatT = 5; UI.float(p, '-' + r.d, '#ff5040'); UI.hurt();
   if (p.hp <= 0) { p.hp = 0; p.dead = true; p.state = 'dead'; UI.death(); setTarget(null); }
 }
 function gainXp(n) {
   const P = Game.P; P.xp += n;
-  while (P.xp >= xpNeed(P.lv)) { P.xp -= xpNeed(P.lv); P.lv++; const s = stats(); Game.player.hp = s.hp; Game.player.mp = s.mp; Game.fx.push(new Fx('LEVELUP', Game.player.x, Game.player.y)); UI.levelUp(P.lv);
+  while (P.xp >= xpNeed(P.lv)) { P.xp -= xpNeed(P.lv); P.lv++; const s = stats(); Game.player.hp = s.hp; Game.player.mp = s.mp; Game.fx.push(new Fx('LEVELUP', Game.player.x, Game.player.y)); UI.levelUp(P.lv); SFX.play('levelup');
     for (const sk of CLS[P.cls].skills) if (sk.lv === P.lv) UI.log(`Yeni beceri: ${sk.name}`, 'q'); }
   UI.refresh();
 }
@@ -317,7 +348,7 @@ function cycleTarget() {
   questFlag('cycleTarget');
 }
 function useSkill(i) {
-  const P = Game.P, p = Game.player, C = CLS[P.cls], sk = C.skills[i]; if (!sk || p.dead) return;
+  const P = Game.P, p = Game.player, C = CLS[P.cls], sk = C.skills[i]; if (!sk || sk.pas || p.dead) return;
   if (P.lv < sk.lv) { UI.log(`${sk.name} ${sk.lv}. seviyede açılır.`); return; }
   if ((p.cds[sk.id] || 0) > 0) return;
   if (p.mp < sk.mp) { UI.log('Mana yetersiz!'); return; }
@@ -326,15 +357,26 @@ function useSkill(i) {
   if (needT && !t) { t = nearestMob(8); if (t) setTarget(t); }
   if (needT && !t) { UI.log('Hedef yok.'); return; }
   if (t && sk.range && Math.hypot(t.x - p.x, t.y - p.y) > sk.range + 0.3) { p.pending = i; p.path = null; return; }
-  p.pending = null; p.mp -= sk.mp; p.cds[sk.id] = sk.cd; p.combatT = 5;
+  p.pending = null; p.mp -= sk.mp; p.cds[sk.id] = sk.cd; p.combatT = 5; if (i === 0) p.atkT = Math.max(p.atkT, 0.9);
   if (t) p.dir = dirOf(t.x - p.x, t.y - p.y);
-  p.state = C.melee && sk.mult ? 'attack' : 'cast'; p.animT = 0; p.stateT = 0.5;
+  p.state = C.melee && sk.mult && (sk.range || 9) < 3 ? 'attack' : 'cast'; p.animT = 0; p.stateT = 0.5;
+  SFX.play(sk.snd);
+  const mobsNear = (x, y, r) => Game.ents.filter(m => m.kind === 'mob' && !m.dead && Math.hypot(m.x - x, m.y - y) <= r);
+  const o = { slow: sk.slow, crit: sk.crit };
+  const land = () => {
+    if (sk.snd2) SFX.play(sk.snd2);
+    if (sk.splash) { Game.fx.push(new Fx(sk.hit, t.x, t.y)); for (const m of mobsNear(t.x, t.y, sk.splash)) hitMob(m, sk.mult, o); }
+    else { hitMob(t, sk.mult, o); const f = sk.hit || sk.fx; if (f) Game.fx.push(new Fx(f, t.x, t.y)); }
+    if (sk.fx2) Game.fx.push(new Fx(sk.fx2, t.x, t.y));
+    if (sk.hits === 2) later(0.28, () => { if (!t.dead) { hitMob(t, sk.mult, o); SFX.play(sk.snd); } });
+    if (sk.dot && !t.dead) t.dot = { n: sk.dot.n, t: 2, mult: sk.dot.mult };
+  };
   later(0.25, () => {
-    if (sk.proj) shoot(sk.proj, p, t, () => { hitMob(t, sk.mult, { slow: sk.slow }); if (sk.hit) Game.fx.push(new Fx(sk.hit, t.x, t.y)); });
-    else if (sk.aoe) { Game.fx.push(new Fx(sk.fx, p.x, p.y)); for (const m of Game.ents) if (m.kind === 'mob' && !m.dead && Math.hypot(m.x - p.x, m.y - p.y) <= sk.aoe) hitMob(m, sk.mult, { slow: sk.slow }); }
-    else if (sk.mult) { hitMob(t, sk.mult); if (sk.fx) Game.fx.push(new Fx(sk.fx, t.x, t.y)); }
-    else if (sk.heal) { const s = stats(); const h = Math.round(s.hp * sk.heal); p.hp = Math.min(s.hp, p.hp + h); UI.float(p, '+' + h, '#7bff8a'); Game.fx.push(new Fx(sk.fx, p.x, p.y)); }
-    else if (sk.buff) { p.buffs = p.buffs.filter(b => b.id !== sk.id); p.buffs.push({ id: sk.id, buff: sk.buff, t: sk.dur }); Game.fx.push(new Fx(sk.fx, p.x, p.y)); UI.log(`${sk.name} etkin.`); }
+    if (sk.proj) shoot(sk.proj, p, t, land);
+    else if (sk.aoe) { Game.fx.push(new Fx(sk.fx, p.x, p.y)); if (sk.snd2) SFX.play(sk.snd2); for (const m of mobsNear(p.x, p.y, sk.aoe)) { hitMob(m, sk.mult, o); if (sk.weak) m.weakT = sk.weak; if (sk.hit) Game.fx.push(new Fx(sk.hit, m.x, m.y)); } }
+    else if (sk.mult) land();
+    else if (sk.heal) { const s = stats(); const h = Math.round(s.hp * sk.heal + s.atk); p.hp = Math.min(s.hp, p.hp + h); UI.float(p, '+' + h, '#7bff8a'); Game.fx.push(new Fx(sk.fx, p.x, p.y, { follow: p })); }
+    else if (sk.buff) { p.buffs = p.buffs.filter(b => b.id !== sk.id); p.buffs.push({ id: sk.id, buff: sk.buff, t: sk.dur }); Game.fx.push(new Fx(sk.fx, p.x, p.y, { follow: p })); UI.log(`${sk.name} etkin.`); }
   });
   UI.refresh();
 }
@@ -375,7 +417,7 @@ function npcMark(cn) {
   if (QUESTS.some(q => q.giver === cn && questState(q) === 'new')) return '!';
   return '';
 }
-function acceptQuest(q) { const P = Game.P; P.quests[q.id] = { n: 0, ready: q.type === 'talk' }; if (q.type === 'special' && Game.flags[q.flag]) P.quests[q.id].ready = true; UI.log(`Görev alındı: ${q.title}`, 'q'); UI.refresh(); save(); }
+function acceptQuest(q) { const P = Game.P; P.quests[q.id] = { n: 0, ready: q.type === 'talk' }; if (q.type === 'special' && Game.flags[q.flag]) P.quests[q.id].ready = true; UI.log(`Görev alındı: ${q.title}`, 'q'); SFX.play('accept_task'); UI.refresh(); save(); }
 function questKill(name) {
   const P = Game.P;
   for (const q of QUESTS) {
@@ -385,9 +427,9 @@ function questKill(name) {
   }
 }
 function questFlag(f) { Game.flags[f] = true; for (const q of QUESTS) { const st = Game.P.quests[q.id]; if (st && !st.ready && q.type === 'special' && q.flag === f) readyQuest(q); } }
-function readyQuest(q) { Game.P.quests[q.id].ready = true; UI.toast(`Görev tamamlandı: ${q.title}`); UI.log(`${q.title} tamam. ${trName(q.to)} ile konuş.`, 'q'); }
+function readyQuest(q) { Game.P.quests[q.id].ready = true; SFX.play('message'); UI.toast(`Görev tamamlandı: ${q.title}`); UI.log(`${q.title} tamam. ${trName(q.to)} ile konuş.`, 'q'); }
 function completeQuest(q) {
-  const P = Game.P, r = q.reward; delete P.quests[q.id]; P.done[q.id] = true;
+  const P = Game.P, r = q.reward; delete P.quests[q.id]; P.done[q.id] = true; SFX.play('finish_task');
   if (r.gold) P.gold += r.gold; if (r.items) r.items.forEach(([id, n]) => addItem(id, n));
   gainXp(r.xp || 0); UI.log(`Ödül: ${r.xp} TP${r.gold ? ', ' + r.gold + ' altın' : ''}`, 'q');
   UI.refresh(); save();
@@ -434,28 +476,29 @@ function update(dt) {
   if (!p.dead) {
     const regen = Game.scene.name === '观林镇' ? 0.03 : p.combatT > 0 ? 0.003 : 0.012;
     p.hp = Math.min(s.hp, p.hp + (s.hp * regen + s.hpreg * 0.02) * dt); p.mp = Math.min(s.mp, p.mp + (s.mp * regen * 1.3 + s.mpreg * 0.02) * dt);
+    for (const b of p.buffs) if (b.buff.hot) p.hp = Math.min(s.hp, p.hp + s.hp * b.buff.hot * dt);
     const J = Input.joy();
     let moving = false;
     if (J) {
       p.path = null; p.pending = null; Game.goTarget = null;
-      const [cx, cy] = snapScreen8(J.x, J.y), l = Math.hypot(cx, cy), sp = RUN * dt;
+      const [cx, cy] = snapScreen8(J.x, J.y), l = Math.hypot(cx, cy), sp = RUN * (1 + s.spd) * dt;
       moveEnt(p, cx / l * sp, cy / l * sp); p.dir = dirOf(cx, cy); moving = true;
     } else if (p.state !== 'attack' && p.state !== 'cast') {
       const t = Game.target;
       if (p.pending != null && t && !t.dead) {
         const sk = CLS[P.cls].skills[p.pending];
-        if (Math.hypot(t.x - p.x, t.y - p.y) <= sk.range) useSkill(p.pending); else { stepTo(p, t.x, t.y, RUN, dt, true); moving = true; }
+        if (Math.hypot(t.x - p.x, t.y - p.y) <= sk.range) useSkill(p.pending); else { stepTo(p, t.x, t.y, RUN * (1 + s.spd), dt, true); moving = true; }
       } else if (t && t.kind === 'mob' && !t.dead && !p.path) {
         const C = CLS[P.cls], d = Math.hypot(t.x - p.x, t.y - p.y);
-        if (d > C.range) { stepTo(p, t.x, t.y, RUN, dt, true); moving = true; }
+        if (d > C.range) { stepTo(p, t.x, t.y, RUN * (1 + s.spd), dt, true); moving = true; }
         else if (p.atkT <= 0) {
           p.atkT = 1.1; p.combatT = 5; p.dir = dirOf(t.x - p.x, t.y - p.y);
-          if (C.melee) { p.state = 'attack'; p.animT = 0; p.stateT = 0.45; later(0.25, () => { if (!t.dead && Math.hypot(t.x - p.x, t.y - p.y) < C.range + 0.6) hitMob(t, 1); }); }
-          else { p.state = 'cast'; p.animT = 0; p.stateT = 0.45; later(0.2, () => shoot(C.bolt, p, t, () => hitMob(t, 0.9))); }
+          if (C.melee) { p.state = 'attack'; p.animT = 0; p.stateT = 0.45; later(0.25, () => { if (!t.dead && Math.hypot(t.x - p.x, t.y - p.y) < C.range + 0.6) { hitMob(t, 1); SFX.play(C.snd); Game.fx.push(new Fx('BLOOD', t.x, t.y)); } }); }
+          else { p.state = 'cast'; p.animT = 0; p.stateT = 0.45; SFX.play(C.snd, 0.6); later(0.2, () => shoot(C.bolt, p, t, () => hitMob(t, 0.9))); }
         }
       }
       if (p.path && p.path.length) {
-        const [tx, ty] = p.path[0]; if (stepTo(p, tx, ty, RUN, dt, true)) p.path.shift(); moving = true;
+        const [tx, ty] = p.path[0]; if (stepTo(p, tx, ty, RUN * (1 + s.spd), dt, true)) p.path.shift(); moving = true;
         if (!p.path.length) { p.path = null; if (Game.goTarget) { const n = Game.goTarget; Game.goTarget = null; if (Math.hypot(n.x - p.x, n.y - p.y) < 2.2) interact(n); } }
       }
     }
@@ -470,7 +513,8 @@ function update(dt) {
     if (e.kind !== 'mob') continue;
     e.t += dt * TICK; e.animT = (e.animT || 0) + dt * TICK;
     if (e.dead) { e.deadT += dt; if ((e.respawnT -= dt) <= 0) { Object.assign(e, { dead: false, hp: e.maxHp, x: e.home.x, y: e.home.y, aggro: false, state: 'idle' }); } continue; }
-    e.atkT -= dt; e.slowT -= dt; if (e.stateT > 0) { e.stateT -= dt; if (e.stateT <= 0) e.state = 'idle'; }
+    e.atkT -= dt; e.slowT -= dt; if (e.weakT > 0) e.weakT -= dt;
+    if (e.dot && (e.dot.t -= dt) <= 0) { e.dot.t = 2; const D = e.dot; if (--D.n <= 0) e.dot = null; hitMob(e, D.mult); if (e.dead) continue; } if (e.stateT > 0) { e.stateT -= dt; if (e.stateT <= 0) e.state = 'idle'; }
     const dp = Math.hypot(p.x - e.x, p.y - e.y), dh = Math.hypot(e.x - e.home.x, e.y - e.home.y);
     const sp = (e.slowT > 0 ? 1 : 2) * (e.d.rank ? 1.1 : 1);
     if (!e.aggro && !e.d.passive && !p.dead && dp < 3.5 && e.d.lv >= P.lv - 5) e.aggro = true;
@@ -487,7 +531,7 @@ function update(dt) {
   }
   // efektler
   for (const f of Game.fx) {
-    f.t += dt * 10;
+    f.t += dt * TICK; if (f.follow) { f.x = f.follow.x; f.y = f.follow.y; }
     if (f.proj) {
       const t = f.proj.to; if (!t || t.dead) { f.done = true; continue; }
       const dx = t.x - f.x, dy = t.y - f.y, d = Math.hypot(dx, dy), st = f.proj.sp * dt;
