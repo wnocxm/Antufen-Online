@@ -1,0 +1,23 @@
+<!doctype html><html><head><meta charset="utf-8"></head><body style="margin:0;background:#3a4a30"><canvas id=c width=1500 height=1000></canvas>
+<script src="js/assets.js"></script>
+<script>
+(async()=>{
+ await Assets.init();
+ const ctx=document.getElementById('c').getContext('2d'); ctx.imageSmoothingEnabled=false;
+ const looks=[
+  {cls:'战士',race:'人类',sex:'male',body:[1,'红'],head:[1,'红'],weap:[1,'灰']},
+  {cls:'法师',race:'精灵',sex:'fema',body:[2,'蓝'],head:[2,'蓝'],weap:[2,'蓝']},
+  {cls:'牧师',race:'人类',sex:'fema',body:[0],head:[0],weap:[0]},
+  {cls:'战士',race:'精灵',sex:'fema',body:[4,'金'],head:[4,'金'],weap:[6,'金']},
+ ];
+ const dolls=looks.map(l=>new Assets.Paperdoll(l));
+ const mons=['怪物-鸭子','野猪','怪物-狼','怪物-人类守卫-黄','怪物-鸡','NPC-卫兵1'].map(n=>new Assets.Sprite(n));
+ await new Promise(r=>setTimeout(r,2500));
+ let t=0; window.dbg={dolls,mons,get t(){return t}};
+ function f(){ t+=0.5; ctx.fillStyle='#3a4a30'; ctx.fillRect(0,0,1500,1000);
+  dolls.forEach((d,i)=>{ for(let a=0;a<8;a++) d.draw(ctx,'comm',a,t,60+a*90,110+i*120); for(let a=0;a<4;a++) d.draw(ctx,'figh',4+a,t,800+a*90,110+i*120); });
+  mons.forEach((m,i)=>{ for(let a=0;a<20;a+=1){ if(m.ok && m.A.a[a]) m.draw(ctx,a,t,40+a*70,620+i*60);} });
+  ctx.fillStyle='#fff'; for(let a=0;a<8;a++) ctx.fillText('a'+a,50+a*90,20);
+  requestAnimationFrame(f);} f();
+})();
+</script></body></html>

@@ -1,0 +1,7 @@
+{
+  "appId": "com.anrufen.online",
+  "appName": "Anrufen Online",
+  "webDir": "www",
+  "android": { "backgroundColor": "#000000" },
+  "ios": { "backgroundColor": "#000000", "contentInset": "never" }
+}

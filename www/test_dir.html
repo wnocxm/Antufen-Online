@@ -1,0 +1,12 @@
+<!doctype html><html><head><meta charset="utf-8"></head><body style="margin:0;background:#556"><canvas id=c width=1200 height=400></canvas>
+<script src="js/assets.js"></script>
+<script>
+(async()=>{ await Assets.init(); const ctx=document.getElementById('c').getContext('2d'); ctx.imageSmoothingEnabled=false;
+ const d=new Assets.Paperdoll({cls:'战士',race:'人类',sex:'male',body:[2,'蓝'],head:[2,'蓝'],weap:[2,'灰']});
+ const m=new Assets.Sprite('怪物-狼');
+ await new Promise(r=>setTimeout(r,3000));
+ ctx.save(); ctx.scale(3,3);
+ for(let a=0;a<4;a++){ d.draw(ctx,'comm',4+a,3,30+a*70,90); m.draw(ctx,4+a,2,30+a*70,125); }
+ ctx.restore(); ctx.fillStyle='#fff'; ctx.font='20px sans-serif'; for(let a=0;a<4;a++) ctx.fillText('d'+a,60+a*210,30);
+})();
+</script></body></html>

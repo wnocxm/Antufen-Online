@@ -1,0 +1,19 @@
+{
+  "name": "anrufen-online",
+  "version": "0.2.0",
+  "private": true,
+  "description": "Anrufen Online - Android/iOS yeniden yapım (orijinal görseller, yatay ekran)",
+  "scripts": {
+    "serve": "npx --yes http-server www -p 8080 -c-1",
+    "android": "npx cap sync android && npx cap open android",
+    "ios": "npx cap sync ios && npx cap open ios"
+  },
+  "dependencies": {
+    "@capacitor/core": "^6.1.2",
+    "@capacitor/android": "^6.1.2",
+    "@capacitor/ios": "^6.1.2"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.1.2"
+  }
+}

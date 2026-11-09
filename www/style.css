@@ -1,0 +1,58 @@
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { width: 100%; height: 100%; overflow: hidden; background: #000; color: #e8dcc0; font-family: "Noto Sans", "Microsoft YaHei", system-ui, sans-serif; touch-action: none; user-select: none; -webkit-user-select: none; }
+button { font: inherit; color: inherit; cursor: pointer; }
+.hidden { display: none !important; }
+#game { position: fixed; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; }
+#loading { position: fixed; inset: 0; display: grid; place-items: center; background: #000; color: #d8b870; font-size: 16px; z-index: 50; }
+#rotate { position: fixed; inset: 0; z-index: 60; background: #000; display: grid; place-items: center; color: #d8b870; font-size: 18px; text-align: center; padding: 20px; }
+
+/* orijinal çerçeve: koyu metal, altın kenar */
+#panel { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; background: rgba(0,0,0,.45); padding: 3vh 3vw; }
+.frame { width: min(560px, 94vw); max-height: 92vh; display: flex; flex-direction: column; background: url(assets/ui/AnbufenUI_Resource_7034.png) center/100% 100%, #1a120c; border: 2px solid #8a6a30; box-shadow: 0 0 0 2px #000, 0 0 0 4px #3a2a14, 0 8px 30px #000; }
+.phead { display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; background: url(assets/ui/AnbufenUI_Resource_7032.png) center/100% 100%; border-bottom: 1px solid #6a5028; font-weight: 700; color: #ffd870; text-shadow: 0 1px 2px #000; }
+#pclose { background: none; border: 1px solid #8a6a30; width: 26px; height: 26px; color: #ffd870; }
+#pbody { padding: 10px 12px; overflow-y: auto; touch-action: pan-y; font-size: 13px; line-height: 1.45; }
+.hint { color: #a89878; font-size: 11.5px; margin-top: 8px; }
+.menu { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.mbtn { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 4px; background: url(assets/ui/AnbufenUI_Resource_7032.png) center/100% 100%; border: 1px solid #6a5028; color: #f0e0b0; }
+.mbtn:active { background-image: url(assets/ui/AnbufenUI_Resource_7033.png); }
+.mic { width: 32px; height: 32px; background: url(assets/ui/AnbufenUI_Resource_7007.png) no-repeat; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, 44px); gap: 5px; }
+.slot { position: relative; width: 44px; height: 44px; display: grid; place-items: center; background: #0e0806; border: 1px solid #5a4424; }
+.slot.q { border-color: #d8a830; } .slot.e { opacity: .5; }
+.slot img { width: 32px; height: 32px; }
+.slot em { position: absolute; right: 2px; bottom: 0; font-style: normal; font-size: 11px; font-weight: 700; text-shadow: 0 1px 2px #000; }
+.charp { display: flex; gap: 12px; }
+.sil { width: 120px; flex: none; background: url(assets/ui/AnbufenUI_Resource_7008.png) center/contain no-repeat; height: 190px; display: grid; place-items: start center; padding-top: 6px; }
+.sil img { width: 60px; height: 60px; border: 1px solid #8a6a30; }
+.cname { font-size: 16px; font-weight: 700; color: #ffd870; } .csub { color: #b8a880; margin-bottom: 6px; }
+.cstats table { border-collapse: collapse; } .cstats td { padding: 2px 10px 2px 0; border-bottom: 1px dotted #4a3820; } .cstats td + td { color: #fff; font-weight: 700; }
+.gear { margin-top: 8px; color: #c8b890; font-size: 12px; }
+.skr { display: flex; gap: 10px; align-items: center; padding: 6px; border-bottom: 1px solid #3a2a18; } .skr img { width: 32px; height: 32px; } .skr.lock { opacity: .5; }
+.qr { padding: 6px 0; border-bottom: 1px solid #3a2a18; } .qr b { color: #ffd870; } .qr small { color: #9cf58a; }
+.wmap { display: flex; overflow-x: auto; touch-action: pan-x; } .wmap img { height: 60vh; }
+.obtn { padding: 8px 14px; background: url(assets/ui/AnbufenUI_Resource_7032.png) center/100% 100%; border: 1px solid #8a6a30; color: #ffd870; }
+
+#dlg { position: fixed; left: 0; right: 0; bottom: 0; z-index: 21; display: flex; justify-content: center; padding: 0 2vw 2vh; }
+.dframe { width: min(620px, 96vw); max-height: 60vh; overflow-y: auto; background: rgba(14,10,6,.94); border: 2px solid #8a6a30; box-shadow: 0 0 0 2px #000, 0 -4px 20px #000; padding: 10px 14px; }
+#dname { color: #9cf58a; font-weight: 700; margin-bottom: 4px; }
+#dtext { font-size: 13px; line-height: 1.5; white-space: pre-line; margin-bottom: 8px; }
+#dbtns { display: flex; flex-wrap: wrap; gap: 6px; }
+#dbtns button { padding: 6px 12px; background: url(assets/ui/AnbufenUI_Resource_7032.png) center/100% 100%; border: 1px solid #6a5028; color: #ffe8a0; font-size: 13px; }
+#dbtns button:active { background-image: url(assets/ui/AnbufenUI_Resource_7033.png); color: #000; }
+
+#death { position: fixed; inset: 0; z-index: 25; display: grid; place-items: center; background: rgba(40,0,0,.5); text-align: center; }
+#death h2 { color: #e04030; font-size: 28px; margin-bottom: 10px; text-shadow: 0 2px 4px #000; }
+#revive { padding: 10px 22px; background: url(assets/ui/AnbufenUI_Resource_7033.png) center/100% 100%; border: 1px solid #ffd870; color: #000; font-weight: 700; }
+
+#create { position: fixed; inset: 0; z-index: 15; pointer-events: none; display: flex; align-items: center; padding-left: max(14px, env(safe-area-inset-left)); }
+.cpanel { pointer-events: auto; width: min(380px, 56vw); margin-top: 52px; max-height: calc(100vh - 60px); overflow-y: auto; touch-action: pan-y; background: rgba(14,10,6,.9); border: 2px solid #8a6a30; padding: 10px 12px; display: flex; flex-direction: column; gap: 7px; font-size: 13px; }
+.cpanel .row { display: flex; align-items: center; flex-wrap: wrap; gap: 5px; }
+.lab { width: 62px; color: #d8b870; }
+.cpanel button { padding: 5px 10px; background: url(assets/ui/AnbufenUI_Resource_7032.png) center/100% 100%; border: 1px solid #5a4424; color: #e8dcc0; }
+.cpanel button.on { background-image: url(assets/ui/AnbufenUI_Resource_7033.png); color: #000; font-weight: 700; border-color: #ffd870; }
+#cname { flex: 1; padding: 5px 8px; background: #000; border: 1px solid #6a5028; color: #fff; font: inherit; user-select: text; -webkit-user-select: text; }
+#cfaces { display: flex; flex-wrap: wrap; gap: 3px; flex: 1; }
+.cpanel .face { padding: 0; width: 38px; height: 38px; background: #000; }
+.face img { width: 100%; height: 100%; display: block; }
+#cstart { margin-top: 4px; padding: 9px; font-size: 15px; font-weight: 700; color: #000 !important; background-image: url(assets/ui/AnbufenUI_Resource_7033.png) !important; border-color: #ffd870 !important; }
