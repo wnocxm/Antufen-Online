@@ -104,6 +104,22 @@ const CLS = {
     ] },
 };
 if (LANG === 'en') for (const c of Object.values(CLS)) for (const sk of c.skills) { const e = EN_SKILL[sk.id]; if (e) { sk.name = e[0]; sk.desc = e[1]; } }
+// Orijinal beceri ağaçları (all_skilltree): her ağaçta 3 sütun; [beceri, sütun, satır]
+const TREES = {
+  '战士': [{ name: 'Acemi', cells: [['w1', 1, 0], ['wp1', 2, 0], ['wp3', 0, 1], ['wp2', 2, 1], ['w2', 0, 2], ['w3', 2, 2]] }, { name: 'Savaşçı', cells: [['w4', 1, 0], ['wp4', 2, 0], ['wp5', 0, 1], ['w5', 2, 1], ['wp6', 0, 2], ['w6', 2, 2]] }],
+  '法师': [{ name: 'Çırak', cells: [['m1', 1, 0], ['mp1', 2, 0], ['mp2', 0, 1], ['mp3', 2, 1], ['m3', 0, 2], ['m2', 2, 2]] }, { name: 'Büyücü', cells: [['m4', 1, 0], ['mp4', 2, 0], ['mp6', 0, 1], ['mp5', 2, 1], ['m5', 0, 2], ['m6', 2, 2]] }],
+  '牧师': [{ name: 'Başlangıç', cells: [['p1', 1, 0], ['pp1', 2, 0], ['p2', 0, 1], ['pp2', 2, 1], ['pp3', 0, 2], ['p3', 2, 2]] }, { name: 'Elçi', cells: [['p4', 1, 0], ['pp4', 2, 0], ['p5', 0, 1], ['p6', 2, 1], ['pp5', 0, 2], ['p7', 2, 2]] }],
+};
+const SK_MAX = 5;
+const skRank = sk => (Game.P.sk && Game.P.sk[sk.id]) || 0;
+const skMult = sk => 1 + 0.1 * (Math.max(1, skRank(sk)) - 1);          // her kademe +%10 güç
+function skillUp(sk) {
+  const P = Game.P, r = skRank(sk);
+  if (r >= SK_MAX) return UI.toast('Bu beceri en yüksek kademede.');
+  if (P.lv < sk.lv) return UI.toast(`${sk.lv}. seviye gerekir.`);
+  if ((P.sp || 0) < 1) return UI.toast('Beceri puanın yok. Seviye atlayınca puan kazanırsın.');
+  P.sp--; P.sk[sk.id] = r + 1; SFX.play('skill_levelup'); UI.log(`${sk.name}: ${tx('kademe')} ${r + 1}`, 'q'); clampVitals(); save();
+}
 const QUICK0 = ['s0', 's1', 's2', 's3', 's4', 's5', 'i:hp1', 'i:mp1'];
 const ITEMS = {
   hp1: { name: 'Zayıf Can İksiri', icon: 1019, desc: '200 can yeniler.', price: 10, use: { hp: 200 } },
@@ -124,7 +140,7 @@ const Game = {
 function newSave(name, cls, race, sex) {
   return { v: 1, name, cls, race, sex, lv: 1, xp: 0, gold: 30, hp: 1e9, mp: 1e9,
     gear: { weap: 0, body: 0, head: 0 }, eq: Object.assign({}, STARTER[cls]), bag: [{ id: 'hp1', n: 5 }, { id: 'mp1', n: 3 }], quests: {}, done: {}, qitems: {},
-    scene: '120207', x: 11, y: 15, quick: QUICK0.slice(), sv: 2, flags: {} };
+    scene: '120207', x: 11, y: 15, quick: QUICK0.slice(), sv: 2, sk: { [CLS[cls].skills[0].id]: 1 }, sp: 1, flags: {} };
 }
 // ---------------- Ekipman (orijinal eşya tablolarından) ----------------
 const STARTER = { '战士': { weap: '10003', body: '10004' }, '法师': { weap: '10006', body: '10007' }, '牧师': { weap: '10882', body: '10883' } };
@@ -162,14 +178,14 @@ function randomGear(lv) {
   return pool.length ? pool[irnd(0, pool.length - 1)][0] : null;
 }
 function save() { const P = Game.P; if (!P || !Game.player) return; P.scene = Game.sceneId; P.x = Game.player.x; P.y = Game.player.y; P.hp = Game.player.hp; P.mp = Game.player.mp; try { localStorage.setItem(SAVE_KEY, JSON.stringify(P)); } catch (e) { } }
-function load() { try { const s = JSON.parse(localStorage.getItem(SAVE_KEY)); if (s && s.v === 1) { if (!s.eq) { s.eq = Object.assign({}, STARTER[s.cls]); if (s.gear && s.gear.head) Object.assign(s.eq, { head: NEWBIE[s.cls][0], shoe: NEWBIE[s.cls][1] }); } if (s.sv !== 2) { s.sv = 2; s.quick = QUICK0.slice(); } return s; } } catch (e) { } return null; }
+function load() { try { const s = JSON.parse(localStorage.getItem(SAVE_KEY)); if (s && s.v === 1) { if (!s.eq) { s.eq = Object.assign({}, STARTER[s.cls]); if (s.gear && s.gear.head) Object.assign(s.eq, { head: NEWBIE[s.cls][0], shoe: NEWBIE[s.cls][1] }); } if (s.sv !== 2) { s.sv = 2; s.quick = QUICK0.slice(); } if (!s.sk) { s.sk = {}; for (const k of CLS[s.cls].skills) if (s.lv >= k.lv) s.sk[k.id] = 1; s.sp = 1; } return s; } } catch (e) { } return null; }
 
 function stats() {
   const P = Game.P, C = CLS[P.cls], L = P.lv - 1, g = P.gear;
   const s = { hp: C.hp + C.ghp * L, mp: C.mp + C.gmp * L, atk: C.atk + C.gatk * L, def: C.def + C.gdef * L, crit: 0, dodge: 0, hpreg: 0, mpreg: 0, res: 0 };
   for (const id of Object.values(P.eq || {})) { const it = id && ITEMS[id]; if (it && it.st) for (const k in it.st) s[k] = (s[k] || 0) + it.st[k]; }
   s.dr = 0; s.spd = 0; let hpPct = 0, mpPct = 0;
-  for (const sk of C.skills) if (sk.pas && P.lv >= sk.lv) for (const k in sk.pas) { if (k === 'hpPct') hpPct += sk.pas[k]; else if (k === 'mpPct') mpPct += sk.pas[k]; else s[k] = (s[k] || 0) + sk.pas[k]; }
+  for (const sk of C.skills) { const r = (P.sk && P.sk[sk.id]) || 0; if (!sk.pas || !r) continue; const m = 0.5 + 0.5 * r; for (const k in sk.pas) { const v = Math.round(sk.pas[k] * m); if (k === 'hpPct') hpPct += v; else if (k === 'mpPct') mpPct += v; else s[k] = (s[k] || 0) + v; } }
   s.hp *= 1 + hpPct / 100; s.mp *= 1 + mpPct / 100;
   if (P.race === '精灵') { s.mp += 15; s.hp -= 5; } else { s.def += 2; }
   for (const b of Game.player?.buffs || []) { if (b.buff.atk) s.atk *= 1 + b.buff.atk; if (b.buff.def) s.def *= 1 + b.buff.def; if (b.buff.spd) s.spd += b.buff.spd; if (b.buff.crit) s.crit += b.buff.crit; if (b.buff.dr) s.dr += b.buff.dr; }
@@ -338,6 +354,7 @@ function hurtPlayer(m) {
 function gainXp(n) {
   const P = Game.P; P.xp += n;
   while (P.xp >= xpNeed(P.lv)) { P.xp -= xpNeed(P.lv); P.lv++; const s = stats(); Game.player.hp = s.hp; Game.player.mp = s.mp; Game.fx.push(new Fx('LEVELUP', Game.player.x, Game.player.y)); UI.levelUp(P.lv); SFX.play('levelup');
+    P.sp = (P.sp || 0) + 1; UI.log('Beceri puanı kazandın! Beceriler ekranından harca.', 'q');
     for (const sk of CLS[P.cls].skills) if (sk.lv === P.lv) UI.log(`Yeni beceri: ${sk.name}`, 'q'); }
   UI.refresh();
 }
@@ -351,7 +368,8 @@ function cycleTarget() {
 }
 function useSkill(i) {
   const P = Game.P, p = Game.player, C = CLS[P.cls], sk = C.skills[i]; if (!sk || sk.pas || p.dead) return;
-  if (P.lv < sk.lv) { UI.log(`${sk.name} ${sk.lv}. seviyede açılır.`); return; }
+  if (!skRank(sk)) { UI.log(P.lv < sk.lv ? `${sk.name} ${sk.lv}. seviyede açılır.` : 'Bu beceri henüz öğrenilmedi. Beceriler ekranından puan ver.'); return; }
+  const SM = skMult(sk);
   if ((p.cds[sk.id] || 0) > 0) return;
   if (p.mp < sk.mp) { UI.log('Mana yetersiz!'); return; }
   let t = Game.target && !Game.target.dead && Game.target.kind === 'mob' ? Game.target : null;
@@ -367,17 +385,17 @@ function useSkill(i) {
   const o = { slow: sk.slow, crit: sk.crit };
   const land = () => {
     if (sk.snd2) SFX.play(sk.snd2);
-    if (sk.splash) { Game.fx.push(new Fx(sk.hit, t.x, t.y)); for (const m of mobsNear(t.x, t.y, sk.splash)) hitMob(m, sk.mult, o); }
-    else { hitMob(t, sk.mult, o); const f = sk.hit || sk.fx; if (f) Game.fx.push(new Fx(f, t.x, t.y)); }
+    if (sk.splash) { Game.fx.push(new Fx(sk.hit, t.x, t.y)); for (const m of mobsNear(t.x, t.y, sk.splash)) hitMob(m, sk.mult * SM, o); }
+    else { hitMob(t, sk.mult * SM, o); const f = sk.hit || sk.fx; if (f) Game.fx.push(new Fx(f, t.x, t.y)); }
     if (sk.fx2) Game.fx.push(new Fx(sk.fx2, t.x, t.y));
-    if (sk.hits === 2) later(0.28, () => { if (!t.dead) { hitMob(t, sk.mult, o); SFX.play(sk.snd); } });
+    if (sk.hits === 2) later(0.28, () => { if (!t.dead) { hitMob(t, sk.mult * SM, o); SFX.play(sk.snd); } });
     if (sk.dot && !t.dead) t.dot = { n: sk.dot.n, t: 2, mult: sk.dot.mult };
   };
   later(0.25, () => {
     if (sk.proj) shoot(sk.proj, p, t, land);
-    else if (sk.aoe) { Game.fx.push(new Fx(sk.fx, p.x, p.y)); if (sk.snd2) SFX.play(sk.snd2); for (const m of mobsNear(p.x, p.y, sk.aoe)) { hitMob(m, sk.mult, o); if (sk.weak) m.weakT = sk.weak; if (sk.hit) Game.fx.push(new Fx(sk.hit, m.x, m.y)); } }
+    else if (sk.aoe) { Game.fx.push(new Fx(sk.fx, p.x, p.y)); if (sk.snd2) SFX.play(sk.snd2); for (const m of mobsNear(p.x, p.y, sk.aoe)) { hitMob(m, sk.mult * SM, o); if (sk.weak) m.weakT = sk.weak; if (sk.hit) Game.fx.push(new Fx(sk.hit, m.x, m.y)); } }
     else if (sk.mult) land();
-    else if (sk.heal) { const s = stats(); const h = Math.round(s.hp * sk.heal + s.atk); p.hp = Math.min(s.hp, p.hp + h); UI.float(p, '+' + h, '#7bff8a'); Game.fx.push(new Fx(sk.fx, p.x, p.y, { follow: p })); }
+    else if (sk.heal) { const s = stats(); const h = Math.round((s.hp * sk.heal + s.atk) * SM); p.hp = Math.min(s.hp, p.hp + h); UI.float(p, '+' + h, '#7bff8a'); Game.fx.push(new Fx(sk.fx, p.x, p.y, { follow: p })); }
     else if (sk.buff) { p.buffs = p.buffs.filter(b => b.id !== sk.id); p.buffs.push({ id: sk.id, buff: sk.buff, t: sk.dur }); Game.fx.push(new Fx(sk.fx, p.x, p.y, { follow: p })); UI.log(`${sk.name} etkin.`); }
   });
   UI.refresh();

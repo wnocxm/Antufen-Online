@@ -26,7 +26,7 @@ const Win = (() => {
   function draw(ctx, vw, VH) {
     if (!cur) return; hits = [];
     ctx.fillStyle = 'rgba(0,0,0,.5)'; ctx.fillRect(0, 0, vw, VH);
-    if (cur === 'bag') drawBag(ctx, vw, VH); else if (cur === 'role') drawRole(ctx, vw, VH); else if (cur === 'npc') drawNpc(ctx, vw, VH); else if (cur === 'task') drawTask(ctx, vw, VH); else if (cur === 'menu') drawMenu(ctx, vw, VH);
+    if (cur === 'bag') drawBag(ctx, vw, VH); else if (cur === 'role') drawRole(ctx, vw, VH); else if (cur === 'npc') drawNpc(ctx, vw, VH); else if (cur === 'task') drawTask(ctx, vw, VH); else if (cur === 'menu') drawMenu(ctx, vw, VH); else if (cur === 'skill') drawSkill(ctx, vw, VH);
     if (pressed && performance.now() - pressT > 160) pressed = null;
   }
   function drawBag(ctx, vw, VH) {
@@ -90,7 +90,7 @@ const Win = (() => {
     let h = null; for (const r of hits) if (x >= r.x && x < r.x + r.w && y >= r.y && y < r.y + r.h) { if (r.id === 'frame') { if (!h) h = r; } else if (!h || h.id === 'frame' || r.w * r.h < h.w * h.h) h = r; }
     if (!h) { close(); return true; }
     pressed = h.id; pressT = performance.now();
-    if (cur === 'bag') tapBag(h.id); else if (cur === 'role') tapRole(h.id); else if (cur === 'npc') tapNpc(h.id); else if (cur === 'task') tapTask(h.id); else if (cur === 'menu') tapMenu(h.id);
+    if (cur === 'bag') tapBag(h.id); else if (cur === 'role') tapRole(h.id); else if (cur === 'npc') tapNpc(h.id); else if (cur === 'task') tapTask(h.id); else if (cur === 'menu') tapMenu(h.id); else if (cur === 'skill') tapSkill(h.id);
     return true;
   }
   let lastTap = { id: null, t: 0 };
@@ -268,6 +268,56 @@ const Win = (() => {
     if (id === 52228) return go('char'); if (id === 52230) return go('skill'); if (id === 52396) return go('quest'); if (id === 52233) return go('map');
     if (id === 52232) { const q = QUESTS.find(q => Game.P.quests[q.id]); UI.closeAll(); if (q) questWalk(q); else UI.toast('Aktif görev yok.'); return; }
     if (id === 52234) return go('bag'); if (id === 52244) return go('sys'); if (id === 52237) { save(); location.reload(); }
+  }
+  // ---------------- Beceri ağacı (FORM_SKILLTREE): solda ağaçlar, ortada 3 sütun, sağda Yükselt/Kısayol/Ayrıntı ----------------
+  const S = { tree: 0, sel: null, detail: true, assign: false };
+  const STABS = [52931, 52932], SGRID = [[50844, 50845, 50846], [50847, 50848, 50849], [50850, 50851, 50852]], SQUICK = [51706, 51707, 51708, 51709, 51710, 51711];
+  function drawSkill(ctx, vw, VH) {
+    const P = Game.P, C = CLS[P.cls], f = Forms.get('skill'), ox = Math.round((vw - f.w) / 2), oy = Math.round((VH - 322) / 2), trees = TREES[P.cls], tree = trees[S.tree];
+    const byId = id => C.skills.find(k => k.id === id), cell = {}; for (const [sid, col, row] of tree.cells) cell[SGRID[row][col]] = byId(sid);
+    const selSk = S.sel && byId(S.sel);
+    Forms.draw(ctx, 'skill', ox, oy, {
+      hide: c => c.id === 50866 || c.id === 50307 || (c.t === 8 && !cell[c.id] && !SQUICK.includes(c.id)) || [51702, 51703, 51704, 51705].includes(c.id),
+      state: c => pressed === c.id || (cell[c.id] && cell[c.id].id === S.sel) || (SQUICK.includes(c.id) && S.assign) ? 1 : 0,
+      text: c => c.id === 50313 ? '' : undefined,
+      after: (c, x, y, w, h) => {
+        const sk = cell[c.id];
+        if (sk) { const r = skRank(sk); if (!r) ctx.globalAlpha = 0.4; drawIcon(ctx, { ik: sk.ik || 'skill', icon: sk.icon }, x + 5, y + 5); ctx.globalAlpha = 1;
+          Forms.label(ctx, `${r}/${SK_MAX}`, x - 6, y + 35, 48, 11, r ? '#ffe070' : P.lv < sk.lv ? '#888' : '#ffffff', 'center', 9);
+          Forms.label(ctx, sk.name, x - 32, y + 45, 100, 11, r ? '#e8e0d0' : '#999', 'center', 8); hits.push({ id: c.id, x: x - 6, y: y - 2, w: 48, h: 52 }); }
+        const qi = SQUICK.indexOf(c.id);
+        if (qi >= 0) { const sl = P.quick[qi]; if (sl && sl[0] === 's') { const k = C.skills[+sl.slice(1)]; if (k) drawIcon(ctx, { ik: k.ik || 'skill', icon: k.icon }, x + 5, y + 5); } else if (sl) { const it = ITEMS[sl.slice(2)]; if (it) drawIcon(ctx, it, x + 5, y + 5); } hits.push({ id: c.id, x, y, w, h }); }
+      },
+    });
+    Forms.label(ctx, `${tx('Beceri puanı')}: ${P.sp || 0}`, ox + 4, oy + 14, 262, 20, (P.sp || 0) > 0 ? '#ffe070' : '#e6cf89', 'center', 12);
+    const L = Forms.drawGroup(ctx, 'skill', 5, ox - 80, oy + 10, { hide: c => !STABS.includes(c.id), state: c => STABS.indexOf(c.id) === S.tree ? 1 : 0 });
+    L.forEach((m, i) => Forms.label(ctx, trees[i].name, m.x, m.y, m.w, m.h, '#ffffff', 'center', 12));
+    const Rm = Forms.drawGroup(ctx, 'skill', 7, ox + f.w + 2, oy + 10, { hide: c => c.id === 52485, state: c => pressed === c.id || (c.id === 52586 && S.detail) || (c.id === 51712 && S.assign) ? 1 : 0 });
+    for (const m of L.concat(Rm)) hits.push({ id: m.c.id, x: m.x, y: m.y, w: m.w, h: m.h });
+    if (selSk && S.detail) {
+      const r = skRank(selSk), lines = [[selSk.name + (selSk.pas ? ' ' + tx('(edilgen)') : ''), '#ffd870', 12], [`${tx('Kademe')} ${r}/${SK_MAX}`, '#ffffff', 10]];
+      wrap(ctx, selSk.desc || '', 140, 10).forEach(l => lines.push([l, '#d8d0c0', 10]));
+      if (!selSk.pas) lines.push([`${selSk.mp} mana · ${selSk.cd} sn`, '#9fc8ff', 10]);
+      if (P.lv < selSk.lv) lines.push([`${selSk.lv}. seviye gerekir.`, '#ff6050', 10]);
+      const bw = 152, bh = lines.length * 13 + 10, bx = ox - 2 - bw, by = oy + 10 + 2 * 46 + 8; panel(ctx, bx, by, bw, bh);
+      lines.forEach(([t, c, sz], i) => Forms.label(ctx, t, bx + 5, by + 5 + i * 13, bw - 10, 13, c, 'left', sz));
+    }
+    if (S.assign) Forms.label(ctx, 'Alttaki bir kısayol yuvasına dokun', ox, oy + 322 + 2, f.w, 14, '#ffe070', 'center', 11);
+    const cl = Forms.ctrl('skill', 52693).s[0].r; hits.push({ id: 52693, x: ox + cl[0], y: oy + cl[1], w: cl[2], h: cl[3] }); hits.push({ id: 'frame', x: ox, y: oy, w: f.w, h: 322 });
+    S._cell = cell;
+  }
+  function tapSkill(id) {
+    const P = Game.P, C = CLS[P.cls];
+    if (id === 52693) return UI.closeAll();
+    if (STABS.includes(id)) { S.tree = STABS.indexOf(id); S.sel = null; S.assign = false; SFX.play('skill_pageflip'); return; }
+    if (S._cell && S._cell[id]) { S.sel = S._cell[id].id; SFX.play('menusel', 0.6); return; }
+    const sk = S.sel && C.skills.find(k => k.id === S.sel);
+    const qi = SQUICK.indexOf(id);
+    if (qi >= 0) { if (S.assign && sk && !sk.pas && skRank(sk)) { const idx = C.skills.indexOf(sk); P.quick = P.quick.map(q => q === 's' + idx ? null : q); P.quick[qi] = 's' + idx; S.assign = false; SFX.play('repair', 0.5); save(); } return; }
+    if (id === 52586) { S.detail = !S.detail; return; }
+    if (!sk) return;
+    if (id === 50250) { skillUp(sk); return; }
+    if (id === 51712) { if (sk.pas) UI.toast('Edilgen beceriler kısayola konmaz.'); else if (!skRank(sk)) UI.toast('Önce beceriyi öğren.'); else S.assign = !S.assign; return; }
   }
   return { open, close, isOpen, draw, tap, get cur() { return cur; } };
 })();

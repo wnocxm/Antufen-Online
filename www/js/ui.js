@@ -199,7 +199,7 @@ const UI = (() => {
     if (sl[0] === 's') {
       const i = +sl.slice(1), sk = CLS[P.cls].skills[i]; if (!sk) return;
       const im = uiImg(`icon_res_${sk.ik || 'skill'}_${sk.icon}`); if (im.complete && im.naturalWidth) ctx.drawImage(im, x, y, 32, 32);
-      if (P.lv < sk.lv) { ctx.fillStyle = 'rgba(0,0,0,.7)'; ctx.fillRect(x, y, 32, 32); ctx.textAlign = 'center'; ctx.font = '8px sans-serif'; text('Sv' + sk.lv, x + 16, y + 20, '#ccc'); return; }
+      if (!skRank(sk)) { ctx.fillStyle = 'rgba(0,0,0,.7)'; ctx.fillRect(x, y, 32, 32); if (P.lv < sk.lv) { ctx.textAlign = 'center'; ctx.font = '8px sans-serif'; text('Sv' + sk.lv, x + 16, y + 20, '#ccc'); } return; }
       const cd = p.cds[sk.id] || 0; if (cd > 0) { ctx.fillStyle = 'rgba(0,0,0,.65)'; ctx.fillRect(x, y + 32 * (1 - cd / sk.cd), 32, 32 * cd / sk.cd); ctx.textAlign = 'center'; ctx.font = 'bold 11px sans-serif'; text(Math.ceil(cd), x + 16, y + 21, '#fff'); }
       if (p.mp < sk.mp) { ctx.fillStyle = 'rgba(0,30,120,.45)'; ctx.fillRect(x, y, 32, 32); }
     } else {
@@ -254,6 +254,7 @@ const UI = (() => {
     if (kind === 'bag') { const sh = shopNpc; closeAll(); Win.open('bag', sh ? { shop: sh } : {}); return; }
     if (kind === 'char') { closeAll(); Win.open('role'); return; }
     if (kind === 'quest') { closeAll(); Win.open('task'); return; }
+    if (kind === 'skill') { closeAll(); Win.open('skill'); return; }
     if (kind === 'menu') { closeAll(); Win.open('menu'); return; }
     if (kind !== cur) sel = null; if (kind !== 'bag' && kind !== 'shop') shopNpc = null;
     cur = kind; panel.classList.remove('hidden'); SFX.play('menu_appear', 0.5); render(); if (kind === 'bag') questFlag('openBag');
@@ -304,7 +305,7 @@ const UI = (() => {
       title = 'Ayarlar';
       h = `<div class="iact"><button class="obtn" data-act="tsfx">Ses efektleri: ${SFX.opt.sfx ? 'Açık' : 'Kapalı'}</button><button class="obtn" data-act="tmus">Müzik: ${SFX.opt.music ? 'Açık' : 'Kapalı'}</button></div>
         <div class="iact"><button class="obtn" data-act="lang">${LANG === 'tr' ? 'Language: English' : 'Dil: Türkçe'}</button></div>
-        <div class="iact"><button class="obtn" data-act="totitle">Giriş ekranına dön</button><button class="obtn" data-act="newchar">Yeni karakter oluştur</button></div><p class="hint">Oyun otomatik kaydedilir. Sürüm 11102004</p>`;
+        <div class="iact"><button class="obtn" data-act="totitle">Giriş ekranına dön</button><button class="obtn" data-act="newchar">Yeni karakter oluştur</button></div><p class="hint">Oyun otomatik kaydedilir. Sürüm 11102006</p>`;
     }
     ptitle.textContent = tx(title); pbody.innerHTML = h; txDom(pbody);
   }
