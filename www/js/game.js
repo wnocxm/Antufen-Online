@@ -149,7 +149,7 @@ const SLOTS = [['weap', 'Silah'], ['head', 'Başlık'], ['body', 'Zırh'], ['bel
 const STATN = { atk: 'Saldırı', def: 'Savunma', hp: 'Can', mp: 'Mana', crit: 'Kritik %', dodge: 'Kaçınma %', hpreg: 'Can yenileme', mpreg: 'Mana yenileme', res: 'Büyü direnci' };
 let SHOPS = {};
 async function loadItems() {
-  const D = await fetch(Assets.base + 'items.json').then(r => r.json());
+  const D = await fetch(vq(Assets.base + 'items.json')).then(r => r.json());
   for (const [id, it] of Object.entries(D.items)) { it.ik = it.icon[0]; it.icon = it.icon[1]; if (it.slot) it.desc = it.desc || ''; if (LANG === 'en') { it.name = EN_ITEM[it.name] || it.name; it.desc = tx(it.desc); } ITEMS[id] = it; }
   if (LANG === 'en') { for (const k of ['hp1', 'hp2', 'mp1', 'mp2', 'growthBox', 'quest']) { ITEMS[k].name = tx(ITEMS[k].name); ITEMS[k].desc = tx(ITEMS[k].desc); } SLOTS.forEach(s => s[1] = tx(s[1])); for (const k in STATN) STATN[k] = tx(STATN[k]); for (const t of Object.values(D.shops)) t.forEach(x => x[0] = tx(x[0])); }
   SHOPS = D.shops;
@@ -251,7 +251,7 @@ Game.mobInfo = name => { for (const k in Assets.D.mon) if (Assets.D.mon[k][0] ==
 async function loadScene(sid, arrive) {
   UI.fade(true);
   const D = Assets.D, sc = D.scenes[sid];
-  const json = await fetch(Assets.base + 'maps/' + sc.map + '.json').then(r => r.json());
+  const json = await fetch(vq(Assets.base + 'maps/' + sc.map + '.json')).then(r => r.json());
   const map = new GameMap(sc.map, json, sc);
   // gerekli görselleri önceden yükle
   const names = new Set(map.names);
@@ -310,7 +310,7 @@ async function gotoScene(sid, fromName, fixed) {
   const sc = Assets.D.scenes[sid];
   let arrive = fixed || null;
   if (!arrive) {
-    const json = await fetch(Assets.base + 'maps/' + sc.map + '.json').then(r => r.json());
+    const json = await fetch(vq(Assets.base + 'maps/' + sc.map + '.json')).then(r => r.json());
     const back = sc.exits.find(e => e[1].replace('(入口)', '') === fromName);
     const regs = json.regions;
     const r = back ? (regs.find(g => g[0] === back[0] + 1 && g[1] === 0) || regs.find(g => g[0] === back[0])) : regs.find(g => g[1] === 0);

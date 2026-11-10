@@ -9,9 +9,9 @@ const Assets = (() => {
 
   async function init(base = 'assets/') {
     const [d, a, p] = await Promise.all([
-      fetch(base + 'data.json').then(r => r.json()),
-      fetch(base + 'ani.json').then(r => r.json()),
-      fetch(base + 'pal.bin').then(r => r.arrayBuffer()),
+      fetch(vq(base + 'data.json')).then(r => r.json()),
+      fetch(vq(base + 'ani.json')).then(r => r.json()),
+      fetch(vq(base + 'pal.bin')).then(r => r.arrayBuffer()),
     ]);
     D = d; ANI = a; PAL = new Uint8Array(p);
     Assets.base = base;

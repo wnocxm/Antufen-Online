@@ -15,7 +15,7 @@ const Forms = (() => {
     '寻路': 'Yol Bul', '任务列表': 'Görev Listesi', '常用': 'Sık Kullanılan', '道具': 'Eşya', '系统': 'Sistem', '角色': 'Karakter', '技能': 'Beceri', '地域': 'Harita', '背包': 'Çanta', '设置': 'Ayarlar',
     '接受': 'Kabul', '放弃': 'Bırak', '完成': 'Tamamla', '可接任务': 'Alınabilir', '已接任务': 'Alınmış', '购买': 'Satın Al', '卖出': 'Sat', '修理': 'Onar',
   };
-  async function init(base) { F = await fetch(base + 'forms.json').then(r => r.json()); }
+  async function init(base) { F = await fetch(vq(base + 'forms.json')).then(r => r.json()); }
   function img(id) { let im = imgs[id]; if (!im) { im = new Image(); im.src = `${Assets.base}ui/AnbufenUI_Resource_${id}.png`; imgs[id] = im; } return im; }
   const rgb = c => `rgb(${(c >>> 16) & 255},${(c >>> 8) & 255},${c & 255})`;
   function get(name) { return F[name]; }

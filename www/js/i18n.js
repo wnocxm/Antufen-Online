@@ -3,6 +3,9 @@
 'use strict';
 
 let LANG = 'tr';
+// sayfanın sürümü (index.html'deki ?v=): veri dosyaları da bu sürümle istenir
+const VER = ((document.currentScript && document.currentScript.src.match(/[?&]v=(\d+)/)) || [])[1] || String(Date.now());
+const vq = u => u + (u.includes('?') ? '&' : '?') + 'v=' + VER;
 try { LANG = localStorage.getItem('anrufen_lang') || ((navigator.language || 'tr').toLowerCase().startsWith('tr') ? 'tr' : 'en'); } catch (e) { }
 function setLang(l) { try { localStorage.setItem('anrufen_lang', l); } catch (e) { } location.reload(); }
 const TX_MISS = new Set();
@@ -33,6 +36,7 @@ const EN_UI = {
   'Beceri puanın yok. Seviye atlayınca puan kazanırsın.': 'No skill points. You gain one each level.', 'Beceri puanı kazandın! Beceriler ekranından harca.': 'You gained a skill point! Spend it in the Skills window.',
   'Bu beceri henüz öğrenilmedi. Beceriler ekranından puan ver.': 'This skill is not learned yet. Spend a point in the Skills window.', 'Edilgen beceriler kısayola konmaz.': 'Passive skills cannot go on the shortcut bar.', 'Önce beceriyi öğren.': 'Learn the skill first.',
   'Acemi': 'Trainee', 'Çırak': 'Apprentice', 'Başlangıç': 'Novice', 'Elçi': 'Envoy',
+  'Pencere açılamadı, sayfayı yenile.': 'The window could not open, please reload.',
   'Devam': 'Continue', 'Listeden bir eşya seç.': 'Select an item from the list.', 'Çantada': 'In bag',
   'Yol Bul': 'Pathfind', 'Görev Listesi': 'Quest List', 'Sık Kullanılan': 'Common', 'Eşya': 'Items', 'Sistem': 'System', 'Beceri': 'Skills', 'Harita': 'Map', 'Alışveriş': 'Shop', 'Teslim': 'Turn in', 'Görev bırakıldı': 'Quest abandoned',
   'Aktif görev yok.': 'No active quests.', 'Hedef bu haritada değil.': 'The target is not on this map.',

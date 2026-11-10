@@ -307,7 +307,7 @@ const UI = (() => {
       title = 'Ayarlar';
       h = `<div class="iact"><button class="obtn" data-act="tsfx">Ses efektleri: ${SFX.opt.sfx ? 'Açık' : 'Kapalı'}</button><button class="obtn" data-act="tmus">Müzik: ${SFX.opt.music ? 'Açık' : 'Kapalı'}</button></div>
         <div class="iact"><button class="obtn" data-act="lang">${LANG === 'tr' ? 'Language: English' : 'Dil: Türkçe'}</button></div>
-        <div class="iact"><button class="obtn" data-act="totitle">Giriş ekranına dön</button><button class="obtn" data-act="newchar">Yeni karakter oluştur</button></div><p class="hint">Oyun otomatik kaydedilir. Sürüm 11102023</p>`;
+        <div class="iact"><button class="obtn" data-act="totitle">Giriş ekranına dön</button><button class="obtn" data-act="newchar">Yeni karakter oluştur</button></div><p class="hint">Oyun otomatik kaydedilir. Sürüm 11102034</p>`;
     }
     ptitle.textContent = tx(title); pbody.innerHTML = h; txDom(pbody);
   }
@@ -410,15 +410,20 @@ const UI = (() => {
   }
   let last = performance.now();
   function loop(now) {
+    try { frame(now); } catch (err) { console.error(err); }
+    requestAnimationFrame(loop);
+  }
+  function frame(now) {
     const dt = Math.min(0.05, (now - last) / 1000); last = now;
     ctx.setTransform(scale, 0, 0, scale, 0, 0); ctx.imageSmoothingEnabled = false;
     if (mode === 'play' && Game.map && Game.player) {
       if (!panelOpen()) update(dt);
-      drawWorld(); drawHud(); Win.draw(ctx, vw, VH);
+      drawWorld(); drawHud();
+      try { Win.draw(ctx, vw, VH); } catch (err) { console.error(err); Win.close(); toast('Pencere açılamadı, sayfayı yenile.'); }
       if (fadeOn || fadeA > 0) { fadeA = clamp(fadeA + (fadeOn ? dt * 5 : -dt * 3), 0, 1); ctx.fillStyle = `rgba(0,0,0,${fadeA})`; ctx.fillRect(0, 0, vw, VH); }
       if (Game.player.dead) { ctx.fillStyle = 'rgba(40,0,0,.45)'; ctx.fillRect(0, 0, vw, VH); }
     } else if (mode === 'create') drawCreate();
-    requestAnimationFrame(loop);
+    
   }
   async function boot() {
     txDom(document.body); await Assets.init('assets/'); await loadItems(); await Forms.init('assets/');
