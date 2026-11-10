@@ -8,6 +8,9 @@ const Forms = (() => {
   const T = {
     '装备': 'Ekipman', '消耗': 'Tüketim', '普通': 'Genel', '任务': 'Görev', '任务 ': 'Görev', '快捷键': 'Kısayol', '存钱': 'Sat', '详细': 'Ayrıntı', '销毁': 'Yok Et',
     '自动回复': 'Oto. İksir', '扩容': 'Genişlet', '确定': 'Tamam', '取消': 'İptal', '返回': 'Geri', '关闭': 'Kapat', '属性': 'Özellik', '称号': 'Unvan', '信息': 'Bilgi',
+    '角色属性': 'Karakter Özellikleri', '角色装备': 'Karakter Ekipmanı', '其它': 'Diğer', '资料': 'Profil', '成就': 'Başarım', '卸下': 'Çıkar', '更换': 'Değiştir', '修改称号': 'Unvan', '退出': 'Çıkış',
+    '昵称': 'Ad', '种族': 'Irk', '等级': 'Seviye', '称号': 'Unvan', '体力': 'Can', '物攻': 'Fiz. Saldırı', '防御': 'Savunma', '闪避': 'Kaçınma', '释放': 'Büyü Hızı', '圣抗': 'Kutsal Dir.', '火抗': 'Ateş Dir.',
+    '职业': 'Sınıf', '经验': 'Tecrübe', '公会': 'Lonca', '法力': 'Mana', '魔攻': 'Büyü Saldırı', '命中': 'İsabet', '暴击': 'Kritik', '韧性': 'Dayanıklılık', '暗抗': 'Gölge Dir.', '冰抗': 'Buz Dir.',
     '接受': 'Kabul', '放弃': 'Bırak', '完成': 'Tamamla', '可接任务': 'Alınabilir', '已接任务': 'Alınmış', '购买': 'Satın Al', '卖出': 'Sat', '修理': 'Onar',
   };
   async function init(base) { F = await fetch(base + 'forms.json').then(r => r.json()); }
@@ -24,7 +27,7 @@ const Forms = (() => {
       const [k, x, y, w, h, a0, a1, a2, col, al, im, t] = s.L[i], X = cx + x, Y = cy + y;
       if (k === 2 && im) {
         const I = img(im); if (!I.complete || !I.naturalWidth) continue;
-        ctx.globalAlpha = al / 100;
+        ctx.globalAlpha = al < 0 ? 1 : al / 100;
         const sw = Math.min(w, I.naturalWidth - a0), sh = Math.min(h, I.naturalHeight - a1); if (sw <= 0 || sh <= 0) { ctx.globalAlpha = 1; continue; }
         for (let yy = 0; yy < h; yy += sh) for (let xx = 0; xx < w; xx += sw) { const tw = Math.min(sw, w - xx), th = Math.min(sh, h - yy); ctx.drawImage(I, a0, a1, tw, th, X + xx, Y + yy, tw, th); }
         ctx.globalAlpha = 1;
@@ -44,14 +47,14 @@ const Forms = (() => {
   function draw(ctx, name, ox, oy, opt = {}) {
     const f = F[name];
     for (let i = f.c.length - 1; i >= 0; i--) {
-      const c = f.c[i]; if (c.g !== -1) continue; if (opt.hide && opt.hide(c)) continue;
+      const c = f.c[i]; if (c.g !== -1 || !c.s.length) continue; if (opt.page != null && c.pg !== -1 && c.pg !== opt.page) continue; if (opt.hide && opt.hide(c)) continue;
       drawCtrl(ctx, c, opt.state ? opt.state(c) : 0, ox, oy, opt.text ? opt.text(c) : undefined);
       if (opt.after) opt.after(c, ox + c.s[0].r[0], oy + c.s[0].r[1], c.s[0].r[2], c.s[0].r[3]);
     }
   }
   // Yan menü (grup): arka plan denetimi (gy = -1) ve düğmeler (gy = dikey konum)
   function drawGroup(ctx, name, g, ox, oy, opt = {}) {
-    const f = F[name], items = f.c.filter(c => c.g === g && c.gy >= 0 && c.s.length && !(opt.hide && opt.hide(c))).sort((a, b) => a.gy - b.gy);
+    const f = F[name], items = f.c.filter(c => c.g === g && c.gy >= 0 && c.s.length && (opt.page == null || c.pg === -1 || c.pg === opt.page) && !(opt.hide && opt.hide(c))).sort((a, b) => a.gy - b.gy);
     const bg = f.c.find(c => c.g === g && c.gy === -1);
     if (bg) { ctx.save(); ctx.beginPath(); ctx.rect(ox, oy, 79, items.length * 46 + 2); ctx.clip(); drawCtrl(ctx, bg, 0, ox, oy); ctx.restore(); }
     items.forEach((c, i) => drawCtrl(ctx, c, opt.state ? opt.state(c) : 0, ox, oy + i * 46, opt.text ? opt.text(c) : undefined));

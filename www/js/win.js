@@ -26,7 +26,7 @@ const Win = (() => {
   function draw(ctx, vw, VH) {
     if (!cur) return; hits = [];
     ctx.fillStyle = 'rgba(0,0,0,.5)'; ctx.fillRect(0, 0, vw, VH);
-    if (cur === 'bag') drawBag(ctx, vw, VH);
+    if (cur === 'bag') drawBag(ctx, vw, VH); else if (cur === 'role') drawRole(ctx, vw, VH);
     if (pressed && performance.now() - pressT > 160) pressed = null;
   }
   function drawBag(ctx, vw, VH) {
@@ -87,10 +87,10 @@ const Win = (() => {
 
   function tap(x, y) {
     if (!cur) return false;
-    let h = null; for (const r of hits) if (x >= r.x && x < r.x + r.w && y >= r.y && y < r.y + r.h) { h = r; if (r.w < 100) break; }
+    let h = null; for (const r of hits) if (x >= r.x && x < r.x + r.w && y >= r.y && y < r.y + r.h) { h = r; if (r.id !== 'frame' && r.w < 200) break; }
     if (!h) { close(); return true; }
     pressed = h.id; pressT = performance.now();
-    if (cur === 'bag') tapBag(h.id);
+    if (cur === 'bag') tapBag(h.id); else if (cur === 'role') tapRole(h.id);
     return true;
   }
   let lastTap = { id: null, t: 0 };
@@ -118,6 +118,55 @@ const Win = (() => {
     if (id === 51672) { if (it.use) B.assign = !B.assign; else UI.toast('Yalnızca iksirler kısayola konabilir.'); return; }
     if (id === 52336) { B.detail = !B.detail; return; }
     if (id === 52337) { if (it.quest) return; if (!B.sure) { B.sure = true; return; } removeItem(B.sel, countItem(B.sel)); B.sure = false; UI.log(`${it.name} yok edildi.`); save(); return; }
+  }
+  // ---------------- Karakter ekranı (FORM_ROLEPROP): sayfa 0 özellikler, sayfa 1 ekipman ----------------
+  const R = { page: 0, sel: null };
+  const RTABS = [50386, 50387];                       // sol menü: Özellik, Ekipman
+  const RSLOT = { 52281: 'head', 52282: 'neck', 52283: 'body', 52284: 'weap', 52285: 'belt', 52286: 'glove', 52287: 'ring', 52288: 'shoe' };
+  let rolePairs = null;
+  function roleValues() {
+    const P = Game.P, p = Game.player, s = stats(), C = CLS[P.cls];
+    return { '昵称': P.name, '种族': TR.race[P.race], '等级': String(P.lv), '称号': '-', '体力': `${Math.ceil(p.hp)}/${s.hp}`, '物攻': String(C.melee ? s.atk : Math.round(s.atk * 0.3)), '防御': String(s.def),
+      '闪避': s.dodge + '%', '释放': Math.round(100 + s.spd * 100) + '%', '圣抗': String(s.res), '火抗': String(s.res), '职业': TR.cls[P.cls], '经验': `${P.xp}/${xpNeed(P.lv)}`, '公会': '-',
+      '法力': `${Math.floor(p.mp)}/${s.mp}`, '魔攻': String(C.melee ? 0 : s.atk), '命中': (95 + Math.min(5, s.crit)) + '%', '暴击': (8 + s.crit) + '%', '韧性': s.dr + '%', '暗抗': String(s.res), '冰抗': String(s.res) };
+  }
+  function drawRole(ctx, vw, VH) {
+    const P = Game.P, f = Forms.get('role'), ox = Math.round((vw - f.w) / 2), oy = Math.round((VH - 322) / 2);
+    if (!rolePairs) { // her etiketin yanındaki değer alanını bul
+      rolePairs = {}; const labs = f.c.filter(c => c.pg === 0 && c.t === 3 && c.s[0].L[0][11]), vals = f.c.filter(c => c.pg === 0 && c.t === 11);
+      for (const l of labs) { const r = l.s[0].r; let best = null, bd = 99; for (const v of vals) { const q = v.s[0].r, d = Math.abs(q[1] - r[1]) + Math.abs(q[0] - (r[0] + 48)) * 0.2; if (d < bd && q[0] > r[0]) { bd = d; best = v; } } if (best) rolePairs[best.id] = l.s[0].L[0][11].trim(); }
+    }
+    const V = R.page === 0 ? roleValues() : null, selId = R.sel && P.eq[R.sel], selIt = selId && ITEMS[selId];
+    Forms.draw(ctx, 'role', ox, oy, {
+      page: R.page, hide: c => c.id === 52600 || c.id === 52603,
+      text: c => (c.pg === 0 && c.t === 3 && c.s[0].r[2] !== 75) ? '' : undefined,
+      state: c => pressed === c.id || (RSLOT[c.id] && RSLOT[c.id] === R.sel) ? 1 : 0,
+      after: (c, x, y, w, h) => {
+        if (V && c.pg === 0 && c.t === 3 && c.s[0].r[2] !== 75) { const k = c.s[0].L[0][11].trim(); Forms.label(ctx, Forms.T[k] || k, x + 8, y, 72, h, '#e6cf89', 'left', 10); Forms.label(ctx, V[k], x + 80, y, 74, h, '#ffffff', 'left', 11); }
+        if (R.page === 1 && RSLOT[c.id]) { const id = P.eq[RSLOT[c.id]], it = id && ITEMS[id]; if (it) drawIcon(ctx, it, x + 5, y + 5); }
+      },
+    });
+    for (const c of f.c) if (c.g === -1 && c.s.length && (c.pg === -1 || c.pg === R.page) && c.id !== 50812 && c.id !== 50841 && c.t !== 3 && c.t !== 11) { const r = c.s[0].r; hits.push({ id: c.id, x: ox + r[0], y: oy + r[1], w: r[2], h: r[3] }); }
+    if (R.page === 1) { // alt bilgi paneli (grup 4) ve seçili ekipmanın bilgisi
+      const bp = f.c.find(c => c.id === 50813); Forms.drawCtrl(ctx, bp, 0, ox, oy + 253);
+      const slotName = R.sel ? SLOTS.find(s => s[0] === R.sel)[1] : null;
+      if (selIt) { Forms.label(ctx, `${slotName}: ${selIt.name}`, ox + 10, oy + 259, 285, 16, '#ffd870', 'left', 12);
+        Forms.label(ctx, Object.entries(selIt.st || {}).map(([k, v]) => `${tx(STATN[k] || k)} +${v}`).join('   '), ox + 10, oy + 277, 285, 14, '#8cf07a', 'left', 11);
+        Forms.label(ctx, `${tx('Gereken seviye: ' + selIt.lv)}`, ox + 10, oy + 293, 285, 14, '#d8d0c0', 'left', 10); }
+      else Forms.label(ctx, R.sel ? `${slotName}: ${tx('Boş yuva')}` : 'Bir ekipman yuvasına dokun.', ox + 10, oy + 268, 285, 16, '#d8d0c0', 'left', 11);
+    }
+    const L = Forms.drawGroup(ctx, 'role', 5, ox - 80, oy + 10, { hide: c => !RTABS.includes(c.id), state: c => RTABS.indexOf(c.id) === R.page ? 1 : 0 });
+    const Rm = Forms.drawGroup(ctx, 'role', 7, ox + f.w + 2, oy + 10, { page: R.page, hide: c => R.page === 0 || c.id === 52042, state: c => pressed === c.id ? 1 : 0 });
+    for (const m of L.concat(Rm)) hits.push({ id: m.c.id, x: m.x, y: m.y, w: m.w, h: m.h });
+    hits.push({ id: 'frame', x: ox, y: oy, w: f.w, h: 322 });
+  }
+  function tapRole(id) {
+    const P = Game.P;
+    if (id === 52695) return close();
+    if (RTABS.includes(id)) { R.page = RTABS.indexOf(id); R.sel = null; SFX.play('skill_pageflip'); return; }
+    if (RSLOT[id]) { R.sel = RSLOT[id]; SFX.play('menusel', 0.6); return; }
+    if (id === 52043 && R.sel && P.eq[R.sel]) { unequip(R.sel); return; }                 // Çıkar
+    if (id === 52044) { close(); open('bag', { cat: 0 }); return; }                         // Değiştir: çantayı ekipman sekmesinde aç
   }
   return { open, close, isOpen, draw, tap, get cur() { return cur; } };
 })();
