@@ -10,7 +10,7 @@ const U = k => uiImg('AnbufenUI_Resource_' + k);
 
 // ---------------- Girdi ----------------
 const Input = (() => {
-  let joy = null, keys = {};
+  let joy = null, keys = {}, winPtr = null;
   const st = { joy: () => {
     if (joy && joy.active) { const l = Math.hypot(joy.dx, joy.dy); if (l > 6) return { x: joy.dx, y: joy.dy }; }
     let x = 0, y = 0; if (keys.a || keys.ArrowLeft) x -= 1; if (keys.d || keys.ArrowRight) x += 1; if (keys.w || keys.ArrowUp) y -= 1; if (keys.s || keys.ArrowDown) y += 1;
@@ -21,13 +21,15 @@ const Input = (() => {
     cv.addEventListener('pointerdown', e => {
       window.SFX && SFX.init && SFX.init();
       const L = UI.toLogical(e.clientX, e.clientY);
-      if (Win.isOpen()) { Win.tap(L.x, L.y); e.preventDefault(); return; }
+      if (Win.isOpen()) { winPtr = { id: e.pointerId, x: L.x, y: L.y, ly: L.y, moved: 0 }; e.preventDefault(); return; }
       const hit = UI.hudHit(L.x, L.y); if (hit) { hit(); e.preventDefault(); return; }
       if (L.x < Math.max(UI.vw * 0.33, 210) && L.y > VH * 0.45 && !joy) { const R = UI.rockerPos(); let dx = L.x - R.x, dy = L.y - R.y; const l = Math.hypot(dx, dy); if (l > 40) { dx = dx / l * 40; dy = dy / l * 40; } joy = { id: e.pointerId, ox: R.x, oy: R.y, dx, dy, active: true }; cv.setPointerCapture(e.pointerId); return; }
       pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
     });
-    cv.addEventListener('pointermove', e => { if (joy && e.pointerId === joy.id) { const L = UI.toLogical(e.clientX, e.clientY); let dx = L.x - joy.ox, dy = L.y - joy.oy; const l = Math.hypot(dx, dy), mx = 40; if (l > mx) { dx = dx / l * mx; dy = dy / l * mx; } joy.dx = dx; joy.dy = dy; } });
-    const end = e => { if (joy && e.pointerId === joy.id) joy = null; const s = pts.get(e.pointerId); if (s) { pts.delete(e.pointerId); if (Math.hypot(e.clientX - s.x, e.clientY - s.y) < 12 && UI.mode === 'play' && !UI.panelOpen()) tapWorld(e.clientX, e.clientY); } };
+    cv.addEventListener('pointermove', e => { if (winPtr && e.pointerId === winPtr.id) { const L = UI.toLogical(e.clientX, e.clientY); winPtr.moved += Math.abs(L.y - winPtr.ly); if (winPtr.moved > 6) Win.drag(L.y - winPtr.ly, winPtr.x, winPtr.y); winPtr.ly = L.y; return; }
+      if (joy && e.pointerId === joy.id) { const L = UI.toLogical(e.clientX, e.clientY); let dx = L.x - joy.ox, dy = L.y - joy.oy; const l = Math.hypot(dx, dy), mx = 40; if (l > mx) { dx = dx / l * mx; dy = dy / l * mx; } joy.dx = dx; joy.dy = dy; } });
+    const end = e => { if (winPtr && e.pointerId === winPtr.id) { const w = winPtr; winPtr = null; if (w.moved <= 6 && e.type === 'pointerup') Win.tap(w.x, w.y); return; }
+      if (joy && e.pointerId === joy.id) joy = null; const s = pts.get(e.pointerId); if (s) { pts.delete(e.pointerId); if (Math.hypot(e.clientX - s.x, e.clientY - s.y) < 12 && UI.mode === 'play' && !UI.panelOpen()) tapWorld(e.clientX, e.clientY); } };
     cv.addEventListener('pointerup', end); cv.addEventListener('pointercancel', end);
     addEventListener('keydown', e => { if (e.target.tagName === 'INPUT') return; const k = e.key.length === 1 ? e.key.toLowerCase() : e.key; keys[k] = true;
       if (UI.mode !== 'play') return;
@@ -305,7 +307,7 @@ const UI = (() => {
       title = 'Ayarlar';
       h = `<div class="iact"><button class="obtn" data-act="tsfx">Ses efektleri: ${SFX.opt.sfx ? 'Açık' : 'Kapalı'}</button><button class="obtn" data-act="tmus">Müzik: ${SFX.opt.music ? 'Açık' : 'Kapalı'}</button></div>
         <div class="iact"><button class="obtn" data-act="lang">${LANG === 'tr' ? 'Language: English' : 'Dil: Türkçe'}</button></div>
-        <div class="iact"><button class="obtn" data-act="totitle">Giriş ekranına dön</button><button class="obtn" data-act="newchar">Yeni karakter oluştur</button></div><p class="hint">Oyun otomatik kaydedilir. Sürüm 11102006</p>`;
+        <div class="iact"><button class="obtn" data-act="totitle">Giriş ekranına dön</button><button class="obtn" data-act="newchar">Yeni karakter oluştur</button></div><p class="hint">Oyun otomatik kaydedilir. Sürüm 11102023</p>`;
     }
     ptitle.textContent = tx(title); pbody.innerHTML = h; txDom(pbody);
   }
@@ -436,7 +438,7 @@ const UI = (() => {
     window.__G = Game;
   }
   return {
-    openShop(cn) { closeAll(); shopNpc = cn; shopTab = 0; cur = 'shop'; panel.classList.remove('hidden'); render(); },
+    openShop(cn) { closeAll(); Win.open('shop', { shop: cn }); },
     boot, rockerPos, toLogical, toWorld, hudHit, open, closeAll, panelOpen, dialog, say, attack,
     get vw() { return vw; }, get mode() { return mode; },
     log, toast, zone(m) { zoneMsg = m; zoneT = 3; }, levelUp(n) { lvlN = n; lvlT = 2.5; }, hurt() { hurtT = 0.4; },

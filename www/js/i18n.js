@@ -33,6 +33,7 @@ const EN_UI = {
   'Beceri puanın yok. Seviye atlayınca puan kazanırsın.': 'No skill points. You gain one each level.', 'Beceri puanı kazandın! Beceriler ekranından harca.': 'You gained a skill point! Spend it in the Skills window.',
   'Bu beceri henüz öğrenilmedi. Beceriler ekranından puan ver.': 'This skill is not learned yet. Spend a point in the Skills window.', 'Edilgen beceriler kısayola konmaz.': 'Passive skills cannot go on the shortcut bar.', 'Önce beceriyi öğren.': 'Learn the skill first.',
   'Acemi': 'Trainee', 'Çırak': 'Apprentice', 'Başlangıç': 'Novice', 'Elçi': 'Envoy',
+  'Devam': 'Continue', 'Listeden bir eşya seç.': 'Select an item from the list.', 'Çantada': 'In bag',
   'Yol Bul': 'Pathfind', 'Görev Listesi': 'Quest List', 'Sık Kullanılan': 'Common', 'Eşya': 'Items', 'Sistem': 'System', 'Beceri': 'Skills', 'Harita': 'Map', 'Alışveriş': 'Shop', 'Teslim': 'Turn in', 'Görev bırakıldı': 'Quest abandoned',
   'Aktif görev yok.': 'No active quests.', 'Hedef bu haritada değil.': 'The target is not on this map.',
   'Karakter Özellikleri': 'Character Stats', 'Karakter Ekipmanı': 'Character Equipment', 'Diğer': 'Other', 'Profil': 'Profile', 'Başarım': 'Achievements', 'Değiştir': 'Change', 'Çıkış': 'Exit',
