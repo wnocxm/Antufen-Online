@@ -436,6 +436,16 @@ function completeQuest(q) {
   gainXp(r.xp || 0); UI.log(`Ödül: ${r.xp} TP${r.gold ? ', ' + r.gold + ' altın' : ''}`, 'q');
   UI.refresh(); save();
 }
+// Görev hedefine otomatik yürü (orijinaldeki "寻路"): teslim edilecek kişi, toplama noktası ya da en yakın hedef canavar
+function questWalk(q) {
+  const p = Game.player, st = Game.P.quests[q.id], near = f => { let b = null, bd = 1e9; for (const e of Game.ents) if (f(e)) { const d = Math.hypot(e.x - p.x, e.y - p.y); if (d < bd) { bd = d; b = e; } } return b; };
+  let t = null;
+  if (st && !st.ready) { if (q.type === 'kill' || q.type === 'collect') t = near(e => e.kind === 'mob' && !e.dead && e.name === q.target); else if (q.type === 'pickup') t = near(e => e.kind === 'npc' && e.cn === q.node && !e.hidden); }
+  if (!t) t = near(e => e.kind === 'npc' && e.cn === q.to);
+  if (!t) return UI.toast('Hedef bu haritada değil.');
+  if (t.kind === 'mob') { setTarget(t); p.path = null; return; }
+  p.path = findPath(Game.map, p.x, p.y, t.x, t.y + 1); Game.goTarget = t; setTarget(null);
+}
 function pickupNode(n) {
   const P = Game.P;
   const q = QUESTS.find(q => q.type === 'pickup' && q.node === n.cn && P.quests[q.id] && !P.quests[q.id].ready);

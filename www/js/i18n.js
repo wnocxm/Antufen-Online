@@ -29,6 +29,8 @@ const EN_UI = {
   'Ekipman': 'Equipment', 'Tüketim': 'Consumable', 'Genel': 'Misc', 'Kısayol': 'Shortcut', 'Ayrıntı': 'Details', 'Yok Et': 'Destroy', 'Oto. İksir': 'Auto Potion', 'Genişlet': 'Expand',
   'İptal': 'Cancel', 'Geri': 'Back', 'Özellik': 'Stats', 'Unvan': 'Title', 'Bilgi': 'Info', 'Kabul': 'Accept', 'Bırak': 'Abandon', 'Alınabilir': 'Available', 'Alınmış': 'Accepted',
   'Satın Al': 'Buy', 'Onar': 'Repair',
+  'Yol Bul': 'Pathfind', 'Görev Listesi': 'Quest List', 'Sık Kullanılan': 'Common', 'Eşya': 'Items', 'Sistem': 'System', 'Beceri': 'Skills', 'Harita': 'Map', 'Alışveriş': 'Shop', 'Teslim': 'Turn in', 'Görev bırakıldı': 'Quest abandoned',
+  'Aktif görev yok.': 'No active quests.', 'Hedef bu haritada değil.': 'The target is not on this map.',
   'Karakter Özellikleri': 'Character Stats', 'Karakter Ekipmanı': 'Character Equipment', 'Diğer': 'Other', 'Profil': 'Profile', 'Başarım': 'Achievements', 'Değiştir': 'Change', 'Çıkış': 'Exit',
   'Ad': 'Name', 'Seviye': 'Level', 'Fiz. Saldırı': 'Phys. Attack', 'Kaçınma': 'Dodge', 'Büyü Hızı': 'Cast Speed', 'Kutsal Dir.': 'Holy Res.', 'Ateş Dir.': 'Fire Res.', 'Lonca': 'Guild',
   'Büyü Saldırı': 'Magic Attack', 'İsabet': 'Hit', 'Dayanıklılık': 'Toughness', 'Gölge Dir.': 'Dark Res.', 'Buz Dir.': 'Ice Res.', 'Yok': 'None', 'Boş yuva': 'Empty slot', 'Bir ekipman yuvasına dokun.': 'Tap an equipment slot.',

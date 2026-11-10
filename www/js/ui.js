@@ -253,6 +253,8 @@ const UI = (() => {
     if (mode !== 'play') return;
     if (kind === 'bag') { const sh = shopNpc; closeAll(); Win.open('bag', sh ? { shop: sh } : {}); return; }
     if (kind === 'char') { closeAll(); Win.open('role'); return; }
+    if (kind === 'quest') { closeAll(); Win.open('task'); return; }
+    if (kind === 'menu') { closeAll(); Win.open('menu'); return; }
     if (kind !== cur) sel = null; if (kind !== 'bag' && kind !== 'shop') shopNpc = null;
     cur = kind; panel.classList.remove('hidden'); SFX.play('menu_appear', 0.5); render(); if (kind === 'bag') questFlag('openBag');
   }
@@ -302,7 +304,7 @@ const UI = (() => {
       title = 'Ayarlar';
       h = `<div class="iact"><button class="obtn" data-act="tsfx">Ses efektleri: ${SFX.opt.sfx ? 'Açık' : 'Kapalı'}</button><button class="obtn" data-act="tmus">Müzik: ${SFX.opt.music ? 'Açık' : 'Kapalı'}</button></div>
         <div class="iact"><button class="obtn" data-act="lang">${LANG === 'tr' ? 'Language: English' : 'Dil: Türkçe'}</button></div>
-        <div class="iact"><button class="obtn" data-act="totitle">Giriş ekranına dön</button><button class="obtn" data-act="newchar">Yeni karakter oluştur</button></div><p class="hint">Oyun otomatik kaydedilir. Sürüm 11100444</p>`;
+        <div class="iact"><button class="obtn" data-act="totitle">Giriş ekranına dön</button><button class="obtn" data-act="newchar">Yeni karakter oluştur</button></div><p class="hint">Oyun otomatik kaydedilir. Sürüm 11102004</p>`;
     }
     ptitle.textContent = tx(title); pbody.innerHTML = h; txDom(pbody);
   }
@@ -328,7 +330,7 @@ const UI = (() => {
   // ---------- NPC diyaloğu ----------
   let dlgNpc = null, dlgQ = null;
   function dialog(n) {
-    SFX.play('request', 0.6); dlgNpc = n; dlgQ = null; $('#dlg').classList.remove('hidden'); renderDlg();
+    closeAll(); Win.open('npc', { npc: n });
   }
   function renderDlg() {
     const n = dlgNpc, P = Game.P; $('#dname').textContent = n.name;
@@ -359,7 +361,7 @@ const UI = (() => {
     if (a === 'accept') { acceptQuest(dlgQ); if (dlgQ.type === 'talk' && dlgQ.to === dlgNpc.cn) { Game.P.quests[dlgQ.id].ready = true; } dlgQ = null; renderDlg(); return; }
     if (a === 'complete') { const q = dlgQ; completeQuest(q); dlgQ = null; if (!q.teleport) renderDlg(); else closeAll(); return; }
   });
-  function say(n, t) { dlgNpc = n; dlgQ = null; $('#dlg').classList.remove('hidden'); $('#dname').textContent = n.name; $('#dtext').textContent = t; $('#dbtns').innerHTML = '<button data-q="bye">Tamam</button>'; txDom($('#dbtns')); }
+  function say(n, t) { closeAll(); Win.open('npc', { npc: n, say: t }); return; dlgNpc = n; dlgQ = null; $('#dlg').classList.remove('hidden'); $('#dname').textContent = n.name; $('#dtext').textContent = t; $('#dbtns').innerHTML = '<button data-q="bye">Tamam</button>'; txDom($('#dbtns')); }
 
   // ---------- karakter oluşturma ----------
   const cre = { cls: '战士', race: '人类', sex: 'male', face: 1 };
@@ -433,6 +435,7 @@ const UI = (() => {
     window.__G = Game;
   }
   return {
+    openShop(cn) { closeAll(); shopNpc = cn; shopTab = 0; cur = 'shop'; panel.classList.remove('hidden'); render(); },
     boot, rockerPos, toLogical, toWorld, hudHit, open, closeAll, panelOpen, dialog, say, attack,
     get vw() { return vw; }, get mode() { return mode; },
     log, toast, zone(m) { zoneMsg = m; zoneT = 3; }, levelUp(n) { lvlN = n; lvlT = 2.5; }, hurt() { hurtT = 0.4; },
