@@ -34,10 +34,10 @@ const Forms = (() => {
     }
   }
   function label(ctx, str, x, y, w, h, color, align = 'center', size = 11) {
-    if (str == null || str === '') return;
+    if (str == null || str === '') return; str = tx(String(str));
     ctx.font = `${size}px "Noto Sans", sans-serif`; ctx.textAlign = align; ctx.textBaseline = 'middle';
-    const tx = align === 'center' ? x + w / 2 : align === 'right' ? x + w - 2 : x + 2, ty = y + h / 2 + 0.5;
-    ctx.fillStyle = '#000'; ctx.fillText(str, tx + 1, ty + 1, w); ctx.fillStyle = color || '#fff'; ctx.fillText(str, tx, ty, w);
+    const lx = align === 'center' ? x + w / 2 : align === 'right' ? x + w - 2 : x + 2, ly = y + h / 2 + 0.5;
+    ctx.fillStyle = '#000'; ctx.fillText(str, lx + 1, ly + 1, w); ctx.fillStyle = color || '#fff'; ctx.fillText(str, lx, ly, w);
     ctx.textBaseline = 'alphabetic';
   }
   // Formun düz (gruba ait olmayan) denetimlerini arkadan öne çiz

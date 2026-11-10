@@ -108,7 +108,7 @@ const UI = (() => {
       ctx.globalAlpha = f.t < 0.8 ? 1 : (1.1 - f.t) / 0.3; ctx.font = `bold ${Math.round(12 * f.s)}px "Noto Sans", sans-serif`; text(f.txt, X, Y, f.c); ctx.globalAlpha = 1;
     }
   }
-  function text(s, x, y, c) { ctx.lineWidth = 2.5; ctx.strokeStyle = '#000'; ctx.lineJoin = 'round'; ctx.strokeText(s, x, y); ctx.fillStyle = c; ctx.fillText(s, x, y); }
+  function text(s, x, y, c) { s = tx(s); ctx.lineWidth = 2.5; ctx.strokeStyle = '#000'; ctx.lineJoin = 'round'; ctx.strokeText(s, x, y); ctx.fillStyle = c; ctx.fillText(s, x, y); }
 
   // ---------- HUD (orijinal parçalar) ----------
   let mmCache = null, mmMap = null;
@@ -299,9 +299,11 @@ const UI = (() => {
       } else { const sh = shopNpc; closeAll(); Win.open('bag', { shop: sh }); return; }
     } else if (cur === 'sys') {
       title = 'Ayarlar';
-      h = `<div class="iact"><button class="obtn" data-act="tsfx">Ses efektleri: ${SFX.opt.sfx ? 'Açık' : 'Kapalı'}</button><button class="obtn" data-act="tmus">Müzik: ${SFX.opt.music ? 'Açık' : 'Kapalı'}</button></div><br><button class="obtn" data-act="totitle">Giriş ekranına dön</button> <button class="obtn" data-act="newchar">Yeni karakter oluştur</button><p class="hint">Oyun otomatik kaydedilir. Sürüm 11092207</p>`;
+      h = `<div class="iact"><button class="obtn" data-act="tsfx">Ses efektleri: ${SFX.opt.sfx ? 'Açık' : 'Kapalı'}</button><button class="obtn" data-act="tmus">Müzik: ${SFX.opt.music ? 'Açık' : 'Kapalı'}</button></div>
+        <div class="iact"><button class="obtn" data-act="lang">${LANG === 'tr' ? 'Language: English' : 'Dil: Türkçe'}</button></div>
+        <div class="iact"><button class="obtn" data-act="totitle">Giriş ekranına dön</button><button class="obtn" data-act="newchar">Yeni karakter oluştur</button></div><p class="hint">Oyun otomatik kaydedilir. Sürüm 11100442</p>`;
     }
-    ptitle.textContent = title; pbody.innerHTML = h;
+    ptitle.textContent = tx(title); pbody.innerHTML = h; txDom(pbody);
   }
   pbody.addEventListener('click', e => {
     const b = e.target.closest('[data-open],[data-use],[data-act],[data-sel],[data-tab]'); if (!b) return;
@@ -316,8 +318,9 @@ const UI = (() => {
     if (A === 'uneq') { unequip(b.dataset.slot); sel = null; render(); return; }
     if (b.dataset.open) { open(b.dataset.open); return; }
     if (b.dataset.use) { useItem(b.dataset.use); render(); return; }
+    if (b.dataset.act === 'lang') { save(); setLang(LANG === 'tr' ? 'en' : 'tr'); return; }
     if (b.dataset.act === 'totitle') { save(); location.reload(); return; }
-    if (b.dataset.act === 'newchar') { if (b.dataset.sure) { localStorage.removeItem(SAVE_KEY); location.reload(); } else { b.dataset.sure = 1; b.textContent = 'Eminim, sil'; } }
+    if (b.dataset.act === 'newchar') { if (b.dataset.sure) { localStorage.removeItem(SAVE_KEY); location.reload(); } else { b.dataset.sure = 1; b.textContent = tx('Eminim, sil'); } }
   });
   $('#pclose').onclick = closeAll;
 
@@ -341,7 +344,7 @@ const UI = (() => {
       if (SHOPS[n.cn]) btns = `<button data-q="shop">🛒 Alışveriş</button>` + btns;
       btns += `<button data-q="bye">Hoşça kal</button>`;
     }
-    $('#dtext').textContent = txt; $('#dbtns').innerHTML = btns;
+    $('#dtext').textContent = txt; $('#dbtns').innerHTML = btns; txDom($('#dbtns'));
   }
   $('#dbtns').addEventListener('click', e => {
     const b = e.target.closest('button'); if (!b) return;
@@ -355,7 +358,7 @@ const UI = (() => {
     if (a === 'accept') { acceptQuest(dlgQ); if (dlgQ.type === 'talk' && dlgQ.to === dlgNpc.cn) { Game.P.quests[dlgQ.id].ready = true; } dlgQ = null; renderDlg(); return; }
     if (a === 'complete') { const q = dlgQ; completeQuest(q); dlgQ = null; if (!q.teleport) renderDlg(); else closeAll(); return; }
   });
-  function say(n, t) { dlgNpc = n; dlgQ = null; $('#dlg').classList.remove('hidden'); $('#dname').textContent = n.name; $('#dtext').textContent = t; $('#dbtns').innerHTML = '<button data-q="bye">Tamam</button>'; }
+  function say(n, t) { dlgNpc = n; dlgQ = null; $('#dlg').classList.remove('hidden'); $('#dname').textContent = n.name; $('#dtext').textContent = t; $('#dbtns').innerHTML = '<button data-q="bye">Tamam</button>'; txDom($('#dbtns')); }
 
   // ---------- karakter oluşturma ----------
   const cre = { cls: '战士', race: '人类', sex: 'male', face: 1 };
@@ -390,8 +393,8 @@ const UI = (() => {
     if (creDoll) { ctx.save(); ctx.translate(vw * 0.73, 250); ctx.scale(2.2, 2.2); creDoll.draw(ctx, 'comm', 2 + (Math.floor(performance.now() / 2500) % 2), performance.now() / 120, 0, 0); ctx.restore(); }
   }
 
-  function log(m, c) { logs.push({ m, c: c === 'q' ? '#ffd23a' : c === 'loot' ? '#e8e0c8' : (c || '#e8e0d0'), t: performance.now() }); if (logs.length > 30) logs.shift(); }
-  function toast(m) { toastMsg = m; toastT = 2.5; }
+  function log(m, c) { m = tx(m); logs.push({ m, c: c === 'q' ? '#ffd23a' : c === 'loot' ? '#e8e0c8' : (c || '#e8e0d0'), t: performance.now() }); if (logs.length > 30) logs.shift(); }
+  function toast(m) { toastMsg = tx(m); toastT = 2.5; }
   // ---------- akış ----------
   async function start() {
     mode = 'loading'; $('#loading').classList.remove('hidden');
@@ -412,7 +415,7 @@ const UI = (() => {
     requestAnimationFrame(loop);
   }
   async function boot() {
-    await Assets.init('assets/'); await loadItems(); await Forms.init('assets/');
+    txDom(document.body); await Assets.init('assets/'); await loadItems(); await Forms.init('assets/');
     Input.bind(cv);
     for (const k of ['AnbufenUI_Resource_7005', 'AnbufenUI_Resource_7078', 'AnbufenUI_Resource_7125', 'AnbufenUI_Resource_7127', 'icon_res_item_1038', 'AnbufenUI_Resource_7003', 'AnbufenUI_Resource_7002', 'AnbufenUI_Resource_7009', 'UIData_2067']) uiImg(k);
     $('#loading').classList.add('hidden');
@@ -422,7 +425,8 @@ const UI = (() => {
       const T = $('#title'); T.classList.remove('hidden'); SFX.Music.play('cover.mid');
       $('#tinfo').textContent = `${s.name} · ${TR.cls[s.cls]} · Seviye ${s.lv}`;
       $('#tcont').onclick = () => { T.classList.add('hidden'); Game.P = s; start(); };
-      $('#tnew').onclick = e => { const b = e.currentTarget; if (b.dataset.sure) { localStorage.removeItem(SAVE_KEY); T.classList.add('hidden'); showCreate(); } else { b.dataset.sure = 1; b.textContent = 'Eminim: eski karakter silinsin'; } };
+      $('#tnew').onclick = e => { const b = e.currentTarget; if (b.dataset.sure) { localStorage.removeItem(SAVE_KEY); T.classList.add('hidden'); showCreate(); } else { b.dataset.sure = 1; b.textContent = tx('Eminim: eski karakter silinsin'); } };
+      $('#tlang').onclick = () => setLang(LANG === 'tr' ? 'en' : 'tr');
     } else showCreate();
     requestAnimationFrame(loop);
     window.__G = Game;
@@ -431,7 +435,7 @@ const UI = (() => {
     boot, rockerPos, toLogical, toWorld, hudHit, open, closeAll, panelOpen, dialog, say, attack,
     get vw() { return vw; }, get mode() { return mode; },
     log, toast, zone(m) { zoneMsg = m; zoneT = 3; }, levelUp(n) { lvlN = n; lvlT = 2.5; }, hurt() { hurtT = 0.4; },
-    float(e, txt, c, s = 1) { floats.push({ e, txt, c, s, t: 0 }); }, target() { }, refresh() { if (cur) render(); },
+    float(e, txt, c, s = 1) { floats.push({ e, txt: tx(String(txt)), c, s, t: 0 }); }, target() { }, refresh() { if (cur) render(); },
     fade(on) { fadeOn = on; if (on) fadeA = 1; }, death() { $('#death').classList.remove('hidden'); },
   };
 })();

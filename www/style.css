@@ -83,3 +83,5 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .tbox button:active { background-image: url(assets/ui/AnbufenUI_Resource_7033.png); color: #000; }
 #tinfo { color: #c8b890; font-size: 12px; }
 .ver { color: #7a6a4a; font-size: 10px; }
+
+.tbox button.small { width: 160px; padding: 6px; font-size: 12px; font-weight: 400; }

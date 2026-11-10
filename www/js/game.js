@@ -103,6 +103,7 @@ const CLS = {
       { id: 'pp5', pas: { crit: 6 }, name: 'İlahi Ceza', icon: 1118, lv: 15, desc: 'Kritik şansı +%6.' },
     ] },
 };
+if (LANG === 'en') for (const c of Object.values(CLS)) for (const sk of c.skills) { const e = EN_SKILL[sk.id]; if (e) { sk.name = e[0]; sk.desc = e[1]; } }
 const QUICK0 = ['s0', 's1', 's2', 's3', 's4', 's5', 'i:hp1', 'i:mp1'];
 const ITEMS = {
   hp1: { name: 'Zayıf Can İksiri', icon: 1019, desc: '200 can yeniler.', price: 10, use: { hp: 200 } },
@@ -133,7 +134,8 @@ const STATN = { atk: 'Saldırı', def: 'Savunma', hp: 'Can', mp: 'Mana', crit: '
 let SHOPS = {};
 async function loadItems() {
   const D = await fetch(Assets.base + 'items.json').then(r => r.json());
-  for (const [id, it] of Object.entries(D.items)) { it.ik = it.icon[0]; it.icon = it.icon[1]; if (it.slot) it.desc = it.desc || ''; ITEMS[id] = it; }
+  for (const [id, it] of Object.entries(D.items)) { it.ik = it.icon[0]; it.icon = it.icon[1]; if (it.slot) it.desc = it.desc || ''; if (LANG === 'en') { it.name = EN_ITEM[it.name] || it.name; it.desc = tx(it.desc); } ITEMS[id] = it; }
+  if (LANG === 'en') { for (const k of ['hp1', 'hp2', 'mp1', 'mp2', 'growthBox', 'quest']) { ITEMS[k].name = tx(ITEMS[k].name); ITEMS[k].desc = tx(ITEMS[k].desc); } SLOTS.forEach(s => s[1] = tx(s[1])); for (const k in STATN) STATN[k] = tx(STATN[k]); for (const t of Object.values(D.shops)) t.forEach(x => x[0] = tx(x[0])); }
   SHOPS = D.shops;
 }
 function iconSrc(it) { return `${Assets.base}ui/icon_res_${it.ik || 'item'}_${it.icon}.png`; }

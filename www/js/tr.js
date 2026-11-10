@@ -130,3 +130,9 @@ const QUESTS = [
   { id: 80039, title: 'Kasaplar', goal: 'Doğu Güneşli Orman\'da 8 ☆Engerek Çetesi Kasabı öldür, Orman Korucusu\'na git.', giver: '护林游侠', to: '护林游侠', type: 'kill', target: '☆毒蛇帮虐杀者', count: 8, req: 80003,
     text: 'Lanet Engerek Çetesi hâlâ yaşıyor. O kasaplar Guanlin halkını katlediyor. Yardım etmeni ve o kasapların işini bitirmeni istiyorum.', ok: 'Tamam', wait: 'Böyle devam edemez!', done: 'Harika, artık Engerek Çetesi bize bir daha saldıramaz.', reward: { xp: 1500, gold: 120 } },
 ];
+
+// Dil İngilizce ise adları, konuşmaları ve görev metinlerini İngilizceyle değiştir
+if (LANG === 'en') {
+  for (const k of ['scene', 'name', 'greet', 'cls', 'race']) Object.assign(TR[k], EN[k]);
+  for (const q of QUESTS) { const e = EN_Q[q.id]; if (!e) continue; q.title = e[0]; q.goal = e[1]; q.text = e[2]; if (e[3]) q.ok = e[3]; if (e[4]) q.wait = e[4]; q.done = e[5]; }
+}
