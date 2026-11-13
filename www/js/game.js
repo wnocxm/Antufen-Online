@@ -80,12 +80,12 @@ const CLS = {
       { id: 'wp5', pas: { hpreg: 60 }, name: 'Hızlı İyileşme', icon: 1135, lv: 14, desc: 'Can yenilenmesi artar.' },
       { id: 'wp6', pas: { dr: 8 }, name: 'Dayanıklılık Halesi', icon: 1110, lv: 18, desc: 'Alınan hasar −%8.' },
     ] },
-  '法师': { hp: 700, mp: 800, atk: 70, def: 20, ghp: 110, gmp: 90, gatk: 14, gdef: 5, range: 6, color: '蓝', bolt: '特效-蓝火球', snd: 'skill_fire2',
+  '法师': { hp: 850, mp: 800, atk: 70, def: 20, ghp: 130, gmp: 90, gatk: 14, gdef: 5, range: 6, color: '蓝', bolt: '特效-蓝火球', snd: 'skill_fire2',
     skills: [
-      { id: 'm1', name: 'Ateş Topu', icon: 1137, mp: 20, cd: 1.2, mult: 1.0, range: 7, proj: '特效-火球', hit: '特效-火爆炸', snd: 'skill_fireball', snd2: 'skill_bomb', add: [60, 65, 70, 75, 80, 90, 100, 110, 120, 130], lv: 1, desc: 'Uzaktan ateş büyüsü.' },
-      { id: 'm2', name: 'Dondurma', icon: 1132, mp: 30, cd: 0.9, mult: 1.0, crit: 15, range: 7, proj: '特效-冰球', hit: 'WATER_ATTACK', slow: 4, snd: 'skill_wind', snd2: 'skill_bubble', add: [80, 90, 100, 110, 120, 135, 150, 165, 180, 195], lv: 3, desc: 'Buz büyüsü; hedefi yavaşlatır.' },
+      { id: 'm1', name: 'Ateş Topu', icon: 1137, mp: 20, cd: 1.2, mult: 1.5, range: 7, proj: '特效-火球', hit: '特效-火爆炸', snd: 'skill_fireball', snd2: 'skill_bomb', add: [60, 65, 70, 75, 80, 90, 100, 110, 120, 130], lv: 1, desc: 'Uzaktan ateş büyüsü.' },
+      { id: 'm2', name: 'Dondurma', icon: 1132, mp: 30, cd: 0.9, mult: 1.5, crit: 15, range: 7, proj: '特效-冰球', hit: 'WATER_ATTACK', slow: 4, snd: 'skill_wind', snd2: 'skill_bubble', add: [80, 90, 100, 110, 120, 135, 150, 165, 180, 195], lv: 3, desc: 'Buz büyüsü; hedefi yavaşlatır.' },
       { id: 'm3', name: 'Şifa', icon: 1135, mp: 60, cd: 20, fx: 'LIGHT_ATTACK', snd: 'skill_light', healT: [300, 320, 340, 370, 400, 460, 530, 610, 700, 800], lv: 6, desc: 'Kendi canını yeniler.' },
-      { id: 'm4', name: 'Alev Yakışı', icon: 1114, mp: 70, cd: 8, mult: 1.0, aoe: 2.4, fx: 'FIRE_ATTACK', hit: '特效-火爆炸', snd: 'skill_fireball2', snd2: 'skill_bomb', add: [400, 425, 450, 475, 500, 530, 570, 620, 680, 750], lv: 10, desc: 'Yakın çevrendeki düşmanları yakar.' },
+      { id: 'm4', name: 'Alev Yakışı', icon: 1114, mp: 70, cd: 8, mult: 1.5, aoe: 2.4, fx: 'FIRE_ATTACK', hit: '特效-火爆炸', snd: 'skill_fireball2', snd2: 'skill_bomb', add: [400, 425, 450, 475, 500, 530, 570, 620, 680, 750], lv: 10, desc: 'Yakın çevrendeki düşmanları yakar.' },
       { id: 'm5', name: 'Büyü Kalkanı', icon: 1134, mp: 80, cd: 30, buff: { def: 0.6, dr: 30 }, dur: 10, fx: '特效-法力盾', snd: 'skill_juqi', lv: 13, desc: '10 saniye alınan hasarı azaltır.' },
       { id: 'm6', name: 'Kar Fırtınası', icon: 1101, mp: 90, cd: 12, mult: 0.0, range: 7, proj: '特效-冰球', hit: '特效-冰块碎裂', splash: 2.6, slow: 4, snd: 'skill_wind', snd2: 'skill_ice', pct: [700, 725, 750, 775, 800, 840, 880, 920, 960, 1000], lv: 16, desc: 'Buz alan saldırısı.' },
       { id: 'mp1', pas: { atk: 15 }, name: 'Büyü Çalışması', icon: 1133, lv: 2, desc: 'Büyü saldırısı artar.' },
@@ -97,11 +97,11 @@ const CLS = {
     ] },
   '牧师': { hp: 900, mp: 700, atk: 60, def: 30, ghp: 140, gmp: 80, gatk: 12, gdef: 6, range: 5.5, color: '金', bolt: '特效-黑暗火球', snd: 'skill_wind',
     skills: [
-      { id: 'p1', name: 'Gölge Darbesi', icon: 1062, mp: 18, cd: 1.0, mult: 1.2, range: 7, proj: '特效-黑暗火球', hit: '特效-冲击爆炸', snd: 'skill_wind', snd2: 'skill_bomb', add: [25, 28, 31, 35, 40, 46, 55, 65, 72, 80], lv: 1, desc: 'Uzaktan gölge saldırısı.' },
+      { id: 'p1', name: 'Gölge Darbesi', icon: 1062, mp: 18, cd: 1.0, mult: 1.5, range: 7, proj: '特效-黑暗火球', hit: '特效-冲击爆炸', snd: 'skill_wind', snd2: 'skill_bomb', add: [25, 28, 31, 35, 40, 46, 55, 65, 72, 80], lv: 1, desc: 'Uzaktan gölge saldırısı.' },
       { id: 'p2', name: 'Çürüme', icon: 1066, mp: 30, cd: 6, mult: 0.3, dot: { n: 5 }, range: 7, fx: '特效-死亡标记', snd: 'skill_deathtag', dotT: [50, 60, 70, 80, 90, 100, 125, 150, 175, 200], lv: 3, desc: 'Hedefe lanet: 2 saniyede bir hasar verir.' },
       { id: 'p3', name: 'İlahi Gözdağı', icon: 1094, mp: 50, cd: 15, mult: 0.5, aoe: 3, weak: 10, fx: '特效-神之威慑', snd: 'skill_juqi', lv: 6, desc: 'Çevredeki düşmanların savunmasını düşürür.' },
       { id: 'p4', name: 'Şifa Pınarı', icon: 1100, ik: 'item', mp: 60, cd: 15, buff: { hotT: 1 }, hotT: [210, 217, 225, 232, 239, 263, 313, 368, 433, 452], dur: 8, fx: '特效-治疗buff', snd: 'skill_light', lv: 10, desc: '8 saniye boyunca can yeniler.' },
-      { id: 'p5', name: 'Gölge Yakışı', icon: 1119, mp: 45, cd: 6, mult: 1.6, range: 7, proj: '特效-黑暗火球', hit: '特效-火爆炸', snd: 'skill_fire2', snd2: 'skill_bomb', lv: 13, desc: 'Karanlık ateşle yakar.' },
+      { id: 'p5', name: 'Gölge Yakışı', icon: 1119, mp: 45, cd: 6, mult: 2.0, range: 7, proj: '特效-黑暗火球', hit: '特效-火爆炸', snd: 'skill_fire2', snd2: 'skill_bomb', lv: 13, desc: 'Karanlık ateşle yakar.' },
       { id: 'p6', name: 'Kutsal Işık', icon: 1030, ik: 'item', mp: 70, cd: 3, fx: '特效-缓缓加红', snd: 'skill_light', healT: [465, 490, 540, 584, 628, 666, 704, 754, 866, 987], lv: 16, desc: 'Canını yeniler.' },
       { id: 'p7', name: 'İlahi Öfke', icon: 1110, mp: 90, cd: 40, buff: { atk: 0.25, def: 0.25 }, dur: 20, fx: '特效-狂暴BUFF', snd: 'skill_relive', lv: 19, desc: 'Saldırı ve savunman 20 saniye artar.' },
       { id: 'pp1', pas: { atk: 15 }, name: 'Sofu İradesi', icon: 1244, ik: 'item', lv: 2, desc: 'Büyü saldırısı artar.' },
@@ -237,7 +237,7 @@ class Mob extends Ent {
     super('mob', x, y); const d = MON[name] || { lv: 1, hp: 50, atk: 5, xp: 5 };
     // canavar değerleri orijinalde sunucudaydı: seviyeden hesaplanır (haritaların seviye aralığına göre)
     const L = d.lv || 1, rk = d.rank || 0, soft = d.passive ? 0.55 : 1;
-    const mhp = Math.round((250 + 260 * L) * soft * (rk === 2 ? 22 : rk ? 5 : 1)); this.atk = Math.round((50 + 28 * L) * soft * (rk === 2 ? 2 : rk ? 1.5 : 1)); this.def = 8 * L * (rk ? 1.5 : 1);
+    const mhp = Math.round((250 + 260 * L) * soft * (rk === 2 ? 18 : rk ? 4 : 1)); this.atk = Math.round((50 + 28 * L) * soft * (rk === 2 ? 1.8 : rk ? 1.25 : 1)); this.def = 8 * L * (rk ? 1.5 : 1);
     Object.assign(this, { name, d, hp: mhp, maxHp: mhp, home, state: 'idle', atkT: 0, wanderT: rnd(1, 4), aggro: false, slowT: 0 });
     const info = Game.mobInfo(name); this.sp = info ? Game.map.sprite(info[1]) : null; this.deathFx = info?.[2];
     this.dir = irnd(0, 3);
