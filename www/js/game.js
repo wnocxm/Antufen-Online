@@ -220,7 +220,7 @@ class Player extends Ent {
     const act = this.state === 'attack' || this.state === 'cast' || this.combatT > 0 ? 'figh' : 'comm';
     let anim, t = this.t;
     if (this.dead) { anim = 16 + this.dir; return this.doll.draw(ctx, 'town', anim, 0, X, Y, 0.85); }
-    if (this.state === 'move') anim = (act === 'figh' ? 12 : 4) + this.dir;
+    if (this.state === 'move') return this.doll.draw(ctx, 'comm', 4 + this.dir, t, X, Y);   // savaşta da normal koşu (figh 12-15 saldırı kareleri)
     else if (this.state === 'attack') { anim = 4 + this.dir; t = this.animT; }
     else if (this.state === 'cast') { anim = 8 + this.dir; t = this.animT; }
     else anim = act === 'figh' ? this.dir : this.dir;

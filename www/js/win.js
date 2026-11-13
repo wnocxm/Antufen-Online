@@ -217,7 +217,7 @@ const Win = (() => {
     if (e.a === 'back') { D.q = null; return; }
     if (e.a === 'shop') { UI.openShop(n.cn); return; }
     if (e.a === 'tp') { UI.closeAll(); setTimeout(() => questTeleport(e.q), 300); return; }
-    if (e.a === 'accept') { const q = D.q; acceptQuest(q); D.q = null; if (q.tp) { UI.closeAll(); setTimeout(() => questTeleport(q), 400); return; } if (q.type === 'talk' && q.to === n.cn) Game.P.quests[q.id].ready = true; return; }
+    if (e.a === 'accept') { const q = D.q; acceptQuest(q); D.q = null; UI.closeAll(); if (q.tp) { setTimeout(() => questTeleport(q), 400); return; } if (q.type === 'talk' && q.to === n.cn) Game.P.quests[q.id].ready = true; return; }   // görev alınınca pencere kapanır
     if (e.a === 'complete') { const q = D.q; completeQuest(q); D.q = null; return; }
   }
   // ---------------- Görev listesi (FORM_TASK) ----------------
