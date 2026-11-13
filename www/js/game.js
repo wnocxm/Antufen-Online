@@ -67,12 +67,12 @@ const MON = {
 const CLS = {
   '战士': { hp: 150, mp: 50, atk: 14, def: 8, ghp: 26, gmp: 5, gatk: 3.2, gdef: 1.8, range: 1.4, color: '红', melee: true, snd: 'skill_sword',
     skills: [
-      { id: 'w1', name: 'Temel Kılıç Ustalığı', icon: 1107, mp: 0, cd: 1.5, mult: 1.25, range: 1.6, fx: 'BLOOD', snd: 'skill_sword', lv: 1, desc: 'Yakın saldırı. Mana harcamaz.' },
+      { id: 'w1', name: 'Temel Kılıç Ustalığı', icon: 1107, mp: 0, cd: 0.8, mult: 1.25, range: 1.6, fx: 'BLOOD', snd: 'skill_sword', lv: 1, desc: 'Yakın saldırı. Mana harcamaz.' },
       { id: 'w2', name: 'Güçlü Savurma', icon: 1114, mp: 8, cd: 5, mult: 1.9, crit: 20, range: 1.6, fx: '特效-刀光-红', snd: 'skill_daoguang', lv: 3, desc: 'Güçlü yakın saldırı, kritik şansı yüksek.' },
-      { id: 'w3', name: 'Bıçak Fırlatma', icon: 1127, mp: 12, cd: 7, mult: 1.3, range: 6, proj: '特效-飞刀', hit: '特效-细碎爆炸', splash: 1.8, snd: 'skill_nife', snd2: 'skill_pilipala', lv: 6, desc: 'Uzaktan alan saldırısı.' },
-      { id: 'w4', name: 'Çifte Darbe', icon: 1112, mp: 14, cd: 8, mult: 1.3, hits: 2, range: 1.6, fx: '特效-刀光', fx2: '特效-大喷血', snd: 'skill_daoguang', lv: 10, desc: 'Art arda iki vuruş.' },
+      { id: 'w3', name: 'Bıçak Fırlatma', icon: 1127, mp: 12, cd: 1.5, mult: 1.3, range: 6, proj: '特效-飞刀', hit: '特效-细碎爆炸', splash: 1.8, snd: 'skill_nife', snd2: 'skill_pilipala', lv: 6, desc: 'Uzaktan alan saldırısı.' },
+      { id: 'w4', name: 'Çifte Darbe', icon: 1112, mp: 14, cd: 5, mult: 1.3, hits: 2, range: 1.6, fx: '特效-刀光', fx2: '特效-大喷血', snd: 'skill_daoguang', lv: 10, desc: 'Art arda iki vuruş.' },
       { id: 'w5', name: 'Hız Patlaması', icon: 1103, mp: 10, cd: 20, buff: { spd: 0.25, crit: 30 }, dur: 5, fx: '特性-聚气', snd: 'skill_juqi', lv: 13, desc: '5 saniye %25 hızlı koşarsın, kritik şansın artar.' },
-      { id: 'w6', name: 'Ruh Yaran', icon: 1132, mp: 18, cd: 10, mult: 2.2, range: 5, fx: '特效-刀光', fx2: '特效-死亡标记', snd: 'skill_deathtag', lv: 17, desc: 'Uzaktan karanlık saldırı.' },
+      { id: 'w6', name: 'Ruh Yaran', icon: 1132, mp: 18, cd: 15, mult: 2.2, range: 5, fx: '特效-刀光', fx2: '特效-死亡标记', snd: 'skill_deathtag', lv: 17, desc: 'Uzaktan karanlık saldırı.' },
       { id: 'wp1', pas: { atk: 4 }, name: 'Silah Eğitimi', icon: 1136, lv: 2, desc: 'Saldırı +4.' },
       { id: 'wp2', pas: { hpPct: 8 }, name: 'Gürbüzlük', icon: 1109, lv: 4, desc: 'Can sınırı +%8.' },
       { id: 'wp3', pas: { dodge: 5 }, name: 'Çeviklik', icon: 1105, lv: 8, desc: 'Kaçınma +%5.' },
@@ -82,9 +82,9 @@ const CLS = {
     ] },
   '法师': { hp: 100, mp: 130, atk: 17, def: 4, ghp: 16, gmp: 15, gatk: 3.8, gdef: 1.0, range: 6, color: '蓝', bolt: '特效-蓝火球', snd: 'skill_fire2',
     skills: [
-      { id: 'm1', name: 'Ateş Topu', icon: 1137, mp: 8, cd: 2.5, mult: 1.8, range: 7, proj: '特效-火球', hit: '特效-火爆炸', snd: 'skill_fireball', snd2: 'skill_bomb', lv: 1, desc: 'Uzaktan ateş büyüsü.' },
-      { id: 'm2', name: 'Dondurma', icon: 1132, mp: 12, cd: 5, mult: 1.6, crit: 15, range: 7, proj: '特效-冰球', hit: 'WATER_ATTACK', slow: 4, snd: 'skill_wind', snd2: 'skill_bubble', lv: 3, desc: 'Buz büyüsü; hedefi yavaşlatır.' },
-      { id: 'm3', name: 'Şifa', icon: 1135, mp: 18, cd: 10, heal: 0.3, fx: 'LIGHT_ATTACK', snd: 'skill_light', lv: 6, desc: 'Kendi canını yeniler.' },
+      { id: 'm1', name: 'Ateş Topu', icon: 1137, mp: 8, cd: 1.2, mult: 1.8, range: 7, proj: '特效-火球', hit: '特效-火爆炸', snd: 'skill_fireball', snd2: 'skill_bomb', lv: 1, desc: 'Uzaktan ateş büyüsü.' },
+      { id: 'm2', name: 'Dondurma', icon: 1132, mp: 12, cd: 0.9, mult: 1.6, crit: 15, range: 7, proj: '特效-冰球', hit: 'WATER_ATTACK', slow: 4, snd: 'skill_wind', snd2: 'skill_bubble', lv: 3, desc: 'Buz büyüsü; hedefi yavaşlatır.' },
+      { id: 'm3', name: 'Şifa', icon: 1135, mp: 18, cd: 20, heal: 0.3, fx: 'LIGHT_ATTACK', snd: 'skill_light', lv: 6, desc: 'Kendi canını yeniler.' },
       { id: 'm4', name: 'Alev Yakışı', icon: 1114, mp: 20, cd: 8, mult: 2.0, aoe: 2.4, fx: 'FIRE_ATTACK', hit: '特效-火爆炸', snd: 'skill_fireball2', snd2: 'skill_bomb', lv: 10, desc: 'Yakın çevrendeki düşmanları yakar.' },
       { id: 'm5', name: 'Büyü Kalkanı', icon: 1134, mp: 25, cd: 30, buff: { def: 0.6, dr: 30 }, dur: 10, fx: '特效-法力盾', snd: 'skill_juqi', lv: 13, desc: '10 saniye alınan hasarı azaltır.' },
       { id: 'm6', name: 'Kar Fırtınası', icon: 1101, mp: 30, cd: 12, mult: 1.7, range: 7, proj: '特效-冰球', hit: '特效-冰块碎裂', splash: 2.6, slow: 4, snd: 'skill_wind', snd2: 'skill_ice', lv: 16, desc: 'Buz alan saldırısı.' },
@@ -97,12 +97,12 @@ const CLS = {
     ] },
   '牧师': { hp: 120, mp: 115, atk: 14, def: 6, ghp: 20, gmp: 13, gatk: 3.3, gdef: 1.4, range: 5.5, color: '金', bolt: '特效-黑暗火球', snd: 'skill_wind',
     skills: [
-      { id: 'p1', name: 'Gölge Darbesi', icon: 1062, mp: 8, cd: 2.5, mult: 1.7, range: 7, proj: '特效-黑暗火球', hit: '特效-冲击爆炸', snd: 'skill_wind', snd2: 'skill_bomb', lv: 1, desc: 'Uzaktan gölge saldırısı.' },
+      { id: 'p1', name: 'Gölge Darbesi', icon: 1062, mp: 8, cd: 1, mult: 1.7, range: 7, proj: '特效-黑暗火球', hit: '特效-冲击爆炸', snd: 'skill_wind', snd2: 'skill_bomb', lv: 1, desc: 'Uzaktan gölge saldırısı.' },
       { id: 'p2', name: 'Çürüme', icon: 1066, mp: 12, cd: 6, mult: 0.5, dot: { mult: 0.45, n: 5 }, range: 7, fx: '特效-死亡标记', snd: 'skill_deathtag', lv: 3, desc: 'Hedefe lanet: 2 saniyede bir hasar verir.' },
       { id: 'p3', name: 'İlahi Gözdağı', icon: 1094, mp: 20, cd: 15, mult: 0.8, aoe: 3, weak: 10, fx: '特效-神之威慑', snd: 'skill_juqi', lv: 6, desc: 'Çevredeki düşmanların savunmasını düşürür.' },
       { id: 'p4', name: 'Şifa Pınarı', icon: 1100, ik: 'item', mp: 22, cd: 15, buff: { hot: 0.05 }, dur: 8, fx: '特效-治疗buff', snd: 'skill_light', lv: 10, desc: '8 saniye boyunca can yeniler.' },
       { id: 'p5', name: 'Gölge Yakışı', icon: 1119, mp: 18, cd: 6, mult: 2.3, range: 7, proj: '特效-黑暗火球', hit: '特效-火爆炸', snd: 'skill_fire2', snd2: 'skill_bomb', lv: 13, desc: 'Karanlık ateşle yakar.' },
-      { id: 'p6', name: 'Kutsal Işık', icon: 1030, ik: 'item', mp: 26, cd: 12, heal: 0.4, fx: '特效-缓缓加红', snd: 'skill_light', lv: 16, desc: 'Canını yeniler.' },
+      { id: 'p6', name: 'Kutsal Işık', icon: 1030, ik: 'item', mp: 26, cd: 3, heal: 0.4, fx: '特效-缓缓加红', snd: 'skill_light', lv: 16, desc: 'Canını yeniler.' },
       { id: 'p7', name: 'İlahi Öfke', icon: 1110, mp: 30, cd: 40, buff: { atk: 0.25, def: 0.25 }, dur: 20, fx: '特效-狂暴BUFF', snd: 'skill_relive', lv: 19, desc: 'Saldırı ve savunman 20 saniye artar.' },
       { id: 'pp1', pas: { atk: 4 }, name: 'Sofu İradesi', icon: 1244, ik: 'item', lv: 2, desc: 'Büyü saldırısı +4.' },
       { id: 'pp2', pas: { crit: 5 }, name: 'Zorbalık', icon: 1078, lv: 5, desc: 'Kritik şansı +%5.' },
@@ -118,9 +118,9 @@ const TREES = {
   '法师': [{ name: 'Çırak', cells: [['m1', 1, 0], ['mp1', 2, 0], ['mp2', 0, 1], ['mp3', 2, 1], ['m3', 0, 2], ['m2', 2, 2]] }, { name: 'Büyücü', cells: [['m4', 1, 0], ['mp4', 2, 0], ['mp6', 0, 1], ['mp5', 2, 1], ['m5', 0, 2], ['m6', 2, 2]] }],
   '牧师': [{ name: 'Başlangıç', cells: [['p1', 1, 0], ['pp1', 2, 0], ['p2', 0, 1], ['pp2', 2, 1], ['pp3', 0, 2], ['p3', 2, 2]] }, { name: 'Elçi', cells: [['p4', 1, 0], ['pp4', 2, 0], ['p5', 0, 1], ['p6', 2, 1], ['pp5', 0, 2], ['p7', 2, 2]] }],
 };
-const SK_MAX = 5;
+const SK_MAX = 10;   // orijinal beceri kayıtlarında en yüksek kademe 10
 const skRank = sk => (Game.P.sk && Game.P.sk[sk.id]) || 0;
-const skMult = sk => 1 + 0.1 * (Math.max(1, skRank(sk)) - 1);          // her kademe +%10 güç
+const skMult = sk => 1 + 0.08 * (Math.max(1, skRank(sk)) - 1);         // orijinal tablolarda 1. kademeden 10. kademeye değerler yaklaşık 2 katına çıkıyor
 function skillUp(sk) {
   const P = Game.P, r = skRank(sk);
   if (r >= SK_MAX) return UI.toast('Bu beceri en yüksek kademede.');
@@ -197,7 +197,7 @@ function stats() {
   const s = { hp: C.hp + C.ghp * L, mp: C.mp + C.gmp * L, atk: C.atk + C.gatk * L, def: C.def + C.gdef * L, crit: 0, dodge: 0, hpreg: 0, mpreg: 0, res: 0 };
   for (const id of Object.values(P.eq || {})) { const it = id && ITEMS[id]; if (it && it.st) for (const k in it.st) s[k] = (s[k] || 0) + it.st[k]; }
   s.dr = 0; s.spd = 0; let hpPct = 0, mpPct = 0;
-  for (const sk of C.skills) { const r = (P.sk && P.sk[sk.id]) || 0; if (!sk.pas || !r) continue; const m = 0.5 + 0.5 * r; for (const k in sk.pas) { const v = Math.round(sk.pas[k] * m); if (k === 'hpPct') hpPct += v; else if (k === 'mpPct') mpPct += v; else s[k] = (s[k] || 0) + v; } }
+  for (const sk of C.skills) { const r = (P.sk && P.sk[sk.id]) || 0; if (!sk.pas || !r) continue; const m = 0.6 + 0.4 * r; for (const k in sk.pas) { const v = Math.round(sk.pas[k] * m); if (k === 'hpPct') hpPct += v; else if (k === 'mpPct') mpPct += v; else s[k] = (s[k] || 0) + v; } }
   s.hp *= 1 + hpPct / 100; s.mp *= 1 + mpPct / 100;
   if (P.race === '精灵') { s.mp += 15; s.hp -= 5; } else { s.def += 2; }
   for (const b of Game.player?.buffs || []) { if (b.buff.atk) s.atk *= 1 + b.buff.atk; if (b.buff.def) s.def *= 1 + b.buff.def; if (b.buff.spd) s.spd += b.buff.spd; if (b.buff.crit) s.crit += b.buff.crit; if (b.buff.dr) s.dr += b.buff.dr; }
