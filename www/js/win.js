@@ -27,7 +27,62 @@ const Win = (() => {
     if (!cur) return; hits = [];
     ctx.fillStyle = 'rgba(0,0,0,.5)'; ctx.fillRect(0, 0, vw, VH);
     if (cur === 'bag') drawBag(ctx, vw, VH); else if (cur === 'role') drawRole(ctx, vw, VH); else if (cur === 'npc') drawNpc(ctx, vw, VH); else if (cur === 'task') drawTask(ctx, vw, VH); else if (cur === 'menu') drawMenu(ctx, vw, VH); else if (cur === 'skill') drawSkill(ctx, vw, VH); else if (cur === 'shop') drawShop(ctx, vw, VH); else if (cur === 'dead') drawDead(ctx, vw, VH);
+    if (cur === 'sys') drawSys(ctx, vw, VH); else if (cur === 'map') drawMap(ctx, vw, VH);
+    if (HUB.some(h => h[0] === cur) || cur === 'hub') drawHub(ctx, vw, VH);
     if (pressed && performance.now() - pressT > 160) pressed = null;
+  }
+  // ---------------- Karakter menüsü: ekranın solunda sekmeler; pencereler arasında geçiş ----------------
+  const HUB = [['role', 'Karakter'], ['bag', 'Çanta'], ['skill', 'Beceri'], ['task', 'Görev'], ['map', 'Harita'], ['sys', 'Ayarlar']];
+  function drawHub(ctx, vw, VH) {
+    const x = 2, w = 72, h = 38, y0 = Math.round((VH - HUB.length * h) / 2);
+    ctx.fillStyle = 'rgba(0,0,0,.72)'; ctx.fillRect(x, y0, w, HUB.length * h);
+    HUB.forEach(([k, n], i) => { const y = y0 + i * h, on = k === cur, pr = pressed === 'hub:' + k;
+      if (on || pr) { ctx.fillStyle = 'rgba(188,0,0,.38)'; ctx.fillRect(x + 1, y + 1, w - 2, h - 2); }
+      ctx.fillStyle = '#686868'; ctx.fillRect(x, y, w, 1); ctx.fillStyle = '#000'; ctx.fillRect(x, y + h - 1, w, 1); ctx.fillRect(x, y, 1, h); ctx.fillRect(x + w - 1, y, 1, h);
+      Forms.label(ctx, n, x, y, w, h, on ? '#ffffff' : '#e6cf89', 'center', 12); hits.push({ id: 'hub:' + k, x, y, w, h }); });
+  }
+  // standart orijinal çerçeve (çantanın 307x239 çerçevesi) + başlık + kapatma düğmesi
+  function stdFrame(ctx, ox, oy, title) {
+    Forms.drawCtrl(ctx, Forms.ctrl('bag', 50771), 0, ox, oy); Forms.drawCtrl(ctx, Forms.ctrl('bag', 52696), pressed === 'close' ? 1 : 0, ox, oy);
+    Forms.label(ctx, title, ox + 4, oy + 13, 262, 20, '#e6cf89', 'center', 12);
+    hits.push({ id: 'close', x: ox + 272, y: oy, w: 34, h: 34 }); hits.push({ id: 'frame', x: ox, y: oy, w: 307, h: 250 });
+  }
+  function rowBtn(ctx, id, x, y, label, value, on) {
+    const c = Forms.ctrl('shop', 50509); Forms.drawCtrl(ctx, c, on || pressed === id ? 1 : 0, x - c.s[0].r[0], y - c.s[0].r[1]);
+    Forms.label(ctx, label, x + 12, y + 3, 190, 20, on || pressed === id ? '#ffffff' : '#e6cf89', 'left', 12); if (value != null) Forms.label(ctx, value, x + 200, y + 3, 90, 20, '#ffffff', 'right', 12);
+    hits.push({ id, x, y, w: 300, h: 33 });
+  }
+  // ---------------- Ayarlar ----------------
+  let sysSure = false;
+  function drawSys(ctx, vw, VH) {
+    const ox = Math.round((vw - 307) / 2), oy = Math.round((VH - 260) / 2); stdFrame(ctx, ox, oy, 'Ayarlar');
+    const on = tx('Açık'), off = tx('Kapalı');
+    rowBtn(ctx, 'sfx', ox + 4, oy + 40, 'Ses efektleri', SFX.opt.sfx ? on : off);
+    rowBtn(ctx, 'mus', ox + 4, oy + 75, 'Müzik', SFX.opt.music ? on : off);
+    rowBtn(ctx, 'lang', ox + 4, oy + 110, 'Dil / Language', LANG === 'tr' ? 'Türkçe' : 'English');
+    rowBtn(ctx, 'title', ox + 4, oy + 145, 'Giriş ekranına dön', null);
+    rowBtn(ctx, 'newc', ox + 4, oy + 180, sysSure ? 'Eminim: karakter silinsin' : 'Yeni karakter oluştur', null, sysSure);
+    Forms.label(ctx, tx('Oyun otomatik kaydedilir.') + '  ' + tx('Sürüm ' + VER), ox + 8, oy + 222, 290, 14, '#8d8983', 'left', 10);
+  }
+  function tapSys(id) {
+    if (id !== 'newc') sysSure = false;
+    if (id === 'sfx') SFX.setSfx(!SFX.opt.sfx); else if (id === 'mus') SFX.setMusic(!SFX.opt.music);
+    else if (id === 'lang') { save(); setLang(LANG === 'tr' ? 'en' : 'tr'); }
+    else if (id === 'title') { save(); location.reload(); }
+    else if (id === 'newc') { if (!sysSure) { sysSure = true; return; } localStorage.removeItem(SAVE_KEY); location.reload(); }
+  }
+  // ---------------- Dünya haritası (dosyadaki orijinal harita görselleri) ----------------
+  const mapImg = {};
+  function drawMap(ctx, vw, VH) {
+    const W = Math.min(vw - 170, 520), H = 320, ox = Math.round((vw - W) / 2) + 30, oy = Math.round((VH - H) / 2);
+    ctx.fillStyle = 'rgba(0,0,0,.8)'; ctx.fillRect(ox, oy, W, H); ctx.strokeStyle = '#9f998f'; ctx.strokeRect(ox + 0.5, oy + 0.5, W - 1, H - 1); ctx.strokeStyle = '#4b4547'; ctx.strokeRect(ox + 1.5, oy + 1.5, W - 3, H - 3);
+    // iki parça yan yana bir bütün: 2047 (400x752) ve 2048 (480x752)
+    const parts = ['UIData_2047', 'UIData_2048'].map(k => mapImg[k] || (mapImg[k] = Object.assign(new Image(), { src: `${Assets.base}ui/${k}.png` })));
+    if (parts.every(i => i.complete && i.naturalWidth)) { const tw = 880, th = 752, k = Math.min((W - 12) / tw, (H - 34) / th), mx = ox + (W - tw * k) / 2, my = oy + 24;
+      ctx.imageSmoothingEnabled = true; ctx.drawImage(parts[0], mx, my, 400 * k, th * k); ctx.drawImage(parts[1], mx + 400 * k, my, 480 * k, th * k); ctx.imageSmoothingEnabled = false; }
+    Forms.label(ctx, `${tx('Dünya Haritası')}  ·  ${tx('Şu an: ' + trName(Game.scene.name))}`, ox + 6, oy + 4, W - 46, 18, '#e6cf89', 'left', 12);
+    Forms.drawCtrl(ctx, Forms.ctrl('bag', 52696), pressed === 'close' ? 1 : 0, ox + W - 306, oy - 6);
+    hits.push({ id: 'close', x: ox + W - 34, y: oy - 6, w: 34, h: 34 }); hits.push({ id: 'frame', x: ox, y: oy, w: W, h: H });
   }
   function drawBag(ctx, vw, VH) {
     const P = Game.P, f = Forms.get('bag'), ox = Math.round((vw - f.w) / 2), oy = Math.round((VH - f.h) / 2);
@@ -90,6 +145,9 @@ const Win = (() => {
     let h = null; for (const r of hits) if (x >= r.x && x < r.x + r.w && y >= r.y && y < r.y + r.h) { if (r.id === 'frame') { if (!h) h = r; } else if (!h || h.id === 'frame' || r.w * r.h < h.w * h.h) h = r; }
     if (!h) { if (cur !== 'dead') close(); return true; }
     pressed = h.id; pressT = performance.now();
+    if (typeof h.id === 'string' && h.id.startsWith('hub:')) { const k = h.id.slice(4); SFX.play('skill_pageflip'); if (k !== cur) { close(); open(k); } return true; }
+    if (h.id === 'close') { UI.closeAll(); return true; }
+    if (cur === 'sys') { tapSys(h.id); return true; } if (cur === 'map' || cur === 'hub') return true;
     if (cur === 'bag') tapBag(h.id); else if (cur === 'role') tapRole(h.id); else if (cur === 'npc') tapNpc(h.id); else if (cur === 'task') tapTask(h.id); else if (cur === 'menu') tapMenu(h.id); else if (cur === 'skill') tapSkill(h.id); else if (cur === 'shop') tapShop(h.id); else if (cur === 'dead') tapDead(h.id);
     return true;
   }

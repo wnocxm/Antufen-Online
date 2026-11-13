@@ -137,7 +137,10 @@ const UI = (() => {
     const thin = (y, v, c) => { ctx.fillStyle = 'rgba(0,0,0,.7)'; ctx.fillRect(bx0, y, 92, 5); ctx.fillStyle = c; ctx.fillRect(bx0 + 1, y + 1, 90 * clamp(v, 0, 1), 3); };
     thin(18, p.hp / s.hp, '#e02818'); thin(25, p.mp / s.mp, '#2a58e8'); thin(32, P.xp / xpNeed(P.lv), '#d8b030');
     ctx.font = '8px "Noto Sans", sans-serif'; text(`${Math.ceil(p.hp)}/${s.hp}`, bx0 + 96, 23, '#ffb0a0'); text(`${Math.floor(p.mp)}/${s.mp}`, bx0 + 96, 31, '#a8c0ff');
-    hud.push([2, 2, 56, 54, () => open('char')]);
+    // "Karakter" düğmesi: soldaki sekmeli menüyü açar (Karakter, Çanta, Beceri, Görev, Harita, Ayarlar)
+    { const kx = 3, ky = 56, kw = 54, kh = 15; ctx.fillStyle = 'rgba(0,0,0,.7)'; ctx.fillRect(kx, ky, kw, kh); ctx.strokeStyle = '#8a6a30'; ctx.lineWidth = 1; ctx.strokeRect(kx + 0.5, ky + 0.5, kw - 1, kh - 1);
+      ctx.textAlign = 'center'; ctx.font = 'bold 9px "Noto Sans", sans-serif'; text('Karakter ▸', kx + kw / 2, ky + 11, '#ffe48a'); hud.push([kx - 2, ky - 2, kw + 4, kh + 6, () => open('hub')]); }
+    hud.push([2, 2, 56, 52, () => open('hub')]);
     // hedef
     const t = Game.target;
     if (t && !t.dead) {
@@ -232,7 +235,7 @@ const UI = (() => {
   }
   function drawTracker() {
     const P = Game.P; const act = QUESTS.filter(q => P.quests[q.id]).slice(0, 3);
-    let y = 70; ctx.textAlign = 'left';
+    let y = 86; ctx.textAlign = 'left';
     const avail = QUESTS.filter(q => questState(q) === 'new').slice(0, 1);
     for (const q of act) {
       const st = P.quests[q.id]; ctx.font = 'bold 9px "Noto Sans", sans-serif'; text(q.title, 6, y, '#ffd23a'); y += 10;
@@ -241,7 +244,7 @@ const UI = (() => {
       text(prog.length > 44 ? prog.slice(0, 43) + '…' : prog, 8, y, st.ready ? '#9cf58a' : '#e8e0d0'); y += 12;
     }
     if (!act.length && avail.length) { ctx.font = '8.5px "Noto Sans", sans-serif'; text(`! ${trName(avail[0].giver)} sana görev verecek`, 6, y, '#ffd23a'); }
-    hud.push([0, 62, 180, Math.max(20, y - 60), () => open('quest')]);
+    hud.push([0, 76, 180, Math.max(20, y - 76), () => open('quest')]);
   }
   function hudHit(x, y) { if (mode !== 'play' || panelOpen()) return null; for (let i = hud.length - 1; i >= 0; i--) { const [a, b, w, h, f] = hud[i]; if (x >= a && x <= a + w && y >= b && y <= b + h) return f; } return null; }
 
@@ -263,6 +266,7 @@ const UI = (() => {
     if (kind === 'quest') { closeAll(); Win.open('task'); return; }
     if (kind === 'skill') { closeAll(); Win.open('skill'); return; }
     if (kind === 'menu') { closeAll(); Win.open('menu'); return; }
+    if (kind === 'sys' || kind === 'map' || kind === 'hub') { closeAll(); Win.open(kind); return; }
     if (kind !== cur) sel = null; if (kind !== 'bag' && kind !== 'shop') shopNpc = null;
     cur = kind; panel.classList.remove('hidden'); SFX.play('menu_appear', 0.5); render(); if (kind === 'bag') questFlag('openBag');
   }
@@ -312,7 +316,7 @@ const UI = (() => {
       title = 'Ayarlar';
       h = `<div class="iact"><button class="obtn" data-act="tsfx">Ses efektleri: ${SFX.opt.sfx ? 'Açık' : 'Kapalı'}</button><button class="obtn" data-act="tmus">Müzik: ${SFX.opt.music ? 'Açık' : 'Kapalı'}</button></div>
         <div class="iact"><button class="obtn" data-act="lang">${LANG === 'tr' ? 'Language: English' : 'Dil: Türkçe'}</button></div>
-        <div class="iact"><button class="obtn" data-act="totitle">Giriş ekranına dön</button><button class="obtn" data-act="newchar">Yeni karakter oluştur</button></div><p class="hint">Oyun otomatik kaydedilir. Sürüm 11132226</p>`;
+        <div class="iact"><button class="obtn" data-act="totitle">Giriş ekranına dön</button><button class="obtn" data-act="newchar">Yeni karakter oluştur</button></div><p class="hint">Oyun otomatik kaydedilir. Sürüm 11132230</p>`;
     }
     ptitle.textContent = tx(title); pbody.innerHTML = h; txDom(pbody);
   }
