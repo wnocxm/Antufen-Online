@@ -92,7 +92,7 @@ const Assets = (() => {
     constructor(name) {
       const r = D.reg[name]; this.ok = !!r; if (!r) return;
       this.r = r; this.A = ANI[r[0] + '_' + r[2]]; this.ok = !!this.A;
-      this.add = /火焰|火光|光柱|光芒|传送门/.test(name);   // ışık efektleri: alev, geçit
+      this.add = false;   // alev ve geçit görselleri kendi saydamlık kanalıyla gelir (çözücüde düzeltildi), özel karıştırma gerekmez
       loadImg(r[0] + '_' + r[1]).catch(() => { });
     }
     get anims() { return this.A ? this.A.a : []; }

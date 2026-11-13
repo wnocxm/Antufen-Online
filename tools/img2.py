@@ -27,12 +27,17 @@ def index_image(b):
             A[k]=0 if P[px[k]]==[255,0,255] else 255
     else:
         table,px=groups[0],groups[1]; p=0
+        # bazı görsellerde (alev, geçit, ışık efektleri) her piksel 2 bayttır: renk numarası + saydamlık
+        spans=[]; q0=0
         for y in range(h):
-            if p+2>len(table): break
-            n=struct.unpack_from('<H',table,p)[0]//8; p+=2
+            if q0+2>len(table): break
+            n=struct.unpack_from('<H',table,q0)[0]//8; q0+=2
             for s in range(n):
-                off,x0,x1=struct.unpack_from('<IHH',table,p); p+=8
-                x1=min(x1,w); q=y*w+x0
-                L[q:q+x1-x0]=px[off:off+x1-x0]; A[q:q+x1-x0]=b'\xff'*(x1-x0)
+                off,x0,x1=struct.unpack_from('<IHH',table,q0); q0+=8; spans.append((y,off,x0,x1))
+        two=len(spans)>1 and all(b[1]-a[1]==2*(a[3]-a[2]) for a,b in zip(spans,spans[1:])) and not all(b[1]-a[1]==(a[3]-a[2]) for a,b in zip(spans,spans[1:]))
+        for y,off,x0,x1 in spans:
+            x1=min(x1,w); q=y*w+x0; n=x1-x0
+            if two: seg=px[off:off+2*n]; L[q:q+n]=seg[0::2]; A[q:q+n]=seg[1::2]
+            else: L[q:q+n]=px[off:off+n]; A[q:q+n]=b'\xff'*n
     im=Image.merge('LA',(Image.frombytes('L',(w,h),bytes(L)),Image.frombytes('L',(w,h),bytes(A))))
     return im,P
