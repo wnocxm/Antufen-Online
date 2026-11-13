@@ -380,7 +380,7 @@ const UI = (() => {
     document.querySelectorAll('[data-race]').forEach(b => b.classList.toggle('on', b.dataset.race === cre.race));
     document.querySelectorAll('[data-sex]').forEach(b => b.classList.toggle('on', b.dataset.sex === cre.sex));
     const st = STARTER[cre.cls], gf = id => ITEMS[id] && ITEMS[id].gfx;
-    creDoll = new Assets.Paperdoll({ cls: cre.cls, race: cre.race, sex: cre.sex, weapG: gf(st.weap) });
+    creDoll = new Assets.Paperdoll({ cls: cre.cls, race: cre.race, sex: cre.sex, });
   }
   $('#create').addEventListener('click', e => {
     const b = e.target.closest('button'); if (!b) return;

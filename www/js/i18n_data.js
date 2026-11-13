@@ -66,11 +66,11 @@ const EN_ITEM = {
 const EN_SKILL = {
   w1: ['Basic Swordsmanship', 'Melee attack. Costs no mana.'], w2: ['Charged Slash', 'Strong melee attack with high critical chance.'], w3: ['Throwing Knife', 'Ranged area attack.'],
   w4: ['Double Strike', 'Two hits in a row.'], w5: ['Speed Burst', 'Run 25% faster for 5 seconds; critical chance rises.'], w6: ['Soul Breaker', 'Ranged dark attack.'],
-  wp1: ['Weapon Training', 'Attack +4.'], wp2: ['Sturdy', 'Max HP +8%.'], wp3: ['Agile', 'Dodge +5%.'], wp4: ['Defense Mastery', 'Defense and resistance +6.'], wp5: ['Fast Healing', 'HP regeneration increases.'], wp6: ['Toughness Aura', 'Damage taken −8%.'],
+  wp1: ['Weapon Training', 'Raises attack.'], wp2: ['Sturdy', 'Max HP +8%.'], wp3: ['Agile', 'Dodge +5%.'], wp4: ['Defense Mastery', 'Raises defense and resistance.'], wp5: ['Fast Healing', 'HP regeneration increases.'], wp6: ['Toughness Aura', 'Damage taken −8%.'],
   m1: ['Fireball', 'Ranged fire spell.'], m2: ['Freeze', 'Ice spell; slows the target.'], m3: ['Heal', 'Restores your HP.'], m4: ['Blazing Burn', 'Burns enemies close around you.'],
   m5: ['Magic Shield', 'Reduces damage taken for 10 seconds.'], m6: ['Blizzard', 'Ice area attack.'],
-  mp1: ['Magic Study', 'Magic attack +4.'], mp2: ['Mana Boost', 'Max mana +10%.'], mp3: ['Mana Control', 'Accuracy and critical +5%.'], mp4: ['Natural Resistance', 'All resistances +10.'], mp5: ['Mana Regeneration', 'Mana regeneration increases.'], mp6: ['Mana Aura', 'Max mana +10% more.'],
+  mp1: ['Magic Study', 'Raises magic attack.'], mp2: ['Mana Boost', 'Max mana +10%.'], mp3: ['Mana Control', 'Accuracy and critical +5%.'], mp4: ['Natural Resistance', 'Raises all resistances.'], mp5: ['Mana Regeneration', 'Mana regeneration increases.'], mp6: ['Mana Aura', 'Max mana +10% more.'],
   p1: ['Shadow Strike', 'Ranged shadow attack.'], p2: ['Corrosion', 'Curses the target: damage every 2 seconds.'], p3: ['Divine Deterrence', 'Lowers the defense of nearby enemies.'], p4: ['Healing Spring', 'Restores HP over 8 seconds.'],
   p5: ['Shadow Burn', 'Burns with dark fire.'], p6: ['Holy Light', 'Restores your HP.'], p7: ['Divine Wrath', 'Raises your attack and defense for 20 seconds.'],
-  pp1: ['Devout Will', 'Magic attack +4.'], pp2: ['Bully', 'Critical chance +5%.'], pp3: ['Flesh Drain', 'Corrosion grows stronger (attack +3).'], pp4: ['Divine Light Casting', 'HP and mana regeneration increase.'], pp5: ['Divine Punishment', 'Critical chance +6%.'],
+  pp1: ['Devout Will', 'Raises magic attack.'], pp2: ['Bully', 'Critical chance +5%.'], pp3: ['Flesh Drain', 'Corrosion grows stronger.'], pp4: ['Divine Light Casting', 'HP and mana regeneration increase.'], pp5: ['Divine Punishment', 'Critical chance +6%.'],
 };
