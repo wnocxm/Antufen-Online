@@ -92,7 +92,7 @@ const Assets = (() => {
     constructor(name) {
       const r = D.reg[name]; this.ok = !!r; if (!r) return;
       this.r = r; this.A = ANI[r[0] + '_' + r[2]]; this.ok = !!this.A;
-      this.add = /火焰|火光|光柱|光芒/.test(name);
+      this.add = /火焰|火光|光柱|光芒|传送门/.test(name);   // ışık efektleri: alev, geçit
       loadImg(r[0] + '_' + r[1]).catch(() => { });
     }
     get anims() { return this.A ? this.A.a : []; }
@@ -134,7 +134,7 @@ const Assets = (() => {
         L[0] = pick('body', look.bodyG || look.body); L[1] = pick('head', look.headG || look.head); L[2] = pick('weap', look.weapG || look.weap);
         const o1 = D.reg[`group1_orn1${'_' + act}_${look.sex}_${look.race}_${look.cls}`];
         const o2 = D.reg[`group1_${look.orn2 || '白'}_orn2_${act}_${look.sex}_${look.race}_${look.cls}`] || Object.keys(D.reg).filter(k => k.startsWith('group1_') && k.includes('_orn2_' + act + '_' + look.sex + '_' + look.race + '_' + look.cls)).map(k => D.reg[k])[0];
-        L[3] = look.race === '精灵' ? o1 : null; L[4] = look.aura ? (o2 || null) : null;
+        L[3] = look.wings ? o1 : null;   // kanat süsü yalnızca özel ekipmanla (başlangıçta yok) L[4] = look.aura ? (o2 || null) : null;
         L.forEach(r => r && loadImg(r[0] + '_' + r[1]).catch(() => { }));
         this.layers[act] = { A, L };
       }

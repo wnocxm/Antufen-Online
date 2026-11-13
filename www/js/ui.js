@@ -307,7 +307,7 @@ const UI = (() => {
       title = 'Ayarlar';
       h = `<div class="iact"><button class="obtn" data-act="tsfx">Ses efektleri: ${SFX.opt.sfx ? 'Açık' : 'Kapalı'}</button><button class="obtn" data-act="tmus">Müzik: ${SFX.opt.music ? 'Açık' : 'Kapalı'}</button></div>
         <div class="iact"><button class="obtn" data-act="lang">${LANG === 'tr' ? 'Language: English' : 'Dil: Türkçe'}</button></div>
-        <div class="iact"><button class="obtn" data-act="totitle">Giriş ekranına dön</button><button class="obtn" data-act="newchar">Yeni karakter oluştur</button></div><p class="hint">Oyun otomatik kaydedilir. Sürüm 11131236</p>`;
+        <div class="iact"><button class="obtn" data-act="totitle">Giriş ekranına dön</button><button class="obtn" data-act="newchar">Yeni karakter oluştur</button></div><p class="hint">Oyun otomatik kaydedilir. Sürüm 11131245</p>`;
     }
     ptitle.textContent = tx(title); pbody.innerHTML = h; txDom(pbody);
   }
@@ -380,7 +380,7 @@ const UI = (() => {
     document.querySelectorAll('[data-race]').forEach(b => b.classList.toggle('on', b.dataset.race === cre.race));
     document.querySelectorAll('[data-sex]').forEach(b => b.classList.toggle('on', b.dataset.sex === cre.sex));
     const st = STARTER[cre.cls], gf = id => ITEMS[id] && ITEMS[id].gfx;
-    creDoll = new Assets.Paperdoll({ cls: cre.cls, race: cre.race, sex: cre.sex, bodyG: gf(st.body), headG: gf(NEWBIE[cre.cls][0]), weapG: gf(st.weap) });
+    creDoll = new Assets.Paperdoll({ cls: cre.cls, race: cre.race, sex: cre.sex, weapG: gf(st.weap) });
   }
   $('#create').addEventListener('click', e => {
     const b = e.target.closest('button'); if (!b) return;

@@ -151,7 +151,8 @@ function newSave(name, cls, race, sex) {
     scene: race === '精灵' ? '120205' : '120207', x: 11, y: 15, quick: QUICK0.slice(), sv: 2, sk: { [CLS[cls].skills[0].id]: 1 }, sp: 1, flags: {} };
 }
 // ---------------- Ekipman (orijinal eşya tablolarından) ----------------
-const STARTER = { '战士': { weap: '10003', body: '10004' }, '法师': { weap: '10006', body: '10007' }, '牧师': { weap: '10882', body: '10883' } };
+const STARTER = { '战士': { weap: '10003' }, '法师': { weap: '10006' }, '牧师': { weap: '10882' } };
+const STARTER_BODY = { '战士': '10004', '法师': '10007', '牧师': '10883' };
 const NEWBIE = { '战士': ['10002', '10439'], '法师': ['10005', '10058'], '牧师': ['10881', '10884'] };
 const SLOTS = [['weap', 'Silah'], ['head', 'Başlık'], ['body', 'Zırh'], ['belt', 'Kemer'], ['shoe', 'Ayakkabı'], ['glove', 'Eldiven'], ['neck', 'Kolye'], ['ring', 'Yüzük']];
 const STATN = { atk: 'Saldırı', def: 'Savunma', hp: 'Can', mp: 'Mana', crit: 'Kritik %', dodge: 'Kaçınma %', hpreg: 'Can yenileme', mpreg: 'Mana yenileme', res: 'Büyü direnci' };
@@ -432,6 +433,7 @@ function useItem(id) {
     const P = Game.P; removeItem(id);
     for (const g of NEWBIE[P.cls]) { const sl = ITEMS[g].slot; if (!P.eq[sl]) P.eq[sl] = g; else addItem(g, 1, true); }
     for (const [sl, g] of Object.entries(STARTER[P.cls])) if (!P.eq[sl]) P.eq[sl] = g;
+    if (!P.eq.body) P.eq.body = STARTER_BODY[P.cls]; else addItem(STARTER_BODY[P.cls], 1, true);
     addItem('hp1', 10, true); addItem('mp1', 10, true);
     UI.toast('Gelişim Paketi açıldı! Yeni ekipmanını kuşandın.'); refreshLook();
   }

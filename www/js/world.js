@@ -54,7 +54,7 @@ class GameMap {
       if (!o) continue;
       const nm = this.names[o - 1]; if (!nm || nm.startsWith('GROUND')) continue;
       const sp = this.sprite(nm); if (!sp.ok) continue;
-      this.objs.push({ kind: 'obj', x, y, sp, anim: this.a[i], depth: x + y, X: this.px(x, y), Y: this.py(x, y), flat: /魔法阵|传送门|阵|地标|箭头|地毯/.test(nm) });
+      this.objs.push({ kind: 'obj', x, y, sp, anim: this.a[i], depth: x + y, X: this.px(x, y), Y: this.py(x, y), flat: /魔法阵|地标|箭头|地毯/.test(nm) || (/阵/.test(nm) && !/传送门/.test(nm)) });
     }
   }
   regionsOf(type) { return this.regions.filter(r => r[1] === type); }
