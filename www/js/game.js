@@ -148,7 +148,8 @@ const Game = {
 function newSave(name, cls, race, sex) {
   return { v: 1, name, cls, race, sex, lv: 1, xp: 0, gold: 30, hp: 1e9, mp: 1e9,
     gear: { weap: 0, body: 0, head: 0 }, eq: Object.assign({}, STARTER[cls]), bag: [{ id: 'hp1', n: 5 }, { id: 'mp1', n: 3 }], quests: {}, done: {}, qitems: {},
-    scene: race === '精灵' ? '120205' : '120207', x: 11, y: 15, quick: QUICK0.slice(), sv: 2, sk: { [CLS[cls].skills[0].id]: 1 }, sp: 1, flags: {} };
+    scene: race === '精灵' ? '120205' : '120207', x: 3, y: 13,   // haritanın kendi varış noktası (Rehber'in yanı)
+    quick: QUICK0.slice(), sv: 2, sk: { [CLS[cls].skills[0].id]: 1 }, sp: 1, flags: {} };
 }
 // ---------------- Ekipman (orijinal eşya tablolarından) ----------------
 const STARTER = { '战士': { weap: '10003' }, '法师': { weap: '10006' }, '牧师': { weap: '10882' } };
@@ -220,10 +221,10 @@ class Player extends Ent {
   draw(ctx, X, Y) {
     const act = this.state === 'attack' || this.state === 'cast' || this.combatT > 0 ? 'figh' : 'comm';
     let anim, t = this.t;
-    if (this.dead) { anim = 16 + this.dir; return this.doll.draw(ctx, 'town', anim, 0, X, Y, 0.85); }
+    if (this.dead) { anim = 16 + this.dir; return this.doll.draw(ctx, 'figh', anim, Math.min((this.deadT || 0) * TICK * 0.7, this.doll.animLen('figh', anim) - 1), X, Y); }   // figh 16-19: yere düşme, son karede kalır
     if (this.state === 'move') return this.doll.draw(ctx, 'comm', 4 + this.dir, t, X, Y);   // savaşta da normal koşu (figh 12-15 saldırı kareleri)
-    else if (this.state === 'attack') { anim = 4 + this.dir; t = this.animT; }
-    else if (this.state === 'cast') { anim = 8 + this.dir; t = this.animT; }
+    else if (this.state === 'attack') { anim = 4 + this.dir; t = Math.min(this.animT, this.doll.animLen('figh', anim) - 1); }   // tek savuruş: baştan başlamaz, son karede bekler
+    else if (this.state === 'cast') { anim = 8 + this.dir; t = Math.min(this.animT, this.doll.animLen('figh', anim) - 1); }
     else anim = act === 'figh' ? this.dir : this.dir;
     this.doll.draw(ctx, act, anim, t, X, Y);
   }
@@ -237,11 +238,13 @@ class Mob extends Ent {
   }
   draw(ctx, X, Y) {
     if (!this.sp) return;
-    const actIdx = this.dead ? 4 : this.state === 'attack' ? 2 : this.state === 'hurt' ? 3 : this.state === 'move' ? 1 : 0;
+    if (this.dead && this.deadT > 0.2) return;                                   // ölüm efekti (kan patlaması) oynarken gövde kaybolur
+    const actIdx = this.state === 'attack' ? 2 : this.state === 'move' ? 1 : 0;
     let anim = actIdx * 4 + this.dir;
     if (!this.sp.anims[anim] || !this.sp.anims[anim].length) anim = this.dir;
-    const t = this.dead ? Math.min(this.deadT * 8, this.sp.animLen(anim) - 1) : (this.state === 'attack' || this.state === 'hurt') ? this.animT : this.t;
-    this.sp.draw(ctx, anim, t, X, Y, false, this.dead ? Math.max(0, 1 - (this.deadT - 1.5)) : 1);
+    const t = this.state === 'attack' ? Math.min(this.animT, this.sp.animLen(anim) - 1) : this.t;
+    const hit = this.state === 'hurt' && !this.dead;                              // vurulunca kısa bir an parlar
+    this.sp.draw(ctx, anim, t, X + (hit ? Math.sin(this.animT * 3) * 1.5 : 0), Y, false, this.dead ? Math.max(0, 1 - this.deadT * 5) : 1);
   }
 }
 class Npc extends Ent {
@@ -279,7 +282,9 @@ async function loadScene(sid, arrive) {
     if (D.cit[id]) { const n = new Npc(id, D.cit[id], x, y); Game.ents.push(n); if (!n.pickup) map.extraBlock[map.idx(x, y)] = 1; }
     else if (D.mon[id]) {
       const d = MON[nm] || {};
-      if (d.dummy) { const n = new Npc(id, [nm, D.mon[id][1]], x, y); n.dummy = true; Game.ents.push(n); continue; }
+      // tek kareli "canavarlar" aslında maden kayası, kalıntı gibi sabit toplama noktalarıdır: saldırılmaz
+      const msp = map.sprite(D.mon[id][1]), still = msp.ok && msp.anims.slice(0, 12).every(a => a.length <= 1);
+      if (d.dummy || still) { const n = new Npc(id, [nm, D.mon[id][1]], x, y); n.dummy = true; n.node = still; Game.ents.push(n); if (still && !d.dummy) map.extraBlock[map.idx(x, y)] = 1; continue; }
       const cnt = d.n || 5, wide = d.wide || 5;
       for (let i = 0; i < cnt; i++) {
         let px = x, py = y;
@@ -360,7 +365,7 @@ function hurtPlayer(m) {
   const s = stats(); if (Math.random() < s.dodge / 100) { UI.float(p, 'Iska', '#cfcfcf'); return; }
   const r = dmgCalc(m.d.atk, s.def, 1); r.d = Math.max(1, Math.round(r.d * (1 - Math.min(60, s.dr) / 100)));
   p.hp -= r.d; p.combatT = 5; UI.float(p, '-' + r.d, '#ff5040'); UI.hurt();
-  if (p.hp <= 0) { p.hp = 0; p.dead = true; p.state = 'dead'; UI.death(); setTarget(null); }
+  if (p.hp <= 0) { p.hp = 0; p.dead = true; p.deadT = 0; p.state = 'dead'; SFX.play('kill', 0.5); UI.death(); setTarget(null); }
 }
 function gainXp(n) {
   const P = Game.P; P.xp += n;
@@ -516,6 +521,7 @@ function update(dt) {
   for (const k in p.cds) p.cds[k] = Math.max(0, p.cds[k] - dt);
   p.buffs.forEach(b => b.t -= dt); p.buffs = p.buffs.filter(b => b.t > 0);
   if (p.stateT > 0) { p.stateT -= dt; if (p.stateT <= 0) p.state = 'idle'; }
+  if (p.dead) p.deadT = (p.deadT || 0) + dt;
   if (!p.dead) {
     const regen = Game.scene.name === '观林镇' ? 0.03 : p.combatT > 0 ? 0.003 : 0.012;
     p.hp = Math.min(s.hp, p.hp + (s.hp * regen + s.hpreg * 0.02) * dt); p.mp = Math.min(s.mp, p.mp + (s.mp * regen * 1.3 + s.mpreg * 0.02) * dt);
@@ -592,6 +598,7 @@ function interact(e) {
   const p = Game.player;
   if (e.kind === 'npc') {
     p.dir = dirOf(e.x - p.x, e.y - p.y);
+    if (e.node) { UI.say(e, 'Bu bir toplama noktası. Madencilik ve toplama meslekleri yakında eklenecek.'); return; }
     if (e.dummy) { UI.say(e, trName(e.cn) + ': eğitim alanı sergisi.'); return; }
     if (e.pickup) { pickupNode(e); return; }
     // konuşma görevlerini tamamla
