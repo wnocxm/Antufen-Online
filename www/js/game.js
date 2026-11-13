@@ -23,9 +23,15 @@ function dirOf(dx, dy) {
   if (ax > ay) return dx > 0 ? 1 : 3;
   return dy > 0 ? 2 : 0;
 }
-// 8 yön: ekranda sağ, sağ-aşağı, aşağı, sol-aşağı, sol, sol-yukarı, yukarı, sağ-yukarı (kare vektörleri)
-const DIR8 = [[1, -1], [1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1], [0, -1]];
-function snapScreen8(sx, sy) { const i = ((Math.round(Math.atan2(sy, sx) / (Math.PI / 4)) % 8) + 8) % 8; return DIR8[i]; }
+// Orijinaldeki gibi yalnızca 4 yön: sağ-aşağı (+x), sol-aşağı (+y), sol-yukarı (-x), sağ-yukarı (-y)
+const DIR4 = [[1, 0], [0, 1], [-1, 0], [0, -1]];
+let lastJoyDir = -1;
+function snapScreen4(sx, sy) {
+  // yönlerin ekrandaki açıları: 27.6°, 152.4°, 207.6°, 332.4° (karo kenarları); en yakınını seç, sınırda titremesin diye son yöne küçük öncelik ver
+  const ang = Math.atan2(sy, sx); let best = 0, bd = 9;
+  for (let i = 0; i < 4; i++) { const a = Math.atan2(DIR4[i][0] * HH + DIR4[i][1] * HH, DIR4[i][0] * HW - DIR4[i][1] * HW); let d = Math.abs(Math.atan2(Math.sin(ang - a), Math.cos(ang - a))); if (i === lastJoyDir) d -= 0.25; if (d < bd) { bd = d; best = i; } }
+  lastJoyDir = best; return DIR4[best];
+}
 // ekran vektöründen (sx, sy) kare vektörüne
 function screenToCellVec(sx, sy) { const a = sx / HW, b = sy / HH; return { x: (a + b) / 2, y: (b - a) / 2 }; }
 
@@ -34,6 +40,8 @@ const MON = {
   '鸭子': { lv: 1, hp: 30, atk: 3, xp: 8, passive: true, n: 6 },
   '鸡': { lv: 2, hp: 40, atk: 4, xp: 10, passive: true, n: 8 },
   '神殿骑士': { dummy: true }, '魔法骷髅': { dummy: true }, '恶魔傀儡': { dummy: true },
+  '蠕虫': { lv: 1, hp: 30, atk: 3, xp: 8, passive: true, n: 6 }, '食腐豺': { lv: 2, hp: 45, atk: 5, xp: 11, passive: true, n: 8, wide: 7 },
+  '掠食秃鹫': { lv: 4, hp: 95, atk: 10, xp: 26, n: 8, wide: 8 }, '☆带刺野猪': { lv: 6, hp: 700, atk: 20, xp: 220, rank: 1, n: 2 }, '工会剑士': { dummy: true },
   '毒蛇帮路匪': { lv: 5, hp: 120, atk: 12, xp: 30, n: 6 },
   '野猪': { lv: 3, hp: 80, atk: 8, xp: 20, n: 10, wide: 9 },
   '☆【帝国叛徒】迪萨安': { lv: 7, hp: 900, atk: 24, xp: 300, rank: 1, n: 1 },
@@ -140,7 +148,7 @@ const Game = {
 function newSave(name, cls, race, sex) {
   return { v: 1, name, cls, race, sex, lv: 1, xp: 0, gold: 30, hp: 1e9, mp: 1e9,
     gear: { weap: 0, body: 0, head: 0 }, eq: Object.assign({}, STARTER[cls]), bag: [{ id: 'hp1', n: 5 }, { id: 'mp1', n: 3 }], quests: {}, done: {}, qitems: {},
-    scene: '120207', x: 11, y: 15, quick: QUICK0.slice(), sv: 2, sk: { [CLS[cls].skills[0].id]: 1 }, sp: 1, flags: {} };
+    scene: race === '精灵' ? '120205' : '120207', x: 11, y: 15, quick: QUICK0.slice(), sv: 2, sk: { [CLS[cls].skills[0].id]: 1 }, sp: 1, flags: {} };
 }
 // ---------------- Ekipman (orijinal eşya tablolarından) ----------------
 const STARTER = { '战士': { weap: '10003', body: '10004' }, '法师': { weap: '10006', body: '10007' }, '牧师': { weap: '10882', body: '10883' } };
@@ -153,6 +161,8 @@ async function loadItems() {
   for (const [id, it] of Object.entries(D.items)) { it.ik = it.icon[0]; it.icon = it.icon[1]; if (it.slot) it.desc = it.desc || ''; if (LANG === 'en') { it.name = EN_ITEM[it.name] || it.name; it.desc = tx(it.desc); } ITEMS[id] = it; }
   if (LANG === 'en') { for (const k of ['hp1', 'hp2', 'mp1', 'mp2', 'growthBox', 'quest']) { ITEMS[k].name = tx(ITEMS[k].name); ITEMS[k].desc = tx(ITEMS[k].desc); } SLOTS.forEach(s => s[1] = tx(s[1])); for (const k in STATN) STATN[k] = tx(STATN[k]); for (const t of Object.values(D.shops)) t.forEach(x => x[0] = tx(x[0])); }
   SHOPS = D.shops;
+  // gece elfi tüccarları aynı mal listelerini satar (orijinalde dükkân listeleri eş)
+  for (const [h, e] of [['道具商人（人类）', '道具商人（夜精灵）'], ['武器商人（人类）', '武器商人（夜精灵）'], ['防具商人（人类）', '防具商人（夜精灵）'], ['饰品商人（人类）', '饰品商人（夜精灵）']]) SHOPS[e] = SHOPS[h];
 }
 function iconSrc(it) { return `${Assets.base}ui/icon_res_${it.ik || 'item'}_${it.icon}.png`; }
 function canEquip(it) { const P = Game.P; if (it.cls && it.cls !== P.cls) return `Bu eşya ${TR.cls[it.cls]} içindir.`; if (P.lv < it.lv) return `${it.lv}. seviye gerekir.`; return null; }
@@ -430,7 +440,12 @@ function refreshLook() { Game.player.doll.set(look()); Assets.preload([]); UI.re
 
 // ---------------- Görevler ----------------
 const QBY = Object.fromEntries(QUESTS.map(q => [q.id, q]));
-function questState(q) { const P = Game.P; if (P.done[q.id]) return 'done'; if (P.quests[q.id]) return P.quests[q.id].ready ? 'ready' : 'active'; if (q.req && !P.done[q.req]) return 'locked'; return 'new'; }
+// q.race: yalnızca o ırk; q.req: tek kimlik ya da "herhangi biri" listesi
+function questState(q) { const P = Game.P; if (P.done[q.id]) return 'done'; if (P.quests[q.id]) return P.quests[q.id].ready ? 'ready' : 'active'; if (q.race && q.race !== P.race) return 'locked';
+  if (q.req && !(Array.isArray(q.req) ? q.req.some(r => P.done[r]) : P.done[q.req])) return 'locked'; return 'new'; }
+// ışınlanma görevi: q.tp = [sahne, x, y]; gidilen yer "ev" olur (ölünce orada doğulur)
+function questTeleport(q) { const P = Game.P; P.home = q.tp.slice(); save(); gotoScene(q.tp[0], null, q.tp[1] != null ? [q.tp[1], q.tp[2]] : null); }
+const tpQuestOf = cn => QUESTS.find(q => q.tp && q.giver === cn && (Game.P.quests[q.id] || Game.P.done[q.id]));
 function questsFor(cn) { return QUESTS.filter(q => (q.giver === cn && questState(q) === 'new') || (q.to === cn && questState(q) === 'ready') || ((q.to === cn || q.giver === cn) && questState(q) === 'active')); }
 function npcMark(cn) {
   if (QUESTS.some(q => q.to === cn && questState(q) === 'ready')) return '?';
@@ -478,21 +493,17 @@ function moveEnt(e, dx, dy) {
   if (!m.blocked(e.x + dx, e.y)) e.x += dx; else if (!m.blocked(e.x + dx, Math.round(e.y))) e.x += dx;
   if (!m.blocked(e.x, e.y + dy)) e.y += dy;
 }
-// Hedefe yalnızca 8 yönde (karo komşuları doğrultusunda) ilerle.
-// smooth: yol izlerken yön ancak ~0.12 sn aynı kalırsa değişir (zikzaklarda karakter titremesin)
-function stepTo(e, tx, ty, sp, dt, smooth) {
-  const dx = tx - e.x, dy = ty - e.y;
-  if (Math.hypot(dx, dy) < 0.06) return true;
-  const eps = 0.04, sx = Math.abs(dx) > eps ? Math.sign(dx) : 0, sy = Math.abs(dy) > eps ? Math.sign(dy) : 0;
-  if (!sx && !sy) { if (!Game.map.blocked(tx, ty)) { e.x = tx; e.y = ty; } return true; }
-  const l = Math.hypot(sx, sy), st = sp * dt;
-  let mx = sx / l * st, my = sy / l * st;
-  if (Math.abs(mx) > Math.abs(dx)) mx = dx; if (Math.abs(my) > Math.abs(dy)) my = dy;
-  moveEnt(e, mx, my);
-  const nd = dirOf(sx, sy);
-  if (!smooth || nd === e.dir) { e.dir = nd; e.dirT = 0; }
-  else if ((e.dirT = (e.dirT || 0) + dt) > 0.12) { e.dir = nd; e.dirT = 0; }
-  return Math.hypot(tx - e.x, ty - e.y) < 0.06;
+// Hedefe yalnızca 4 yönde ilerle: önce bir eksen, sonra diğeri (L biçiminde)
+function stepTo(e, tx, ty, sp, dt) {
+  const dx = tx - e.x, dy = ty - e.y, eps = 0.04;
+  if (Math.abs(dx) <= eps && Math.abs(dy) <= eps) { if (!Game.map.blocked(tx, ty)) { e.x = tx; e.y = ty; } return true; }
+  // eldeki eksende kalan yol bitene kadar o eksende kal; yoksa uzun olanı seç
+  if (e.ax === 'x' && Math.abs(dx) <= eps) e.ax = null; if (e.ax === 'y' && Math.abs(dy) <= eps) e.ax = null;
+  if (!e.ax) e.ax = Math.abs(dx) >= Math.abs(dy) ? 'x' : 'y';
+  const st = sp * dt, ox = e.x, oy = e.y;
+  if (e.ax === 'x') { moveEnt(e, Math.sign(dx) * Math.min(st, Math.abs(dx)), 0); e.dir = dirOf(dx, 0); if (Math.abs(e.x - ox) < 1e-4) e.ax = Math.abs(dy) > eps ? 'y' : null; }
+  else { moveEnt(e, 0, Math.sign(dy) * Math.min(st, Math.abs(dy))); e.dir = dirOf(0, dy); if (Math.abs(e.y - oy) < 1e-4) e.ax = Math.abs(dx) > eps ? 'x' : null; }
+  return Math.abs(tx - e.x) <= eps && Math.abs(ty - e.y) <= eps;
 }
 function update(dt) {
   Game.time += dt; if (Game.arriveT > 0) Game.arriveT -= dt; if (Game.warnT > 0) Game.warnT -= dt;
@@ -511,9 +522,9 @@ function update(dt) {
     let moving = false;
     if (J) {
       p.path = null; p.pending = null; Game.goTarget = null;
-      const [cx, cy] = snapScreen8(J.x, J.y), l = Math.hypot(cx, cy), sp = RUN * (1 + s.spd) * dt;
+      const [cx, cy] = snapScreen4(J.x, J.y), l = 1, sp = RUN * (1 + s.spd) * dt;
       moveEnt(p, cx / l * sp, cy / l * sp); p.dir = dirOf(cx, cy); moving = true;
-    } else if (p.state !== 'attack' && p.state !== 'cast') {
+    } else if ((lastJoyDir = -1, p.state !== 'attack' && p.state !== 'cast')) {
       const t = Game.target;
       if (p.pending != null && t && !t.dead) {
         const sk = CLS[P.cls].skills[p.pending];
@@ -604,4 +615,4 @@ function tapWorld(sx, sy) {
   const path = findPath(Game.map, p.x, p.y, c.x, c.y);
   if (path) { p.path = path; setTarget(null); Game.goTarget = null; Game.fx.push(Object.assign(new Fx('路标-左上', Math.round(c.x), Math.round(c.y)), { len: 6 })); }
 }
-function revive() { const p = Game.player, s = stats(); p.dead = false; p.state = 'idle'; p.hp = Math.round(s.hp * 0.5); p.mp = Math.round(s.mp * 0.5); const town = Game.P.done[80003] || Game.P.quests[80003]; if (town) gotoScene('120005', null, [33, 20]); else { const r = Game.map.regionsOf(0)[0]; if (r) { p.x = r[2]; p.y = r[3]; } } }
+function revive() { const p = Game.player, s = stats(); p.dead = false; p.state = 'idle'; p.hp = Math.round(s.hp * 0.5); p.mp = Math.round(s.mp * 0.5); const P0 = Game.P; if (!P0.home && (P0.done[80003] || P0.quests[80003])) P0.home = ['120005', 33, 20]; const town = P0.home; if (town) gotoScene(town[0], null, town[1] != null ? [town[1], town[2]] : null); else { const r = Game.map.regionsOf(0)[0]; if (r) { p.x = r[2]; p.y = r[3]; } } }

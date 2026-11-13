@@ -189,7 +189,7 @@ const Win = (() => {
     } else {
       if (SHOPS[n.cn]) o.push({ t: 'Alışveriş', a: 'shop', c: '#ffe070' });
       for (const q of questsFor(n.cn)) { const st = questState(q); o.push({ t: (st === 'ready' ? '? ' : st === 'new' ? '! ' : '… ') + q.title, a: 'q', q, c: st === 'active' ? '#c8c0b0' : '#ffe070' }); }
-      if (n.cn === '观林镇传送员' && (P.quests[80003] || P.done[80003])) o.push({ t: "✦ Guanlin Kasabası'na ışınlan", a: 'tp' });
+      const tq = tpQuestOf(n.cn); if (tq) o.push({ t: '✦ Işınlan: ' + trName(Assets.D.scenes[tq.tp[0]].name), a: 'tp', q: tq });
       o.push({ t: 'Hoşça kal', a: 'bye' });
     }
     return { txt, o: o.slice(0, 6) };
@@ -216,8 +216,8 @@ const Win = (() => {
     if (e.a === 'q') { D.q = e.q; return; }
     if (e.a === 'back') { D.q = null; return; }
     if (e.a === 'shop') { UI.openShop(n.cn); return; }
-    if (e.a === 'tp') { UI.closeAll(); setTimeout(() => gotoScene('120005', null, [33, 20]), 300); return; }
-    if (e.a === 'accept') { const q = D.q; acceptQuest(q); D.q = null; if (q.teleport) { UI.closeAll(); setTimeout(() => gotoScene('120005', null, [33, 20]), 400); return; } if (q.type === 'talk' && q.to === n.cn) Game.P.quests[q.id].ready = true; return; }
+    if (e.a === 'tp') { UI.closeAll(); setTimeout(() => questTeleport(e.q), 300); return; }
+    if (e.a === 'accept') { const q = D.q; acceptQuest(q); D.q = null; if (q.tp) { UI.closeAll(); setTimeout(() => questTeleport(q), 400); return; } if (q.type === 'talk' && q.to === n.cn) Game.P.quests[q.id].ready = true; return; }
     if (e.a === 'complete') { const q = D.q; completeQuest(q); D.q = null; return; }
   }
   // ---------------- Görev listesi (FORM_TASK) ----------------

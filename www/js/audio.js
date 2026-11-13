@@ -84,10 +84,12 @@ const SFX = (() => {
     g.gain.exponentialRampToValueAtTime(0.001, at + n.d + rel); o.start(at); o.stop(at + n.d + rel + 0.05);
   }
   const songs = new Map();
+  // dosyada bulunan orijinal müzikler; sahne başka bir parça isterse kır müziği çalar
+  const HAVE = ['akadiya_music.mid', 'alica_music.mid', 'cover.mid', 'grassland.mid', 'sliva_music.mid', 'sunnyforrest_music.mid'];
   const Music = {
     cur: null, pending: null, song: null, t0: 0, idx: 0, timer: null,
     async play(name) {
-      if (!name) return; this.pending = name;
+      if (!name) return; if (!HAVE.includes(name)) name = 'grassland.mid'; this.pending = name;
       if (!ac || !opt.music) return;
       if (this.cur === name && this.timer) return;
       this.stop(true); this.cur = name;

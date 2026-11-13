@@ -60,7 +60,7 @@ class GameMap {
   regionsOf(type) { return this.regions.filter(r => r[1] === type); }
 }
 
-// A* yol bulma (8 yön, köşe kesmeden)
+// A* yol bulma (4 yön)
 function findPath(map, sx, sy, tx, ty, maxIter = 5000) {
   sx = Math.round(sx); sy = Math.round(sy); tx = Math.round(tx); ty = Math.round(ty);
   if (!map.inside(tx, ty)) return null;
@@ -77,7 +77,7 @@ function findPath(map, sx, sy, tx, ty, maxIter = 5000) {
     let bi = 0; for (let i = 1; i < open.length; i++) if (open[i][3] < open[bi][3]) bi = i;
     const [x, y] = open.splice(bi, 1)[0];
     if (x === tx && y === ty) { const out = []; let k = key(x, y); while (k !== undefined && k !== key(sx, sy)) { out.push([k % W, Math.floor(k / W)]); k = came.get(k); } return out.reverse(); }
-    for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]]) {
+    for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {   // orijinaldeki gibi yalnızca 4 yön
       const nx = x + dx, ny = y + dy; if (!map.inside(nx, ny) || map.blocked(nx, ny)) continue;
       if (dx && dy && (map.blocked(x + dx, y) || map.blocked(x, y + dy))) continue;
       const ng = g.get(key(x, y)) + (dx && dy ? 1.414 : 1), k = key(nx, ny);

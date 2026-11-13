@@ -55,7 +55,7 @@ const EN_UI = {
   // eski eşyalar ve görev eşyaları
   'Zayıf Can İksiri': 'Weak Health Potion', 'Can İksiri': 'Health Potion', 'Zayıf Mana İksiri': 'Weak Mana Potion', 'Mana İksiri': 'Mana Potion', 'Gelişim Paketi': 'Growth Pack', 'Görev Eşyası': 'Quest Item',
   'Aç: seviyene uygun ekipman ve iksir çıkar.': 'Open: gives gear and potions for your level.', 'Görev için gerekli.': 'Needed for a quest.',
-  'Tavuk Kanı': 'Chicken Blood', 'Domuz Bacak Kemiği': 'Boar Leg Bone', 'Enfiye Kutusu': 'Snuff Box', 'Orman Kurdu Eti': 'Forest Wolf Meat', 'Yabani Sebze': 'Wild Greens', 'Peri Tozu': 'Fairy Dust',
+  'Çakal Eti': 'Jackal Meat', 'Tavuk Kanı': 'Chicken Blood', 'Domuz Bacak Kemiği': 'Boar Leg Bone', 'Enfiye Kutusu': 'Snuff Box', 'Orman Kurdu Eti': 'Forest Wolf Meat', 'Yabani Sebze': 'Wild Greens', 'Peri Tozu': 'Fairy Dust',
 };
 // değişken içeren metinler
 const EN_RULES = [
@@ -68,7 +68,7 @@ const EN_RULES = [
   [/^(.*) (\d+)\. seviyede açılır\.?$/, '$1 unlocks at level $2.'], [/^(\d+)\. seviyede açılır$/, 'Unlocks at level $1'], [/^(\d+)\. seviye gerekir\.$/, 'Requires level $1.'],
   [/^Bu eşya (.*) içindir\.$/, 'This item is for $1.'], [/^Gereken seviye: (\d+)$/, 'Required level: $1'], [/^Seviye (\d+)$/, 'Level $1'], [/^Sv (\d+)$/, 'Lv $1'], [/^(.*)  Sv ?(\d+)$/, '$1  Lv $2'], [/^(.*) Sv(\d+)$/, '$1 Lv$2'], [/^Sv(\d+)$/, 'Lv$1'],
   [/^Satış: (\d+) altın$/, 'Sell: $1 gold'], [/^Sat \(\+(\d+)\)$/, 'Sell (+$1)'], [/^Satın al \((\d+)\)$/, 'Buy ($1)'], [/^10 tane \((\d+)\)$/, '10 pcs ($1)'],
-  [/^Ganimet: (.*?)!?$/, 'Loot: $1'], [/^(.*) (\d+)\/(\d+)$/, (m, a, b, c) => `${tx(a)} ${b}/${c}`], [/^(.*) ×(\d+)$/, (m, a, b) => `${tx(a)} ×${b}`], [/^Yeni beceri: (.*)$/, 'New skill: $1'], [/^Şu an: (.*)$/, 'Now in: $1'], [/^Tamamlanan görev: (\d+)$/, 'Quests completed: $1'],
+  [/^Ganimet: (.*?)!?$/, 'Loot: $1'], [/^✦ Işınlan: (.*)$/, '✦ Teleport: $1'], [/^(.*) (\d+)\/(\d+)$/, (m, a, b, c) => `${tx(a)} ${b}/${c}`], [/^(.*) ×(\d+)$/, (m, a, b) => `${tx(a)} ×${b}`], [/^Yeni beceri: (.*)$/, 'New skill: $1'], [/^Şu an: (.*)$/, 'Now in: $1'], [/^Tamamlanan görev: (\d+)$/, 'Quests completed: $1'],
   [/^Ses efektleri: Açık$/, 'Sound effects: On'], [/^Ses efektleri: Kapalı$/, 'Sound effects: Off'], [/^Müzik: Açık$/, 'Music: On'], [/^Müzik: Kapalı$/, 'Music: Off'],
   [/^Oyun otomatik kaydedilir\. Sürüm (\d+)$/, 'The game saves automatically. Version $1'], [/^Sürüm (\d+)$/, 'Version $1'], [/^Kısayol (\d+)$/, 'Shortcut $1'],
   [/^(\d+) can yeniler\.$/, 'Restores $1 HP.'], [/^(\d+) mana yeniler\.$/, 'Restores $1 mana.'], [/^(\d+) mana · ([\d.]+) sn · (.*)$/, (m, a, b, c) => `${a} mana · ${b} s · ${tx(c)}`],
@@ -97,7 +97,7 @@ function txDom(root) {
 // ---------------- İngilizce veri (NPC, canavar, bölge adları; orijinal Çince adlara göre) ----------------
 const EN = {
   scene: { '新兵营地': 'Recruit Camp', '观林镇': 'Guanlin Town', '阳光森林': 'Sunny Forest', '阳光森林北': 'Sunny Forest North', '阳光森林南': 'Sunny Forest South', '阳光森林东': 'Sunny Forest East',
-    '巨魔森林': 'Troll Forest', '阳光草原': 'Sunny Plains', '黑暗哨塔': 'Dark Watchtower', '邪教基地': 'Cult Base' },
+    '巨魔森林': 'Troll Forest', '阳光草原': 'Sunny Plains', '黑暗哨塔': 'Dark Watchtower', '邪教基地': 'Cult Base', '先知神殿': "Prophet's Temple", '神殿故道': 'Old Temple Road', '迷雾荒野': 'Misty Wilds', '恶臭平原': 'Stinking Plain' },
   name: {
     '点点我': 'Guide', '新兵队长': 'Recruit Captain', '新兵教练': 'Recruit Trainer', '教练员': 'Instructor', '初级战斗导师': 'Combat Tutor', '观林镇传送员': 'Guanlin Teleporter',
     '鸭子': 'Duck', '鸡': 'Chicken', '神殿骑士': 'Temple Knight', '魔法骷髅': 'Magic Skeleton', '恶魔傀儡': 'Demon Puppet',
@@ -111,6 +111,11 @@ const EN = {
     '小草堆': 'Small Grass Pile', '草堆': 'Grass Pile', '魔法土堆': 'Magic Dirt Mound', '贫矿': 'Poor Ore', '风化岩（任务矿）': 'Weathered Rock', '风化的遗迹（任务遗迹）': 'Weathered Ruin',
     '契约爱神': 'Covenant Cupid', '战士守卫': 'Warrior Guard', '野菜': 'Wild Greens', '破碎的遗迹': 'Broken Ruin', '魔法草': 'Magic Herb', '林隐仙子': 'Forest Hermit Fairy',
     '闪光的草堆': 'Glittering Grass Pile', '警卫卡鲁': 'Guard Karu',
+    '荒野向导': 'Wilderness Guide', '训练官': 'Drill Officer', '神殿传送员': 'Temple Teleporter', '蠕虫': 'Worm', '食腐豺': 'Carrion Jackal', '掠食秃鹫': 'Predatory Vulture', '☆带刺野猪': '☆Spiked Boar', '工会剑士': 'Guild Swordsman',
+    '盲眼向导（夜精灵）': 'Blind Guide', '道具商人（夜精灵）': 'Item Merchant', '武器商人（夜精灵）': 'Weapon Merchant', '防具商人（夜精灵）': 'Armor Merchant', '饰品商人（夜精灵）': 'Accessory Merchant', '宝石加工者（夜精灵）': 'Gem Cutter',
+    '驯兽师（夜精灵）': 'Beast Tamer', '希尔芙传信使（夜精灵）': 'Sylph Courier', '神谕先知': 'Oracle Prophet', '狄亚·先知之手': "Dia, Hand of the Prophet", '神殿大厨': 'Temple Head Cook', '追迹者': 'Tracker',
+    '夜精灵男孤儿': 'Orphan Elf Boy', '夜精灵女孤儿': 'Orphan Elf Girl', '神殿教师': 'Temple Teacher', '会计师工会志愿者': "Accountants' Guild Volunteer", '种植者工会志愿者': "Growers' Guild Volunteer",
+    '通灵学徒': 'Medium Apprentice', '神殿侍卫': 'Temple Guard', '采矿人（夜精灵）': 'Miner', '考古理论者（夜精灵）': 'Archaeologist', '源质炼金师（夜精灵）': 'Essence Alchemist', '技能训练师（夜精灵）': 'Skill Trainer',
     '毒蛇帮路匪': 'Viper Gang Bandit', '野猪': 'Wild Boar', '☆【帝国叛徒】迪萨安': '☆【Imperial Traitor】Disaan', '蜘蛛': 'Longleg Spider', '蜘蛛掠夺者': 'Spider Raider',
     '森林狼': 'Forest Wolf', '☆森林狼头领': '☆Forest Wolf Chief', '森林蝰蛇': 'Forest Viper', '恶作剧仙子': 'Prankster Fairy', '毒蛇帮精英': 'Viper Gang Elite', '蜂蜜仙子': 'Honey Fairy',
     '☆毒蛇帮虐杀者': '☆Viper Gang Butcher', '☆精英护卫': '☆Elite Guard', '☆☆【叛徒】萨丁曼': '☆☆【Traitor】Sadinman', '森林巨魔': 'Forest Troll', '☆巨魔摧毁者': '☆Troll Destroyer', '☆饥饿的巨魔': '☆Hungry Troll',
@@ -155,6 +160,9 @@ const EN = {
     '考古理论者（人类）': 'What happened on this continent? Do not believe gossip; only the old ruins tell the truth.',
     '竞技场管理人莉莉': 'To my mind, beating enemies in the wild is nothing much. The truly strong are those who win in contests between people.',
     '源质炼金师（人类）': 'The alchemy of decomposition is a deep art.', '技能训练师（人类）': 'To live in this world you should learn a craft besides fighting.',
+    '荒野向导': 'Glad to see you, youngster. If I have a ? above my head, you can complete a quest with me. Remember that.', '训练官': 'I review the battle results here.',
+    '神殿传送员': "Hello, young adventurer. When your recruit training is finished I will teleport you to the Prophet's Temple, where real challenges await.",
+    '狄亚·先知之手': "Welcome to the temple. I carry the Prophet's word.", '神谕先知': 'The oracle sees all, young one.', '神殿侍卫': 'I guard the temple.',
     '小草堆': 'There seems to be an ordinary snuff box in the grass.', '草堆': 'An ordinary pile of grass.', '魔法土堆': 'A loose mound of dirt; it looks a little strange.',
     '野菜': 'Fresh ferns growing in the forest.', '魔法草': 'A special plant that grows in the forest.', '林隐仙子': 'The forest is full of nature magic; by resting quietly I can become part of it.',
     '闪光的草堆': 'There seem to be strange plant seeds in the grass.', '警卫卡鲁': 'When will I ever get out of this cursed place...', '战士守卫': 'It is not safe here. Be careful.',

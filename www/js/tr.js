@@ -5,7 +5,7 @@ const TR = {
   scene: {
     '新兵营地': 'Acemi Kampı', '观林镇': 'Guanlin Kasabası', '阳光森林': 'Güneşli Orman', '阳光森林北': 'Güneşli Orman Kuzey',
     '阳光森林南': 'Güneşli Orman Güney', '阳光森林东': 'Güneşli Orman Doğu', '巨魔森林': 'Trol Ormanı', '阳光草原': 'Güneşli Çayır',
-    '黑暗哨塔': 'Karanlık Gözcü Kulesi', '邪教基地': 'Tarikat Üssü',
+    '黑暗哨塔': 'Karanlık Gözcü Kulesi', '邪教基地': 'Tarikat Üssü', '先知神殿': 'Kâhin Tapınağı', '神殿故道': 'Tapınak Eski Yolu', '迷雾荒野': 'Sisli Yaban', '恶臭平原': 'Kokuşmuş Ova',
   },
   name: {
     // Acemi Kampı
@@ -20,6 +20,12 @@ const TR = {
     '钻石回馈使者': 'Elmas Elçisi', '采矿人（人类）': 'Madenci', '装备强化大师': 'Ekipman Ustası', '魔法兽强化大师': 'Büyülü Canavar Ustası',
     '医生工会学徒': 'Doktor Çırağı Fige', '沧桑的旅者': 'Yaşlı Gezgin', '考古理论者（人类）': 'Arkeolog', '竞技场管理人莉莉': 'Arena Görevlisi Lily',
     '源质炼金师（人类）': 'Ayrıştırma Simyacısı', '技能训练师（人类）': 'Beceri Eğitmeni',
+    // gece elfi başlangıcı: Acemi Kampı, Kâhin Tapınağı, Tapınak Eski Yolu
+    '荒野向导': 'Yaban Rehberi', '训练官': 'Talim Subayı', '神殿传送员': 'Tapınak Işınlayıcısı', '蠕虫': 'Solucan', '食腐豺': 'Leş Çakalı', '掠食秃鹫': 'Yırtıcı Akbaba', '☆带刺野猪': '☆Dikenli Yaban Domuzu', '工会剑士': 'Lonca Kılıççısı',
+    '盲眼向导（夜精灵）': 'Kör Rehber', '道具商人（夜精灵）': 'Eşya Tüccarı', '武器商人（夜精灵）': 'Silah Tüccarı', '防具商人（夜精灵）': 'Zırh Tüccarı', '饰品商人（夜精灵）': 'Takı Tüccarı', '宝石加工者（夜精灵）': 'Mücevher İşçisi',
+    '驯兽师（夜精灵）': 'Hayvan Terbiyecisi', '希尔芙传信使（夜精灵）': 'Silf Ulağı', '神谕先知': 'Kehanet Kâhini', '狄亚·先知之手': 'Dia, Kâhinin Eli', '神殿大厨': 'Tapınak Aşçıbaşısı', '追迹者': 'İz Sürücü',
+    '夜精灵男孤儿': 'Yetim Elf Oğlan', '夜精灵女孤儿': 'Yetim Elf Kız', '神殿教师': 'Tapınak Öğretmeni', '会计师工会志愿者': 'Muhasipler Loncası Gönüllüsü', '种植者工会志愿者': 'Ekiciler Loncası Gönüllüsü',
+    '通灵学徒': 'Medyum Çırağı', '神殿侍卫': 'Tapınak Muhafızı', '采矿人（夜精灵）': 'Madenci', '考古理论者（夜精灵）': 'Arkeolog', '源质炼金师（夜精灵）': 'Ayrıştırma Simyacısı', '技能训练师（夜精灵）': 'Beceri Eğitmeni',
     // orman
     '小草堆': 'Küçük Ot Yığını', '草堆': 'Ot Yığını', '魔法土堆': 'Büyülü Toprak Yığını', '贫矿': 'Zayıf Maden', '风化岩（任务矿）': 'Aşınmış Kaya',
     '风化的遗迹（任务遗迹）': 'Aşınmış Kalıntı', '契约爱神': 'Anlaşma Aşk Perisi', '战士守卫': 'Savaşçı Muhafız', '野菜': 'Yabani Sebze', '破碎的遗迹': 'Kırık Kalıntı',
@@ -76,6 +82,9 @@ const TR = {
     '野菜': 'Ormanda yetişen taze eğrelti otları.', '魔法草': 'Ormanda yetişen özel bir bitki.', '林隐仙子': 'Ormanda bolca doğa büyüsü var; sessizce dinlenerek ona karışabilirim.',
     '闪光的草堆': 'Otların arasında tuhaf bitki tohumları var gibi.', '警卫卡鲁': 'Ne zaman bu lanet yerden gidebileceğim...',
     '战士守卫': 'Burası güvenli değil, dikkatli ol.',
+    '荒野向导': 'Seni gördüğüme sevindim genç. Başımda ? işareti varsa bir görevi bende tamamlayabilirsin demektir, bunu unutma.', '训练官': 'Savaş sonuçlarını burada ben denetlerim.',
+    '神殿传送员': 'Merhaba genç maceracı. Acemi eğitimin bitince seni Kâhin Tapınağı\'na ışınlayacağım; orada gerçek zorluklar seni bekliyor.',
+    '狄亚·先知之手': 'Tapınağa hoş geldin. Kâhinin sözünü ben taşırım.', '神谕先知': 'Kehanet her şeyi görür, genç olan.', '神殿侍卫': 'Tapınağı korurum.',
   },
   cls: { '战士': 'Savaşçı', '法师': 'Büyücü', '牧师': 'Kutsal Elçi' },
   race: { '人类': 'İnsan', '精灵': 'Gece Elfi' },
@@ -85,20 +94,30 @@ function trName(cn) { return TR.name[cn] || TR.scene[cn] || cn; }
 // Görevler (orijinal metinlerin çevirisi). giver/to: NPC Çince adı.
 // type: talk (to ile konuş), kill (target, count), collect (canavardan düşen eşya), pickup (toplama noktası), special
 const QUESTS = [
-  { id: 80292, title: 'Kayıt', goal: 'Acemi Komutanı ile konuş.', giver: '点点我', to: '新兵队长', type: 'talk',
+  { id: 80292, race: '人类', title: 'Kayıt', goal: 'Acemi Komutanı ile konuş.', giver: '点点我', to: '新兵队长', type: 'talk',
     text: 'Haydi şimdi Acemi Komutanı\'na gidip kaydını yaptır!', ok: 'Tamam!', done: 'Çok iyi, sağlam bir savaşçıya benziyorsun, krallığa hizmet edebilirsin.', reward: { xp: 20, gold: 5 } },
-  { id: 80294, title: 'Acemi Eğitimi', goal: 'Bir ördek öldür, sonra Acemi Eğitmeni\'ne rapor ver.', giver: '新兵队长', to: '新兵教练', type: 'kill', target: '鸭子', count: 1, req: 80292,
+  { id: 80294, race: '人类', title: 'Acemi Eğitimi', goal: 'Bir ördek öldür, sonra Acemi Eğitmeni\'ne rapor ver.', giver: '新兵队长', to: '新兵教练', type: 'kill', target: '鸭子', count: 1, req: 80292,
     text: 'Macera yolunda tehlike her an vardır. Kendini koruyabilir misin? Sınav olarak bir ördek öldür. Ondan önce Eğitim Görevlisi ile konuşabilirsin, sana dövüş tekniklerini öğretir.', ok: 'Tamam', wait: 'Bu kadar basit bir işi bile yapamıyor musun? Hadi bir ördek avla!', done: 'Çok iyi, artık düşmana nasıl saldıracağını biliyorsun!', reward: { xp: 40, gold: 10 } },
-  { id: 80296, title: 'Kendini Geliştir', goal: 'Tavuk kesmeye devam et, Tavuk Kanı\'nı Eğitim Görevlisi\'ne götür.', giver: '新兵教练', to: '教练员', type: 'collect', target: '鸡', item: 'Tavuk Kanı', count: 1, chance: 0.35, req: 80294,
+  { id: 80296, race: '人类', title: 'Kendini Geliştir', goal: 'Tavuk kesmeye devam et, Tavuk Kanı\'nı Eğitim Görevlisi\'ne götür.', giver: '新兵教练', to: '教练员', type: 'collect', target: '鸡', item: 'Tavuk Kanı', count: 1, chance: 0.35, req: 80294,
     text: 'İyi bir maceracı ancak sürekli savaşarak yetişir. Şimdi tavuk kes, tavuk kanını bulunca Eğitim Görevlisi\'ne götür.', ok: 'Tamam!', wait: 'Hâlâ getirmedin mi? Ne beceriksiz.', done: 'Çok iyi, bu tavuk kanıyla çok iş yapılır. Sana biraz ödül vermeliyim. Al şu can iksirlerini, gelecekteki maceraların için olmazsa olmaz.', reward: { xp: 70, gold: 10, items: [['hp1', 5]] } },
-  { id: 80595, title: 'Küçük İpucu', goal: 'Çantanı aç, sonra Eğitim Görevlisi\'nden ödülünü al.', giver: '教练员', to: '教练员', type: 'special', flag: 'openBag', req: 80296,
+  { id: 80595, title: 'Küçük İpucu', goal: 'Çantanı aç, sonra Eğitim Görevlisi\'nden ödülünü al.', giver: '教练员', to: '教练员', type: 'special', flag: 'openBag', req: [80296, 80297],
     text: 'Çanta düğmesiyle çantanı açabilirsin. Haydi bak bakalım çantanda neler var.', ok: 'Tamam', wait: 'Çantanı açtıktan sonra yanıma gel.', done: 'Artık çantanı istediğin zaman açabilirsin, unutma!', reward: { xp: 30, items: [['mp1', 5]] } },
-  { id: 80597, title: 'Hedef Seçme', goal: 'Hedef değiştir düğmesiyle başka bir hedef seç, sonra Eğitim Görevlisi ile konuş.', giver: '初级战斗导师', to: '教练员', type: 'special', flag: 'cycleTarget', req: 80292,
+  { id: 80597, title: 'Hedef Seçme', goal: 'Hedef değiştir düğmesiyle başka bir hedef seç, sonra Eğitim Görevlisi ile konuş.', giver: '初级战斗导师', to: '教练员', type: 'special', flag: 'cycleTarget', req: [80292, 80293],
     text: 'Belirli bir hedefe saldırmak istersen hedef değiştir düğmesine bas, beklemediğin bir etkisi olur.', ok: 'Tamam', wait: 'Hedef değiştir düğmesine basınca hedef seçimi değişir. Bu sırrı herkese söylemem~', done: 'Bu küçük ipuçlarını unutma, oyunu daha iyi oynamanı sağlar.', reward: { xp: 30 } },
-  { id: 82632, title: 'Kendini Donat', goal: 'Guanlin Işınlayıcısı ile konuşup Gelişim Paketi\'ni al.', giver: '教练员', to: '观林镇传送员', type: 'talk', req: 80595,
+  { id: 82632, race: '人类', title: 'Kendini Donat', goal: 'Guanlin Işınlayıcısı ile konuşup Gelişim Paketi\'ni al.', giver: '教练员', to: '观林镇传送员', type: 'talk', req: 80595,
     text: 'İnsan ne kadar çalışırsa çalışsın bir sınırı vardır. Maceralarda başarılı olmak için iyi ekipman şarttır.', ok: 'Anladım.', done: 'Al bu gelişim paketini. Çantanda aç, içindeki ekipmanları kuşan!', reward: { xp: 50, items: [['growthBox', 1]] } },
-  { id: 80003, title: 'Yola Çıkış', goal: 'Guanlin Işınlayıcısı ile konuşup Guanlin Kasabası\'na git, varınca muhtarla konuş.', giver: '观林镇传送员', to: '观林镇镇长', type: 'talk', req: 82632, teleport: true,
+  { id: 80003, race: '人类', tp: ['120005', 33, 20], title: 'Yola Çıkış', goal: 'Guanlin Işınlayıcısı ile konuşup Guanlin Kasabası\'na git, varınca muhtarla konuş.', giver: '观林镇传送员', to: '观林镇镇长', type: 'talk', req: 82632,
     text: 'Sana öğretecek bir şeyim kalmadı. Dünyanın sırlarını artık kendin keşfedeceksin. Seni Guanlin Kasabası\'na götüreceğim; varınca muhtarla konuş, belki sana yardım eder. Bol şans genç!\nDikkat: buradan bir kez ayrılırsan bir daha dönemezsin. Hazır mısın?', ok: 'Evet, hazırım!', done: 'Hoş geldin genç.', reward: { xp: 80, gold: 20 } },
+  { id: 80293, race: '精灵', title: 'Yoklama', goal: 'Yaban Rehberi ile konuş.', giver: '点点我', to: '荒野向导', type: 'talk',
+    text: 'Haydi şimdi Yaban Rehberi\'ne gidip yoklamanı ver!', ok: 'Tamam!', done: 'Çok iyi, sağlam birine benziyorsun; halkımıza hizmet edebilirsin.', reward: { xp: 20, gold: 5 } },
+  { id: 80295, race: '精灵', title: 'Acemi Eğitimi', goal: 'Bir solucan öldür, sonra Talim Subayı\'na rapor ver.', giver: '荒野向导', to: '训练官', type: 'kill', target: '蠕虫', count: 1, req: 80293,
+    text: 'Macera yolunda tehlike her an vardır. Kendini koruyabilir misin? Sınav olarak bir solucan öldür. Ondan önce Eğitim Görevlisi ile konuşabilirsin, sana dövüş tekniklerini öğretir.', ok: 'Tamam', wait: 'Bu kadar basit bir işi bile yapamıyor musun? Hadi bir solucan avla!', done: 'Çok iyi, artık düşmana nasıl saldıracağını biliyorsun!', reward: { xp: 40, gold: 10 } },
+  { id: 80297, race: '精灵', title: 'Kendini Geliştir', goal: 'Leş çakalı avlamaya devam et, Çakal Eti\'ni Eğitim Görevlisi\'ne götür.', giver: '训练官', to: '教练员', type: 'collect', target: '食腐豺', item: 'Çakal Eti', count: 1, chance: 0.35, req: 80295,
+    text: 'İyi bir maceracı ancak sürekli savaşarak yetişir. Şimdi leş çakalı avla, çakal etini bulunca Eğitim Görevlisi\'ne götür.', ok: 'Tamam!', wait: 'Hâlâ getirmedin mi? Ne beceriksiz.', done: 'Çok iyi, bu etle çok iş yapılır. Sana biraz ödül vermeliyim. Al şu can iksirlerini, gelecekteki maceraların için olmazsa olmaz.', reward: { xp: 70, gold: 10, items: [['hp1', 5]] } },
+  { id: 82633, race: '精灵', title: 'Kendini Donat', goal: 'Tapınak Işınlayıcısı ile konuşup Gelişim Paketi\'ni al.', giver: '教练员', to: '神殿传送员', type: 'talk', req: 80595,
+    text: 'İnsan ne kadar çalışırsa çalışsın bir sınırı vardır. Maceralarda başarılı olmak için iyi ekipman şarttır.', ok: 'Anladım.', done: 'Al bu gelişim paketini. Çantanda aç, içindeki ekipmanları kuşan!', reward: { xp: 50, items: [['growthBox', 1]] } },
+  { id: 80123, race: '精灵', tp: ['120016', null, null], title: 'Yola Koyuluş', goal: 'Tapınak Işınlayıcısı seni Kâhin Tapınağı\'na götürsün; varınca Dia, Kâhinin Eli ile konuş.', giver: '神殿传送员', to: '狄亚·先知之手', type: 'talk', req: 82633,
+    text: 'Sana öğretecek bir şeyim kalmadı; bu dünyanın sırlarını artık kendin keşfedeceksin. Seni yeni maceran için Kâhin Tapınağı\'na götüreceğim. Varınca Dia, Kâhinin Eli ile konuş; senden ne istediğini o söyler. Bol şans genç!\nDikkat: buradan bir kez ayrılırsan bir daha dönemezsin. Hazır mısın?', ok: 'Evet, hazırım!', done: 'Hoş geldin genç. Tapınağın sana ihtiyacı var.', reward: { xp: 80, gold: 20 } },
   { id: 80004, title: 'Guanlin\'e Hoş Geldin!', goal: 'Silah Tüccarı ile konuş.', giver: '观林镇镇长', to: '武器商人（人类）', type: 'talk', req: 80003,
     text: 'Genç, maceraya çıkmadan önce iyi hazırlanmalısın. İyi ekipman bir savaşın kaderini belirler. Önce gidip Silah Tüccarı\'na bir merhaba de.', ok: 'Tamam', done: 'Benden silah almakta sorun yok artık.', reward: { xp: 60, gold: 20 } },
   { id: 80439, title: 'Domuz Avı', goal: 'Güneşli Orman\'daki azgın yaban domuzlarından 20 tane öldür.', giver: '观林镇镇长', to: '观林镇镇长', type: 'kill', target: '野猪', count: 20, req: 80004,
@@ -134,5 +153,11 @@ const QUESTS = [
 // Dil İngilizce ise adları, konuşmaları ve görev metinlerini İngilizceyle değiştir
 if (LANG === 'en') {
   for (const k of ['scene', 'name', 'greet', 'cls', 'race']) Object.assign(TR[k], EN[k]);
+  // gece elfi tüccarları ve ortak NPC'ler insan eşlerinin sözlerini kullanır
   for (const q of QUESTS) { const e = EN_Q[q.id]; if (!e) continue; q.title = e[0]; q.goal = e[1]; q.text = e[2]; if (e[3]) q.ok = e[3]; if (e[4]) q.wait = e[4]; q.done = e[5]; }
 }
+
+// Gece elfi tüccarları insan eşleriyle aynı sözleri söyler (orijinalde metinler neredeyse aynı)
+for (const [h, e] of [['道具商人（人类）', '道具商人（夜精灵）'], ['武器商人（人类）', '武器商人（夜精灵）'], ['防具商人（人类）', '防具商人（夜精灵）'], ['饰品商人（人类）', '饰品商人（夜精灵）'], ['驯兽师（人类）', '驯兽师（夜精灵）'],
+  ['宝石匠（人类）', '宝石加工者（夜精灵）'], ['采矿人（人类）', '采矿人（夜精灵）'], ['考古理论者（人类）', '考古理论者（夜精灵）'], ['源质炼金师（人类）', '源质炼金师（夜精灵）'], ['技能训练师（人类）', '技能训练师（夜精灵）'], ['驿站老板（人类）', '盲眼向导（夜精灵）'], ['人类信箱', '希尔芙传信使（夜精灵）']])
+  if (TR.greet[h] && !TR.greet[e]) TR.greet[e] = TR.greet[h];
