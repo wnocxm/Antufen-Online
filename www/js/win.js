@@ -26,7 +26,7 @@ const Win = (() => {
   function draw(ctx, vw, VH) {
     if (!cur) return; hits = [];
     ctx.fillStyle = 'rgba(0,0,0,.5)'; ctx.fillRect(0, 0, vw, VH);
-    if (cur === 'bag') drawBag(ctx, vw, VH); else if (cur === 'role') drawRole(ctx, vw, VH); else if (cur === 'npc') drawNpc(ctx, vw, VH); else if (cur === 'task') drawTask(ctx, vw, VH); else if (cur === 'menu') drawMenu(ctx, vw, VH); else if (cur === 'skill') drawSkill(ctx, vw, VH); else if (cur === 'shop') drawShop(ctx, vw, VH);
+    if (cur === 'bag') drawBag(ctx, vw, VH); else if (cur === 'role') drawRole(ctx, vw, VH); else if (cur === 'npc') drawNpc(ctx, vw, VH); else if (cur === 'task') drawTask(ctx, vw, VH); else if (cur === 'menu') drawMenu(ctx, vw, VH); else if (cur === 'skill') drawSkill(ctx, vw, VH); else if (cur === 'shop') drawShop(ctx, vw, VH); else if (cur === 'dead') drawDead(ctx, vw, VH);
     if (pressed && performance.now() - pressT > 160) pressed = null;
   }
   function drawBag(ctx, vw, VH) {
@@ -88,9 +88,9 @@ const Win = (() => {
   function tap(x, y) {
     if (!cur) return false;
     let h = null; for (const r of hits) if (x >= r.x && x < r.x + r.w && y >= r.y && y < r.y + r.h) { if (r.id === 'frame') { if (!h) h = r; } else if (!h || h.id === 'frame' || r.w * r.h < h.w * h.h) h = r; }
-    if (!h) { close(); return true; }
+    if (!h) { if (cur !== 'dead') close(); return true; }
     pressed = h.id; pressT = performance.now();
-    if (cur === 'bag') tapBag(h.id); else if (cur === 'role') tapRole(h.id); else if (cur === 'npc') tapNpc(h.id); else if (cur === 'task') tapTask(h.id); else if (cur === 'menu') tapMenu(h.id); else if (cur === 'skill') tapSkill(h.id); else if (cur === 'shop') tapShop(h.id);
+    if (cur === 'bag') tapBag(h.id); else if (cur === 'role') tapRole(h.id); else if (cur === 'npc') tapNpc(h.id); else if (cur === 'task') tapTask(h.id); else if (cur === 'menu') tapMenu(h.id); else if (cur === 'skill') tapSkill(h.id); else if (cur === 'shop') tapShop(h.id); else if (cur === 'dead') tapDead(h.id);
     return true;
   }
   let lastTap = { id: null, t: 0 };
@@ -368,5 +368,17 @@ const Win = (() => {
   }
   // liste kaydırma (parmakla sürükleme)
   function drag(dy) { if (cur !== 'shop') return; H.acc += dy; while (H.acc <= -HROW_H) { H.off++; H.acc += HROW_H; } while (H.acc >= HROW_H) { H.off--; H.acc -= HROW_H; } if (H.off < 0) H.off = 0; }
+  // ---------------- Ölüm ekranı (FORM_DEADSELECT): üstte mesaj, altta seçenek satırları ----------------
+  function drawDead(ctx, vw, VH) {
+    const f = Forms.get('dead'), ox = Math.round((vw - f.w) / 2), oy = Math.round((VH - 226) / 2), P = Game.P;
+    const home = P.home || ((P.done[80003] || P.quests[80003]) ? ['120005'] : null), where = home ? trName(Assets.D.scenes[home[0]].name) : trName(Game.scene.name);
+    const opts = [{ t: `${tx('Yeniden doğ')}: ${where}`, id: 52040 }];
+    Forms.draw(ctx, 'dead', ox, oy, { hide: c => c.t === 5 && !opts.some(o => o.id === c.id), state: c => c.t === 5 ? 1 : 0, text: () => '' });
+    Forms.label(ctx, 'Öldün', ox + 10, oy + 8, 280, 20, '#ff5040', 'center', 14);
+    Forms.label(ctx, 'Savaşta yenildin. Canının ve mananın yarısıyla yeniden doğacaksın.', ox + 10, oy + 28, 280, 16, GOLD, 'center', 10);
+    for (const o of opts) { const r = Forms.ctrl('dead', o.id).s[0].r; Forms.label(ctx, o.t, ox + r[0] + 7, oy + r[1] + 2, 288, 24, '#ffffff', 'left', 12); hits.push({ id: o.id, x: ox + r[0], y: oy + r[1], w: r[2], h: r[3] }); }
+    hits.push({ id: 'frame', x: ox, y: oy, w: f.w, h: 226 });
+  }
+  function tapDead(id) { if (id === 52040) { close(); revive(); } }
   return { open, close, isOpen, draw, tap, drag, get cur() { return cur; } };
 })();

@@ -38,6 +38,7 @@ const EN_UI = {
   'Acemi': 'Trainee', 'Çırak': 'Apprentice', 'Başlangıç': 'Novice', 'Elçi': 'Envoy',
   'Pencere açılamadı, sayfayı yenile.': 'The window could not open, please reload.',
   'Bu bir toplama noktası. Madencilik ve toplama meslekleri yakında eklenecek.': 'This is a gathering node. Mining and gathering professions are coming soon.',
+  'Savaşta yenildin. Canının ve mananın yarısıyla yeniden doğacaksın.': 'You were defeated. You will revive with half your HP and mana.',
   'Devam': 'Continue', 'Listeden bir eşya seç.': 'Select an item from the list.', 'Çantada': 'In bag',
   'Yol Bul': 'Pathfind', 'Görev Listesi': 'Quest List', 'Sık Kullanılan': 'Common', 'Eşya': 'Items', 'Sistem': 'System', 'Beceri': 'Skills', 'Harita': 'Map', 'Alışveriş': 'Shop', 'Teslim': 'Turn in', 'Görev bırakıldı': 'Quest abandoned',
   'Aktif görev yok.': 'No active quests.', 'Hedef bu haritada değil.': 'The target is not on this map.',

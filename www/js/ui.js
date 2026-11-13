@@ -125,15 +125,19 @@ const UI = (() => {
     hud.length = 0;
     const P = Game.P, p = Game.player, s = stats();
     // sol üst: portre ve çubuklar
-    const por = uiImg('Portrait_' + P.face);
-    ctx.drawImage(U(7009), 2, 2, 64, 60);
-    if (por.complete) ctx.drawImage(por, 8, 7, 52, 50);
-    ctx.fillStyle = 'rgba(0,0,0,.55)'; ctx.fillRect(66, 6, 132, 44);
-    ctx.textAlign = 'left'; ctx.font = 'bold 10px "Noto Sans", sans-serif'; text(`${P.name}  Sv ${P.lv}`, 70, 17, '#ffe48a');
-    bar(70, 21, 124, 9, p.hp / s.hp, '#ff6a4a', '#8a1408'); bar(70, 32, 124, 9, p.mp / s.mp, '#6aa0ff', '#142a8a');
-    ctx.font = '8px "Noto Sans", sans-serif'; ctx.textAlign = 'center'; text(`${Math.ceil(p.hp)}/${s.hp}`, 132, 29, '#fff'); text(`${Math.floor(p.mp)}/${s.mp}`, 132, 40, '#fff');
-    bar(70, 44, 124, 4, P.xp / xpNeed(P.lv), '#ffe080', '#a07010');
-    hud.push([2, 2, 64, 60, () => open('char')]);
+    // orijinal FORM_HEADIMG: 42x40 yuva, 7143 çerçevesi içinde 32x32 portre; yanında ince can/mana/tecrübe çizgileri
+    const por = uiImg('Portrait_' + P.face), hk = 1.25, hx = 3, hy = 3;
+    ctx.save(); ctx.translate(hx, hy); ctx.scale(hk, hk);
+    const hf = U(7143); if (hf.complete && hf.naturalWidth) ctx.drawImage(hf, 2, 2, 40, 38);
+    if (por.complete && por.naturalWidth) ctx.drawImage(por, 6, 6, 32, 30);
+    ctx.fillStyle = 'rgba(0,0,0,.75)'; ctx.fillRect(26, 29, 14, 10); ctx.textAlign = 'center'; ctx.font = 'bold 8px "Noto Sans", sans-serif'; text(String(P.lv), 33, 37, '#ffe48a');
+    ctx.restore();
+    const bx0 = hx + 44 * hk + 2;
+    ctx.textAlign = 'left'; ctx.font = 'bold 10px "Noto Sans", sans-serif'; text(P.name, bx0, 14, '#ffe48a');
+    const thin = (y, v, c) => { ctx.fillStyle = 'rgba(0,0,0,.7)'; ctx.fillRect(bx0, y, 92, 5); ctx.fillStyle = c; ctx.fillRect(bx0 + 1, y + 1, 90 * clamp(v, 0, 1), 3); };
+    thin(18, p.hp / s.hp, '#e02818'); thin(25, p.mp / s.mp, '#2a58e8'); thin(32, P.xp / xpNeed(P.lv), '#d8b030');
+    ctx.font = '8px "Noto Sans", sans-serif'; text(`${Math.ceil(p.hp)}/${s.hp}`, bx0 + 96, 23, '#ffb0a0'); text(`${Math.floor(p.mp)}/${s.mp}`, bx0 + 96, 31, '#a8c0ff');
+    hud.push([2, 2, 56, 54, () => open('char')]);
     // hedef
     const t = Game.target;
     if (t && !t.dead) {
@@ -178,6 +182,7 @@ const UI = (() => {
     rb(vw - 40, VH - 50, 28, 'icon_res_skill_' + sk0.icon, 'Saldır', () => attack());
     rb(vw - 92, VH - 30, 15, null, null, () => cycleTarget(), '◎');
     rb(vw - 32, VH - 124, 19, 'icon_res_item_1038', 'Çanta', () => open('bag'));
+    rb(vw - 84, VH - 112, 17, 'icon_res_skill_' + CLS[P.cls].skills[1].icon, 'Beceri', () => open('skill'));
     rb(vw - 32, VH - 179, 24, null, 'Görev', () => open('quest'), null, 7125);
     rb(vw - 32, VH - 236, 24, null, 'Menü', () => open('menu'), null, 7127);
     // orta alt: yarı saydam mesaj kutusu (orijinaldeki gibi)
@@ -307,7 +312,7 @@ const UI = (() => {
       title = 'Ayarlar';
       h = `<div class="iact"><button class="obtn" data-act="tsfx">Ses efektleri: ${SFX.opt.sfx ? 'Açık' : 'Kapalı'}</button><button class="obtn" data-act="tmus">Müzik: ${SFX.opt.music ? 'Açık' : 'Kapalı'}</button></div>
         <div class="iact"><button class="obtn" data-act="lang">${LANG === 'tr' ? 'Language: English' : 'Dil: Türkçe'}</button></div>
-        <div class="iact"><button class="obtn" data-act="totitle">Giriş ekranına dön</button><button class="obtn" data-act="newchar">Yeni karakter oluştur</button></div><p class="hint">Oyun otomatik kaydedilir. Sürüm 11132058</p>`;
+        <div class="iact"><button class="obtn" data-act="totitle">Giriş ekranına dön</button><button class="obtn" data-act="newchar">Yeni karakter oluştur</button></div><p class="hint">Oyun otomatik kaydedilir. Sürüm 11132226</p>`;
     }
     ptitle.textContent = tx(title); pbody.innerHTML = h; txDom(pbody);
   }
@@ -448,7 +453,7 @@ const UI = (() => {
     get vw() { return vw; }, get mode() { return mode; },
     log, toast, zone(m) { zoneMsg = m; zoneT = 3; }, levelUp(n) { lvlN = n; lvlT = 2.5; }, hurt() { hurtT = 0.4; },
     float(e, txt, c, s = 1) { floats.push({ e, txt: tx(String(txt)), c, s, t: 0 }); }, target() { }, refresh() { if (cur) render(); },
-    fade(on) { fadeOn = on; if (on) fadeA = 1; }, death() { $('#death').classList.remove('hidden'); },
+    fade(on) { fadeOn = on; if (on) fadeA = 1; }, death() { closeAll(); setTimeout(() => Win.open('dead'), 1200); },
   };
 })();
 $('#revive').onclick = () => { $('#death').classList.add('hidden'); revive(); };
