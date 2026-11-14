@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Anrufen Yönetim</title>
+<style>
+  :root { --bg: #120d09; --panel: #1d1610; --line: #4b4547; --gold: #e6cf89; --text: #e8e0d0; --dim: #8d8983; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 14px system-ui, sans-serif; }
+  header { padding: 12px 16px; border-bottom: 1px solid var(--line); color: var(--gold); font-weight: 700; display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+  main { padding: 12px 16px; display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+  section { background: var(--panel); border: 1px solid var(--line); padding: 10px 12px; min-width: 0; }
+  h2 { margin: 0 0 8px; font-size: 14px; color: var(--gold); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; } td, th { text-align: left; padding: 3px 4px; border-bottom: 1px solid #2a221a; } th { color: var(--dim); font-weight: 500; }
+  .big { font-size: 28px; color: var(--gold); } .dim { color: var(--dim); font-size: 12px; }
+  form { display: flex; gap: 6px; flex-wrap: wrap; } input, button { background: #0c0805; color: var(--text); border: 1px solid var(--line); padding: 7px 9px; font: inherit; } button { color: var(--gold); cursor: pointer; }
+  .wrap { overflow-x: auto; }
+</style></head>
+<body>
+<header><span>Anrufen Online · Yönetim</span><span class="dim" id="st">Giriş yapılmadı</span></header>
+<main id="login"><section><h2>Yönetici girişi</h2>
+  <form id="f"><input id="u" placeholder="Kullanıcı adı" autocomplete="username"><input id="p" type="password" placeholder="Şifre" autocomplete="current-password"><button>Giriş</button></form>
+  <p class="dim">Yalnızca yönetici yetkisi olan hesaplar girebilir. Yetki: <code>node make-admin.js &lt;kullanıcı adı&gt;</code></p></section></main>
+<main id="dash" hidden>
+  <section><h2>Özet</h2><div><span class="big" id="on">0</span> çevrimiçi</div><div class="dim" id="sum"></div></section>
+  <section><h2>Çevrimiçi oyuncular</h2><div class="wrap"><table id="tOn"></table></div></section>
+  <section><h2>En yüksek seviyeler</h2><div class="wrap"><table id="tTop"></table></div></section>
+  <section><h2>Son sohbetler</h2><div class="wrap"><table id="tChat"></table></div></section>
+</main>
+<script>
+let token = sessionStorage.getItem('adm') || '';
+const $ = id => document.getElementById(id), esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const CLS = { '战士': 'Savaşçı', '法师': 'Büyücü', '牧师': 'Kutsal Elçi' };
+const rows = (el, head, list) => { $(el).innerHTML = '<tr>' + head.map(h => `<th>${h}</th>`).join('') + '</tr>' + (list.length ? list.join('') : `<tr><td colspan="${head.length}" class="dim">—</td></tr>`); };
+async function load() {
+  const r = await fetch('/api/admin/stats', { headers: { Authorization: 'Bearer ' + token } });
+  if (r.status !== 200) { $('st').textContent = r.status === 403 ? 'Bu hesap yönetici değil' : 'Giriş gerekli'; $('login').hidden = false; $('dash').hidden = true; return; }
+  const s = await r.json(); $('login').hidden = true; $('dash').hidden = false;
+  $('st').textContent = 'Güncellendi: ' + new Date().toLocaleTimeString('tr-TR');
+  $('on').textContent = s.online.length; $('sum').textContent = `${s.accounts} hesap · ${s.characters} karakter · çalışma süresi ${Math.round(s.uptime / 60)} dk`;
+  rows('tOn', ['Ad', 'Sınıf', 'Sv', 'Harita', 'Konum'], s.online.map(o => `<tr><td>${esc(o.name)}</td><td>${CLS[o.cls] || esc(o.cls)}</td><td>${o.lv}</td><td>${esc(o.scene)}</td><td>${o.x},${o.y}</td></tr>`));
+  rows('tTop', ['Ad', 'Sınıf', 'Sv', 'Son görülme'], s.top.map(o => `<tr><td>${esc(o.name)}</td><td>${CLS[o.cls] || esc(o.cls)}</td><td>${o.lv}</td><td class="dim">${o.last_seen ? new Date(o.last_seen).toLocaleString('tr-TR') : '—'}</td></tr>`));
+  rows('tChat', ['Saat', 'Ad', 'Mesaj'], s.chats.map(c => `<tr><td class="dim">${new Date(c.created_at).toLocaleTimeString('tr-TR')}</td><td>${esc(c.name)}</td><td>${esc(c.text)}</td></tr>`));
+}
+$('f').onsubmit = async e => {
+  e.preventDefault();
+  const r = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: $('u').value, password: $('p').value }) });
+  if (r.status !== 200) { $('st').textContent = 'Giriş başarısız'; return; }
+  token = (await r.json()).token; sessionStorage.setItem('adm', token); load();
+};
+load(); setInterval(() => { if (!$('dash').hidden) load(); }, 5000);
+</script>
+</body></html>
