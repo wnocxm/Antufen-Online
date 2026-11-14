@@ -23,11 +23,11 @@ const Input = (() => {
       const L = UI.toLogical(e.clientX, e.clientY);
       if (Win.isOpen()) { winPtr = { id: e.pointerId, x: L.x, y: L.y, ly: L.y, moved: 0 }; e.preventDefault(); return; }
       const hit = UI.hudHit(L.x, L.y); if (hit) { hit(); e.preventDefault(); return; }
-      if (L.x < Math.max(UI.vw * 0.33, 210) && L.y > VH * 0.45 && !joy) { const R = UI.rockerPos(); let dx = L.x - R.x, dy = L.y - R.y; const l = Math.hypot(dx, dy); if (l > 40) { dx = dx / l * 40; dy = dy / l * 40; } joy = { id: e.pointerId, ox: R.x, oy: R.y, dx, dy, active: true }; cv.setPointerCapture(e.pointerId); return; }
+      if (L.x < Math.max(UI.vw * 0.33, 240) && L.y > VH * 0.4 && !joy) { const R = UI.rockerPos(); let dx = L.x - R.x, dy = L.y - R.y; const l = Math.hypot(dx, dy); if (l > 48) { dx = dx / l * 48; dy = dy / l * 48; } joy = { id: e.pointerId, ox: R.x, oy: R.y, dx, dy, active: true }; cv.setPointerCapture(e.pointerId); return; }
       pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
     });
     cv.addEventListener('pointermove', e => { if (winPtr && e.pointerId === winPtr.id) { const L = UI.toLogical(e.clientX, e.clientY); winPtr.moved += Math.abs(L.y - winPtr.ly); if (winPtr.moved > 6) Win.drag(L.y - winPtr.ly, winPtr.x, winPtr.y); winPtr.ly = L.y; return; }
-      if (joy && e.pointerId === joy.id) { const L = UI.toLogical(e.clientX, e.clientY); let dx = L.x - joy.ox, dy = L.y - joy.oy; const l = Math.hypot(dx, dy), mx = 40; if (l > mx) { dx = dx / l * mx; dy = dy / l * mx; } joy.dx = dx; joy.dy = dy; } });
+      if (joy && e.pointerId === joy.id) { const L = UI.toLogical(e.clientX, e.clientY); let dx = L.x - joy.ox, dy = L.y - joy.oy; const l = Math.hypot(dx, dy), mx = 48; if (l > mx) { dx = dx / l * mx; dy = dy / l * mx; } joy.dx = dx; joy.dy = dy; } });
     const end = e => { if (winPtr && e.pointerId === winPtr.id) { const w = winPtr; winPtr = null; if (w.moved <= 6 && e.type === 'pointerup') Win.tap(w.x, w.y); return; }
       if (joy && e.pointerId === joy.id) joy = null; const s = pts.get(e.pointerId); if (s) { pts.delete(e.pointerId); if (Math.hypot(e.clientX - s.x, e.clientY - s.y) < 12 && UI.mode === 'play' && !UI.panelOpen()) tapWorld(e.clientX, e.clientY); } };
     cv.addEventListener('pointerup', end); cv.addEventListener('pointercancel', end);
@@ -121,7 +121,8 @@ const UI = (() => {
     ctx.fillStyle = g; ctx.fillRect(x + 1, y + 1, Math.max(0, (w - 2) * clamp(v, 0, 1)), h - 2);
     ctx.strokeStyle = '#6a5030'; ctx.lineWidth = 1; ctx.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
   }
-  function rockerPos() { return { x: 104 + safeL, y: VH - 74 }; }
+  const HS = 1.2;   // dokunmatik düğmelerin (yön kolu ve beceri yayı) ölçeği
+  function rockerPos() { return { x: 104 * HS + safeL, y: VH - 74 * HS }; }
   function drawHud() {
     hud.length = 0;
     const P = Game.P, p = Game.player, s = stats();
@@ -158,12 +159,12 @@ const UI = (() => {
     drawTracker();
     // sol alt: ejderha madalyonu = yürüme kolu (orijinal FORM_ROCKER, 134x134)
     const R = rockerPos(), J = Input.joyState;
-    const dm = U(7002); if (dm.complete) ctx.drawImage(dm, R.x - 66, R.y - 67, 132, 134);
+    const dm = U(7002); if (dm.complete) ctx.drawImage(dm, R.x - 66 * HS, R.y - 67 * HS, 132 * HS, 134 * HS);
     { const kx = R.x + (J ? J.dx : 0), ky = R.y + (J ? J.dy : 0), kn = U(7005);   // orijinal turuncu küre (7005)
-      ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = J ? 1 : 0.8; if (kn.complete && kn.naturalWidth) ctx.drawImage(kn, kx - 19, ky - 19, 39, 39); ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over'; }
+      ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = J ? 1 : 0.8; if (kn.complete && kn.naturalWidth) ctx.drawImage(kn, kx - 19.5 * HS, ky - 19.5 * HS, 39 * HS, 39 * HS); ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over'; }
     // sağ alt: klasik mobil MMORPG düzeni: büyük saldırı düğmesi, çevresinde yay biçiminde beceri ve iksir yuvaları
     // (yuvalar orijinal halka görseli 7078 ile; P.quick[0] = büyük düğme, [1..3] iç yay, [4..7] dış yay)
-    const ring = U(7078), ax = vw - 50 - safeR, ay = VH - 50;
+    const ring = U(7078), ax = vw - 50 * HS - safeR, ay = VH - 50 * HS;
     const slotAt = (cx, cy, r, sl, fn) => {
       if (ring.complete && ring.naturalWidth) { const w = r * 2 + 8; ctx.drawImage(ring, cx - w / 2, cy - w / 2, w, w); }
       // simge halkanın iç boşluğuna, yuvarlak kırpılarak çizilir
@@ -171,17 +172,17 @@ const UI = (() => {
       const k = ir * 2 / 32; ctx.translate(cx - ir, cy - ir); ctx.scale(k, k); drawSlot(sl, 0, 0); ctx.restore();
       hud.push([cx - r - 2, cy - r - 2, r * 2 + 4, r * 2 + 4, fn]);
     };
-    slotAt(ax, ay, 32, P.quick[0], () => attack());
-    const arc = (R, n, from, to, r, base) => { for (let i = 0; i < n; i++) { const a = (from + (to - from) * (n === 1 ? 0 : i / (n - 1))) * Math.PI / 180, qi = base + i; slotAt(ax + Math.cos(a) * R, ay + Math.sin(a) * R, r, P.quick[qi], () => quick(qi)); } };
+    slotAt(ax, ay, 32 * HS, P.quick[0], () => attack());
+    const arc = (R, n, from, to, r, base) => { for (let i = 0; i < n; i++) { const a = (from + (to - from) * (n === 1 ? 0 : i / (n - 1))) * Math.PI / 180, qi = base + i; slotAt(ax + Math.cos(a) * R * HS, ay + Math.sin(a) * R * HS, r * HS, P.quick[qi], () => quick(qi)); } };
     arc(66, 3, 180, 270, 19, 1);            // iç yay: 3 beceri
     arc(112, 4, 180, 270, 18, 4);           // dış yay: 2 beceri + 2 iksir
     // hedef değiştir: yayın dışında küçük düğme
-    { const tx0 = ax - 142, ty0 = ay + 20; ctx.fillStyle = 'rgba(12,8,5,.8)'; ctx.beginPath(); ctx.arc(tx0, ty0, 12, 0, 7); ctx.fill(); ctx.strokeStyle = '#b89a50'; ctx.lineWidth = 1.5; ctx.stroke();
-      ctx.textAlign = 'center'; ctx.font = 'bold 13px serif'; text('◎', tx0, ty0 + 5, '#ffe48a'); hud.push([tx0 - 15, ty0 - 15, 30, 30, () => cycleTarget()]); }
+    { const tx0 = ax - 142 * HS, ty0 = ay + 22 * HS; ctx.fillStyle = 'rgba(12,8,5,.8)'; ctx.beginPath(); ctx.arc(tx0, ty0, 14, 0, 7); ctx.fill(); ctx.strokeStyle = '#b89a50'; ctx.lineWidth = 1.5; ctx.stroke();
+      ctx.textAlign = 'center'; ctx.font = 'bold 13px serif'; text('◎', tx0, ty0 + 5, '#ffe48a'); hud.push([tx0 - 18, ty0 - 18, 36, 36, () => cycleTarget()]); }
     // orta alt: yarı saydam mesaj kutusu (orijinaldeki gibi)
     { const now = performance.now(), L = logs.filter(l => now - l.t < 10000).slice(-5);
       if (L.length) {
-        const bx = rockerPos().x + 76, bw = Math.max(120, Math.min(360, vw - bx - 210)), bh = L.length * 11 + 6, by = VH - 6 - bh;
+        const bx = rockerPos().x + 76 * HS, bw = Math.max(110, Math.min(360, vw - bx - 215 * HS)), bh = L.length * 11 + 6, by = VH - 6 - bh;
         ctx.fillStyle = 'rgba(0,0,0,.5)'; ctx.fillRect(bx, by, bw, bh);
         ctx.textAlign = 'left'; ctx.font = '9px "Noto Sans", sans-serif';
         L.forEach((l, i) => { ctx.globalAlpha = Math.min(1, (10000 - (now - l.t)) / 1000); text(l.m, bx + 5, by + 12 + i * 11, l.c); });
@@ -306,7 +307,7 @@ const UI = (() => {
       title = 'Ayarlar';
       h = `<div class="iact"><button class="obtn" data-act="tsfx">Ses efektleri: ${SFX.opt.sfx ? 'Açık' : 'Kapalı'}</button><button class="obtn" data-act="tmus">Müzik: ${SFX.opt.music ? 'Açık' : 'Kapalı'}</button></div>
         <div class="iact"><button class="obtn" data-act="lang">${LANG === 'tr' ? 'Language: English' : 'Dil: Türkçe'}</button></div>
-        <div class="iact"><button class="obtn" data-act="totitle">Giriş ekranına dön</button><button class="obtn" data-act="newchar">Yeni karakter oluştur</button></div><p class="hint">Oyun otomatik kaydedilir. Sürüm 11140929</p>`;
+        <div class="iact"><button class="obtn" data-act="totitle">Giriş ekranına dön</button><button class="obtn" data-act="newchar">Yeni karakter oluştur</button></div><p class="hint">Oyun otomatik kaydedilir. Sürüm 11141509</p>`;
     }
     ptitle.textContent = tx(title); pbody.innerHTML = h; txDom(pbody);
   }
