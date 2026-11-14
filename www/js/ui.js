@@ -29,7 +29,7 @@ const Input = (() => {
     cv.addEventListener('pointermove', e => { if (winPtr && e.pointerId === winPtr.id) { const L = UI.toLogical(e.clientX, e.clientY); winPtr.moved += Math.abs(L.y - winPtr.ly); if (winPtr.moved > 6) Win.drag(L.y - winPtr.ly, winPtr.x, winPtr.y); winPtr.ly = L.y; return; }
       if (joy && e.pointerId === joy.id) { const L = UI.toLogical(e.clientX, e.clientY); let dx = L.x - joy.ox, dy = L.y - joy.oy; const l = Math.hypot(dx, dy), mx = 48; if (l > mx) { dx = dx / l * mx; dy = dy / l * mx; } joy.dx = dx; joy.dy = dy; } });
     const end = e => { if (winPtr && e.pointerId === winPtr.id) { const w = winPtr; winPtr = null; if (w.moved <= 6 && e.type === 'pointerup') Win.tap(w.x, w.y); return; }
-      if (joy && e.pointerId === joy.id) joy = null; const s = pts.get(e.pointerId); if (s) { pts.delete(e.pointerId); if (Math.hypot(e.clientX - s.x, e.clientY - s.y) < 12 && UI.mode === 'play' && !UI.panelOpen()) tapWorld(e.clientX, e.clientY); } };
+      if (joy && e.pointerId === joy.id) joy = null; const s = pts.get(e.pointerId); if (s) { UI.cancelAssign(); pts.delete(e.pointerId); if (Math.hypot(e.clientX - s.x, e.clientY - s.y) < 12 && UI.mode === 'play' && !UI.panelOpen()) tapWorld(e.clientX, e.clientY); } };
     cv.addEventListener('pointerup', end); cv.addEventListener('pointercancel', end);
     addEventListener('keydown', e => { if (e.target.tagName === 'INPUT') return; const k = e.key.length === 1 ? e.key.toLowerCase() : e.key; keys[k] = true;
       if (UI.mode !== 'play') return;
@@ -146,9 +146,13 @@ const UI = (() => {
     // hedef
     const t = Game.target;
     if (t && !t.dead) {
-      const x = vw / 2 - 80; ctx.fillStyle = 'rgba(0,0,0,.6)'; ctx.fillRect(x, 4, 160, 26);
-      ctx.textAlign = 'center'; ctx.font = 'bold 10px "Noto Sans", sans-serif'; text(trName(t.name) + '  Sv' + t.d.lv, vw / 2, 15, t.d.rank ? '#ffb050' : '#f0e0d0');
-      bar(x + 6, 19, 148, 7, t.hp / t.maxHp, '#ff6040', '#801008');
+      const w = 170, x = Math.round(vw / 2 - w / 2), y = 4, col = t.d.rank === 2 ? '#e890ff' : t.d.rank ? '#ffb050' : t.d.lv > P.lv + 3 ? '#ff6040' : '#f0e0d0';
+      ctx.fillStyle = 'rgba(0,0,0,.72)'; ctx.fillRect(x, y, w, 30);
+      ctx.fillStyle = '#9f998f'; ctx.fillRect(x, y, w, 1); ctx.fillRect(x, y + 29, w, 1); ctx.fillStyle = '#4b4547'; ctx.fillRect(x, y + 1, 1, 28); ctx.fillRect(x + w - 1, y + 1, 1, 28);
+      ctx.textAlign = 'left'; ctx.font = 'bold 10px "Noto Sans", sans-serif'; text(trName(t.name), x + 6, y + 12, col);
+      ctx.textAlign = 'right'; ctx.font = 'bold 9px "Noto Sans", sans-serif'; text('Sv' + t.d.lv, x + w - 6, y + 12, '#ffe48a');
+      ctx.fillStyle = 'rgba(0,0,0,.8)'; ctx.fillRect(x + 6, y + 17, w - 12, 7); ctx.fillStyle = '#e02818'; ctx.fillRect(x + 7, y + 18, (w - 14) * clamp(t.hp / t.maxHp, 0, 1), 5);
+      ctx.textAlign = 'center'; ctx.font = '7px "Noto Sans", sans-serif'; text(`${Math.max(0, Math.ceil(t.hp))}/${t.maxHp}`, vw / 2, y + 24, '#fff');
     }
     // sağ üst: mini harita
     drawMinimap(vw - 92, 4, 88, 66);
@@ -165,15 +169,17 @@ const UI = (() => {
     // sağ alt: klasik mobil MMORPG düzeni: büyük saldırı düğmesi, çevresinde yay biçiminde beceri ve iksir yuvaları
     // (yuvalar orijinal halka görseli 7078 ile; P.quick[0] = büyük düğme, [1..3] iç yay, [4..7] dış yay)
     const ring = U(7078), ax = vw - 50 * HS - safeR, ay = VH - 50 * HS;
-    const slotAt = (cx, cy, r, sl, fn) => {
+    const pulse = assign ? 0.5 + 0.5 * Math.sin(performance.now() / 160) : 0;
+    const slotAt = (cx, cy, r, sl, fn, qi) => {
+      if (assign) { ctx.fillStyle = `rgba(255,210,80,${0.25 + 0.35 * pulse})`; ctx.beginPath(); ctx.arc(cx, cy, r + 5, 0, 7); ctx.fill(); }
       if (ring.complete && ring.naturalWidth) { const w = r * 2 + 8; ctx.drawImage(ring, cx - w / 2, cy - w / 2, w, w); }
       // simge halkanın iç boşluğuna, yuvarlak kırpılarak çizilir
       const ir = r * 0.66; ctx.save(); ctx.beginPath(); ctx.arc(cx, cy, ir, 0, 7); ctx.clip(); ctx.fillStyle = '#0c0805'; ctx.fillRect(cx - ir, cy - ir, ir * 2, ir * 2);
       const k = ir * 2 / 32; ctx.translate(cx - ir, cy - ir); ctx.scale(k, k); drawSlot(sl, 0, 0); ctx.restore();
-      hud.push([cx - r - 2, cy - r - 2, r * 2 + 4, r * 2 + 4, fn]);
+      hud.push([cx - r - 2, cy - r - 2, r * 2 + 4, r * 2 + 4, () => assign ? doAssign(qi) : fn()]);
     };
-    slotAt(ax, ay, 32 * HS, P.quick[0], () => attack());
-    const arc = (R, n, from, to, r, base) => { for (let i = 0; i < n; i++) { const a = (from + (to - from) * (n === 1 ? 0 : i / (n - 1))) * Math.PI / 180, qi = base + i; slotAt(ax + Math.cos(a) * R * HS, ay + Math.sin(a) * R * HS, r * HS, P.quick[qi], () => quick(qi)); } };
+    slotAt(ax, ay, 32 * HS, P.quick[0], () => attack(), 0);
+    const arc = (R, n, from, to, r, base) => { for (let i = 0; i < n; i++) { const a = (from + (to - from) * (n === 1 ? 0 : i / (n - 1))) * Math.PI / 180, qi = base + i; slotAt(ax + Math.cos(a) * R * HS, ay + Math.sin(a) * R * HS, r * HS, P.quick[qi], () => quick(qi), qi); } };
     arc(66, 3, 180, 270, 19, 1);            // iç yay: 3 beceri
     arc(112, 4, 180, 270, 18, 4);           // dış yay: 2 beceri + 2 iksir
     // hedef değiştir: yayın dışında küçük düğme
@@ -209,6 +215,11 @@ const UI = (() => {
       ctx.textAlign = 'right'; ctx.font = 'bold 9px sans-serif'; text(countItem(id), x + 31, y + 31, '#fff');
     }
   }
+  // kısayol atama: pencereden "Kısayol" seçilince yay yuvaları parlar, dokunulan yuvaya yerleşir
+  let assign = null;
+  function startAssign(sl, name) { assign = { sl, name }; closeAll(); toastMsg = tx('Bir yuvaya dokun') + ': ' + name; toastT = 3; }
+  function doAssign(qi) { const P = Game.P, sl = assign.sl; P.quick = P.quick.map(q => q === sl ? null : q); P.quick[qi] = sl; assign = null; SFX.play('repair', 0.5); save(); toastMsg = tx('Kısayola yerleşti.'); toastT = 1.5; }
+  function cancelAssign() { if (assign) { assign = null; toastT = 0; } }
   function quick(i) { const sl = Game.P.quick[i]; if (!sl) return; if (sl[0] === 's') useSkill(+sl.slice(1)); else useItem(sl.slice(2)); }
   function attack() { const p = Game.player; const t = Game.target && !Game.target.dead ? Game.target : nearestMob(9); if (t) { setTarget(t); p.path = null; } else log('Yakında hedef yok.'); }
   function drawMinimap(x, y, w, h) {
@@ -307,7 +318,7 @@ const UI = (() => {
       title = 'Ayarlar';
       h = `<div class="iact"><button class="obtn" data-act="tsfx">Ses efektleri: ${SFX.opt.sfx ? 'Açık' : 'Kapalı'}</button><button class="obtn" data-act="tmus">Müzik: ${SFX.opt.music ? 'Açık' : 'Kapalı'}</button></div>
         <div class="iact"><button class="obtn" data-act="lang">${LANG === 'tr' ? 'Language: English' : 'Dil: Türkçe'}</button></div>
-        <div class="iact"><button class="obtn" data-act="totitle">Giriş ekranına dön</button><button class="obtn" data-act="newchar">Yeni karakter oluştur</button></div><p class="hint">Oyun otomatik kaydedilir. Sürüm 11141706</p>`;
+        <div class="iact"><button class="obtn" data-act="totitle">Giriş ekranına dön</button><button class="obtn" data-act="newchar">Yeni karakter oluştur</button></div><p class="hint">Oyun otomatik kaydedilir. Sürüm 11141708</p>`;
     }
     ptitle.textContent = tx(title); pbody.innerHTML = h; txDom(pbody);
   }
@@ -444,6 +455,7 @@ const UI = (() => {
   }
   return {
     openShop(cn) { closeAll(); Win.open('shop', { shop: cn }); },
+    startAssign, cancelAssign,
     boot, rockerPos, toLogical, toWorld, hudHit, open, closeAll, panelOpen, dialog, say, attack,
     get vw() { return vw; }, get mode() { return mode; },
     log, toast, zone(m) { zoneMsg = m; zoneT = 3; }, levelUp(n) { lvlN = n; lvlT = 2.5; }, hurt() { hurtT = 0.4; },

@@ -40,6 +40,8 @@ const EN_UI = {
   'Bu bir toplama noktası. Madencilik ve toplama meslekleri yakında eklenecek.': 'This is a gathering node. Mining and gathering professions are coming soon.',
   'Savaşta yenildin. Canının ve mananın yarısıyla yeniden doğacaksın.': 'You were defeated. You will revive with half your HP and mana.',
   'Karakter ▸': 'Character ▸', 'Ses efektleri': 'Sound effects', 'Müzik': 'Music', 'Açık': 'On', 'Kapalı': 'Off', 'Eminim: karakter silinsin': 'Sure: delete the character', 'Oyun otomatik kaydedilir.': 'The game saves automatically.', 'Dil / Language': 'Language / Dil',
+  'Bir yuvaya dokun': 'Tap a slot', 'Kısayola yerleşti.': 'Placed on the shortcut.', 'yok edilsin mi?': 'destroy it?', 'görev bırakılsın mı?': 'abandon the quest?', 'Satın alınsın mı?': 'Buy it?', 'Toplam': 'Total', 'En fazla': 'Max',
+  'Karakterin silinecek ve yeni karakter oluşturacaksın. Emin misin?': 'Your character will be deleted and you will create a new one. Are you sure?',
   'Devam': 'Continue', 'Listeden bir eşya seç.': 'Select an item from the list.', 'Çantada': 'In bag',
   'Yol Bul': 'Pathfind', 'Görev Listesi': 'Quest List', 'Sık Kullanılan': 'Common', 'Eşya': 'Items', 'Sistem': 'System', 'Beceri': 'Skills', 'Harita': 'Map', 'Alışveriş': 'Shop', 'Teslim': 'Turn in', 'Görev bırakıldı': 'Quest abandoned',
   'Aktif görev yok.': 'No active quests.', 'Hedef bu haritada değil.': 'The target is not on this map.',

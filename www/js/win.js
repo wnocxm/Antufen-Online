@@ -10,8 +10,42 @@ const Win = (() => {
   const quickIds = () => Forms.get('bag').c.filter(c => c.t === 8 && c.ev.includes('OnDrop')).sort((a, b) => a.s[0].r[0] - b.s[0].r[0]);
   const PAGES = [51668, 51669, 51670, 51674];
 
+  let modal = null;
+  function ask(text, onYes) { modal = { k: 'yesno', text, onYes }; SFX.play('menu_appear', 0.4); }
+  function askNum(title, max, onOk, unit) { modal = { k: 'num', title, max: Math.max(1, max), n: 1, onOk, unit }; SFX.play('menu_appear', 0.4); }
+  function buyAsk(id) {
+    const it = ITEMS[id], P = Game.P, can = Math.floor(P.gold / it.price);
+    if (can < 1) return UI.toast('Yeterli altının yok.');
+    if (!it.use) return ask(`${it.name}: ${it.price} ${tx('altın')}. ${tx('Satın alınsın mı?')}`, () => buyItem(id, 1));
+    askNum(it.name, Math.min(99, can), n => buyItem(id, n), it.price);
+  }
+  function drawModal(ctx, vw, VH) {
+    ctx.fillStyle = 'rgba(0,0,0,.45)'; ctx.fillRect(0, 0, vw, VH); const mh = [];
+    if (modal.k === 'yesno') {
+      const f = Forms.get('yesno'), ox = Math.round((vw - f.w) / 2), oy = Math.round((VH - f.h) / 2);
+      Forms.draw(ctx, 'yesno', ox, oy, { state: c => pressed === 'm' + c.id ? 1 : 0 });
+      wrap(ctx, modal.text, f.w - 30, 12).slice(0, 5).forEach((l, i) => Forms.label(ctx, l, ox + 15, oy + 14 + i * 16, f.w - 30, 16, GOLD, 'center', 12));
+      for (const [id, t] of [[52786, 'Tamam'], [52788, 'İptal']]) { const r = Forms.ctrl('yesno', id).s[0].r; Forms.label(ctx, t, ox + r[0], oy + r[1], r[2], r[3], '#ffffff', 'center', 12); mh.push({ id: 'm' + id, x: ox + r[0], y: oy + r[1], w: r[2], h: r[3] }); }
+    } else {
+      const f = Forms.get('selnum'), ox = Math.round((vw - f.w) / 2), oy = Math.round((VH - f.h) / 2);
+      Forms.draw(ctx, 'selnum', ox, oy, { hide: c => c.id === 50763 || c.id === 50764, state: c => pressed === 'm' + c.id ? 1 : 0, text: c => c.id === 52791 ? 'Tamam' : c.id === 52792 ? 'İptal' : undefined });
+      Forms.label(ctx, modal.title, ox + 10, oy + 14, f.w - 20, 20, GOLD, 'center', 13);
+      const nb = Forms.ctrl('selnum', 50761).s[0].r; Forms.label(ctx, String(modal.n), ox + nb[0], oy + nb[1], nb[2], nb[3], '#ffffff', 'center', 16);
+      if (modal.unit) Forms.label(ctx, `${tx('Toplam')}: ${modal.n * modal.unit} ${tx('altın')}  ·  ${tx('En fazla')}: ${modal.max}`, ox + 10, oy + 98, f.w - 20, 18, '#d8d0c0', 'center', 11);
+      for (const id of [50758, 50759, 50761, 52791, 52792]) { const r = Forms.ctrl('selnum', id).s[0].r; mh.push({ id: 'm' + id, x: ox + r[0], y: oy + r[1], w: r[2], h: r[3] }); }
+    }
+    modal.hits = mh;
+  }
+  function tapModal(x, y) {
+    const h = (modal.hits || []).find(r => x >= r.x && x < r.x + r.w && y >= r.y && y < r.y + r.h); if (!h) return;
+    pressed = h.id; pressT = performance.now(); SFX.play('menusel', 0.6); const m = modal;
+    if (h.id === 'm52786') { modal = null; m.onYes(); } else if (h.id === 'm52788' || h.id === 'm52792') modal = null;
+    else if (h.id === 'm50758') m.n = m.n > 1 ? m.n - 1 : m.max; else if (h.id === 'm50759') m.n = m.n < m.max ? m.n + 1 : 1;
+    else if (h.id === 'm50761') m.n = m.n === m.max ? 1 : Math.min(m.max, m.n < 10 ? 10 : m.max);   // sayıya dokun: 10, sonra en fazla
+    else if (h.id === 'm52791') { modal = null; m.onOk(m.n); }
+  }
   function open(name, o = {}) { cur = name; opt = o; if (name === 'npc') { D.q = null; SFX.play('request', 0.6); } if (name === 'task') { K.sel = null; K.sure = false; } if (name === 'menu') M.page = 0; if (name === 'shop') { H.tab = 0; H.sel = null; H.off = 0; } B.sel = null; B.sure = false; B.assign = false; B.page = 0; if (o.cat != null) B.cat = o.cat; SFX.play('menu_appear', 0.5); if (name === 'bag') questFlag('openBag'); }
-  function close() { cur = null; opt = {}; }
+  function close() { cur = null; opt = {}; modal = null; }
   const isOpen = () => !!cur;
 
   function bagItems() {
@@ -29,6 +63,7 @@ const Win = (() => {
     if (cur === 'bag') drawBag(ctx, vw, VH); else if (cur === 'role') drawRole(ctx, vw, VH); else if (cur === 'npc') drawNpc(ctx, vw, VH); else if (cur === 'task') drawTask(ctx, vw, VH); else if (cur === 'menu') drawMenu(ctx, vw, VH); else if (cur === 'skill') drawSkill(ctx, vw, VH); else if (cur === 'shop') drawShop(ctx, vw, VH); else if (cur === 'dead') drawDead(ctx, vw, VH);
     if (cur === 'sys') drawSys(ctx, vw, VH); else if (cur === 'map') drawMap(ctx, vw, VH);
     if (HUB.some(h => h[0] === cur) || cur === 'hub') drawHub(ctx, vw, VH);
+    if (modal) drawModal(ctx, vw, VH);
     if (pressed && performance.now() - pressT > 160) pressed = null;
   }
   // ---------------- Karakter menüsü: ekranın solunda sekmeler; pencereler arasında geçiş ----------------
@@ -61,7 +96,7 @@ const Win = (() => {
     rowBtn(ctx, 'mus', ox + 4, oy + 75, 'Müzik', SFX.opt.music ? on : off);
     rowBtn(ctx, 'lang', ox + 4, oy + 110, 'Dil / Language', LANG === 'tr' ? 'Türkçe' : 'English');
     rowBtn(ctx, 'title', ox + 4, oy + 145, 'Giriş ekranına dön', null);
-    rowBtn(ctx, 'newc', ox + 4, oy + 180, sysSure ? 'Eminim: karakter silinsin' : 'Yeni karakter oluştur', null, sysSure);
+    rowBtn(ctx, 'newc', ox + 4, oy + 180, 'Yeni karakter oluştur', null);
     Forms.label(ctx, tx('Oyun otomatik kaydedilir.') + '  ' + tx('Sürüm ' + VER), ox + 8, oy + 222, 290, 14, '#8d8983', 'left', 10);
   }
   function tapSys(id) {
@@ -69,7 +104,7 @@ const Win = (() => {
     if (id === 'sfx') SFX.setSfx(!SFX.opt.sfx); else if (id === 'mus') SFX.setMusic(!SFX.opt.music);
     else if (id === 'lang') { save(); setLang(LANG === 'tr' ? 'en' : 'tr'); }
     else if (id === 'title') { save(); location.reload(); }
-    else if (id === 'newc') { if (!sysSure) { sysSure = true; return; } localStorage.removeItem(SAVE_KEY); location.reload(); }
+    else if (id === 'newc') ask('Karakterin silinecek ve yeni karakter oluşturacaksın. Emin misin?', () => { localStorage.removeItem(SAVE_KEY); location.reload(); });
   }
   // ---------------- Dünya haritası (dosyadaki orijinal harita görselleri) ----------------
   const mapImg = {};
@@ -91,12 +126,12 @@ const Win = (() => {
     const selIt = B.sel && ITEMS[B.sel] && countItem(B.sel) ? ITEMS[B.sel] : null; if (!selIt) B.sel = null;
     const slotMap = new Map(slots.map((c, i) => [c.id, i])), quickMap = new Map(quick.map((c, i) => [c.id, i]));
     Forms.draw(ctx, 'bag', ox, oy, {
-      hide: c => c.id === 51661 || (PAGES.includes(c.id) && PAGES.indexOf(c.id) >= Math.max(pages, 1)),
+      hide: c => c.id === 51661 || c.id === 50772 || quickMap.has(c.id) || (PAGES.includes(c.id) && PAGES.indexOf(c.id) >= Math.max(pages, 1)),
       state: c => {
         if (pressed === c.id) return 1;
         if (PAGES.includes(c.id)) return PAGES.indexOf(c.id) === B.page ? 1 : 0;
         if (slotMap.has(c.id)) { const e = items[B.page * per + slotMap.get(c.id)]; return e && e.id && e.id === B.sel ? 1 : 0; }
-        if (quickMap.has(c.id)) return B.assign ? 1 : 0;
+
         return 0;
       },
       after: (c, x, y, w, h) => {
@@ -120,8 +155,8 @@ const Win = (() => {
     const act = selIt ? (selIt.slot ? 'Giy' : selIt.growth ? 'Aç' : selIt.use ? 'Kullan' : '') : '';
     const Rm = Forms.drawGroup(ctx, 'bag', 7, ox + f.w + 2, oy + 10, {
       hide: c => c.id === 52793 || c.id === 52093 || (c.id === 52400 && !opt.shop),
-      state: c => pressed === c.id || (c.id === 52336 && B.detail) || (c.id === 51672 && B.assign) || (c.id === 52337 && B.sure) ? 1 : 0,
-      text: c => c.id === 52400 && selIt ? `Sat (+${selIt.sell || 1})` : c.id === 52337 && B.sure ? 'Emin misin?' : undefined,
+      state: c => pressed === c.id || (c.id === 52336 && B.detail) || false ? 1 : 0,
+      text: c => c.id === 52400 && selIt ? `Sat (+${selIt.sell || 1})` : undefined,
     });
     for (const m of Rm) if (m.c.id === 50773) Forms.label(ctx, act || '—', m.x, m.y, m.w, m.h, act ? '#ffe070' : '#777', 'center', 12);
     for (const m of L.concat(Rm)) hits.push({ id: m.c.id, x: m.x, y: m.y, w: m.w, h: m.h });
@@ -136,12 +171,13 @@ const Win = (() => {
       panel(ctx, X - (W - 79), by, W, bh);
       lines.forEach(([t, c, s], i) => Forms.label(ctx, t, X - (W - 79) + 5, by + 5 + i * 14, W - 10, 14, c, 'left', s));
     }
-    if (B.assign) Forms.label(ctx, 'Alttaki bir kısayol yuvasına dokun', ox, oy + f.h + 2, f.w, 14, '#ffe070', 'center', 11);
+
   }
   function panel(ctx, x, y, w, h) { ctx.fillStyle = 'rgba(0,0,0,.8)'; ctx.fillRect(x, y, w, h); ctx.strokeStyle = '#9f998f'; ctx.lineWidth = 1; ctx.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1); ctx.strokeStyle = '#4b4547'; ctx.strokeRect(x + 1.5, y + 1.5, w - 3, h - 3); }
 
   function tap(x, y) {
     if (!cur) return false;
+    if (modal) { tapModal(x, y); return true; }
     let h = null; for (const r of hits) if (x >= r.x && x < r.x + r.w && y >= r.y && y < r.y + r.h) { if (r.id === 'frame') { if (!h) h = r; } else if (!h || h.id === 'frame' || r.w * r.h < h.w * h.h) h = r; }
     if (!h) { if (cur !== 'dead') close(); return true; }
     pressed = h.id; pressT = performance.now();
@@ -173,9 +209,9 @@ const Win = (() => {
     const it = ITEMS[B.sel];
     if (id === 50773) { useItem(B.sel); return; }
     if (id === 52400 && opt.shop) { sellItem(B.sel); return; }
-    if (id === 51672) { if (it.use) B.assign = !B.assign; else UI.toast('Yalnızca iksirler kısayola konabilir.'); return; }
+    if (id === 51672) { if (it.use) UI.startAssign('i:' + B.sel, it.name); else UI.toast('Yalnızca iksirler kısayola konabilir.'); return; }
     if (id === 52336) { B.detail = !B.detail; return; }
-    if (id === 52337) { if (it.quest) return; if (!B.sure) { B.sure = true; return; } removeItem(B.sel, countItem(B.sel)); B.sure = false; UI.log(`${it.name} yok edildi.`); save(); return; }
+    if (id === 52337) { if (it.quest) return; const sid = B.sel; ask(`${it.name}: ${tx('yok edilsin mi?')}`, () => { removeItem(sid, countItem(sid)); B.sel = null; UI.log(`${it.name} yok edildi.`); save(); }); return; }
   }
   // ---------------- Karakter ekranı (FORM_ROLEPROP): sayfa 0 özellikler, sayfa 1 ekipman ----------------
   const R = { page: 0, sel: null };
@@ -298,7 +334,7 @@ const Win = (() => {
     if (selQ) { const st = P.quests[selQ.id], lines = wrap(ctx, K.detail ? selQ.text : selQ.goal, 288, 10).slice(0, 4);
       lines.forEach((l, i) => Forms.label(ctx, l, ox + 10, oy + 257 + i * 12, 290, 12, '#ffffff', 'left', 10));
       Forms.label(ctx, tx('Teslim') + ': ' + trName(selQ.to), ox + 10, oy + 257 + 48, 290, 12, '#e6cf89', 'left', 10); }
-    const Rm = Forms.drawGroup(ctx, 'task', 7, ox + f.w + 2, oy + 10, { page: 0, state: c => pressed === c.id || (c.id === 52573 && K.detail) || (c.id === 52475 && K.sure) ? 1 : 0, text: c => c.id === 52475 && K.sure ? 'Emin misin?' : undefined });
+    const Rm = Forms.drawGroup(ctx, 'task', 7, ox + f.w + 2, oy + 10, { page: 0, state: c => pressed === c.id || (c.id === 52573 && K.detail) || (c.id === 52475 && K.sure) ? 1 : 0, text: () => undefined });
     for (const m of Rm) hits.push({ id: m.c.id, x: m.x, y: m.y, w: m.w, h: m.h });
     const cl = Forms.ctrl('task', 52734).s[0].r; hits.push({ id: 52734, x: ox + cl[0], y: oy + cl[1], w: cl[2], h: cl[3] }); hits.push({ id: 'frame', x: ox, y: oy, w: f.w, h: f.h });
   }
@@ -310,7 +346,7 @@ const Win = (() => {
     const q = K.sel && QBY[K.sel]; if (!q) return;
     if (id === 52573) { K.detail = !K.detail; return; }
     if (id === 52476) { UI.closeAll(); questWalk(q); return; }                                   // Yol Bul
-    if (id === 52475) { if (!K.sure) { K.sure = true; return; } delete P.quests[q.id]; K.sure = false; K.sel = null; UI.log(`${tx('Görev bırakıldı')}: ${q.title}`); save(); return; }
+    if (id === 52475) { ask(`${q.title}: ${tx('görev bırakılsın mı?')}`, () => { delete P.quests[q.id]; K.sel = null; UI.log(`${tx('Görev bırakıldı')}: ${q.title}`); save(); }); return; }
   }
   // ---------------- Ana menü (FORM_V5_MENU): sayfa 0 kategoriler, alt sayfalar işlevler ----------------
   const M = { page: 0 };
@@ -339,22 +375,22 @@ const Win = (() => {
     const byId = id => C.skills.find(k => k.id === id), cell = {}; for (const [sid, col, row] of tree.cells) cell[SGRID[row][col]] = byId(sid);
     const selSk = S.sel && byId(S.sel);
     Forms.draw(ctx, 'skill', ox, oy, {
-      hide: c => c.id === 50866 || c.id === 50307 || (c.t === 8 && !cell[c.id] && !SQUICK.includes(c.id)) || [51702, 51703, 51704, 51705].includes(c.id),
-      state: c => pressed === c.id || (cell[c.id] && cell[c.id].id === S.sel) || (SQUICK.includes(c.id) && S.assign) ? 1 : 0,
+      hide: c => c.id === 50866 || c.id === 50307 || c.id === 50843 || (c.t === 8 && !cell[c.id]) || [51702, 51703, 51704, 51705].includes(c.id),
+      state: c => pressed === c.id || (cell[c.id] && cell[c.id].id === S.sel) ? 1 : 0,
       text: c => c.id === 50313 ? '' : undefined,
       after: (c, x, y, w, h) => {
         const sk = cell[c.id];
         if (sk) { const r = skRank(sk); if (!r) ctx.globalAlpha = 0.4; drawIcon(ctx, { ik: sk.ik || 'skill', icon: sk.icon }, x + 5, y + 5); ctx.globalAlpha = 1;
           Forms.label(ctx, `${r}/${SK_MAX}`, x - 6, y + 35, 48, 11, r ? '#ffe070' : P.lv < sk.lv ? '#888' : '#ffffff', 'center', 9);
           Forms.label(ctx, sk.name, x - 32, y + 45, 100, 11, r ? '#e8e0d0' : '#999', 'center', 8); hits.push({ id: c.id, x: x - 6, y: y - 2, w: 48, h: 52 }); }
-        const qi = SQUICK.indexOf(c.id);
+        const qi = -1;
         if (qi >= 0) { const sl = P.quick[qi]; if (sl && sl[0] === 's') { const k = C.skills[+sl.slice(1)]; if (k) drawIcon(ctx, { ik: k.ik || 'skill', icon: k.icon }, x + 5, y + 5); } else if (sl) { const it = ITEMS[sl.slice(2)]; if (it) drawIcon(ctx, it, x + 5, y + 5); } hits.push({ id: c.id, x, y, w, h }); }
       },
     });
     Forms.label(ctx, `${tx('Beceri puanı')}: ${P.sp || 0}`, ox + 4, oy + 14, 262, 20, (P.sp || 0) > 0 ? '#ffe070' : '#e6cf89', 'center', 12);
     const L = Forms.drawGroup(ctx, 'skill', 5, ox - 80, oy + 10, { hide: c => !STABS.includes(c.id), state: c => STABS.indexOf(c.id) === S.tree ? 1 : 0 });
     L.forEach((m, i) => Forms.label(ctx, trees[i].name, m.x, m.y, m.w, m.h, '#ffffff', 'center', 12));
-    const Rm = Forms.drawGroup(ctx, 'skill', 7, ox + f.w + 2, oy + 10, { hide: c => c.id === 52485, state: c => pressed === c.id || (c.id === 52586 && S.detail) || (c.id === 51712 && S.assign) ? 1 : 0 });
+    const Rm = Forms.drawGroup(ctx, 'skill', 7, ox + f.w + 2, oy + 10, { hide: c => c.id === 52485, state: c => pressed === c.id || (c.id === 52586 && S.detail) ? 1 : 0 });
     for (const m of L.concat(Rm)) hits.push({ id: m.c.id, x: m.x, y: m.y, w: m.w, h: m.h });
     if (selSk && S.detail) {
       const r = skRank(selSk), lines = [[selSk.name + (selSk.pas ? ' ' + tx('(edilgen)') : ''), '#ffd870', 12], [`${tx('Kademe')} ${r}/${SK_MAX}`, '#ffffff', 10]];
@@ -364,7 +400,7 @@ const Win = (() => {
       const bw = 152, bh = lines.length * 13 + 10, bx = ox - 2 - bw, by = oy + 10 + 2 * 46 + 8; panel(ctx, bx, by, bw, bh);
       lines.forEach(([t, c, sz], i) => Forms.label(ctx, t, bx + 5, by + 5 + i * 13, bw - 10, 13, c, 'left', sz));
     }
-    if (S.assign) Forms.label(ctx, 'Alttaki bir kısayol yuvasına dokun', ox, oy + 322 + 2, f.w, 14, '#ffe070', 'center', 11);
+
     const cl = Forms.ctrl('skill', 52693).s[0].r; hits.push({ id: 52693, x: ox + cl[0], y: oy + cl[1], w: cl[2], h: cl[3] }); hits.push({ id: 'frame', x: ox, y: oy, w: f.w, h: 322 });
     S._cell = cell;
   }
@@ -379,7 +415,7 @@ const Win = (() => {
     if (id === 52586) { S.detail = !S.detail; return; }
     if (!sk) return;
     if (id === 50250) { skillUp(sk); return; }
-    if (id === 51712) { if (sk.pas) UI.toast('Edilgen beceriler kısayola konmaz.'); else if (!skRank(sk)) UI.toast('Önce beceriyi öğren.'); else S.assign = !S.assign; return; }
+    if (id === 51712) { if (sk.pas) UI.toast('Edilgen beceriler kısayola konmaz.'); else if (!skRank(sk)) UI.toast('Önce beceriyi öğren.'); else UI.startAssign('s' + C.skills.indexOf(sk), sk.name); return; }
   }
   // ---------------- Dükkân (FORM_STORE): solda sekmeler, ortada liste (simge, ad, fiyat), sağda Satın Al / Sat / Ayrıntı ----------------
   const H = { tab: 0, sel: null, off: 0, detail: true, acc: 0 };
@@ -419,10 +455,10 @@ const Win = (() => {
     if (id === 52701) return UI.closeAll();
     if (HTABS.includes(id)) { H.tab = HTABS.indexOf(id); H.sel = null; H.off = 0; SFX.play('skill_pageflip'); return; }
     const i = HROWS.indexOf(id);
-    if (i >= 0) { const it = shopItems()[H.off + i]; if (!it) return; const now = performance.now(); if (H.sel === it && shopTap.id === it && now - shopTap.t < 450) { buyItem(it, 1); shopTap.id = null; return; } H.sel = it; shopTap = { id: it, t: now }; SFX.play('menusel', 0.6); return; }
+    if (i >= 0) { const it = shopItems()[H.off + i]; if (!it) return; const now = performance.now(); if (H.sel === it && shopTap.id === it && now - shopTap.t < 450) { buyAsk(it); shopTap.id = null; return; } H.sel = it; shopTap = { id: it, t: now }; SFX.play('menusel', 0.6); return; }
     if (id === 50753) { H.detail = !H.detail; return; }
     if (id === 50752) { const sh = opt.shop; close(); open('bag', { shop: sh }); return; }          // Sat: çantayı satış kipinde aç
-    if (id === 50751) { if (!H.sel) return UI.toast('Listeden bir eşya seç.'); buyItem(H.sel, 1); return; }
+    if (id === 50751) { if (!H.sel) return UI.toast('Listeden bir eşya seç.'); buyAsk(H.sel); return; }
   }
   // liste kaydırma (parmakla sürükleme)
   function drag(dy) { if (cur !== 'shop') return; H.acc += dy; while (H.acc <= -HROW_H) { H.off++; H.acc += HROW_H; } while (H.acc >= HROW_H) { H.off--; H.acc -= HROW_H; } if (H.off < 0) H.off = 0; }
@@ -438,5 +474,5 @@ const Win = (() => {
     hits.push({ id: 'frame', x: ox, y: oy, w: f.w, h: 226 });
   }
   function tapDead(id) { if (id === 52040) { close(); revive(); } }
-  return { open, close, isOpen, draw, tap, drag, get cur() { return cur; } };
+  return { ask, askNum, open, close, isOpen, draw, tap, drag, get cur() { return cur; } };
 })();
