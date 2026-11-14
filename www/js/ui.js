@@ -47,8 +47,9 @@ const UI = (() => {
   let scale = 1, vw = 640, dpr = 1, mode = 'boot';
   const floats = [], logs = [], hud = [];
   let toastMsg = null, toastT = 0, zoneMsg = null, zoneT = 0, lvlT = 0, lvlN = 0, hurtT = 0, fadeOn = false, fadeA = 0;
-  let safeL = 0;
+  let safeL = 0, safeR = 0;
   function resize() {
+    safeR = Math.min(40, (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sar')) || 0) * 0.5);
     safeL = Math.min(40, (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sal')) || 0) * 0.5);
     dpr = Math.min(devicePixelRatio || 1, 2);
     cv.width = innerWidth * dpr; cv.height = innerHeight * dpr;
@@ -155,43 +156,32 @@ const UI = (() => {
     ctx.font = '9px "Noto Sans", sans-serif'; text(`(${Math.round(p.x)},${Math.round(p.y)})  ${P.gold} altın`, vw - 6, 94, '#ffd060');
     // görev takibi
     drawTracker();
-    // alt orta: kısayol çubuğu (orijinal 7003)
-    // dar ekranda çubuk küçülür, ejderha ve sağdaki düğmelerle çakışmaz
-    const qL = rockerPos().x + 70, qk = Math.min(1, (vw - qL - 110) / 480), qb = U(7003), qx = Math.round(Math.max(qL, vw / 2 - 240 * qk)), qy = VH - 89 * qk;
-    ctx.save(); ctx.translate(qx, qy); ctx.scale(qk, qk);
-    if (qb.complete) ctx.drawImage(qb, 0, 0);
-    const slots = [66, 113, 160, 229, 276, 323, 370, 417];
-    slots.forEach((cx, i) => drawSlot(P.quick[i], cx - 16, 54 - 16));
-    ctx.restore();
-    slots.forEach((cx, i) => hud.push([qx + (cx - 16) * qk, qy + 38 * qk, 32 * qk, 32 * qk, () => quick(i)]));
-    hud.push([qx + 14 * qk, qy + 40 * qk, 34 * qk, 36 * qk, () => open('menu')]);
-    hud.push([qx + 430 * qk, qy + 40 * qk, 34 * qk, 36 * qk, () => open('quest')]);
     // sol alt: ejderha madalyonu = yürüme kolu (orijinal FORM_ROCKER, 134x134)
     const R = rockerPos(), J = Input.joyState;
     const dm = U(7002); if (dm.complete) ctx.drawImage(dm, R.x - 66, R.y - 67, 132, 134);
     { const kx = R.x + (J ? J.dx : 0), ky = R.y + (J ? J.dy : 0), kn = U(7005);   // orijinal turuncu küre (7005)
       ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = J ? 1 : 0.8; if (kn.complete && kn.naturalWidth) ctx.drawImage(kn, kx - 19, ky - 19, 39, 39); ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over'; }
-    // sağ kenar: yuvarlak düğmeler (saldırı, hedef, çanta)
-    // orijinal düğme görselleri: 7078 halka (47x47), 7125 sohbet/görev ve 7127 menü (54x54)
-    const rb = (cx, cy, r, icon, label, fn, glyph, base) => {
-      const bi = U(base || 7078), k = base ? 1 : r / 20;
-      if (bi.complete && bi.naturalWidth) { const w = bi.naturalWidth * k, h = bi.naturalHeight * k; ctx.drawImage(bi, cx - w / 2, cy - h / 2, w, h); }
-      if (icon) { const im = uiImg(icon); if (im.complete && im.naturalWidth) ctx.drawImage(im, cx - r * 0.72, cy - r * 0.72, r * 1.44, r * 1.44); }
-      if (glyph) { ctx.textAlign = 'center'; ctx.font = `bold ${Math.round(r)}px serif`; text(glyph, cx, cy + r * 0.36, '#ffe48a'); }
-      if (label) { ctx.textAlign = 'center'; ctx.font = 'bold 8px "Noto Sans", sans-serif'; text(label, cx, cy + (base ? 27 : r + 6) + 6, '#ffe48a'); }
-      hud.push([cx - r - 5, cy - r - 5, r * 2 + 10, r * 2 + 10, fn]);
+    // sağ alt: klasik mobil MMORPG düzeni: büyük saldırı düğmesi, çevresinde yay biçiminde beceri ve iksir yuvaları
+    // (yuvalar orijinal halka görseli 7078 ile; P.quick[0] = büyük düğme, [1..3] iç yay, [4..7] dış yay)
+    const ring = U(7078), ax = vw - 50 - safeR, ay = VH - 50;
+    const slotAt = (cx, cy, r, sl, fn) => {
+      if (ring.complete && ring.naturalWidth) { const w = r * 2 + 8; ctx.drawImage(ring, cx - w / 2, cy - w / 2, w, w); }
+      // simge halkanın iç boşluğuna, yuvarlak kırpılarak çizilir
+      const ir = r * 0.66; ctx.save(); ctx.beginPath(); ctx.arc(cx, cy, ir, 0, 7); ctx.clip(); ctx.fillStyle = '#0c0805'; ctx.fillRect(cx - ir, cy - ir, ir * 2, ir * 2);
+      const k = ir * 2 / 32; ctx.translate(cx - ir, cy - ir); ctx.scale(k, k); drawSlot(sl, 0, 0); ctx.restore();
+      hud.push([cx - r - 2, cy - r - 2, r * 2 + 4, r * 2 + 4, fn]);
     };
-    const sk0 = CLS[P.cls].skills[0];
-    rb(vw - 40, VH - 50, 28, 'icon_res_skill_' + sk0.icon, 'Saldır', () => attack());
-    rb(vw - 92, VH - 30, 15, null, null, () => cycleTarget(), '◎');
-    rb(vw - 32, VH - 124, 19, 'icon_res_item_1038', 'Çanta', () => open('bag'));
-    rb(vw - 84, VH - 112, 17, 'icon_res_skill_' + CLS[P.cls].skills[1].icon, 'Beceri', () => open('skill'));
-    rb(vw - 32, VH - 179, 24, null, 'Görev', () => open('quest'), null, 7125);
-    rb(vw - 32, VH - 236, 24, null, 'Menü', () => open('menu'), null, 7127);
+    slotAt(ax, ay, 32, P.quick[0], () => attack());
+    const arc = (R, n, from, to, r, base) => { for (let i = 0; i < n; i++) { const a = (from + (to - from) * (n === 1 ? 0 : i / (n - 1))) * Math.PI / 180, qi = base + i; slotAt(ax + Math.cos(a) * R, ay + Math.sin(a) * R, r, P.quick[qi], () => quick(qi)); } };
+    arc(66, 3, 180, 270, 19, 1);            // iç yay: 3 beceri
+    arc(112, 4, 180, 270, 18, 4);           // dış yay: 2 beceri + 2 iksir
+    // hedef değiştir: yayın dışında küçük düğme
+    { const tx0 = ax - 142, ty0 = ay + 20; ctx.fillStyle = 'rgba(12,8,5,.8)'; ctx.beginPath(); ctx.arc(tx0, ty0, 12, 0, 7); ctx.fill(); ctx.strokeStyle = '#b89a50'; ctx.lineWidth = 1.5; ctx.stroke();
+      ctx.textAlign = 'center'; ctx.font = 'bold 13px serif'; text('◎', tx0, ty0 + 5, '#ffe48a'); hud.push([tx0 - 15, ty0 - 15, 30, 30, () => cycleTarget()]); }
     // orta alt: yarı saydam mesaj kutusu (orijinaldeki gibi)
     { const now = performance.now(), L = logs.filter(l => now - l.t < 10000).slice(-5);
       if (L.length) {
-        const bw = Math.min(400, vw - 330), bx = Math.round(vw / 2 - bw / 2), bh = L.length * 11 + 6, by = VH - 92 - bh;
+        const bx = rockerPos().x + 76, bw = Math.max(120, Math.min(360, vw - bx - 210)), bh = L.length * 11 + 6, by = VH - 6 - bh;
         ctx.fillStyle = 'rgba(0,0,0,.5)'; ctx.fillRect(bx, by, bw, bh);
         ctx.textAlign = 'left'; ctx.font = '9px "Noto Sans", sans-serif';
         L.forEach((l, i) => { ctx.globalAlpha = Math.min(1, (10000 - (now - l.t)) / 1000); text(l.m, bx + 5, by + 12 + i * 11, l.c); });
@@ -316,7 +306,7 @@ const UI = (() => {
       title = 'Ayarlar';
       h = `<div class="iact"><button class="obtn" data-act="tsfx">Ses efektleri: ${SFX.opt.sfx ? 'Açık' : 'Kapalı'}</button><button class="obtn" data-act="tmus">Müzik: ${SFX.opt.music ? 'Açık' : 'Kapalı'}</button></div>
         <div class="iact"><button class="obtn" data-act="lang">${LANG === 'tr' ? 'Language: English' : 'Dil: Türkçe'}</button></div>
-        <div class="iact"><button class="obtn" data-act="totitle">Giriş ekranına dön</button><button class="obtn" data-act="newchar">Yeni karakter oluştur</button></div><p class="hint">Oyun otomatik kaydedilir. Sürüm 11132230</p>`;
+        <div class="iact"><button class="obtn" data-act="totitle">Giriş ekranına dön</button><button class="obtn" data-act="newchar">Yeni karakter oluştur</button></div><p class="hint">Oyun otomatik kaydedilir. Sürüm 11140929</p>`;
     }
     ptitle.textContent = tx(title); pbody.innerHTML = h; txDom(pbody);
   }
@@ -415,7 +405,7 @@ const UI = (() => {
     mode = 'loading'; $('#loading').classList.remove('hidden');
     await loadScene(Game.P.scene || (Game.P.race === '精灵' ? '120205' : '120207'));
     $('#loading').classList.add('hidden'); mode = 'play';
-    if (!Object.keys(Game.P.done).length && !Object.keys(Game.P.quests).length) { toast('Rehber seni bekliyor: başında ! olan kişiye dokun'); log('Sol alttaki ejderhayı parmağınla kaydırarak yürü ya da haritada bir yere dokun.', '#ffd23a'); log('Canavara dokunursan saldırırsın; sağ alttaki Saldır düğmesi de en yakın canavara saldırır.', '#ffd23a'); }
+    if (!Object.keys(Game.P.done).length && !Object.keys(Game.P.quests).length) { toast('Rehber seni bekliyor: başında ! olan kişiye dokun'); log('Sol alttaki ejderhayı parmağınla kaydırarak yürü ya da haritada bir yere dokun.', '#ffd23a'); log('Canavara dokunursan saldırırsın; sağ alttaki büyük düğme de en yakın canavara saldırır.', '#ffd23a'); }
   }
   let last = performance.now();
   function loop(now) {
@@ -437,7 +427,7 @@ const UI = (() => {
   async function boot() {
     txDom(document.body); await Assets.init('assets/'); await loadItems(); await Forms.init('assets/');
     Input.bind(cv);
-    for (const k of ['AnbufenUI_Resource_7005', 'AnbufenUI_Resource_7078', 'AnbufenUI_Resource_7125', 'AnbufenUI_Resource_7127', 'icon_res_item_1038', 'AnbufenUI_Resource_7003', 'AnbufenUI_Resource_7002', 'AnbufenUI_Resource_7009', 'UIData_2067']) uiImg(k);
+    for (const k of ['AnbufenUI_Resource_7005', 'AnbufenUI_Resource_7078', 'icon_res_item_1038', 'AnbufenUI_Resource_7003', 'AnbufenUI_Resource_7002', 'AnbufenUI_Resource_7009', 'UIData_2067']) uiImg(k);
     $('#loading').classList.add('hidden');
     const s = load();
     if (s) {

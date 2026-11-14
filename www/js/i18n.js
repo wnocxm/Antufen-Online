@@ -54,7 +54,7 @@ const EN_UI = {
   'Yalnızca iksirler kısayola konabilir.': 'Only potions can be put on the shortcut bar.',
   'Rehber seni bekliyor: başında ! olan kişiye dokun': 'The Guide is waiting: tap the person with a ! above their head',
   'Sol alttaki ejderhayı parmağınla kaydırarak yürü ya da haritada bir yere dokun.': 'Drag the dragon at the bottom left to walk, or tap somewhere on the map.',
-  'Canavara dokunursan saldırırsın; sağ alttaki Saldır düğmesi de en yakın canavara saldırır.': 'Tap a monster to attack; the Attack button at the bottom right attacks the nearest one.',
+  'Canavara dokunursan saldırırsın; sağ alttaki büyük düğme de en yakın canavara saldırır.': 'Tap a monster to attack; the big button at the bottom right attacks the nearest one.',
   // eski eşyalar ve görev eşyaları
   'Zayıf Can İksiri': 'Weak Health Potion', 'Can İksiri': 'Health Potion', 'Zayıf Mana İksiri': 'Weak Mana Potion', 'Mana İksiri': 'Mana Potion', 'Gelişim Paketi': 'Growth Pack', 'Görev Eşyası': 'Quest Item',
   'Aç: seviyene uygun ekipman ve iksir çıkar.': 'Open: gives gear and potions for your level.', 'Görev için gerekli.': 'Needed for a quest.',

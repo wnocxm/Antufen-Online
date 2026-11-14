@@ -12,7 +12,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .phead { display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; background: url(assets/ui/AnbufenUI_Resource_7032.png) center/100% 100%; border-bottom: 1px solid #6a5028; font-weight: 700; color: #ffd870; text-shadow: 0 1px 2px #000; }
 #pclose { background: url(assets/ui/AnbufenUI_Resource_7116.png) center/contain no-repeat; border: 0; width: 34px; height: 34px; color: transparent; }
 #pclose:active { background-image: url(assets/ui/AnbufenUI_Resource_7117.png); }
-:root { --sal: env(safe-area-inset-left, 0px); }
+:root { --sal: env(safe-area-inset-left, 0px); --sar: env(safe-area-inset-right, 0px); }
 #pbody { padding: 10px 12px; overflow-y: auto; touch-action: pan-y; font-size: 13px; line-height: 1.45; }
 .hint { color: #a89878; font-size: 11.5px; margin-top: 8px; }
 .menu { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
