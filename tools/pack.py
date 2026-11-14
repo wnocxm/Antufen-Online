@@ -4,7 +4,7 @@ from godat import named
 from lstr import lstrings
 EXP='exp'; OUT=sys.argv[1]
 reg=json.load(open(f'{EXP}/reg.json')); scenes=json.load(open(f'{EXP}/scenes.json'))
-SCENES=['120207','120205','120005','120016','120004','120029','120018','120019','120020','120021']
+SCENES=['120207','120205','120005','120016','120004','120029','120018','120019','120020','120021','120026','120028','120030']
 CIT={i:[s for o,s in lstrings(d)] for i,n,d in named('files/all_citizen.godat')}
 MON={i:[s for o,s in lstrings(d)] for i,n,d in named('files/all_monster.godat')}
 need=set(); maps={}

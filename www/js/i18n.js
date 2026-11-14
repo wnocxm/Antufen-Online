@@ -60,7 +60,9 @@ const EN_UI = {
   // eski eşyalar ve görev eşyaları
   'Zayıf Can İksiri': 'Weak Health Potion', 'Can İksiri': 'Health Potion', 'Zayıf Mana İksiri': 'Weak Mana Potion', 'Mana İksiri': 'Mana Potion', 'Gelişim Paketi': 'Growth Pack', 'Görev Eşyası': 'Quest Item',
   'Aç: seviyene uygun ekipman ve iksir çıkar.': 'Open: gives gear and potions for your level.', 'Görev için gerekli.': 'Needed for a quest.',
-  'Çakal Eti': 'Jackal Meat', 'Tavuk Kanı': 'Chicken Blood', 'Domuz Bacak Kemiği': 'Boar Leg Bone', 'Enfiye Kutusu': 'Snuff Box', 'Orman Kurdu Eti': 'Forest Wolf Meat', 'Yabani Sebze': 'Wild Greens', 'Peri Tozu': 'Fairy Dust',
+  'Çakal Eti': 'Jackal Meat', 'Uzun Kılıç': 'Long Sword', 'Örümcek Zehirli Dişi': 'Spider Venom Fang', 'Kurt Dişi': 'Wolf Fang', 'Şişkin Bez': 'Swollen Gland', 'Kırmızı Desenli Kabuk': 'Red-Patterned Carapace', 'Çakal Beyni': 'Jackal Brain', 'Yılan Siniri': 'Snake Nerve',
+  'Çakal Kaburgası': 'Jackal Rib', 'Akbaba Tüyü': 'Vulture Feather', 'Domuz Dikeni': 'Boar Spike', 'Domuz Kafası': 'Boar Head', 'Taze Solucan Eti': 'Fresh Worm Meat', 'Kuyruk Zehri': 'Tail Venom', 'Taze Akrep Derisi': 'Fresh Scorpion Skin', 'Balçık Zehri': 'Slime Venom',
+  'Örümcek Bacağı Eti': 'Spider Leg Meat', 'Tatlı Bal': 'Sweet Honey', 'Engerek Derisi': 'Viper Skin', 'Kurt Budu': 'Wolf Leg', 'Tavuk Kanı': 'Chicken Blood', 'Domuz Bacak Kemiği': 'Boar Leg Bone', 'Enfiye Kutusu': 'Snuff Box', 'Orman Kurdu Eti': 'Forest Wolf Meat', 'Yabani Sebze': 'Wild Greens', 'Peri Tozu': 'Fairy Dust',
 };
 // değişken içeren metinler
 const EN_RULES = [
@@ -102,7 +104,7 @@ function txDom(root) {
 // ---------------- İngilizce veri (NPC, canavar, bölge adları; orijinal Çince adlara göre) ----------------
 const EN = {
   scene: { '新兵营地': 'Recruit Camp', '观林镇': 'Guanlin Town', '阳光森林': 'Sunny Forest', '阳光森林北': 'Sunny Forest North', '阳光森林南': 'Sunny Forest South', '阳光森林东': 'Sunny Forest East',
-    '巨魔森林': 'Troll Forest', '阳光草原': 'Sunny Plains', '黑暗哨塔': 'Dark Watchtower', '邪教基地': 'Cult Base', '先知神殿': "Prophet's Temple", '神殿故道': 'Old Temple Road', '迷雾荒野': 'Misty Wilds', '恶臭平原': 'Stinking Plain' },
+    '巨魔森林': 'Troll Forest', '阳光草原': 'Sunny Plains', '黑暗哨塔': 'Dark Watchtower', '邪教基地': 'Cult Base', '先知神殿': "Prophet's Temple", '邪气荒野': 'Wicked Wilds', '神殿故道': 'Old Temple Road', '迷雾荒野': 'Misty Wilds', '恶臭平原': 'Stinking Plain' },
   name: {
     '点点我': 'Guide', '新兵队长': 'Recruit Captain', '新兵教练': 'Recruit Trainer', '教练员': 'Instructor', '初级战斗导师': 'Combat Tutor', '观林镇传送员': 'Guanlin Teleporter',
     '鸭子': 'Duck', '鸡': 'Chicken', '神殿骑士': 'Temple Knight', '魔法骷髅': 'Magic Skeleton', '恶魔傀儡': 'Demon Puppet',
@@ -121,6 +123,7 @@ const EN = {
     '驯兽师（夜精灵）': 'Beast Tamer', '希尔芙传信使（夜精灵）': 'Sylph Courier', '神谕先知': 'Oracle Prophet', '狄亚·先知之手': "Dia, Hand of the Prophet", '神殿大厨': 'Temple Head Cook', '追迹者': 'Tracker',
     '夜精灵男孤儿': 'Orphan Elf Boy', '夜精灵女孤儿': 'Orphan Elf Girl', '神殿教师': 'Temple Teacher', '会计师工会志愿者': "Accountants' Guild Volunteer", '种植者工会志愿者': "Growers' Guild Volunteer",
     '通灵学徒': 'Medium Apprentice', '神殿侍卫': 'Temple Guard', '采矿人（夜精灵）': 'Miner', '考古理论者（夜精灵）': 'Archaeologist', '源质炼金师（夜精灵）': 'Essence Alchemist', '技能训练师（夜精灵）': 'Skill Trainer',
+    '饥饿织网者': 'Hungry Weaver', '蝎子': 'Scorpion', '蛇': 'Snake', '史莱姆': 'Slime', '饥饿的食腐豺': 'Hungry Carrion Jackal', '狼': 'Wolf', '精灵战士': 'Elf Warrior', '路匪': 'Bandit',
     '毒蛇帮路匪': 'Viper Gang Bandit', '野猪': 'Wild Boar', '☆【帝国叛徒】迪萨安': '☆【Imperial Traitor】Disaan', '蜘蛛': 'Longleg Spider', '蜘蛛掠夺者': 'Spider Raider',
     '森林狼': 'Forest Wolf', '☆森林狼头领': '☆Forest Wolf Chief', '森林蝰蛇': 'Forest Viper', '恶作剧仙子': 'Prankster Fairy', '毒蛇帮精英': 'Viper Gang Elite', '蜂蜜仙子': 'Honey Fairy',
     '☆毒蛇帮虐杀者': '☆Viper Gang Butcher', '☆精英护卫': '☆Elite Guard', '☆☆【叛徒】萨丁曼': '☆☆【Traitor】Sadinman', '森林巨魔': 'Forest Troll', '☆巨魔摧毁者': '☆Troll Destroyer', '☆饥饿的巨魔': '☆Hungry Troll',
@@ -167,7 +170,17 @@ const EN = {
     '源质炼金师（人类）': 'The alchemy of decomposition is a deep art.', '技能训练师（人类）': 'To live in this world you should learn a craft besides fighting.',
     '荒野向导': 'Glad to see you, youngster. If I have a ? above my head, you can complete a quest with me. Remember that.', '训练官': 'I review the battle results here.',
     '神殿传送员': "Hello, young adventurer. When your recruit training is finished I will teleport you to the Prophet's Temple, where real challenges await.",
-    '狄亚·先知之手': "Welcome to the temple. I carry the Prophet's word.", '神谕先知': 'The oracle sees all, young one.', '神殿侍卫': 'I guard the temple.',
+    '狄亚·先知之手': 'A powerful evil surrounds this temple. I keep watch here and cannot leave, so I need people like you to do all kinds of things for the Prophet.',
+    '神谕先知': 'Everyone has their own path... and the world has its own. Even when we walk through the darkest valley we need not fear, for the world walks with us.',
+    '神殿侍卫': 'Wild beasts never used to attack here, but now we deal with all kinds of monsters every day.',
+    '神殿大厨': "Today's main dish is tender bark bugs roasted in dry leaves, and tomorrow... a good cook should not think about tomorrow.",
+    '追迹者': 'As a tracker, the first thing I learned was not how to track, but how to hide.',
+    '夜精灵男孤儿': 'When I grow up I will have a harem of a hundred beauties of every race! And conquer the world with a sacred beast!',
+    '夜精灵女孤儿': 'I want to go adventuring like you too, but the teacher wants me to study more first.',
+    '神殿教师': 'I teach these lost children as best I can, so they become seeds that carry the spirit of our people.',
+    '会计师工会志愿者': 'Whatever you think of the Oracle Prophet, all I know is her books are a mess... If you want rewards from the temple, come to me; I never get the sums wrong...',
+    '种植者工会志愿者': 'Endless killing and reaping is no lasting way. I came here to plant hardy plants that keep the plain alive.',
+    '通灵学徒': 'When the Prophet meditates she dives into the dangerous sea of spirits; our duty is to guard her.',
     '小草堆': 'There seems to be an ordinary snuff box in the grass.', '草堆': 'An ordinary pile of grass.', '魔法土堆': 'A loose mound of dirt; it looks a little strange.',
     '野菜': 'Fresh ferns growing in the forest.', '魔法草': 'A special plant that grows in the forest.', '林隐仙子': 'The forest is full of nature magic; by resting quietly I can become part of it.',
     '闪光的草堆': 'There seem to be strange plant seeds in the grass.', '警卫卡鲁': 'When will I ever get out of this cursed place...', '战士守卫': 'It is not safe here. Be careful.',

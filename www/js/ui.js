@@ -242,7 +242,7 @@ const UI = (() => {
     for (const q of act) {
       const st = P.quests[q.id]; ctx.font = 'bold 9px "Noto Sans", sans-serif'; text(q.title, 6, y, '#ffd23a'); y += 10;
       ctx.font = '8.5px "Noto Sans", sans-serif';
-      const prog = st.ready ? `Tamam: ${trName(q.to)} ile konuş` : q.type === 'kill' ? `${trName(q.target)}: ${st.n}/${q.count}` : (q.type === 'collect' || q.type === 'pickup') ? `${q.item}: ${st.n}/${q.count}` : q.goal;
+      const prog = questState(q) === 'ready' ? `Tamam: ${trName(q.to)} ile konuş` : q.type === 'deliver' ? `${q.item}: ${giveCount(q)}/${q.count}` : q.type === 'kill' ? `${trName(q.target)}: ${st.n}/${q.count}` : (q.type === 'collect' || q.type === 'pickup') ? `${q.item}: ${st.n}/${q.count}` : q.goal;
       text(prog.length > 44 ? prog.slice(0, 43) + '…' : prog, 8, y, st.ready ? '#9cf58a' : '#e8e0d0'); y += 12;
     }
     if (!act.length && avail.length) { ctx.font = '8.5px "Noto Sans", sans-serif'; text(`! ${trName(avail[0].giver)} sana görev verecek`, 6, y, '#ffd23a'); }
@@ -318,7 +318,7 @@ const UI = (() => {
       title = 'Ayarlar';
       h = `<div class="iact"><button class="obtn" data-act="tsfx">Ses efektleri: ${SFX.opt.sfx ? 'Açık' : 'Kapalı'}</button><button class="obtn" data-act="tmus">Müzik: ${SFX.opt.music ? 'Açık' : 'Kapalı'}</button></div>
         <div class="iact"><button class="obtn" data-act="lang">${LANG === 'tr' ? 'Language: English' : 'Dil: Türkçe'}</button></div>
-        <div class="iact"><button class="obtn" data-act="totitle">Giriş ekranına dön</button><button class="obtn" data-act="newchar">Yeni karakter oluştur</button></div><p class="hint">Oyun otomatik kaydedilir. Sürüm 11141708</p>`;
+        <div class="iact"><button class="obtn" data-act="totitle">Giriş ekranına dön</button><button class="obtn" data-act="newchar">Yeni karakter oluştur</button></div><p class="hint">Oyun otomatik kaydedilir. Sürüm 11141744</p>`;
     }
     ptitle.textContent = tx(title); pbody.innerHTML = h; txDom(pbody);
   }
