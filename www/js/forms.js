@@ -12,7 +12,7 @@ const Forms = (() => {
     '昵称': 'Ad', '种族': 'Irk', '等级': 'Seviye', '称号': 'Unvan', '体力': 'Can', '物攻': 'Fiz. Saldırı', '防御': 'Savunma', '闪避': 'Kaçınma', '释放': 'Büyü Hızı', '圣抗': 'Kutsal Dir.', '火抗': 'Ateş Dir.',
     '职业': 'Sınıf', '经验': 'Tecrübe', '公会': 'Lonca', '法力': 'Mana', '魔攻': 'Büyü Saldırı', '命中': 'İsabet', '暴击': 'Kritik', '韧性': 'Dayanıklılık', '暗抗': 'Gölge Dir.', '冰抗': 'Buz Dir.',
     '升级': 'Yükselt', '洗点': 'Sıfırla', '技能点': 'Beceri puanı',
-    '寻路': 'Yol Bul', '任务列表': 'Görev Listesi', '常用': 'Sık Kullanılan', '道具': 'Eşya', '系统': 'Sistem', '角色': 'Karakter', '技能': 'Beceri', '地域': 'Harita', '背包': 'Çanta', '设置': 'Ayarlar',
+    '寻路': 'Yol Bul', '切换': 'Değiştir', '任务列表': 'Görev Listesi', '常用': 'Sık Kullanılan', '道具': 'Eşya', '系统': 'Sistem', '角色': 'Karakter', '技能': 'Beceri', '地域': 'Harita', '背包': 'Çanta', '设置': 'Ayarlar',
     '接受': 'Kabul', '放弃': 'Bırak', '完成': 'Tamamla', '可接任务': 'Alınabilir', '已接任务': 'Alınmış', '购买': 'Satın Al', '卖出': 'Sat', '修理': 'Onar',
   };
   async function init(base) { F = await fetch(vq(base + 'forms.json')).then(r => r.json()); }

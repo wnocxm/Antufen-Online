@@ -107,18 +107,40 @@ const Win = (() => {
     else if (id === 'newc') ask('Karakterin silinecek ve yeni karakter oluşturacaksın. Emin misin?', () => { localStorage.removeItem(SAVE_KEY); location.reload(); });
   }
   // ---------------- Dünya haritası (dosyadaki orijinal harita görselleri) ----------------
-  const mapImg = {};
+  // Orijinal FORM_WORLDMAP: 480x320 siyah çizim alanı (51935), altında Çıkış / Değiştir / Yol Bul düğmeleri.
+  // Dünya haritası iki parça mürekkep çizimidir (2047 + 2048 = 880x752) ve 1:1 boyutta parmakla kaydırılır.
+  // "Değiştir" bulunduğun haritanın yakın görünümüne geçer (oyuncu, NPC'ler, çıkışlar).
+  const mapImg = {}, WM = { mode: 'world', x: null, y: null };
+  function mapRect(vw, VH) { const W = 480, H = 320; return { W, H, ox: Math.max(80, Math.round((vw - W) / 2) + 30), oy: Math.round((VH - H) / 2) }; }
   function drawMap(ctx, vw, VH) {
-    const W = Math.min(vw - 170, 520), H = 320, ox = Math.round((vw - W) / 2) + 30, oy = Math.round((VH - H) / 2);
-    ctx.fillStyle = 'rgba(0,0,0,.8)'; ctx.fillRect(ox, oy, W, H); ctx.strokeStyle = '#9f998f'; ctx.strokeRect(ox + 0.5, oy + 0.5, W - 1, H - 1); ctx.strokeStyle = '#4b4547'; ctx.strokeRect(ox + 1.5, oy + 1.5, W - 3, H - 3);
-    // iki parça yan yana bir bütün: 2047 (400x752) ve 2048 (480x752)
-    const parts = ['UIData_2047', 'UIData_2048'].map(k => mapImg[k] || (mapImg[k] = Object.assign(new Image(), { src: `${Assets.base}ui/${k}.png` })));
-    if (parts.every(i => i.complete && i.naturalWidth)) { const tw = 880, th = 752, k = Math.min((W - 12) / tw, (H - 34) / th), mx = ox + (W - tw * k) / 2, my = oy + 24;
-      ctx.imageSmoothingEnabled = true; ctx.drawImage(parts[0], mx, my, 400 * k, th * k); ctx.drawImage(parts[1], mx + 400 * k, my, 480 * k, th * k); ctx.imageSmoothingEnabled = false; }
-    Forms.label(ctx, `${tx('Dünya Haritası')}  ·  ${tx('Şu an: ' + trName(Game.scene.name))}`, ox + 6, oy + 4, W - 46, 18, '#e6cf89', 'left', 12);
-    Forms.drawCtrl(ctx, Forms.ctrl('bag', 52696), pressed === 'close' ? 1 : 0, ox + W - 306, oy - 6);
-    hits.push({ id: 'close', x: ox + W - 34, y: oy - 6, w: 34, h: 34 }); hits.push({ id: 'frame', x: ox, y: oy, w: W, h: H });
+    const { W, H, ox, oy } = mapRect(vw, VH), top = 26, bh = 36, vh = H - top - bh;
+    ctx.fillStyle = '#000'; ctx.fillRect(ox, oy, W, H); ctx.strokeStyle = '#9f998f'; ctx.strokeRect(ox + 0.5, oy + 0.5, W - 1, H - 1); ctx.strokeStyle = '#4b4547'; ctx.strokeRect(ox + 1.5, oy + 1.5, W - 3, H - 3);
+    ctx.save(); ctx.beginPath(); ctx.rect(ox + 2, oy + top, W - 4, vh); ctx.clip();
+    if (WM.mode === 'world') {
+      const parts = ['UIData_2047', 'UIData_2048'].map(k => mapImg[k] || (mapImg[k] = Object.assign(new Image(), { src: `${Assets.base}ui/${k}.png` })));
+      const tw = 880, th = 752;
+      if (WM.x == null) { WM.x = (tw - W) / 2; WM.y = (th - vh) / 2; }
+      WM.x = clamp(WM.x, 0, tw - (W - 4)); WM.y = clamp(WM.y, 0, th - vh);
+      const mx = Math.round(ox + 2 - WM.x), my = Math.round(oy + top - WM.y);
+      if (parts.every(i => i.complete && i.naturalWidth)) { ctx.drawImage(parts[0], mx, my); ctx.drawImage(parts[1], mx + 400, my); }
+    } else {
+      // bulunduğun harita: zemin görüntüsü sığacak kadar küçültülür
+      const map = Game.map, g = map.ground, k = Math.min((W - 8) / map.pw, (vh - 4) / map.ph), gw = map.pw * k, gh = map.ph * k, gx = ox + (W - gw) / 2, gy = oy + top + (vh - gh) / 2;
+      ctx.imageSmoothingEnabled = true; ctx.drawImage(g, 0, 0, map.pw, map.ph, gx, gy, gw, gh); ctx.imageSmoothingEnabled = false;
+      const dot = (e, c, r) => { ctx.fillStyle = c; ctx.beginPath(); ctx.arc(gx + map.px(e.x, e.y) * k, gy + map.py(e.x, e.y) * k, r, 0, 7); ctx.fill(); };
+      for (const r of map.regionsOf(1)) dot({ x: (r[2] + r[4]) / 2, y: (r[3] + r[5]) / 2 }, '#4aa8ff', 3.5);
+      for (const e of Game.ents) if (e.kind === 'npc' && !e.dummy && !e.hidden) dot(e, '#7cf06a', 2);
+      if (Math.floor(Game.time * 3) % 2 === 0) { dot(Game.player, '#000', 4); dot(Game.player, '#ffe048', 3); }
+    }
+    ctx.restore();
+    Forms.label(ctx, WM.mode === 'world' ? tx('Dünya Haritası') : tx(trName(Game.scene.name)), ox + 8, oy + 4, W - 16, 18, '#e6cf89', 'left', 12);
+    // alt düğmeler: orijinal 70x30 düğmeler (7130/7131)
+    const by = oy + H - bh + 3, B = [[52938, ox + 8], [52802, ox + W - 78]];
+    for (const [id, x] of B) { Forms.drawCtrl(ctx, Forms.ctrl('worldmap', id), pressed === id ? 1 : 0, x - 1, by - 1); hits.push({ id, x, y: by, w: 70, h: 30 }); }
+    Forms.label(ctx, WM.mode === 'world' ? tx('Parmağınla kaydır') : tx('Sarı: sen · Yeşil: NPC · Mavi: çıkış'), ox + 90, by, W - 180, 30, '#8d8983', 'center', 10);
+    hits.push({ id: 'frame', x: ox, y: oy, w: W, h: H });
   }
+  function tapMap(id) { if (id === 52802) UI.closeAll(); else if (id === 52938) { WM.mode = WM.mode === 'world' ? 'local' : 'world'; SFX.play('skill_pageflip'); } }
   function drawBag(ctx, vw, VH) {
     const P = Game.P, f = Forms.get('bag'), ox = Math.round((vw - f.w) / 2), oy = Math.round((VH - f.h) / 2);
     const items = bagItems(), slots = slotIds(), quick = quickIds(), per = slots.length, pages = Math.max(1, Math.ceil(items.length / per));
@@ -183,7 +205,7 @@ const Win = (() => {
     pressed = h.id; pressT = performance.now();
     if (typeof h.id === 'string' && h.id.startsWith('hub:')) { const k = h.id.slice(4); SFX.play('skill_pageflip'); if (k !== cur) { close(); open(k); } return true; }
     if (h.id === 'close') { UI.closeAll(); return true; }
-    if (cur === 'sys') { tapSys(h.id); return true; } if (cur === 'map' || cur === 'hub') return true;
+    if (cur === 'sys') { tapSys(h.id); return true; } if (cur === 'map') { tapMap(h.id); return true; } if (cur === 'hub') return true;
     if (cur === 'bag') tapBag(h.id); else if (cur === 'role') tapRole(h.id); else if (cur === 'npc') tapNpc(h.id); else if (cur === 'task') tapTask(h.id); else if (cur === 'menu') tapMenu(h.id); else if (cur === 'skill') tapSkill(h.id); else if (cur === 'shop') tapShop(h.id); else if (cur === 'dead') tapDead(h.id);
     return true;
   }
@@ -461,7 +483,7 @@ const Win = (() => {
     if (id === 50751) { if (!H.sel) return UI.toast('Listeden bir eşya seç.'); buyAsk(H.sel); return; }
   }
   // liste kaydırma (parmakla sürükleme)
-  function drag(dy) { if (cur !== 'shop') return; H.acc += dy; while (H.acc <= -HROW_H) { H.off++; H.acc += HROW_H; } while (H.acc >= HROW_H) { H.off--; H.acc -= HROW_H; } if (H.off < 0) H.off = 0; }
+  function drag(dy, x, y, dx = 0) { if (cur === 'map') { if (WM.mode === 'world' && WM.x != null) { WM.x -= dx; WM.y -= dy; } return; } if (cur !== 'shop') return; H.acc += dy; while (H.acc <= -HROW_H) { H.off++; H.acc += HROW_H; } while (H.acc >= HROW_H) { H.off--; H.acc -= HROW_H; } if (H.off < 0) H.off = 0; }
   // ---------------- Ölüm ekranı (FORM_DEADSELECT): üstte mesaj, altta seçenek satırları ----------------
   function drawDead(ctx, vw, VH) {
     const f = Forms.get('dead'), ox = Math.round((vw - f.w) / 2), oy = Math.round((VH - 226) / 2), P = Game.P;

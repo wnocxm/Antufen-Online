@@ -16,7 +16,9 @@ const EN_UI = {
   'Eminim: eski karakter silinsin': 'Sure: delete the old character', 'Sınıf': 'Class', 'Irk': 'Race', 'Cinsiyet': 'Gender', 'Yüz': 'Face', 'Erkek': 'Male', 'Kadın': 'Female',
   'Oyuna başla': 'Start game', 'Kahraman': 'Hero', 'Öldün': 'You died', 'Yeniden doğ': 'Revive', 'Kapat': 'Close',
   'Savaşçı': 'Warrior', 'Büyücü': 'Mage', 'Kutsal Elçi': 'Priest', 'İnsan': 'Human', 'Gece Elfi': 'Night Elf',
+  'Parmağınla kaydır': 'Drag to scroll', 'Sarı: sen · Yeşil: NPC · Mavi: çıkış': 'Yellow: you · Green: NPC · Blue: exit',
   // çevrimiçi
+  'Oyuna Gir': 'Enter Game', 'Seç': 'Select', 'Sunucu': 'Server', 'Kullanıcı Girişi': 'User Login', 'Karakter Seç': 'Select Character', 'Dil: Türkçe': 'Language: Turkish', 'Eski karakter silinecek. Emin misin?': 'The old character will be deleted. Are you sure?',
   'Çevrimiçi Oyna': 'Play Online', 'Sunucu adresi': 'Server address', 'Kullanıcı adı': 'Username', 'Şifre': 'Password', 'Giriş': 'Log in', 'Hesap Aç': 'Sign up', 'Çıkış yap': 'Log out',
   'Mesajını yaz…': 'Type your message…', 'Gönder': 'Send', 'Hesap': 'Account', 'Seviye': 'Level', 'Bu hesapta henüz karakter yok.': 'This account has no characters yet.',
   'Önce sunucu adresini yaz.': 'Enter the server address first.', 'Kullanıcı adı ve şifreyi yaz.': 'Enter your username and password.', 'Bağlanılıyor…': 'Connecting…',

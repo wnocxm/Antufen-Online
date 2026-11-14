@@ -83,20 +83,28 @@ const SFX = (() => {
     }
     g.gain.exponentialRampToValueAtTime(0.001, at + n.d + rel); o.start(at); o.stop(at + n.d + rel + 0.05);
   }
-  const songs = new Map();
-  // dosyada bulunan orijinal müzikler; sahne başka bir parça isterse kır müziği çalar
+  // Orijinal MIDI parçaları General MIDI ses bankasıyla kaydedilip mp3 olarak çalınır (telefondaki MIDI çalarına en yakın ses).
+  // mp3 açılamazsa basit sentezleyiciye düşülür.
+  const songs = new Map(), mbufs = new Map();
+  // oyun paketinde bulunan orijinal müzikler. Sahne tablosundaki diğer parçalar (karlı dağ, kutsal dağ, mağara...) orijinalde
+  // sunucudan sonradan indiriliyordu; dosyalarda olmadıkları için o haritalarda kır müziği çalar.
   const HAVE = ['akadiya_music.mid', 'alica_music.mid', 'cover.mid', 'grassland.mid', 'sliva_music.mid', 'sunnyforrest_music.mid'];
   const Music = {
-    cur: null, pending: null, song: null, t0: 0, idx: 0, timer: null,
+    cur: null, pending: null, song: null, t0: 0, idx: 0, timer: null, src: null,
     async play(name) {
       if (!name) return; if (!HAVE.includes(name)) name = 'grassland.mid'; this.pending = name;
       if (!ac || !opt.music) return;
-      if (this.cur === name && this.timer) return;
+      if (this.cur === name && (this.timer || this.src)) return;
       this.stop(true); this.cur = name;
+      const mp3 = name.replace(/\.mid$/, '.mp3');
+      if (!mbufs.has(name)) mbufs.set(name, fetch(vq('assets/music/' + mp3)).then(r => { if (!r.ok) throw 0; return r.arrayBuffer(); }).then(b => new Promise((ok, bad) => ac.decodeAudioData(b, ok, bad))).catch(() => null));
+      const buf = await mbufs.get(name); if (this.cur !== name || this.timer || this.src) return;
+      musGain.gain.cancelScheduledValues(ac.currentTime); musGain.gain.setValueAtTime(0.0001, ac.currentTime); musGain.gain.linearRampToValueAtTime(0.55, ac.currentTime + 0.6);
+      if (buf) { const s = ac.createBufferSource(); s.buffer = buf; s.loop = true; s.connect(musGain); s.start(); this.src = s; return; }
+      // yedek: basit sentezleyici
       if (!songs.has(name)) songs.set(name, fetch('assets/music/' + name).then(r => r.arrayBuffer()).then(parseMidi).catch(() => null));
-      const s = await songs.get(name); if (!s || this.cur !== name || this.timer) return;
-      this.song = s; this.t0 = ac.currentTime + 0.15; this.idx = 0;
-      musGain.gain.cancelScheduledValues(ac.currentTime); musGain.gain.setValueAtTime(0.32, ac.currentTime);
+      const so = await songs.get(name); if (!so || this.cur !== name || this.timer || this.src) return;
+      this.song = so; this.t0 = ac.currentTime + 0.15; this.idx = 0; musGain.gain.setValueAtTime(0.32, ac.currentTime);
       this.timer = setInterval(() => this.tick(), 100); this.tick();
     },
     tick() {
@@ -107,7 +115,12 @@ const SFX = (() => {
         if (at > ac.currentTime - 0.05) voice(n, Math.max(at, ac.currentTime)); this.idx++;
       }
     },
-    stop(keep) { if (this.timer) { clearInterval(this.timer); this.timer = null; } if (ac && musGain) { musGain.gain.cancelScheduledValues(ac.currentTime); musGain.gain.setTargetAtTime(0.0001, ac.currentTime, 0.08); } if (!keep) this.cur = null; else this.cur = null; },
+    stop(keep) {
+      if (this.timer) { clearInterval(this.timer); this.timer = null; }
+      if (this.src) { const s = this.src; this.src = null; try { s.stop(ac.currentTime + 0.3); } catch (e) { } }
+      if (ac && musGain) { musGain.gain.cancelScheduledValues(ac.currentTime); musGain.gain.setTargetAtTime(0.0001, ac.currentTime, 0.08); }
+      this.cur = null;
+    },
   };
   document.addEventListener('visibilitychange', () => { if (!ac) return; if (document.hidden) ac.suspend(); else ac.resume(); });
   addEventListener('pointerdown', init, { capture: true });

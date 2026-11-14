@@ -21,12 +21,12 @@ const Input = (() => {
     cv.addEventListener('pointerdown', e => {
       window.SFX && SFX.init && SFX.init();
       const L = UI.toLogical(e.clientX, e.clientY);
-      if (Win.isOpen()) { winPtr = { id: e.pointerId, x: L.x, y: L.y, ly: L.y, moved: 0 }; e.preventDefault(); return; }
+      if (Win.isOpen()) { winPtr = { id: e.pointerId, x: L.x, y: L.y, ly: L.y, lx: L.x, moved: 0 }; e.preventDefault(); return; }
       const hit = UI.hudHit(L.x, L.y); if (hit) { hit(); e.preventDefault(); return; }
       if (L.x < Math.max(UI.vw * 0.33, 240) && L.y > VH * 0.4 && !joy) { const R = UI.rockerPos(); let dx = L.x - R.x, dy = L.y - R.y; const l = Math.hypot(dx, dy); if (l > 48) { dx = dx / l * 48; dy = dy / l * 48; } joy = { id: e.pointerId, ox: R.x, oy: R.y, dx, dy, active: true }; cv.setPointerCapture(e.pointerId); return; }
       pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
     });
-    cv.addEventListener('pointermove', e => { if (winPtr && e.pointerId === winPtr.id) { const L = UI.toLogical(e.clientX, e.clientY); winPtr.moved += Math.abs(L.y - winPtr.ly); if (winPtr.moved > 6) Win.drag(L.y - winPtr.ly, winPtr.x, winPtr.y); winPtr.ly = L.y; return; }
+    cv.addEventListener('pointermove', e => { if (winPtr && e.pointerId === winPtr.id) { const L = UI.toLogical(e.clientX, e.clientY); winPtr.moved += Math.abs(L.y - winPtr.ly) + Math.abs(L.x - (winPtr.lx ?? L.x)); if (winPtr.moved > 6) Win.drag(L.y - winPtr.ly, winPtr.x, winPtr.y, L.x - (winPtr.lx ?? L.x)); winPtr.ly = L.y; winPtr.lx = L.x; return; }
       if (joy && e.pointerId === joy.id) { const L = UI.toLogical(e.clientX, e.clientY); let dx = L.x - joy.ox, dy = L.y - joy.oy; const l = Math.hypot(dx, dy), mx = 48; if (l > mx) { dx = dx / l * mx; dy = dy / l * mx; } joy.dx = dx; joy.dy = dy; } });
     const end = e => { if (winPtr && e.pointerId === winPtr.id) { const w = winPtr; winPtr = null; if (w.moved <= 6 && e.type === 'pointerup') Win.tap(w.x, w.y); return; }
       if (joy && e.pointerId === joy.id) joy = null; const s = pts.get(e.pointerId); if (s) { UI.cancelAssign(); pts.delete(e.pointerId); if (Math.hypot(e.clientX - s.x, e.clientY - s.y) < 12 && UI.mode === 'play' && !UI.panelOpen()) tapWorld(e.clientX, e.clientY); } };
@@ -338,7 +338,7 @@ const UI = (() => {
       title = 'Ayarlar';
       h = `<div class="iact"><button class="obtn" data-act="tsfx">Ses efektleri: ${SFX.opt.sfx ? 'Açık' : 'Kapalı'}</button><button class="obtn" data-act="tmus">Müzik: ${SFX.opt.music ? 'Açık' : 'Kapalı'}</button></div>
         <div class="iact"><button class="obtn" data-act="lang">${LANG === 'tr' ? 'Language: English' : 'Dil: Türkçe'}</button></div>
-        <div class="iact"><button class="obtn" data-act="totitle">Giriş ekranına dön</button><button class="obtn" data-act="newchar">Yeni karakter oluştur</button></div><p class="hint">Oyun otomatik kaydedilir. Sürüm 11142011</p>`;
+        <div class="iact"><button class="obtn" data-act="totitle">Giriş ekranına dön</button><button class="obtn" data-act="newchar">Yeni karakter oluştur</button></div><p class="hint">Oyun otomatik kaydedilir. Sürüm 11142350</p>`;
     }
     ptitle.textContent = tx(title); pbody.innerHTML = h; txDom(pbody);
   }
@@ -445,6 +445,15 @@ const UI = (() => {
   $('#ctext').addEventListener('keydown', e => { if (e.key === 'Enter') sendChat(); else if (e.key === 'Escape') closeChat(); });
   function chatLine(name, m, mine) { logs.push({ m: `${name}: ${m}`, c: mine ? '#ffe48a' : '#8fd8ff', t: performance.now() }); if (logs.length > 30) logs.shift(); SFX.play('message', 0.4); }
 
+  // ---------- giriş ekranı listeleri (orijinal kapak formu: seçili satır çerçeveli, sol alt "Seç" tuşu) ----------
+  function coverScale() { const k = Math.min(innerHeight / 360, innerWidth / 360); document.documentElement.style.setProperty('--ck', k); }
+  addEventListener('resize', coverScale); coverScale();
+  function menuSel(menu, btn) { menu.querySelectorAll('button').forEach(b => b.classList.toggle('on', b === btn)); }
+  function menuFirst(menu) { const b = [...menu.querySelectorAll('button')].find(x => !x.classList.contains('hidden')); menuSel(menu, b); }
+  for (const id of ['tmenu', 'olist']) $('#' + id).addEventListener('pointerdown', e => { const b = e.target.closest('button'); if (b) menuSel($('#' + id), b); });
+  $('#tok').onclick = () => { const b = $('#tmenu button.on') || $('#tmenu button:not(.hidden)'); if (b) b.click(); };
+  $('#ook').onclick = () => { if (!$('#ologin').classList.contains('hidden')) return doLogin(false); const b = $('#olist button.on') || $('#olist button'); if (b) b.click(); };
+
   // ---------- çevrimiçi giriş ve karakter seçimi ----------
   let onlineCreate = false, ochars = [];
   const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -453,13 +462,13 @@ const UI = (() => {
     $('#online').classList.remove('hidden'); $('#ourl').value = Net.url; $('#ouser').value = Net.user; $('#opass').value = ''; omsg('');
     if (Net.token) listChars(); else showLogin();
   }
-  function showLogin() { $('#ologin').classList.remove('hidden'); $('#ochars').classList.add('hidden'); }
+  function showLogin() { $('#ologin').classList.remove('hidden'); $('#ochars').classList.add('hidden'); $('#otit').textContent = tx('Kullanıcı Girişi'); }
   async function listChars(list) {
     try { ochars = list || await Net.chars(); } catch (e) { omsg(Net.why(e)); showLogin(); return; }
-    $('#ologin').classList.add('hidden'); $('#ochars').classList.remove('hidden');
+    $('#ologin').classList.add('hidden'); $('#ochars').classList.remove('hidden'); $('#otit').textContent = tx('Karakter Seç');
     $('#olist').innerHTML = ochars.length ? ochars.map(c => `<button class="ochar" data-c="${c.id}"><img src="${Assets.base}ui/Portrait_${esc(c.face)}.png" alt=""><span><b>${esc(c.name)}</b>` +
       `<small>${tx(TR.cls[c.cls])} · ${tx(TR.race[c.race])} · ${tx('Seviye')} ${c.lv}</small></span></button>`).join('') : `<p class="hint">${tx('Bu hesapta henüz karakter yok.')}</p>`;
-    $('#onew').classList.toggle('hidden', ochars.length >= 4);
+    $('#onew').classList.toggle('hidden', ochars.length >= 4); menuFirst($('#olist'));
     omsg(Net.user ? tx('Hesap') + ': ' + Net.user : '', true);
   }
   async function doLogin(isNew) {
@@ -472,7 +481,7 @@ const UI = (() => {
   $('#ogo').onclick = () => doLogin(false); $('#oreg').onclick = () => doLogin(true);
   $('#opass').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(false); });
   $('#oout').onclick = async () => { await Net.logout(); showLogin(); omsg('Çıkış yapıldı.', true); };
-  $('#oback').onclick = () => { $('#online').classList.add('hidden'); $('#title').classList.remove('hidden'); };
+  $('#oback').onclick = () => { $('#online').classList.add('hidden'); $('#title').classList.remove('hidden'); omsg(''); };
   $('#onew').onclick = () => { $('#online').classList.add('hidden'); onlineCreate = true; showCreate(); };
   $('#olist').addEventListener('click', async e => {
     const b = e.target.closest('[data-c]'); if (!b) return; omsg('Yükleniyor…', true);
@@ -517,8 +526,10 @@ const UI = (() => {
     $('#tcont').classList.toggle('hidden', !s);
     $('#tinfo').textContent = s ? `${s.name} · ${tx(TR.cls[s.cls])} · ${tx('Seviye')} ${s.lv}` : '';
     $('#tcont').onclick = () => { T.classList.add('hidden'); Game.P = s; start(); };
-    $('#tnew').onclick = e => { const b = e.currentTarget; if (!s || b.dataset.sure) { localStorage.removeItem(SAVE_KEY); T.classList.add('hidden'); onlineCreate = false; showCreate(); } else { b.dataset.sure = 1; b.textContent = tx('Eminim: eski karakter silinsin'); } };
+    $('#tnew').onclick = e => { const b = e.currentTarget; if (!s || b.dataset.sure) { localStorage.removeItem(SAVE_KEY); T.classList.add('hidden'); onlineCreate = false; showCreate(); } else { b.dataset.sure = 1; b.textContent = tx('Eminim, sil'); $('#tinfo').textContent = tx('Eski karakter silinecek. Emin misin?'); } };
     $('#tonline').onclick = () => { T.classList.add('hidden'); showOnline(); };
+    $('#tlang').textContent = LANG === 'tr' ? 'Dil: Türkçe' : 'Language: English';
+    menuFirst($('#tmenu'));
     $('#tlang').onclick = () => setLang(LANG === 'tr' ? 'en' : 'tr');
     requestAnimationFrame(loop);
     window.__G = Game;

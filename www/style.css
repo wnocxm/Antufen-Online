@@ -76,30 +76,31 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .srow.on { border-color: #ffd870; } .srow.no { opacity: .55; }
 .skgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 4px; }
 
-#title { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; background: radial-gradient(ellipse at center, #5a0c08 0%, #1a0403 55%, #000 100%); }
-.tbox { display: flex; flex-direction: column; align-items: center; gap: 10px; }
-.tbox img { width: min(300px, 60vw); image-rendering: pixelated; margin-bottom: 8px; }
-.tbox button { width: 220px; padding: 11px; font-size: 16px; font-weight: 700; color: #ffe8a0; background: url(assets/ui/AnbufenUI_Resource_7032.png) center/100% 100%; border: 1px solid #8a6a30; }
-.tbox button:active { background-image: url(assets/ui/AnbufenUI_Resource_7033.png); color: #000; }
-#tinfo { color: #c8b890; font-size: 12px; }
-.ver { color: #7a6a4a; font-size: 10px; }
 
-.tbox button.small { width: 160px; padding: 6px; font-size: 12px; font-weight: 400; }
-
-/* çevrimiçi giriş ve karakter seçimi */
-#online { position: fixed; inset: 0; z-index: 31; display: grid; place-items: center; background: radial-gradient(ellipse at center, #5a0c08 0%, #1a0403 55%, #000 100%); padding: 10px; }
-.obox { width: min(420px, 94vw); max-height: 96vh; overflow-y: auto; touch-action: pan-y; background: rgba(14,10,6,.92); border: 2px solid #8a6a30; box-shadow: 0 0 0 2px #000, 0 8px 30px #000; padding: 10px 14px; display: flex; flex-direction: column; gap: 8px; font-size: 13px; }
-.otitle { color: #ffd870; font-weight: 700; font-size: 16px; text-align: center; }
-.obox label { display: flex; flex-direction: column; gap: 2px; color: #d8b870; margin-bottom: 6px; }
-.obox input, #chat input { padding: 7px 8px; background: #000; border: 1px solid #6a5028; color: #fff; font: inherit; font-size: 15px; user-select: text; -webkit-user-select: text; }
-.orow { display: flex; gap: 6px; flex-wrap: wrap; }
-.obox button { flex: 1; padding: 9px; font-weight: 700; color: #ffe8a0; background: url(assets/ui/AnbufenUI_Resource_7032.png) center/100% 100%; border: 1px solid #8a6a30; }
-.obox button:active, .ochar:active { background-image: url(assets/ui/AnbufenUI_Resource_7033.png); color: #000; }
-.obox button.small { flex: none; align-self: center; padding: 5px 14px; font-weight: 400; font-size: 12px; }
-#olist { display: flex; flex-direction: column; gap: 5px; margin-bottom: 6px; }
-.obox .ochar { display: flex; align-items: center; gap: 8px; text-align: left; padding: 4px 8px; font-weight: 400; }
-.ochar img { width: 36px; height: 36px; border: 1px solid #8a6a30; } .ochar b { color: #ffd870; display: block; } .ochar small { color: #c8b890; }
-#omsg { color: #ff9a70; min-height: 1em; text-align: center; } #omsg.ok { color: #9cf58a; }
 #chat { position: fixed; left: 50%; transform: translateX(-50%); bottom: 8px; z-index: 22; display: flex; gap: 4px; width: min(520px, 92vw); padding: 5px; background: rgba(14,10,6,.92); border: 1px solid #8a6a30; }
 #chat input { flex: 1; min-width: 0; }
 #chat button { padding: 6px 10px; color: #ffe8a0; background: url(assets/ui/AnbufenUI_Resource_7032.png) center/100% 100%; border: 1px solid #8a6a30; }
+
+/* giriş ekranı: orijinal kapak formu (siyah zemin, 320x320 kırmızı doku, krem yazı, seçili satır çerçevesi, alt köşe tuşları) */
+.cover { position: fixed; inset: 0; z-index: 30; background: #000; overflow: hidden; }
+.cv { position: absolute; left: 50%; top: 0; width: 360px; height: 360px; transform-origin: 50% 0; transform: translateX(-50%) scale(var(--ck, 1)); }
+.cbg { position: absolute; left: 20px; top: 0; width: 320px; height: 320px; background: url(assets/ui/AnrufenCoverUI_Resource_7000.png) 0 0/320px 320px no-repeat; image-rendering: pixelated; }
+.ctit { position: absolute; left: 116px; top: 8px; width: 128px; height: 50px; display: grid; place-items: center; color: #f2e4d7; font-size: 15px; font-weight: 700; text-shadow: 1px 1px 0 #000; }
+.cmenu { position: absolute; left: 0; right: 0; top: 103px; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.cmenu button, .cmenu .ochar { width: 128px; height: 28px; background: none; border: 1px solid transparent; color: #f2e4d7; font-size: 12px; text-shadow: 1px 1px 0 #000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cmenu button.on, .cmenu button:active { border-color: #f2e4d7; }
+.cmenu.small { position: static; flex-direction: row; justify-content: center; gap: 4px; margin-top: 4px; }
+.cmenu.small button { width: 96px; }
+#olist { top: 64px; } #olist .ochar { width: 200px; height: 34px; display: flex; align-items: center; gap: 6px; text-align: left; padding: 0 4px; }
+.ochar img { width: 28px; height: 28px; border: 1px solid #8d7a5a; } .ochar b { display: block; font-size: 12px; } .ochar small { font-size: 10px; color: #c8b8a0; }
+#ochars .cmenu.small { position: absolute; left: 0; right: 0; top: 248px; }
+.cform { position: absolute; left: 50px; top: 74px; width: 260px; display: flex; flex-direction: column; gap: 6px; }
+.cform label { display: flex; align-items: center; gap: 6px; color: #f2e4d7; font-size: 12px; text-shadow: 1px 1px 0 #000; }
+.cform label span { width: 80px; text-align: right; }
+.cform input, #chat input { width: 140px; height: 26px; padding: 2px 5px; background: rgba(0,0,0,.65); border: 1px solid #8d7a5a; color: #fff; font: inherit; font-size: 13px; user-select: text; -webkit-user-select: text; }
+.cinfo { position: absolute; left: 30px; right: 30px; top: 276px; text-align: center; color: #c8b8a0; font-size: 11px; text-shadow: 1px 1px 0 #000; }
+#omsg { color: #ffb090; } #omsg.ok { color: #c8e8a0; }
+.cbar { position: absolute; left: 0; right: 0; top: 321px; height: 39px; }
+.sk { position: absolute; top: 7px; width: 60px; height: 26px; background: none; border: 0; color: #d8c09a; font-family: "Noto Serif", serif; font-size: 15px; font-weight: 700; text-shadow: 1px 1px 0 #000, -1px -1px 0 #000; }
+.sk.l { left: 2px; } .sk.r { right: 2px; } .sk:active { color: #fff6d0; }
+.cbar .ver { position: absolute; left: 70px; right: 70px; top: 13px; text-align: center; color: #6d6359; font-size: 9px; }
