@@ -16,6 +16,18 @@ const EN_UI = {
   'Eminim: eski karakter silinsin': 'Sure: delete the old character', 'Sınıf': 'Class', 'Irk': 'Race', 'Cinsiyet': 'Gender', 'Yüz': 'Face', 'Erkek': 'Male', 'Kadın': 'Female',
   'Oyuna başla': 'Start game', 'Kahraman': 'Hero', 'Öldün': 'You died', 'Yeniden doğ': 'Revive', 'Kapat': 'Close',
   'Savaşçı': 'Warrior', 'Büyücü': 'Mage', 'Kutsal Elçi': 'Priest', 'İnsan': 'Human', 'Gece Elfi': 'Night Elf',
+  // çevrimiçi
+  'Çevrimiçi Oyna': 'Play Online', 'Sunucu adresi': 'Server address', 'Kullanıcı adı': 'Username', 'Şifre': 'Password', 'Giriş': 'Log in', 'Hesap Aç': 'Sign up', 'Çıkış yap': 'Log out',
+  'Mesajını yaz…': 'Type your message…', 'Gönder': 'Send', 'Hesap': 'Account', 'Seviye': 'Level', 'Bu hesapta henüz karakter yok.': 'This account has no characters yet.',
+  'Önce sunucu adresini yaz.': 'Enter the server address first.', 'Kullanıcı adı ve şifreyi yaz.': 'Enter your username and password.', 'Bağlanılıyor…': 'Connecting…',
+  'Hesap açıldı. Şimdi bir karakter oluştur.': 'Account created. Now create a character.', 'Çıkış yapıldı.': 'Logged out.',
+  'Sunucuya ulaşılamadı. Adresi ve internet bağlantını kontrol et.': 'Could not reach the server. Check the address and your connection.', 'Bu kullanıcı adı alınmış.': 'This username is taken.',
+  'Kullanıcı adı ya da şifre yanlış.': 'Wrong username or password.', 'Kullanıcı adı 3-24 harf/rakam, şifre en az 6 karakter olmalı.': 'Username must be 3-24 letters/digits, password at least 6 characters.',
+  'Çok fazla deneme yaptın, biraz bekle.': 'Too many attempts, please wait.', 'Bu hesap kapatılmış.': 'This account is banned.', 'Bu karakter adı alınmış.': 'This character name is taken.',
+  'Bir hesapta en fazla 4 karakter olabilir.': 'An account can have at most 4 characters.', 'Oturumun sona erdi, yeniden giriş yap.': 'Your session expired, please log in again.',
+  'Ad 2-12 harf ya da rakam olmalı, boşluk olmaz.': 'Name must be 2-12 letters or digits, no spaces.', 'Sunucuya kaydediliyor…': 'Saving to server…',
+  'Sunucuya bağlanılıyor…': 'Connecting to server…', 'Sunucuya yeniden kaydedildi.': 'Saved to server again.', 'Sunucuya kaydedilemedi, tekrar denenecek…': 'Could not save to server, retrying…',
+  'Bu karakterle başka bir yerden girildi.': 'This character logged in from somewhere else.', 'Karakter değiştir': 'Switch character', 'Sunucuya otomatik kaydedilir.': 'Saved to the server automatically.',
   // HUD ve menüler
   'Saldır': 'Attack', 'Çanta': 'Bag', 'Görev': 'Quest', 'Menü': 'Menu', 'Ana Menü': 'Main Menu', 'Karakter': 'Character', 'Beceriler': 'Skills', 'Görevler': 'Quests',
   'Dünya Haritası': 'World Map', 'Ayarlar': 'Settings', 'altın': 'gold', 'Tüm sınıflar': 'All classes', 'Etkin': 'Active', '(edilgen)': '(passive)',

@@ -75,6 +75,7 @@ const UI = (() => {
       list.push([o.depth, o]);
     }
     for (const e of Game.ents) { const X = e.X, Y = e.Y; if (X < ox - 100 || X > ox + vw + 100 || Y < oy - 20 || Y > oy + VH + 150) continue; list.push([e.x + e.y + 0.01, e]); }
+    if (Net.on) for (const o of Net.others.values()) { const X = o.X, Y = o.Y; if (X < ox - 100 || X > ox + vw + 100 || Y < oy - 20 || Y > oy + VH + 150) continue; list.push([o.x + o.y + 0.01, o]); }
     list.sort((a, b) => a[0] - b[0]);
     for (const [, o] of list) {
       if (o.kind === 'obj') o.sp.draw(ctx, o.anim, Game.time * TICK, o.X - ox, o.Y - oy);
@@ -102,7 +103,12 @@ const UI = (() => {
           text(n + ' Sv' + e.d.lv, X, Y - 58, e.d.rank === 2 ? '#e890ff' : e.d.rank ? '#ffb050' : e.d.lv > Game.P.lv + 3 ? '#ff6040' : '#f0e0d0');
           ctx.fillStyle = '#000'; ctx.fillRect(X - 16, Y - 54, 32, 3); ctx.fillStyle = '#d02010'; ctx.fillRect(X - 16, Y - 54, 32 * Math.max(0, e.hp / e.maxHp), 3);
         }
-      } else if (e.kind === 'player') text(Game.P.name, X, Y - 64, '#ffe48a');
+      } else if (e.kind === 'player') { text(Game.P.name, X, Y - 64, '#ffe48a'); if (e.sayT > 0) bubble(e.say, X, Y - 76, e.sayT); }
+    }
+    // diğer oyuncular: ad ve konuşma balonu
+    if (Net.on) for (const o of Net.others.values()) {
+      const X = o.X - ox, Y = o.Y - oy; if (X < -60 || X > vw + 60 || Y < -20 || Y > VH + 100) continue;
+      text(o.name, X, Y - 64, '#ffffff'); if (o.sayT > 0) bubble(o.say, X, Y - 76, o.sayT);
     }
     // uçan sayılar
     for (let i = floats.length - 1; i >= 0; i--) {
@@ -110,6 +116,17 @@ const UI = (() => {
       const X = Game.map.px(f.e.x, f.e.y) - ox, Y = Game.map.py(f.e.x, f.e.y) - oy - 50 - f.t * 26;
       ctx.globalAlpha = f.t < 0.8 ? 1 : (1.1 - f.t) / 0.3; ctx.font = `bold ${Math.round(12 * f.s)}px "Noto Sans", sans-serif`; text(f.txt, X, Y, f.c); ctx.globalAlpha = 1;
     }
+  }
+  // konuşma balonu: oyuncunun yazdığı metin çevrilmeden gösterilir
+  function bubble(s, x, y, t) {
+    ctx.save(); ctx.font = '10px "Noto Sans", sans-serif'; ctx.globalAlpha = Math.min(1, t);
+    const words = String(s).split(' '), lines = []; let ln = '';
+    for (const w of words) { const n = ln ? ln + ' ' + w : w; if (ctx.measureText(n).width > 130 && ln) { lines.push(ln); ln = w; } else ln = n; } if (ln) lines.push(ln);
+    const L = lines.slice(0, 4), w = Math.min(140, Math.max(...L.map(l => ctx.measureText(l).width))) + 10, h = L.length * 12 + 6, bx = Math.round(x - w / 2), by = Math.round(y - h);
+    ctx.fillStyle = 'rgba(250,244,226,.92)'; ctx.strokeStyle = '#6a5030'; ctx.lineWidth = 1; ctx.fillRect(bx, by, w, h); ctx.strokeRect(bx + 0.5, by + 0.5, w - 1, h - 1);
+    ctx.beginPath(); ctx.moveTo(x - 4, by + h); ctx.lineTo(x, by + h + 5); ctx.lineTo(x + 4, by + h); ctx.fill();
+    ctx.fillStyle = '#2a1a0a'; ctx.textAlign = 'center'; L.forEach((l, i) => ctx.fillText(l, x, by + 13 + i * 12));
+    ctx.restore();
   }
   function text(s, x, y, c) { s = tx(s); ctx.lineWidth = 2.5; ctx.strokeStyle = '#000'; ctx.lineJoin = 'round'; ctx.strokeText(s, x, y); ctx.fillStyle = c; ctx.fillText(s, x, y); }
 
@@ -185,6 +202,9 @@ const UI = (() => {
     // hedef değiştir: yayın dışında küçük düğme
     { const tx0 = ax - 142 * HS, ty0 = ay + 22 * HS; ctx.fillStyle = 'rgba(12,8,5,.8)'; ctx.beginPath(); ctx.arc(tx0, ty0, 14, 0, 7); ctx.fill(); ctx.strokeStyle = '#b89a50'; ctx.lineWidth = 1.5; ctx.stroke();
       ctx.textAlign = 'center'; ctx.font = 'bold 13px serif'; text('◎', tx0, ty0 + 5, '#ffe48a'); hud.push([tx0 - 18, ty0 - 18, 36, 36, () => cycleTarget()]); }
+    // sohbet düğmesi: yalnızca çevrimiçi
+    if (Net.on) { const cx0 = rockerPos().x + 76 * HS + 16, cy0 = VH - 88; ctx.fillStyle = 'rgba(12,8,5,.8)'; ctx.beginPath(); ctx.arc(cx0, cy0, 14, 0, 7); ctx.fill(); ctx.strokeStyle = Net.live ? '#b89a50' : '#6a3020'; ctx.lineWidth = 1.5; ctx.stroke();
+      ctx.textAlign = 'center'; ctx.font = 'bold 9px "Noto Sans", sans-serif'; text(LANG === 'en' ? 'Chat' : 'Sohbet', cx0, cy0 + 3, Net.live ? '#ffe48a' : '#a08070'); hud.push([cx0 - 18, cy0 - 18, 36, 36, () => openChat()]); }
     // orta alt: yarı saydam mesaj kutusu (orijinaldeki gibi)
     { const now = performance.now(), L = logs.filter(l => now - l.t < 10000).slice(-5);
       if (L.length) {
@@ -318,7 +338,7 @@ const UI = (() => {
       title = 'Ayarlar';
       h = `<div class="iact"><button class="obtn" data-act="tsfx">Ses efektleri: ${SFX.opt.sfx ? 'Açık' : 'Kapalı'}</button><button class="obtn" data-act="tmus">Müzik: ${SFX.opt.music ? 'Açık' : 'Kapalı'}</button></div>
         <div class="iact"><button class="obtn" data-act="lang">${LANG === 'tr' ? 'Language: English' : 'Dil: Türkçe'}</button></div>
-        <div class="iact"><button class="obtn" data-act="totitle">Giriş ekranına dön</button><button class="obtn" data-act="newchar">Yeni karakter oluştur</button></div><p class="hint">Oyun otomatik kaydedilir. Sürüm 11141744</p>`;
+        <div class="iact"><button class="obtn" data-act="totitle">Giriş ekranına dön</button><button class="obtn" data-act="newchar">Yeni karakter oluştur</button></div><p class="hint">Oyun otomatik kaydedilir. Sürüm 11142011</p>`;
     }
     ptitle.textContent = tx(title); pbody.innerHTML = h; txDom(pbody);
   }
@@ -399,8 +419,15 @@ const UI = (() => {
     if (b.id === 'cstart') {
       const name = ($('#cname').value.trim() || 'Kahraman').slice(0, 12);
       const g = (cre.race === '人类' ? 0 : 2) + (cre.sex === 'male' ? 1 : 2);
-      Game.P = newSave(name, cre.cls, cre.race, cre.sex); Game.P.face = `${g}00${cre.face}`;
-      $('#create').classList.add('hidden'); start(); return;
+      const P = newSave(name, cre.cls, cre.race, cre.sex); P.face = `${g}00${cre.face}`;
+      if (onlineCreate) {
+        if (!/^[\p{L}\p{N}_]{2,12}$/u.test(name)) { $('#cmsg').textContent = tx('Ad 2-12 harf ya da rakam olmalı, boşluk olmaz.'); return; }
+        $('#cmsg').textContent = tx('Sunucuya kaydediliyor…'); b.disabled = true;
+        Net.create(P).then(id => Net.play(id)).then(S => { $('#cmsg').textContent = ''; $('#create').classList.add('hidden'); Game.P = fixSave(S); start(); })
+          .catch(err => { $('#cmsg').textContent = Net.why(err); }).finally(() => { b.disabled = false; });
+        return;
+      }
+      Game.P = P; $('#create').classList.add('hidden'); start(); return;
     }
     renderCreate();
   });
@@ -409,6 +436,48 @@ const UI = (() => {
     const lg = uiImg('UIData_2067'); if (lg.complete) ctx.drawImage(lg, 16, 8, 192 * 0.8, 72 * 0.8);
     if (creDoll) { ctx.save(); ctx.translate(vw * 0.73, 250); ctx.scale(2.2, 2.2); creDoll.draw(ctx, 'comm', 2 + (Math.floor(performance.now() / 2500) % 2), performance.now() / 120, 0, 0); ctx.restore(); }
   }
+
+  // ---------- sohbet ----------
+  function openChat() { if (!Net.live) { toast('Sunucuya bağlanılıyor…'); return; } $('#chat').classList.remove('hidden'); const i = $('#ctext'); i.value = ''; setTimeout(() => i.focus(), 30); }
+  function closeChat() { $('#chat').classList.add('hidden'); $('#ctext').blur(); }
+  function sendChat() { const v = $('#ctext').value; if (v.trim()) Net.chat(v); closeChat(); }
+  $('#csend').onclick = sendChat; $('#cclose').onclick = closeChat;
+  $('#ctext').addEventListener('keydown', e => { if (e.key === 'Enter') sendChat(); else if (e.key === 'Escape') closeChat(); });
+  function chatLine(name, m, mine) { logs.push({ m: `${name}: ${m}`, c: mine ? '#ffe48a' : '#8fd8ff', t: performance.now() }); if (logs.length > 30) logs.shift(); SFX.play('message', 0.4); }
+
+  // ---------- çevrimiçi giriş ve karakter seçimi ----------
+  let onlineCreate = false, ochars = [];
+  const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  function omsg(t, ok) { const m = $('#omsg'); m.textContent = t ? tx(t) : ''; m.classList.toggle('ok', !!ok); }
+  function showOnline() {
+    $('#online').classList.remove('hidden'); $('#ourl').value = Net.url; $('#ouser').value = Net.user; $('#opass').value = ''; omsg('');
+    if (Net.token) listChars(); else showLogin();
+  }
+  function showLogin() { $('#ologin').classList.remove('hidden'); $('#ochars').classList.add('hidden'); }
+  async function listChars(list) {
+    try { ochars = list || await Net.chars(); } catch (e) { omsg(Net.why(e)); showLogin(); return; }
+    $('#ologin').classList.add('hidden'); $('#ochars').classList.remove('hidden');
+    $('#olist').innerHTML = ochars.length ? ochars.map(c => `<button class="ochar" data-c="${c.id}"><img src="${Assets.base}ui/Portrait_${esc(c.face)}.png" alt=""><span><b>${esc(c.name)}</b>` +
+      `<small>${tx(TR.cls[c.cls])} · ${tx(TR.race[c.race])} · ${tx('Seviye')} ${c.lv}</small></span></button>`).join('') : `<p class="hint">${tx('Bu hesapta henüz karakter yok.')}</p>`;
+    $('#onew').classList.toggle('hidden', ochars.length >= 4);
+    omsg(Net.user ? tx('Hesap') + ': ' + Net.user : '', true);
+  }
+  async function doLogin(isNew) {
+    Net.url = $('#ourl').value; const u = $('#ouser').value.trim(), p = $('#opass').value;
+    if (!Net.url) return omsg('Önce sunucu adresini yaz.');
+    if (!u || !p) return omsg('Kullanıcı adı ve şifreyi yaz.');
+    omsg('Bağlanılıyor…', true);
+    try { const list = await Net.login(u, p, isNew); $('#opass').value = ''; await listChars(list); if (isNew) omsg('Hesap açıldı. Şimdi bir karakter oluştur.', true); } catch (e) { omsg(Net.why(e)); }
+  }
+  $('#ogo').onclick = () => doLogin(false); $('#oreg').onclick = () => doLogin(true);
+  $('#opass').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(false); });
+  $('#oout').onclick = async () => { await Net.logout(); showLogin(); omsg('Çıkış yapıldı.', true); };
+  $('#oback').onclick = () => { $('#online').classList.add('hidden'); $('#title').classList.remove('hidden'); };
+  $('#onew').onclick = () => { $('#online').classList.add('hidden'); onlineCreate = true; showCreate(); };
+  $('#olist').addEventListener('click', async e => {
+    const b = e.target.closest('[data-c]'); if (!b) return; omsg('Yükleniyor…', true);
+    try { const P = await Net.play(+b.dataset.c); $('#online').classList.add('hidden'); Game.P = fixSave(P); start(); } catch (err) { omsg(Net.why(err)); }
+  });
 
   function log(m, c) { m = tx(m); logs.push({ m, c: c === 'q' ? '#ffd23a' : c === 'loot' ? '#e8e0c8' : (c || '#e8e0d0'), t: performance.now() }); if (logs.length > 30) logs.shift(); }
   function toast(m) { toastMsg = tx(m); toastT = 2.5; }
@@ -429,6 +498,7 @@ const UI = (() => {
     ctx.setTransform(scale, 0, 0, scale, 0, 0); ctx.imageSmoothingEnabled = false;
     if (mode === 'play' && Game.map && Game.player) {
       if (!panelOpen()) update(dt);
+      Net.tick(dt);
       drawWorld(); drawHud();
       try { Win.draw(ctx, vw, VH); } catch (err) { console.error(err); Win.close(); toast('Pencere açılamadı, sayfayı yenile.'); }
       if (fadeOn || fadeA > 0) { fadeA = clamp(fadeA + (fadeOn ? dt * 5 : -dt * 3), 0, 1); ctx.fillStyle = `rgba(0,0,0,${fadeA})`; ctx.fillRect(0, 0, vw, VH); }
@@ -442,18 +512,19 @@ const UI = (() => {
     for (const k of ['AnbufenUI_Resource_7005', 'AnbufenUI_Resource_7078', 'icon_res_item_1038', 'AnbufenUI_Resource_7003', 'AnbufenUI_Resource_7002', 'AnbufenUI_Resource_7009', 'UIData_2067']) uiImg(k);
     $('#loading').classList.add('hidden');
     const s = load();
-    if (s) {
-      // giriş ekranı: devam et ya da yeni karakter
-      const T = $('#title'); T.classList.remove('hidden'); SFX.Music.play('cover.mid');
-      $('#tinfo').textContent = `${s.name} · ${TR.cls[s.cls]} · Seviye ${s.lv}`;
-      $('#tcont').onclick = () => { T.classList.add('hidden'); Game.P = s; start(); };
-      $('#tnew').onclick = e => { const b = e.currentTarget; if (b.dataset.sure) { localStorage.removeItem(SAVE_KEY); T.classList.add('hidden'); showCreate(); } else { b.dataset.sure = 1; b.textContent = tx('Eminim: eski karakter silinsin'); } };
-      $('#tlang').onclick = () => setLang(LANG === 'tr' ? 'en' : 'tr');
-    } else showCreate();
+    // giriş ekranı: devam et, yeni karakter (bu telefonda) ya da çevrimiçi oyna
+    const T = $('#title'); T.classList.remove('hidden'); SFX.Music.play('cover.mid');
+    $('#tcont').classList.toggle('hidden', !s);
+    $('#tinfo').textContent = s ? `${s.name} · ${tx(TR.cls[s.cls])} · ${tx('Seviye')} ${s.lv}` : '';
+    $('#tcont').onclick = () => { T.classList.add('hidden'); Game.P = s; start(); };
+    $('#tnew').onclick = e => { const b = e.currentTarget; if (!s || b.dataset.sure) { localStorage.removeItem(SAVE_KEY); T.classList.add('hidden'); onlineCreate = false; showCreate(); } else { b.dataset.sure = 1; b.textContent = tx('Eminim: eski karakter silinsin'); } };
+    $('#tonline').onclick = () => { T.classList.add('hidden'); showOnline(); };
+    $('#tlang').onclick = () => setLang(LANG === 'tr' ? 'en' : 'tr');
     requestAnimationFrame(loop);
     window.__G = Game;
   }
   return {
+    chatLine,
     openShop(cn) { closeAll(); Win.open('shop', { shop: cn }); },
     startAssign, cancelAssign,
     boot, rockerPos, toLogical, toWorld, hudHit, open, closeAll, panelOpen, dialog, say, attack,

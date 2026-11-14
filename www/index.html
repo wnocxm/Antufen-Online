@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#000000">
 <title>Anrufen Online</title>
-<link rel="stylesheet" href="style.css?v=11141744">
+<link rel="stylesheet" href="style.css?v=11142011">
 </head>
 <body>
 <canvas id="game"></canvas>
@@ -28,7 +28,21 @@
 </div>
 
 <div id="title" class="hidden"><div class="tbox"><img src="assets/ui/UIData_2067.png" alt="">
-<button id="tcont">Devam Et</button><button id="tnew">Yeni Karakter</button><button id="tlang" class="small">English / Türkçe</button><p id="tinfo"></p><p class="ver">Sürüm 11141744</p></div></div>
+<button id="tcont">Devam Et</button><button id="tnew">Yeni Karakter</button><button id="tonline">Çevrimiçi Oyna</button><button id="tlang" class="small">English / Türkçe</button><p id="tinfo"></p><p class="ver">Sürüm 11142011</p></div></div>
+<div id="online" class="hidden"><div class="obox">
+  <div class="otitle">Çevrimiçi Oyna</div>
+  <div id="ologin">
+    <label>Sunucu adresi<input id="ourl" placeholder="https://oyun.alanadiniz.com" autocomplete="url" inputmode="url"></label>
+    <label>Kullanıcı adı<input id="ouser" maxlength="24" autocomplete="username" autocapitalize="off"></label>
+    <label>Şifre<input id="opass" type="password" maxlength="100" autocomplete="current-password"></label>
+    <div class="orow"><button id="ogo">Giriş</button><button id="oreg">Hesap Aç</button></div>
+  </div>
+  <div id="ochars" class="hidden"><div id="olist"></div>
+    <div class="orow"><button id="onew">Yeni Karakter</button><button id="oout" class="small">Çıkış yap</button></div>
+  </div>
+  <p id="omsg"></p><button id="oback" class="small">Geri</button>
+</div></div>
+<div id="chat" class="hidden"><input id="ctext" maxlength="120" placeholder="Mesajını yaz…" autocomplete="off" enterkeyhint="send"><button id="csend">Gönder</button><button id="cclose">✕</button></div>
 <div id="death" class="hidden"><div><h2>Öldün</h2><button id="revive">Yeniden doğ</button></div></div>
 
 <div id="create" class="hidden">
@@ -38,19 +52,20 @@
     <div class="row"><span class="lab">Irk</span><button data-race="人类">İnsan</button><button data-race="精灵">Gece Elfi</button></div>
     <div class="row"><span class="lab">Cinsiyet</span><button data-sex="male">Erkek</button><button data-sex="fema">Kadın</button></div>
     <div class="row"><span class="lab">Yüz</span><div id="cfaces"></div></div>
-    <button id="cstart">Oyuna başla</button>
+    <button id="cstart">Oyuna başla</button><p id="cmsg" class="hint"></p>
   </div>
 </div>
 
-<script src="js/audio.js?v=11141744"></script>
-<script src="js/assets.js?v=11141744"></script>
-<script src="js/i18n.js?v=11141744"></script>
-<script src="js/i18n_data.js?v=11141744"></script>
-<script src="js/tr.js?v=11141744"></script>
-<script src="js/world.js?v=11141744"></script>
-<script src="js/game.js?v=11141744"></script>
-<script src="js/forms.js?v=11141744"></script>
-<script src="js/win.js?v=11141744"></script>
-<script src="js/ui.js?v=11141744"></script>
+<script src="js/audio.js?v=11142011"></script>
+<script src="js/assets.js?v=11142011"></script>
+<script src="js/i18n.js?v=11142011"></script>
+<script src="js/i18n_data.js?v=11142011"></script>
+<script src="js/tr.js?v=11142011"></script>
+<script src="js/world.js?v=11142011"></script>
+<script src="js/game.js?v=11142011"></script>
+<script src="js/net.js?v=11142011"></script>
+<script src="js/forms.js?v=11142011"></script>
+<script src="js/win.js?v=11142011"></script>
+<script src="js/ui.js?v=11142011"></script>
 </body>
 </html>

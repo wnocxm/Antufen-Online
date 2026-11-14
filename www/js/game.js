@@ -195,8 +195,10 @@ function randomGear(lv) {
   const P = Game.P, pool = Object.entries(ITEMS).filter(([, it]) => it.slot && (!it.cls || it.cls === P.cls) && it.lv <= lv && it.lv >= lv - 12);
   return pool.length ? pool[irnd(0, pool.length - 1)][0] : null;
 }
-function save() { const P = Game.P; if (!P || !Game.player) return; P.scene = Game.sceneId; P.x = Game.player.x; P.y = Game.player.y; P.hp = Game.player.hp; P.mp = Game.player.mp; try { localStorage.setItem(SAVE_KEY, JSON.stringify(P)); } catch (e) { } }
-function load() { try { const s = JSON.parse(localStorage.getItem(SAVE_KEY)); if (s && s.v === 1) { if (!s.eq) { s.eq = Object.assign({}, STARTER[s.cls]); if (s.gear && s.gear.head) Object.assign(s.eq, { head: NEWBIE[s.cls][0], shoe: NEWBIE[s.cls][1] }); } if (s.sv !== 2) { s.sv = 2; s.quick = QUICK0.slice(); } if (!s.sk) { s.sk = {}; for (const k of CLS[s.cls].skills) if (s.lv >= k.lv) s.sk[k.id] = 1; s.sp = 1; } return s; } } catch (e) { } return null; }
+function save() { const P = Game.P; if (!P || !Game.player) return; P.scene = Game.sceneId; P.x = Game.player.x; P.y = Game.player.y; P.hp = Game.player.hp; P.mp = Game.player.mp; if (Net.on) return Net.save(P); try { localStorage.setItem(SAVE_KEY, JSON.stringify(P)); } catch (e) { } }
+function load() { try { return fixSave(JSON.parse(localStorage.getItem(SAVE_KEY))); } catch (e) { } return null; }
+// eski ya da sunucudan gelen kaydı tamamla
+function fixSave(s) { try { if (s && s.v === 1) { s.quests = s.quests || {}; s.done = s.done || {}; s.qitems = s.qitems || {}; s.flags = s.flags || {}; s.gear = s.gear || { weap: 0, body: 0, head: 0 }; if (!s.eq) { s.eq = Object.assign({}, STARTER[s.cls]); if (s.gear && s.gear.head) Object.assign(s.eq, { head: NEWBIE[s.cls][0], shoe: NEWBIE[s.cls][1] }); } if (s.sv !== 2) { s.sv = 2; s.quick = QUICK0.slice(); } if (!s.sk) { s.sk = {}; for (const k of CLS[s.cls].skills) if (s.lv >= k.lv) s.sk[k.id] = 1; s.sp = 1; } return s; } } catch (e) { } return null; }
 
 function stats() {
   const P = Game.P, C = CLS[P.cls], L = P.lv - 1, g = P.gear;
@@ -309,6 +311,7 @@ async function loadScene(sid, arrive) {
   if (map.blocked(px, py)) { const r = map.regionsOf(0)[0] || [0, 0, Math.floor(map.w / 2), Math.floor(map.h / 2)]; px = r[2]; py = r[3]; }
   if (map.blocked(px, py)) { outer: for (let r = 1; r < 30; r++) for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) if (!map.blocked(px + dx, py + dy)) { px += dx; py += dy; break outer; } }
   Game.player = new Player(px, py); Game.ents.push(Game.player);
+  Net.scene(sid, px, py);   // çevrimiçiyse sunucuya bu haritada olduğumuzu bildir
   Game.cam.x = Game.player.X; Game.cam.y = Game.player.Y;
   Game.arriveT = 1.5;
   UI.zone(trName(sc.name));

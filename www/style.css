@@ -85,3 +85,21 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .ver { color: #7a6a4a; font-size: 10px; }
 
 .tbox button.small { width: 160px; padding: 6px; font-size: 12px; font-weight: 400; }
+
+/* çevrimiçi giriş ve karakter seçimi */
+#online { position: fixed; inset: 0; z-index: 31; display: grid; place-items: center; background: radial-gradient(ellipse at center, #5a0c08 0%, #1a0403 55%, #000 100%); padding: 10px; }
+.obox { width: min(420px, 94vw); max-height: 96vh; overflow-y: auto; touch-action: pan-y; background: rgba(14,10,6,.92); border: 2px solid #8a6a30; box-shadow: 0 0 0 2px #000, 0 8px 30px #000; padding: 10px 14px; display: flex; flex-direction: column; gap: 8px; font-size: 13px; }
+.otitle { color: #ffd870; font-weight: 700; font-size: 16px; text-align: center; }
+.obox label { display: flex; flex-direction: column; gap: 2px; color: #d8b870; margin-bottom: 6px; }
+.obox input, #chat input { padding: 7px 8px; background: #000; border: 1px solid #6a5028; color: #fff; font: inherit; font-size: 15px; user-select: text; -webkit-user-select: text; }
+.orow { display: flex; gap: 6px; flex-wrap: wrap; }
+.obox button { flex: 1; padding: 9px; font-weight: 700; color: #ffe8a0; background: url(assets/ui/AnbufenUI_Resource_7032.png) center/100% 100%; border: 1px solid #8a6a30; }
+.obox button:active, .ochar:active { background-image: url(assets/ui/AnbufenUI_Resource_7033.png); color: #000; }
+.obox button.small { flex: none; align-self: center; padding: 5px 14px; font-weight: 400; font-size: 12px; }
+#olist { display: flex; flex-direction: column; gap: 5px; margin-bottom: 6px; }
+.obox .ochar { display: flex; align-items: center; gap: 8px; text-align: left; padding: 4px 8px; font-weight: 400; }
+.ochar img { width: 36px; height: 36px; border: 1px solid #8a6a30; } .ochar b { color: #ffd870; display: block; } .ochar small { color: #c8b890; }
+#omsg { color: #ff9a70; min-height: 1em; text-align: center; } #omsg.ok { color: #9cf58a; }
+#chat { position: fixed; left: 50%; transform: translateX(-50%); bottom: 8px; z-index: 22; display: flex; gap: 4px; width: min(520px, 92vw); padding: 5px; background: rgba(14,10,6,.92); border: 1px solid #8a6a30; }
+#chat input { flex: 1; min-width: 0; }
+#chat button { padding: 6px 10px; color: #ffe8a0; background: url(assets/ui/AnbufenUI_Resource_7032.png) center/100% 100%; border: 1px solid #8a6a30; }

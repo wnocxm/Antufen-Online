@@ -96,14 +96,14 @@ const Win = (() => {
     rowBtn(ctx, 'mus', ox + 4, oy + 75, 'Müzik', SFX.opt.music ? on : off);
     rowBtn(ctx, 'lang', ox + 4, oy + 110, 'Dil / Language', LANG === 'tr' ? 'Türkçe' : 'English');
     rowBtn(ctx, 'title', ox + 4, oy + 145, 'Giriş ekranına dön', null);
-    rowBtn(ctx, 'newc', ox + 4, oy + 180, 'Yeni karakter oluştur', null);
-    Forms.label(ctx, tx('Oyun otomatik kaydedilir.') + '  ' + tx('Sürüm ' + VER), ox + 8, oy + 222, 290, 14, '#8d8983', 'left', 10);
+    rowBtn(ctx, 'newc', ox + 4, oy + 180, Net.on ? 'Karakter değiştir' : 'Yeni karakter oluştur', null);
+    Forms.label(ctx, tx(Net.on ? 'Sunucuya otomatik kaydedilir.' : 'Oyun otomatik kaydedilir.') + '  ' + tx('Sürüm ' + VER), ox + 8, oy + 222, 290, 14, '#8d8983', 'left', 10);
   }
   function tapSys(id) {
     if (id !== 'newc') sysSure = false;
     if (id === 'sfx') SFX.setSfx(!SFX.opt.sfx); else if (id === 'mus') SFX.setMusic(!SFX.opt.music);
-    else if (id === 'lang') { save(); setLang(LANG === 'tr' ? 'en' : 'tr'); }
-    else if (id === 'title') { save(); location.reload(); }
+    else if (id === 'lang') { save(); Net.now().then(() => setLang(LANG === 'tr' ? 'en' : 'tr')); }
+    else if (id === 'title' || (id === 'newc' && Net.on)) { save(); Net.now().then(() => location.reload()); }
     else if (id === 'newc') ask('Karakterin silinecek ve yeni karakter oluşturacaksın. Emin misin?', () => { localStorage.removeItem(SAVE_KEY); location.reload(); });
   }
   // ---------------- Dünya haritası (dosyadaki orijinal harita görselleri) ----------------
