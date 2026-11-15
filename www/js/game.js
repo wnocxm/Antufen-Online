@@ -237,9 +237,19 @@ class Player extends Ent {
     this.doll.draw(ctx, act, anim, t, X, Y);
   }
 }
+// Elle ayarlanmamış canavarlar: seviye sahnenin seviyesinden, sıra adındaki yıldızlardan (☆ seçkin, ☆☆ patron) gelir.
+// Sahnenin seviyesi harita dosyası adındaki sayıdır (…-10, …-50); bir sahnedeki canavarlar o aralığa sırayla dağıtılır.
+function monDef(nm, sc) {
+  if (MON[nm]) return MON[nm];
+  const rank = nm.startsWith('☆☆') ? 2 : nm.includes('☆') ? 1 : 0, S = (sc && sc.lv) || 1;
+  const kinds = sc ? [...new Set(sc.ents.filter(e => Assets.D.mon[e[0]] && !e[1].includes('☆')).map(e => e[1]))] : [], i = Math.max(0, kinds.indexOf(nm));
+  const base = Math.max(1, S - 9), span = Math.max(1, Math.min(9, kinds.length));
+  const lv = Math.min(S + 5, base + Math.round(i * 8 / span) + (rank === 2 ? 6 : rank ? 3 : 0));
+  return MON[nm] = { lv, rank, xp: Math.round((4 + 5 * lv) * (rank === 2 ? 25 : rank ? 3 : 1)), n: rank === 2 ? 1 : rank ? 2 : 7, wide: rank ? 4 : 8, auto: true };
+}
 class Mob extends Ent {
   constructor(name, x, y, home) {
-    super('mob', x, y); const d = MON[name] || { lv: 1, hp: 50, atk: 5, xp: 5 };
+    super('mob', x, y); const d = monDef(name, Game.scene);
     // canavar değerleri orijinalde sunucudaydı: seviyeden hesaplanır (haritaların seviye aralığına göre)
     const L = d.lv || 1, rk = d.rank || 0, soft = d.passive ? 0.55 : 1;
     const mhp = Math.round((250 + 260 * L) * soft * (rk === 2 ? 18 : rk ? 4 : 1)); this.atk = Math.round((50 + 28 * L) * soft * (rk === 2 ? 1.8 : rk ? 1.25 : 1)); this.def = 8 * L * (rk ? 1.5 : 1);
@@ -292,7 +302,7 @@ async function loadScene(sid, arrive) {
     const [x, y] = pos;
     if (D.cit[id]) { const n = new Npc(id, D.cit[id], x, y); Game.ents.push(n); if (!n.pickup) map.extraBlock[map.idx(x, y)] = 1; }
     else if (D.mon[id]) {
-      const d = MON[nm] || {};
+      const d = monDef(nm, sc);
       // tek kareli "canavarlar" aslında maden kayası, kalıntı gibi sabit toplama noktalarıdır: saldırılmaz
       const msp = map.sprite(D.mon[id][1]), still = msp.ok && msp.anims.slice(0, 12).every(a => a.length <= 1);
       if (d.skip) continue;   // etkinlik canavarları (yalnızca bayramlarda çıkar)
@@ -327,20 +337,21 @@ function checkExits() {
     if (cx >= r[2] && cx <= r[4] && cy >= r[3] && cy <= r[5]) {
       const ex = map.scene.exits.find(e => e[0] === r[0]); if (!ex) continue;
       const target = ex[1].replace('(入口)', '');
-      const sid = Object.keys(Assets.D.scenes).find(k => Assets.D.scenes[k].name === target);
-      if (!sid) { if (!Game.warnT) { UI.toast(`${trName(target)}: bu bölge henüz açılmadı`); Game.warnT = 3; } return; }
-      gotoScene(sid, Game.scene.name);
+      // hedef sahne numarası paketlemede çözülür (aynı adlı birden çok sahne olabilir)
+      const sid = ex[2] || Object.keys(Assets.D.scenes).find(k => Assets.D.scenes[k].name === target);
+      if (!sid || !Assets.D.scenes[sid]) { if (!Game.warnT) { UI.toast(`${trName(target)}: bu bölge henüz açılmadı`); Game.warnT = 3; } return; }
+      gotoScene(sid, Game.scene.name, null, Game.sceneId);
       return;
     }
   }
 }
-async function gotoScene(sid, fromName, fixed) {
+async function gotoScene(sid, fromName, fixed, fromSid) {
   Game.transit = true; save();
   const sc = Assets.D.scenes[sid];
   let arrive = fixed || null;
   if (!arrive) {
     const json = await fetch(vq(Assets.base + 'maps/' + sc.map + '.json')).then(r => r.json());
-    const back = sc.exits.find(e => e[1].replace('(入口)', '') === fromName);
+    const back = (fromSid && sc.exits.find(e => e[2] === fromSid)) || sc.exits.find(e => e[1].replace('(入口)', '') === fromName);
     const regs = json.regions;
     const r = back ? (regs.find(g => g[0] === back[0] + 1 && g[1] === 0) || regs.find(g => g[0] === back[0])) : regs.find(g => g[1] === 0);
     if (r) arrive = [Math.round((r[2] + r[4]) / 2), Math.round((r[3] + r[5]) / 2)];

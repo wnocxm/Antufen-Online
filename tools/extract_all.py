@@ -29,7 +29,7 @@ def spans(table, h):
             off, x0, x1 = struct.unpack_from('<IHH', table, q); q += 8; sp.append((y, off, x0, x1))
     return sp
 
-def image8(b):
+def decode8(b):
     """256 renkli görsel -> RGBA. Düz (satırlar 4 bayta tamamlanır) ya da satır-aralık sıkıştırmalı; bazıları piksel başına renk + saydamlık taşır."""
     hdr = struct.unpack_from('<6I', b, 0); w, h = hdr[3], hdr[4]
     a = b.find(b'\x78\x9c', 24); cs, rs = struct.unpack_from('<II', b, a - 8)
@@ -76,6 +76,10 @@ def image8(b):
             if n <= 0: continue
             if two: seg = pxa[off:off + 2 * n]; L[y, x0:x0 + len(seg[0::2])] = seg[0::2]; A[y, x0:x0 + len(seg[1::2])] = seg[1::2]
             else: seg = pxa[off:off + n]; L[y, x0:x0 + len(seg)] = seg; A[y, x0:x0 + len(seg)] = 255
+    return pal, L, A
+
+def image8(b):
+    pal, L, A = decode8(b)
     return Image.fromarray(np.dstack([pal[L], A]).astype(np.uint8), 'RGBA')
 
 def rgb565(a):
