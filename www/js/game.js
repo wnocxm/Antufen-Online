@@ -166,7 +166,7 @@ const STATN = { atk: 'Saldırı', def: 'Savunma', hp: 'Can', mp: 'Mana', crit: '
 let SHOPS = {};
 async function loadItems() {
   const D = await fetch(vq(Assets.base + 'items.json')).then(r => r.json());
-  for (const [id, it] of Object.entries(D.items)) { it.ik = it.icon[0]; it.icon = it.icon[1]; if (it.slot) it.desc = it.desc || ''; if (LANG === 'en') { it.name = EN_ITEM[it.name] || it.name; it.desc = tx(it.desc); } ITEMS[id] = it; }
+  for (const [id, it] of Object.entries(D.items)) { it.ik = it.icon[0]; it.icon = it.icon[1]; if (it.slot) it.desc = it.desc || ''; if (LANG === 'en') { it.name = it.en || EN_ITEM[it.name] || it.name; it.desc = it.den || tx(it.desc); } ITEMS[id] = it; }
   if (LANG === 'en') { for (const k of ['hp1', 'hp2', 'mp1', 'mp2', 'growthBox', 'quest']) { ITEMS[k].name = tx(ITEMS[k].name); ITEMS[k].desc = tx(ITEMS[k].desc); } SLOTS.forEach(s => s[1] = tx(s[1])); for (const k in STATN) STATN[k] = tx(STATN[k]); for (const t of Object.values(D.shops)) t.forEach(x => x[0] = tx(x[0])); }
   SHOPS = D.shops;
   // gece elfi tüccarları aynı mal listelerini satar (orijinalde dükkân listeleri eş)
@@ -468,6 +468,10 @@ function useItem(id) {
   if (it.use) {
     if (it.use.hp) { if (p.hp >= s.hp) return UI.log('Canın dolu.'); p.hp = Math.min(s.hp, p.hp + it.use.hp); UI.float(p, '+' + it.use.hp, '#7bff8a'); }
     if (it.use.mp) { if (p.mp >= s.mp) return UI.log('Manan dolu.'); p.mp = Math.min(s.mp, p.mp + it.use.mp); UI.float(p, '+' + it.use.mp, '#6fb7ff'); }
+    if (it.use.hot) { // yiyecek: süre boyunca yavaş yavaş yeniler (aynı türden yenisi eskisinin yerine geçer)
+      const [res, amt, sec] = it.use.hot, k = res === 'hp' ? 'hotT' : 'motT'; p.buffs = p.buffs.filter(b => !b.buff[k]);
+      p.buffs.push({ id: 'food_' + res, buff: { [k]: amt / sec }, t: sec }); UI.float(p, it.name, res === 'hp' ? '#7bff8a' : '#6fb7ff', 0.8);
+    }
     removeItem(id);
   } else if (it.growth) {
     const P = Game.P; removeItem(id);
@@ -668,7 +672,7 @@ function update(dt) {
   if (!p.dead) {
     const regen = Game.scene.name === '观林镇' ? 0.03 : p.combatT > 0 ? 0.003 : 0.012;
     p.hp = Math.min(s.hp, p.hp + (s.hp * regen + s.hpreg * 0.1) * dt); p.mp = Math.min(s.mp, p.mp + (s.mp * regen * 1.3 + s.mpreg * 0.1) * dt);
-    for (const b of p.buffs) { if (b.buff.hot) p.hp = Math.min(s.hp, p.hp + s.hp * b.buff.hot * dt); if (b.buff.hotT) p.hp = Math.min(s.hp, p.hp + b.buff.hotT * dt); }
+    for (const b of p.buffs) { if (b.buff.hot) p.hp = Math.min(s.hp, p.hp + s.hp * b.buff.hot * dt); if (b.buff.hotT) p.hp = Math.min(s.hp, p.hp + b.buff.hotT * dt); if (b.buff.motT) p.mp = Math.min(s.mp, p.mp + b.buff.motT * dt); }
     const J = Input.joy();
     let moving = false;
     if (J) {

@@ -23,7 +23,7 @@ const J = path.resolve(__dirname, '..', 'www', 'js');
       await c.query(`INSERT INTO items (id, name_tr, name_en, slot, cls, lv, price, sell, icon_kind, icon, stats, use_effect, gfx) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
         ON CONFLICT (id) DO UPDATE SET name_tr=EXCLUDED.name_tr, name_en=EXCLUDED.name_en, slot=EXCLUDED.slot, cls=EXCLUDED.cls, lv=EXCLUDED.lv, price=EXCLUDED.price, sell=EXCLUDED.sell,
         icon_kind=EXCLUDED.icon_kind, icon=EXCLUDED.icon, stats=EXCLUDED.stats, use_effect=EXCLUDED.use_effect, gfx=EXCLUDED.gfx`,
-        [id, it.name, ctx.EN_ITEM[it.name] || null, it.slot || null, it.cls || null, it.lv || null, it.price || 0, it.sell || 0, it.icon[0], it.icon[1],
+        [id, it.name, it.en || ctx.EN_ITEM[it.name] || null, it.slot || null, it.cls || null, it.lv || null, it.price || 0, it.sell || 0, it.icon[0], it.icon[1],
           it.st ? JSON.stringify(it.st) : null, it.use ? JSON.stringify(it.use) : null, it.gfx || null]);
       n++;
     }
