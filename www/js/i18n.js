@@ -18,6 +18,7 @@ const EN_UI = {
   'Savaşçı': 'Warrior', 'Büyücü': 'Mage', 'Kutsal Elçi': 'Priest', 'İnsan': 'Human', 'Gece Elfi': 'Night Elf',
   'Parmağınla kaydır': 'Drag to scroll', 'Sarı: sen · Yeşil: NPC · Mavi: çıkış': 'Yellow: you · Green: NPC · Blue: exit',
   // çevrimiçi
+  'Aktif görev yok.': 'No active quests.', 'Başında ! olan kişilerle konuş.': 'Talk to people with a ! above their head.', 'edilgen': 'passive', 'Devam': 'Continue',
   'Sistem': 'System', 'Binek': 'Mount', 'Potansiyel': 'Potential', 'Yakında': 'Coming soon', 'Satış': 'Sell price', 'Boş yuva': 'Empty slot',
   'Otomatik Yol': 'Auto-Path', 'Şimdi': 'Now', 'Önce haritadan bir yer seç.': 'Select a place on the map first.', 'Zaten buradasın.': 'You are already here.', 'Hedefe vardın.': 'You have arrived.',
   'Buradan oraya yürüyerek gidilemiyor.': 'You cannot walk there from here.', 'Yol bulunamadı.': 'No path found.',

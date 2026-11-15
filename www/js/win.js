@@ -59,12 +59,12 @@ const Win = (() => {
 
   function draw(ctx, vw, VH) {
     if (!cur) return; hits = [];
-    const modern = cur === 'bag' || cur === 'role' || cur === 'hub';   // yeni arayüz: oyun ekranı karartılmaz
+    const modern = cur !== 'menu';   // yeni arayüz: oyun ekranı karartılmaz
     if (!modern) { ctx.fillStyle = 'rgba(0,0,0,.5)'; ctx.fillRect(0, 0, vw, VH); }
-    if (cur === 'bag') drawBag2(ctx, vw, VH); else if (cur === 'role') drawRole2(ctx, vw, VH); else if (cur === 'npc') drawNpc(ctx, vw, VH); else if (cur === 'task') drawTask(ctx, vw, VH); else if (cur === 'menu') drawMenu(ctx, vw, VH); else if (cur === 'skill') drawSkill(ctx, vw, VH); else if (cur === 'shop') drawShop(ctx, vw, VH); else if (cur === 'dead') drawDead(ctx, vw, VH);
-    if (cur === 'sys') drawSys(ctx, vw, VH); else if (cur === 'map') drawMap(ctx, vw, VH);
-    if (cur === 'hub' || (HUB0.some(h => h[0] === cur) && cur !== 'bag' && cur !== 'role')) drawHub2(ctx, vw, VH);
-    if (modal) drawModal(ctx, vw, VH);
+    if (cur === 'bag') drawBag2(ctx, vw, VH); else if (cur === 'role') drawRole2(ctx, vw, VH); else if (cur === 'npc') drawNpc2(ctx, vw, VH); else if (cur === 'task') drawTask2(ctx, vw, VH); else if (cur === 'menu') drawMenu(ctx, vw, VH); else if (cur === 'skill') drawSkill2(ctx, vw, VH); else if (cur === 'shop') drawShop2(ctx, vw, VH); else if (cur === 'dead') drawDead2(ctx, vw, VH);
+    if (cur === 'sys') { drawHub2(ctx, vw, VH); drawSys2(ctx, vw, VH); } else if (cur === 'map') { drawMap(ctx, vw, VH); drawHub2(ctx, vw, VH); }
+    if (cur === 'hub') drawHub2(ctx, vw, VH);
+    if (modal) drawModal2(ctx, vw, VH);
     if (pressed && performance.now() - pressT > 160) pressed = null;
   }
   // ---------------- Karakter menüsü: ekranın solunda sekmeler; pencereler arasında geçiş ----------------
@@ -92,10 +92,13 @@ const Win = (() => {
   // ================= Yeni arayüz (Android sürümünün NEW_FORM_* ekranları) =================
   // Ekranlar 320 yüksekliğinde tasarlanmış; ekran yüksekliğine ölçeklenip sol kenara yaslanır: solda kırmızı sekme sütunu (126),
   // ortada parşömen (227), sağda yalnızca bir şey seçiliyken açılan işlem paneli (135).
-  let NK = 1, NX = 0;
-  function nBegin(ctx, VH) { NK = VH / 320; NX = UI.safeL || 0; ctx.save(); ctx.translate(NX, 0); ctx.scale(NK, NK); ctx.imageSmoothingEnabled = true; }
-  function nEnd(ctx) { ctx.imageSmoothingEnabled = false; ctx.restore(); }
-  const nHit = (id, x, y, w, h) => hits.push({ id, x: NX + x * NK, y: y * NK, w: w * NK, h: h * NK });
+  let NK = 1, NX = 0, NY = 0, NSX = 0, NSY = 0, NHT = null;
+  // o: { x, y: ekran konumu, k: ölçek, oy: ekran tanımındaki boş üst payı (form birimi) }
+  function nBegin(ctx, VH, o = {}) { NK = o.k || VH / 320; NX = o.x != null ? o.x : (UI.safeL || 0); NY = o.y || 0; NSX = 0; NSY = -(o.oy || 0); ctx.save(); ctx.translate(NX, NY); ctx.scale(NK, NK); ctx.translate(0, NSY); ctx.imageSmoothingEnabled = true; }
+  function nEnd(ctx) { ctx.imageSmoothingEnabled = false; ctx.restore(); NHT = null; }
+  // ekranın içine ikinci bir ekran (bilgi kutusu) yerleştirmek için kaydırma
+  function nSub(ctx, dx, dy, fn) { ctx.save(); ctx.translate(dx, dy); const sx = NSX, sy = NSY; NSX += dx; NSY += dy; fn(); NSX = sx; NSY = sy; ctx.restore(); }
+  const nHit = (id, x, y, w, h) => (NHT || hits).push({ id, x: NX + (x + NSX) * NK, y: NY + (y + NSY) * NK, w: w * NK, h: h * NK });
   const nC = (f, id) => Forms.ctrl(f, id);
   function nDraw(ctx, f, id, st, txt) { const c = nC(f, id); Forms.drawCtrl(ctx, c, st ? 1 : 0, 0, 0, txt); return c.s[0].r; }
   // parşömen üstünde gölgesiz yazı
@@ -103,7 +106,10 @@ const Win = (() => {
   // sol sütun: arka plan + sekmeler (seçili olan sarı) + kapatma düğmesi
   function nTabs(ctx, f, bgId, ids, labels, active, closeId) {
     nDraw(ctx, f, bgId, 0);
-    ids.forEach((id, i) => { if (labels[i] == null) return; const r = nDraw(ctx, f, id, i === active || pressed === id, tx(labels[i])); nHit(id, r[0], r[1], r[2], r[3]); });
+    ids.forEach((id, i) => { if (labels[i] == null) return; const c = nC(f, id), on = i === active || pressed === id, r = nDraw(ctx, f, id, on, tx(labels[i]));
+      // bazı ekranlarda sekmenin kendi yazı katmanı yok: yazı aynı yere elle çizilir
+      if (!c.s[0].L.some(L => L[0] === 3)) { ctx.font = 'bold 11px "Noto Sans", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = 'rgba(255,230,170,.55)'; ctx.fillText(tx(labels[i]), r[0] + 54, r[1] + 16.5, 96); ctx.fillStyle = '#1c0a04'; ctx.fillText(tx(labels[i]), r[0] + 54, r[1] + 15.5, 96); ctx.textBaseline = 'alphabetic'; }
+      nHit(id, r[0], r[1], r[2], r[3]); });
     if (closeId) { const r = nDraw(ctx, f, closeId, pressed === closeId); nHit(closeId, r[0], r[1], r[2], r[3]); }
     nHit('frame', 0, 0, 126, 320);
   }
@@ -223,6 +229,168 @@ const Win = (() => {
     if (R2SLOT[id]) { R.sel = R2SLOT[id]; SFX.play('menusel', 0.6); return; }
     if (id === 'uneq' && R.sel && P.eq[R.sel]) return unequip(R.sel);
     if (id === 'swap') { close(); open('bag', { cat: 0 }); }
+  }
+
+  // ---------------- NPC konuşması (NEW_FORM_NPC_DIALOGUE): üstte söz, altında seçenek satırları ----------------
+  const N2ROWS = [50289, 50290, 50291, 50292, 50293], R3 = 'AnbufenUI_3_Resource';
+  // uzun parşömen: 227x320 zemin, satırlar 370'e kadar indiği için zemin o boya gerilir
+  function nLongBg(ctx, h = 373) { const I = Forms.img(7033, R3); if (I.complete && I.naturalWidth) ctx.drawImage(I, 0, 0, 227, h); nHit('frame', 0, 0, 227, h); }
+  function nRow(ctx, f, id, on, label, key, col) { const c = nC(f, id), r = c.s[0].r; Forms.drawCtrl(ctx, c, on ? 1 : 0, 0, 0); nText(ctx, label, r[0] + 14, r[1] + 19, on ? '#ffffff' : (col || '#3a1c08'), 12, 'left', 190); nHit(key, r[0], r[1], r[2], 50); }
+  function drawNpc2(ctx, vw, VH) {
+    nBegin(ctx, VH, { k: VH / 373 }); const f = 'n_npc_dialogue'; let { txt, o } = npcOptions(); o = o.slice(0, 5);
+    const lines = wrap(ctx, txt, 196, 11), per = 5, pages = Math.max(1, Math.ceil(lines.length / per)); if (D.key !== txt) { D.key = txt; D.pg = 0; D.focus = 0; }
+    if (D.pg < pages - 1) o = [{ t: 'Devam', a: 'next' }];
+    if (D.focus >= o.length) D.focus = 0; npcMap = {};
+    nLongBg(ctx); nText(ctx, opt.npc.name, 16, 20, '#7a1c08', 12, 'left', 180);
+    lines.slice(D.pg * per, D.pg * per + per).forEach((l, i) => nText(ctx, l, 16, 38 + i * 13.5, '#2a1a0a', 11, 'left', 198));
+    o.forEach((e, i) => { const id = N2ROWS[i]; npcMap[id] = e; nRow(ctx, f, id, pressed === id || i === D.focus, e.t, id, e.c === '#c8c0b0' ? '#6a5a40' : null); });
+    { const r = nDraw(ctx, f, 50294, pressed === 'close'); nHit('close', r[0] + 6, r[1], 36, 36); }
+    nEnd(ctx);
+  }
+  function tapNpc2(id) {
+    const e = npcMap[id]; if (!e) return; const n = opt.npc; D.focus = N2ROWS.indexOf(id);
+    if (e.a === 'next') { D.pg++; D.focus = 0; return; }
+    if (e.a === 'bye') return UI.closeAll();
+    if (e.a === 'q') { D.q = e.q; return; }
+    if (e.a === 'back') { D.q = null; return; }
+    if (e.a === 'shop') { UI.openShop(n.cn); return; }
+    if (e.a === 'tp') { UI.closeAll(); setTimeout(() => questTeleport(e.q), 300); return; }
+    if (e.a === 'accept') { const q = D.q; acceptQuest(q); D.q = null; UI.closeAll(); if (q.tp) { setTimeout(() => questTeleport(q), 400); return; } if (q.type === 'talk' && q.to === n.cn) Game.P.quests[q.id].ready = true; return; }
+    if (e.a === 'complete') { const q = D.q; completeQuest(q); D.q = null; return; }
+  }
+  // ---------------- Görev listesi (NEW_FORM_TASK): solda görev satırları, sağda seçili görevin bilgisi ----------------
+  const K2ROWS = [50274, 50275, 50276, 50277, 50278, 50279], R2 = 'AnbufenUI_2_Resource';
+  function drawTask2(ctx, vw, VH) {
+    nBegin(ctx, VH, { oy: 42 }); const f = 'n_task', P = Game.P, act = QUESTS.filter(q => P.quests[q.id]);
+    if (K.sel && !P.quests[K.sel]) K.sel = null; if (!K.sel && act.length) K.sel = act[0].id;
+    if (K.off == null || K.off > Math.max(0, act.length - 6)) K.off = 0;
+    const selQ = K.sel && QBY[K.sel];
+    nDraw(ctx, f, 50787, 0); nHit('frame', 0, 42, 227, 320);
+    act.slice(K.off, K.off + 6).forEach((q, i) => { const id = K2ROWS[i], st = P.quests[q.id], c = nC(f, id), r = c.s[0].r, on = q.id === K.sel || pressed === id;
+      Forms.drawCtrl(ctx, c, on ? 1 : 0, 0, 0); nText(ctx, q.title, r[0] + 12, r[1] + 17, on ? '#ffffff' : '#3a1c08', 12, 'left', 190);
+      nText(ctx, st.ready ? tx('Tamam') : q.count ? `${st.n}/${q.count}` : '…', r[0] + 204, r[1] + 35, st.ready ? '#1c6a12' : '#6a4a14', 10, 'right'); nHit(id, r[0], r[1], r[2], 50); });
+    if (!act.length) { nText(ctx, 'Aktif görev yok.', 113, 150, '#5a4020', 12, 'center'); nText(ctx, 'Başında ! olan kişilerle konuş.', 113, 168, '#5a4020', 11, 'center', 200); }
+    if (act.length > 6) { nText(ctx, `${K.off + 1}-${Math.min(act.length, K.off + 6)} / ${act.length}  ▾`, 113, 352, '#5a4020', 10, 'center'); nHit('more', 40, 340, 150, 22); }
+    { const r = nDraw(ctx, f, 50280, pressed === 'close'); nHit('close', r[0] + 6, r[1], 36, 36); }
+    if (selQ) nSub(ctx, 232, 62, () => { const g = 'n_item_info';
+      nDraw(ctx, g, 50419, 0); nHit('frame', 0, 9, 227, 250);
+      nText(ctx, selQ.title, 18, 36, '#6a0c00', 12.5, 'left', 192); nText(ctx, `${tx('Teslim')}: ${trName(selQ.to)}`, 18, 52, '#2a1608', 10, 'left', 192);
+      const L = wrap(ctx, selQ.goal, 190, 10).map(l => [l, '#0c4208']).concat([['', '']], wrap(ctx, selQ.text || '', 190, 10).map(l => [l, '#1a0f05']));
+      L.slice(0, 11).forEach(([l, c], i) => nText(ctx, l, 18, 72 + i * 12.5, c, 10, 'left', 192));
+      for (const [id, label, key] of [[50423, 'Yol Bul', 'walk'], [50424, 'Bırak', 'drop']]) { const r = nDraw(ctx, g, id, pressed === key, ''); Forms.label(ctx, label, r[0], r[1], r[2], r[3], '#f4ead0', 'center', 11); nHit(key, r[0], r[1], r[2], r[3]); } });
+    nEnd(ctx);
+  }
+  function tapTask2(id) {
+    const P = Game.P, act = QUESTS.filter(q => P.quests[q.id]), i = K2ROWS.indexOf(id);
+    if (i >= 0 && act[K.off + i]) { K.sel = act[K.off + i].id; SFX.play('menusel', 0.6); return; }
+    if (id === 'more') { K.off = K.off + 6 >= act.length ? 0 : K.off + 6; return; }
+    const q = K.sel && QBY[K.sel]; if (!q) return;
+    if (id === 'walk') { UI.closeAll(); questWalk(q); return; }
+    if (id === 'drop') ask(`${q.title}: ${tx('görev bırakılsın mı?')}`, () => { delete P.quests[q.id]; K.sel = null; UI.log(`${tx('Görev bırakıldı')}: ${q.title}`); save(); });
+  }
+  // ---------------- Beceri ağacı (NEW_FORM_SKILLTREE): solda ağaçlar, ortada 3x3 yuva, sağda Yükselt / Kısayol ve açıklama ----------------
+  const S2TABS = [50396, 50397, 50398, 50399, 50400, 50872];
+  function drawSkill2(ctx, vw, VH) {
+    nBegin(ctx, VH); const f = 'n_skilltree', P = Game.P, C = CLS[P.cls], trees = TREES[P.cls], tree = trees[S.tree] || trees[0];
+    const byId = id => C.skills.find(k => k.id === id), selSk = S.sel && byId(S.sel), slot = nC(f, 50415), sr = slot.s[0].r; S._cell = {};
+    nDraw(ctx, f, 50408, 0); nHit('frame', 126, 0, 227, 320);
+    nTabs(ctx, f, 50394, S2TABS, trees.map(t => t.name), S.tree, null);
+    for (const [sid, col, row] of tree.cells) {
+      const sk = byId(sid); if (!sk) continue; const x = 148 + col * 64, y = 12 + row * 86, r = skRank(sk), key = 'sk:' + sid; S._cell[key] = sk;
+      Forms.drawCtrl(ctx, slot, sk.id === S.sel ? 1 : 0, x - sr[0], y - sr[1]);
+      if (!r) ctx.globalAlpha = 0.4; drawIcon(ctx, { ik: sk.ik || 'skill', icon: sk.icon }, x + 7, y + 7, 32); ctx.globalAlpha = 1;
+      nText(ctx, `${r}/${SK_MAX}`, x + 23, y + 52, r ? '#7a1c08' : P.lv < sk.lv ? '#8a7a60' : '#2a1a0a', 10, 'center');
+      nText(ctx, sk.name, x + 23, y + 64, r ? '#2a1a0a' : '#7a6a50', 8.5, 'center', 66); nHit(key, x - 8, y, 62, 72);
+    }
+    nText(ctx, `${tx('Beceri puanı')}: ${P.sp || 0}`, 140, 298, (P.sp || 0) > 0 ? '#ffe070' : '#e8dcc0', 12, 'left');
+    if (selSk) {
+      nActions(ctx, f, 50401, [50410, 50411], [['Yükselt', 'up'], ['Kısayol', 'quick']]);
+      const r = skRank(selSk), L = [[selSk.name, '#7a1c08', 11], [`${tx('Kademe')} ${r}/${SK_MAX}${selSk.pas ? ' · ' + tx('edilgen') : ''}`, '#5a4020', 9.5]];
+      wrap(ctx, selSk.desc || '', 92, 9.5).forEach(l => L.push([l, '#2a1a0a', 9.5]));
+      if (!selSk.pas) L.push([`${selSk.mp} mana · ${selSk.cd} sn`, '#1a3a7a', 9.5]);
+      if (P.lv < selSk.lv) L.push([`${selSk.lv}. seviye gerekir.`, '#c02010', 9.5]);
+      L.slice(0, 14).forEach(([t, c, sz], i) => nText(ctx, t, 362, 118 + i * 12.5, c, sz, 'left', 94));
+    }
+    { const r = nDraw(ctx, f, 50413, pressed === 50413); nHit(50413, r[0] - 4, r[1], r[2] + 4, r[3]); }
+    nEnd(ctx);
+  }
+  function tapSkill2(id) {
+    const P = Game.P, C = CLS[P.cls];
+    if (id === 50413) { close(); open('hub'); return; }
+    if (S2TABS.includes(id)) { S.tree = S2TABS.indexOf(id); S.sel = null; SFX.play('skill_pageflip'); return; }
+    if (S._cell && S._cell[id]) { S.sel = S._cell[id].id; SFX.play('menusel', 0.6); return; }
+    const sk = S.sel && C.skills.find(k => k.id === S.sel); if (!sk) return;
+    if (id === 'up') return skillUp(sk);
+    if (id === 'quick') { if (sk.pas) UI.toast('Edilgen beceriler kısayola konmaz.'); else if (!skRank(sk)) UI.toast('Önce beceriyi öğren.'); else UI.startAssign('s' + C.skills.indexOf(sk), sk.name); }
+  }
+  // ---------------- Dükkân (NEW_FORM_SHOP): solda sekmeler, ortada liste, altta altın ve Sat; seçilince sağda bilgi ve Satın Al ----------------
+  const H2TABS = [50899, 50900, 50901, 50902, 50903], H2ROWS = [50334, 50335, 50336, 50337, 50338];
+  function drawShop2(ctx, vw, VH) {
+    nBegin(ctx, VH, { oy: 41 }); const f = 'n_shop', P = Game.P, tabs = SHOPS[opt.shop] || [], items = shopItems();
+    H.off = Math.max(0, Math.min(H.off, items.length - H2ROWS.length)); const selIt = H.sel && ITEMS[H.sel];
+    nDraw(ctx, f, 50332, 0); nHit('frame', 126, 41, 227, 320);
+    nTabs(ctx, f, 50327, H2TABS, H2TABS.map((_, i) => tabs[i] ? tabs[i][0] : null), H.tab, null);
+    H2ROWS.forEach((id, i) => { const itId = items[H.off + i]; if (!itId) return; const it = ITEMS[itId], c = nC(f, id), x = c.s[0].r[0], y = 49 + i * 53, on = itId === H.sel || pressed === id, bad = it.slot && canEquip(it);
+      Forms.drawCtrl(ctx, c, on ? 1 : 0, 0, y - c.s[0].r[1]);
+      if (bad) ctx.globalAlpha = 0.45; drawIcon(ctx, it, x + 8, y + 9, 32); ctx.globalAlpha = 1;
+      nText(ctx, it.name, x + 49, y + 17, bad ? '#8a7a60' : on ? '#ffffff' : '#3a1c08', 11, 'left', 152);
+      nText(ctx, it.lv ? `${tx('Sv')} ${it.lv}` : '', x + 49, y + 34, '#6a5a40', 9.5, 'left'); nText(ctx, String(it.price), x + 200, y + 34, P.gold < it.price ? '#c02010' : '#6a4a14', 11, 'right');
+      nHit(id, x, y, 209, 52); });
+    if (items.length > H2ROWS.length) { const th = 265 * H2ROWS.length / items.length, ty = 49 + (265 - th) * H.off / (items.length - H2ROWS.length); ctx.fillStyle = 'rgba(90,60,20,.6)'; ctx.fillRect(345, ty, 3, th); }
+    nDraw(ctx, f, 50333, 0); nText(ctx, String(P.gold), 163, 340, '#ffe070', 12, 'left');
+    { const r = nDraw(ctx, f, 50393, pressed === 'sellmode', ''); Forms.label(ctx, 'Sat', r[0], r[1], r[2], r[3], '#f4ead0', 'center', 11); nHit('sellmode', r[0], r[1], r[2], r[3]); }
+    { const r = nDraw(ctx, f, 50356, pressed === 'close'); nHit('close', r[0] - 4, r[1], r[2] + 4, r[3]); }
+    if (selIt) nSub(ctx, Math.min(358, (vw - NX) / NK - 229), 70, () => { const g = 'n_shopinfo';
+      nDraw(ctx, g, 50365, 0); nHit('frame', 0, 9, 227, 250); drawIcon(ctx, selIt, 19, 29, 32); nText(ctx, selIt.name, 62, 38, '#6a0c00', 12.5, 'left', 150); nText(ctx, `${selIt.price} ${tx('altın')}`, 62, 54, P.gold < selIt.price ? '#b01808' : '#2a1608', 10.5, 'left');
+      const L = itemLines(selIt).slice(1); const why = selIt.slot && canEquip(selIt); if (why) L.push([why, '#c02010', 10]); L.push([`${tx('Çantada')}: ${countItem(H.sel)}`, '#5a4020', 10]);
+      const DK = { '#3a2a14': '#1a0f05', '#6a4a14': '#2a1608', '#5a4020': '#2a1608', '#1c5a12': '#0c4208', '#c02010': '#b01808' };
+      let y = 80; for (const [t, c, sz] of L) for (const l of wrap(ctx, tx(t), 190, sz)) { nText(ctx, l, 18, y, DK[c] || c, sz, 'left', 192); y += 13.5; }
+      const r = nDraw(ctx, g, 50369, pressed === 'buy', ''); Forms.label(ctx, 'Satın Al', r[0], r[1], r[2], r[3], '#f4ead0', 'center', 11); nHit('buy', r[0], r[1], r[2], r[3]); });
+    nEnd(ctx);
+  }
+  function tapShop2(id) {
+    if (H2TABS.includes(id)) { H.tab = H2TABS.indexOf(id); H.sel = null; H.off = 0; SFX.play('skill_pageflip'); return; }
+    const i = H2ROWS.indexOf(id);
+    if (i >= 0) { const it = shopItems()[H.off + i]; if (!it) return; const now = performance.now(); if (H.sel === it && shopTap.id === it && now - shopTap.t < 450) { buyAsk(it); shopTap.id = null; return; } H.sel = it; shopTap = { id: it, t: now }; SFX.play('menusel', 0.6); return; }
+    if (id === 'sellmode') { const sh = opt.shop; close(); open('bag', { shop: sh }); return; }
+    if (id === 'buy' && H.sel) buyAsk(H.sel);
+  }
+  // ---------------- Ölüm ekranı ve Ayarlar: söz alanı + seçenek satırları (NEW_FORM_DEADSELECT) ----------------
+  const DS = [50447, 50448, 50449, 50450, 50451];
+  function drawDead2(ctx, vw, VH) {
+    const k = VH / 373; nBegin(ctx, VH, { k, x: Math.round((vw - 227 * k) / 2) }); const f = 'n_deadselect', P = Game.P;
+    const home = P.home || ((P.done[80003] || P.quests[80003]) ? ['120005'] : null), where = home ? trName(Assets.D.scenes[home[0]].name) : trName(Game.scene.name);
+    nLongBg(ctx, 170); nText(ctx, 'Öldün', 113, 26, '#a81808', 15, 'center');
+    wrap(ctx, tx('Savaşta yenildin. Canının ve mananın yarısıyla yeniden doğacaksın.'), 196, 11).forEach((l, i) => nText(ctx, l, 113, 52 + i * 14, '#2a1a0a', 11, 'center', 200));
+    nRow(ctx, f, DS[0], true, `${tx('Yeniden doğ')}: ${where}`, 'revive');
+    nEnd(ctx);
+  }
+  function drawSys2(ctx, vw, VH) {
+    const k = VH / 373; nBegin(ctx, VH, { k, x: (UI.safeL || 0) + 126 * VH / 320 }); const f = 'n_deadselect', on = tx('Açık'), off = tx('Kapalı');
+    nLongBg(ctx); nText(ctx, 'Ayarlar', 113, 24, '#7a1c08', 14, 'center');
+    nText(ctx, Net.on ? 'Sunucuya otomatik kaydedilir.' : 'Oyun otomatik kaydedilir.', 113, 52, '#2a1a0a', 11, 'center', 200); nText(ctx, tx('Sürüm ' + VER), 113, 70, '#5a4020', 10, 'center');
+    const rows = [['sfx', `${tx('Ses efektleri')}: ${SFX.opt.sfx ? on : off}`], ['mus', `${tx('Müzik')}: ${SFX.opt.music ? on : off}`], ['lang', `Dil / Language: ${LANG === 'tr' ? 'Türkçe' : 'English'}`], ['title', 'Giriş ekranına dön'], ['newc', Net.on ? 'Karakter değiştir' : 'Yeni karakter oluştur']];
+    rows.forEach(([key, label], i) => nRow(ctx, f, DS[i], pressed === 's:' + key, label, 's:' + key));
+    nEnd(ctx);
+  }
+  // ---------------- Onay ve sayı kutuları (NEW_FORM_DIALOG_YESNO, NEW_FORM_SELNUM) ----------------
+  function drawModal2(ctx, vw, VH) {
+    ctx.fillStyle = 'rgba(0,0,0,.45)'; ctx.fillRect(0, 0, vw, VH); const mh = [], k = 1.3;
+    nBegin(ctx, VH, { k, x: Math.round((vw - 227 * k) / 2), y: Math.round((VH - 129 * k) / 2) }); NHT = mh;
+    const btn = (f, id, label, key) => { const r = nDraw(ctx, f, id, pressed === key, ''); Forms.label(ctx, label, r[0], r[1], r[2], r[3], '#f4ead0', 'center', 11); nHit(key, r[0], r[1], r[2], r[3]); };
+    if (modal.k === 'yesno') {
+      const f = 'n_dialog_yesno'; nDraw(ctx, f, 50042, 0);
+      const L = wrap(ctx, modal.text, 196, 11).slice(0, 5); L.forEach((l, i) => nText(ctx, l, 113, 46 - L.length * 7 + i * 14 + 7, '#2a1a0a', 11, 'center', 200));
+      btn(f, 50041, 'Tamam', 'm52786'); btn(f, 50040, 'İptal', 'm52788');
+    } else {
+      const f = 'n_selnum'; nDraw(ctx, f, 50253, 0);
+      nText(ctx, modal.title, 113, 13, '#7a1c08', 11, 'center', 120);
+      { const r = nDraw(ctx, f, 50259, 0); const I = Forms.img(7036, R3); if (I.complete && I.naturalWidth) ctx.drawImage(I, 0, 0, 53, 26, r[0] + 54, r[1], 54, 26); nText(ctx, String(modal.n), 112, 43, '#ffffff', 14, 'center'); nHit('m50761', r[0], r[1], r[2], r[3]); }
+      for (const [id, key] of [[50254, 'm50758'], [50255, 'm50759']]) { const r = nDraw(ctx, f, id, pressed === key); nHit(key, r[0] - 3, r[1] - 3, r[2] + 6, r[3] + 6); }
+      if (modal.unit) nText(ctx, `${tx('Toplam')}: ${modal.n * modal.unit} ${tx('altın')} · ${tx('En fazla')}: ${modal.max}`, 113, 68, '#2a1a0a', 9.5, 'center', 200);
+      for (const [id, label, key] of [[50263, 'Tamam', 'm52791'], [50264, 'İptal', 'm52792']]) { const r = nC(f, id).s[0].r, I = Forms.img(7017, R3); if (I.complete && I.naturalWidth) ctx.drawImage(I, 0, 0, 84, 24, r[0], r[1], 84, 24); Forms.label(ctx, label, r[0], r[1], r[2], r[3], '#f4ead0', 'center', 11); nHit(key, r[0], r[1], r[2], r[3]); }
+    }
+    nEnd(ctx); modal.hits = mh;
   }
 
   // ---------------- Ayarlar ----------------
@@ -368,8 +536,8 @@ const Win = (() => {
     pressed = h.id; pressT = performance.now();
     if (typeof h.id === 'string' && h.id.startsWith('hub:')) { const k = h.id.slice(4); SFX.play('skill_pageflip'); if (k === 'gm') { UI.open('gm'); return true; } if (k !== cur) { close(); open(k); } return true; }
     if (h.id === 'close') { UI.closeAll(); return true; }
-    if (cur === 'sys') { tapSys(h.id); return true; } if (cur === 'map') { tapMap(h.id); return true; } if (cur === 'hub') return true;
-    if (cur === 'bag') tapBag2(h.id); else if (cur === 'role') tapRole2(h.id); else if (cur === 'npc') tapNpc(h.id); else if (cur === 'task') tapTask(h.id); else if (cur === 'menu') tapMenu(h.id); else if (cur === 'skill') tapSkill(h.id); else if (cur === 'shop') tapShop(h.id); else if (cur === 'dead') tapDead(h.id);
+    if (cur === 'sys') { if (typeof h.id === 'string' && h.id.startsWith('s:')) tapSys(h.id.slice(2)); return true; } if (cur === 'map') { tapMap(h.id); return true; } if (cur === 'hub') return true;
+    if (cur === 'bag') tapBag2(h.id); else if (cur === 'role') tapRole2(h.id); else if (cur === 'npc') tapNpc2(h.id); else if (cur === 'task') tapTask2(h.id); else if (cur === 'menu') tapMenu(h.id); else if (cur === 'skill') tapSkill2(h.id); else if (cur === 'shop') tapShop2(h.id); else if (cur === 'dead') { if (h.id === 'revive') { close(); revive(); } }
     return true;
   }
   let lastTap = { id: null, t: 0 };
@@ -646,7 +814,7 @@ const Win = (() => {
     if (id === 50751) { if (!H.sel) return UI.toast('Listeden bir eşya seç.'); buyAsk(H.sel); return; }
   }
   // liste kaydırma (parmakla sürükleme)
-  function drag(dy, x, y, dx = 0) { if (cur !== 'shop') return; H.acc += dy; while (H.acc <= -HROW_H) { H.off++; H.acc += HROW_H; } while (H.acc >= HROW_H) { H.off--; H.acc -= HROW_H; } if (H.off < 0) H.off = 0; }
+  function drag(dy, x, y, dx = 0) { if (cur !== 'shop') return; const RH = 53 * NK; H.acc += dy; while (H.acc <= -RH) { H.off++; H.acc += RH; } while (H.acc >= RH) { H.off--; H.acc -= RH; } if (H.off < 0) H.off = 0; }
   // ---------------- Ölüm ekranı (FORM_DEADSELECT): üstte mesaj, altta seçenek satırları ----------------
   function drawDead(ctx, vw, VH) {
     const f = Forms.get('dead'), ox = Math.round((vw - f.w) / 2), oy = Math.round((VH - 226) / 2), P = Game.P;
