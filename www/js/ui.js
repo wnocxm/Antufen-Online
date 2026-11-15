@@ -82,7 +82,7 @@ const UI = (() => {
       if (o.kind === 'obj') o.sp.draw(ctx, o.anim, Game.time * TICK, o.X - ox, o.Y - oy);
       else {
         const X = o.X - ox, Y = o.Y - oy;
-        if (o === Game.target) { ctx.strokeStyle = '#e03020'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.ellipse(X, Y, 15, 7, 0, 0, 7); ctx.stroke(); }
+        if (o === Game.target) { ctx.strokeStyle = o.kind === 'npc' ? '#58e048' : '#e03020'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.ellipse(X, Y, 15, 7, 0, 0, 7); ctx.stroke(); }
         if (o.kind !== 'npc' || !o.hidden) { ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.beginPath(); ctx.ellipse(X, Y, 11, 5, 0, 0, 7); ctx.fill(); }
         o.draw(ctx, X, Y);
       }
@@ -163,7 +163,8 @@ const UI = (() => {
     hud.push([2, 2, 56, 52, () => open('hub')]);
     // hedef
     const t = Game.target;
-    if (t && !t.dead) {
+    if (t && t.kind === 'npc' && !t.hidden) { const w = 150, x = Math.round(vw / 2 - w / 2), y = 4; ctx.fillStyle = 'rgba(0,0,0,.72)'; ctx.fillRect(x, y, w, 20); ctx.strokeStyle = '#4a8a3a'; ctx.lineWidth = 1; ctx.strokeRect(x + 0.5, y + 0.5, w - 1, 19); ctx.textAlign = 'center'; ctx.font = 'bold 10px "Noto Sans", sans-serif'; text(t.name, vw / 2, y + 14, '#9cf58a'); }
+    else if (t && !t.dead) {
       const w = 170, x = Math.round(vw / 2 - w / 2), y = 4, col = t.d.rank === 2 ? '#e890ff' : t.d.rank ? '#ffb050' : t.d.lv > P.lv + 3 ? '#ff6040' : '#f0e0d0';
       ctx.fillStyle = 'rgba(0,0,0,.72)'; ctx.fillRect(x, y, w, 30);
       ctx.fillStyle = '#9f998f'; ctx.fillRect(x, y, w, 1); ctx.fillRect(x, y + 29, w, 1); ctx.fillStyle = '#4b4547'; ctx.fillRect(x, y + 1, 1, 28); ctx.fillRect(x + w - 1, y + 1, 1, 28);
@@ -207,7 +208,13 @@ const UI = (() => {
       const k = ir * 2 / 32; ctx.translate(cx - ir, cy - ir); ctx.scale(k, k); drawSlot(sl, 0, 0); ctx.restore();
       hud.push([cx - r - 2, cy - r - 2, r * 2 + 4, r * 2 + 4, () => assign ? doAssign(qi) : fn()]);
     };
-    slotAt(ax, ay, 32 * HS, P.quick[0], () => attack(), 0);
+    // hedef bir NPC ise büyük düğme konuşma düğmesine döner (Android sürümünün turuncu konuşma düğmesi, 7004 / basılı 7005)
+    const tn = Game.target && Game.target.kind === 'npc' && !Game.target.hidden ? Game.target : null;
+    if (tn && !assign) {
+      const r = 32 * HS, im = uiImg2(talkPress > performance.now() ? 'talk_7005' : 'talk_7004');
+      if (im.complete && im.naturalWidth) { ctx.imageSmoothingEnabled = true; ctx.drawImage(im, ax - r - 4, ay - r - 4, r * 2 + 8, r * 2 + 8); ctx.imageSmoothingEnabled = false; }
+      hud.push([ax - r - 2, ay - r - 2, r * 2 + 4, r * 2 + 4, () => { talkPress = performance.now() + 180; talkTo(tn); }]);
+    } else slotAt(ax, ay, 32 * HS, P.quick[0], () => attack(), 0);
     const arc = (R, n, from, to, r, base) => { for (let i = 0; i < n; i++) { const a = (from + (to - from) * (n === 1 ? 0 : i / (n - 1))) * Math.PI / 180, qi = base + i; slotAt(ax + Math.cos(a) * R * HS, ay + Math.sin(a) * R * HS, r * HS, P.quick[qi], () => quick(qi), qi); } };
     arc(66, 3, 180, 270, 19, 1);            // iç yay: 3 beceri
     arc(112, 4, 180, 270, 18, 4);           // dış yay: 2 beceri + 2 iksir
@@ -250,7 +257,8 @@ const UI = (() => {
   function doAssign(qi) { const P = Game.P, sl = assign.sl; P.quick = P.quick.map(q => q === sl ? null : q); P.quick[qi] = sl; assign = null; SFX.play('repair', 0.5); save(); toastMsg = tx('Kısayola yerleşti.'); toastT = 1.5; }
   function cancelAssign() { if (assign) { assign = null; toastT = 0; } }
   function quick(i) { const sl = Game.P.quick[i]; if (!sl) return; if (sl[0] === 's') useSkill(+sl.slice(1)); else useItem(sl.slice(2)); }
-  function attack() { const p = Game.player; const t = Game.target && !Game.target.dead ? Game.target : nearestMob(9); if (t) { setTarget(t); p.path = null; } else log('Yakında hedef yok.'); }
+  let talkPress = 0;
+  function attack() { const p = Game.player; const t = Game.target && Game.target.kind === 'mob' && !Game.target.dead ? Game.target : nearestMob(9); if (t) { setTarget(t); p.path = null; } else log('Yakında hedef yok.'); }
   function drawMinimap(x, y, w, h) {
     const map = Game.map;
     if (mmMap !== map) {
@@ -348,7 +356,7 @@ const UI = (() => {
       title = 'Ayarlar';
       h = `<div class="iact"><button class="obtn" data-act="tsfx">Ses efektleri: ${SFX.opt.sfx ? 'Açık' : 'Kapalı'}</button><button class="obtn" data-act="tmus">Müzik: ${SFX.opt.music ? 'Açık' : 'Kapalı'}</button></div>
         <div class="iact"><button class="obtn" data-act="lang">${LANG === 'tr' ? 'Language: English' : 'Dil: Türkçe'}</button></div>
-        <div class="iact"><button class="obtn" data-act="totitle">Giriş ekranına dön</button><button class="obtn" data-act="newchar">Yeni karakter oluştur</button></div><p class="hint">Oyun otomatik kaydedilir. Sürüm 11151325</p>`;
+        <div class="iact"><button class="obtn" data-act="totitle">Giriş ekranına dön</button><button class="obtn" data-act="newchar">Yeni karakter oluştur</button></div><p class="hint">Oyun otomatik kaydedilir. Sürüm 11151814</p>`;
     }
     ptitle.textContent = tx(title); pbody.innerHTML = h; txDom(pbody);
   }
@@ -586,7 +594,7 @@ const UI = (() => {
     const dt = Math.min(0.05, (now - last) / 1000); last = now;
     ctx.setTransform(scale, 0, 0, scale, 0, 0); ctx.imageSmoothingEnabled = false;
     if (mode === 'play' && Game.map && Game.player) {
-      if (!panelOpen()) update(dt);
+      update(dt);   // pencere açıkken de oyun sürer (çevrimiçi oyundaki gibi)
       Net.tick(dt);
       drawWorld(); drawHud();
       try { Win.draw(ctx, vw, VH); } catch (err) { console.error(err); Win.close(); toast('Pencere açılamadı, sayfayı yenile.'); }

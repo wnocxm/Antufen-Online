@@ -302,7 +302,7 @@ async function loadScene(sid, arrive) {
   for (const s of CLS[Game.P.cls].skills) for (const k of ['fx', 'proj', 'hit']) if (s[k]) names.add(s[k]);
   await Assets.preload([...names]);
   Game.player && (Game.player = null);
-  Game.map = map; Game.scene = sc; Game.sceneId = sid; Game.ents = []; Game.fx = []; Game.floats = [];
+  Game.map = map; Game.scene = sc; Game.sceneId = sid; Game.target = null; Game.ents = []; Game.fx = []; Game.floats = [];
   map.build();
   // NPC'ler ve canavarlar
   for (const [id, nm, pos] of sc.ents) {
@@ -760,11 +760,18 @@ function tapWorld(sx, sy) {
   }
   if (best) {
     if (best.kind === 'mob') { setTarget(best); p.path = null; return; }
-    if (Math.hypot(best.x - p.x, best.y - p.y) < 2) { interact(best); return; }
-    p.path = findPath(Game.map, p.x, p.y, best.x, best.y + 1); Game.goTarget = best; setTarget(null); return;
+    // NPC: ilk dokunuş hedef alır (sağ alttaki büyük düğme konuşma düğmesine döner); hedefliyken ikinci dokunuş konuşmaya gider
+    if (best.kind === 'npc' && Game.target !== best) { setTarget(best); p.path = null; SFX.play('menusel', 0.5); return; }
+    return talkTo(best);
   }
   const c = Game.map.toCell(W.x, W.y);
   const path = findPath(Game.map, p.x, p.y, c.x, c.y);
   if (path) { Game.route = null; p.path = path; setTarget(null); Game.goTarget = null; Game.fx.push(Object.assign(new Fx('路标-左上', Math.round(c.x), Math.round(c.y)), { len: 6 })); }
+}
+// hedef alınmış NPC ile konuş: yakınsa hemen, uzaksa yanına yürüyüp konuşur (hedef korunur)
+function talkTo(n) {
+  const p = Game.player; if (!n || n.hidden) return;
+  if (Math.hypot(n.x - p.x, n.y - p.y) < 2) return interact(n);
+  p.path = findPath(Game.map, p.x, p.y, n.x, n.y + 1); Game.goTarget = n; if (!p.path) UI.toast('Oraya yol bulunamadı.');
 }
 function revive() { const p = Game.player, s = stats(); p.dead = false; p.state = 'idle'; p.hp = Math.round(s.hp * 0.5); p.mp = Math.round(s.mp * 0.5); const P0 = Game.P; if (!P0.home && (P0.done[80003] || P0.quests[80003])) P0.home = ['120005', 33, 20]; const town = P0.home; if (town) gotoScene(town[0], null, town[1] != null ? [town[1], town[2]] : null); else { const r = Game.map.regionsOf(0)[0]; if (r) { p.x = r[2]; p.y = r[3]; } } }
