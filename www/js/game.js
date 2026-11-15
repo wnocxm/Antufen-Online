@@ -404,7 +404,8 @@ function gainXp(n) {
   const P = Game.P; P.xp += n;
   while (P.xp >= xpNeed(P.lv)) { P.xp -= xpNeed(P.lv); P.lv++; const s = stats(); Game.player.hp = s.hp; Game.player.mp = s.mp; Game.fx.push(new Fx('LEVELUP', Game.player.x, Game.player.y)); UI.levelUp(P.lv); SFX.play('levelup');
     P.sp = (P.sp || 0) + 1; UI.log('Beceri puanı kazandın! Beceriler ekranından harca.', 'q');
-    for (const sk of CLS[P.cls].skills) if (sk.lv === P.lv) UI.log(`Yeni beceri: ${sk.name}`, 'q'); }
+    for (const sk of CLS[P.cls].skills) if (sk.lv === P.lv) UI.log(`Yeni beceri: ${sk.name}`, 'q');
+    const nq = questsUnlockedAt(P.lv); for (const q of nq) UI.log(`${tx('Yeni görev')}: ${q.title} · ${trName(q.giver)}`, 'q'); if (nq.length) UI.toast(`${nq.length} ${tx('yeni görev açıldı')}`); }
   UI.refresh();
 }
 function setTarget(e) { Game.target = e; UI.target(e); }
@@ -484,7 +485,62 @@ function refreshLook() { Game.player.doll.set(look()); Assets.preload([]); UI.re
 const QBY = Object.fromEntries(QUESTS.map(q => [q.id, q]));
 // q.race: yalnızca o ırk; q.req: tek kimlik ya da "herhangi biri" listesi
 function questState(q) { const P = Game.P; if (P.done[q.id]) return 'done'; if (P.quests[q.id]) return P.quests[q.id].ready || (q.type === 'deliver' && giveCount(q) >= q.count) ? 'ready' : 'active'; if (q.race && q.race !== P.race) return 'locked';
-  if (q.req && !(Array.isArray(q.req) ? q.req.some(r => P.done[r]) : P.done[q.req])) return 'locked'; return 'new'; }
+  if (q.req && !(Array.isArray(q.req) ? q.req.some(r => P.done[r]) : P.done[q.req])) return 'locked'; if (P.lv < questMinLv(q)) return 'soon'; return 'new'; }
+// ---------------- Görevlerin seviye şartı ----------------
+// Orijinal istemci seviye şartını taşımaz (sunucudaydı); şart orijinal verilerden türetilir:
+//  1) hedef canavarın yaşadığı haritanın seviye aralığının alt sınırı - 1 (aralıklar dünya haritası tablosundan),
+//  2) hedefi olmayan (konuşma, teslim) görev: zincirde kendinden sonra gelen ilk savaş görevinin şartı; yoksa veren NPC'nin haritası,
+//  3) bir görev, zincirde kendinden önceki görevden daha düşük seviyede açılmaz.
+let NPC_SC = null, MON_SC = null;
+function sceneIndex() {
+  if (NPC_SC) return; NPC_SC = {}; MON_SC = {}; const S = Assets.D.scenes;
+  for (const [sid, s] of Object.entries(S)) for (const e of s.ents) { const M = Assets.D.mon[e[0]] ? MON_SC : NPC_SC; (M[e[1]] || (M[e[1]] = [])).push(sid); }
+}
+const zoneMin = sids => { let m = null; for (const sid of sids || []) { const r = Assets.D.scenes[sid].lvr; if (r && (m == null || r[0] < m)) m = r[0]; } return m; };
+// bir haritanın görev seviyesi: aralığın alt sınırı - 1; başlangıç kampları (aralıksız) 1
+function sceneQLv(sid) { const s = Assets.D.scenes[sid], r = s && s.lvr; return r ? Math.max(1, r[0] - 1) : s && s.kind && s.kind[0] === 3 ? 1 : s && s.lv ? Math.max(1, s.lv - 1) : null; }
+function questOwnLv(q) {
+  sceneIndex(); if (!q.target && !q.node) return null;
+  const T = q.target ? (MON_SC[q.target] || []) : (NPC_SC[q.node] || MON_SC[q.node] || []), G = NPC_SC[q.giver] || [], S = Assets.D.scenes;
+  // hedefin, görevi verenin haritasında ya da ona komşu haritalarda yaşadığı yer önce gelir (aynı canavar başka bölgelerde de olabilir)
+  const near = new Set(G); for (const g of G) for (const e of S[g].exits) if (e[2]) near.add(e[2]);
+  const pick = L => { let m = null; for (const sid of L) { const v = sceneQLv(sid); if (v != null && (m == null || v < m)) m = v; } return m; };
+  const a = pick(T.filter(s => near.has(s))); return a != null ? a : pick(T);
+}
+let QNEXT = null;
+function questMinLv(q) {
+  if (q._lv != null) return q._lv;
+  q._lv = 1;   // döngü koruması
+  if (!QNEXT) { QNEXT = {}; for (const x of QUESTS) for (const r of [].concat(x.req || [])) (QNEXT[r] || (QNEXT[r] = [])).push(x); }
+  let lv = questOwnLv(q);
+  const pre = [].concat(q.req || []).map(r => QBY[r]).filter(Boolean).map(questMinLv), preLv = pre.length ? Math.min(...pre) : null;
+  if (lv == null && preLv != null) lv = preLv;   // hedefsiz ara adım: önceki görev biter bitmez açılır
+  if (lv == null) { // ileriye bak: zincirdeki ilk savaş görevi
+    const seen = new Set(); let front = [q];
+    for (let d = 0; d < 6 && lv == null && front.length; d++) { const nx = []; for (const x of front) for (const y of QNEXT[x.id] || []) if (!seen.has(y.id)) { seen.add(y.id); const o = questOwnLv(y); if (o != null) lv = lv == null ? o : Math.min(lv, o); nx.push(y); } front = nx; }
+  }
+  if (lv == null) { sceneIndex(); const z = zoneMin(NPC_SC[q.giver]); lv = z != null ? Math.max(1, z - 1) : 1; }
+  // önceki görev: tek kimlikse onun seviyesi; "herhangi biri" listesiyse (ırklara göre ayrı yollar) en düşüğü
+  if (preLv != null) lv = Math.max(lv, preLv);
+  return q._lv = lv;
+}
+// seviye atlayınca açılan görevler
+function questsUnlockedAt(lv) { return QUESTS.filter(q => questMinLv(q) === lv && questState(q) === 'new'); }
+// bir NPC'nin bulunduğu haritalardan, buradan yürüyerek en kısa yoldan varılanı
+function npcSceneNear(cn) {
+  sceneIndex(); const L = NPC_SC[cn] || []; if (L.includes(Game.sceneId)) return Game.sceneId;
+  let best = null, bl = 1e9; for (const sid of L) { const p = scenePath(Game.sceneId, sid); if (p && p.length < bl) { bl = p.length; best = sid; } } return best || L[0] || null;
+}
+function monSceneNear(name) {
+  sceneIndex(); const L = MON_SC[name] || []; if (L.includes(Game.sceneId)) return Game.sceneId;
+  let best = null, bl = 1e9; for (const sid of L) { const p = scenePath(Game.sceneId, sid); if (p && p.length < bl) { bl = p.length; best = sid; } } return best || L[0] || null;
+}
+// bir kişiye git: başka haritadaysa geçitlerden yürür, varınca kişiye yürür
+function routeToNpc(cn) {
+  const sid = npcSceneNear(cn); if (!sid) return UI.toast('Bu kişinin yeri bilinmiyor.');
+  if (sid === Game.sceneId) { const e = Game.ents.find(e => e.cn === cn); if (e) return walkToEnt(e); return; }
+  Game.routeNpc = cn; routeTo(sid);
+}
 // ışınlanma görevi: q.tp = [sahne, x, y]; gidilen yer "ev" olur (ölünce orada doğulur)
 function questTeleport(q) { const P = Game.P; P.home = q.tp.slice(); save(); gotoScene(q.tp[0], null, q.tp[1] != null ? [q.tp[1], q.tp[2]] : null); }
 const tpQuestOf = cn => QUESTS.find(q => q.tp && q.giver === cn && (Game.P.quests[q.id] || Game.P.done[q.id]));
@@ -550,7 +606,7 @@ function scenePath(from, to) {
 }
 function routeStep() {
   const to = Game.route; if (!to || !Game.player) return;
-  if (to === Game.sceneId) { Game.route = null; return UI.toast('Hedefe vardın.'); }
+  if (to === Game.sceneId) { Game.route = null; const cn = Game.routeNpc; Game.routeNpc = null; if (cn) { const e = Game.ents.find(e => e.cn === cn); if (e) return walkToEnt(e); } return UI.toast('Hedefe vardın.'); }
   const path = scenePath(Game.sceneId, to), ex = path && Game.scene.exits.find(e => e[2] === path[1]), r = ex && Game.map.regionsOf(1).find(g => g[0] === ex[0]);
   if (!r) { Game.route = null; return UI.toast('Yol bulunamadı.'); }
   const p = Game.player; let best = null;
@@ -566,7 +622,10 @@ function questWalk(q) {
   let t = null;
   if (st && !st.ready) { if (q.type === 'kill' || q.type === 'collect') t = near(e => e.kind === 'mob' && !e.dead && e.name === q.target); else if (q.type === 'pickup') t = near(e => e.kind === 'npc' && e.cn === q.node && !e.hidden); }
   if (!t) t = near(e => e.kind === 'npc' && e.cn === q.to);
-  if (!t) return UI.toast('Hedef bu haritada değil.');
+  if (!t) {
+    if (st && !st.ready && (q.type === 'kill' || q.type === 'collect')) { const sid = monSceneNear(q.target); if (sid && sid !== Game.sceneId) { Game.routeNpc = null; return routeTo(sid); } }
+    return routeToNpc(st ? q.to : q.giver);
+  }
   if (t.kind === 'mob') { setTarget(t); p.path = null; return; }
   p.path = findPath(Game.map, p.x, p.y, t.x, t.y + 1); Game.goTarget = t; setTarget(null);
 }
@@ -613,7 +672,7 @@ function update(dt) {
     const J = Input.joy();
     let moving = false;
     if (J) {
-      p.path = null; p.pending = null; Game.goTarget = null; Game.route = null;
+      p.path = null; p.pending = null; Game.goTarget = null; Game.route = null; Game.routeNpc = null;
       const [cx, cy] = snapScreen4(J.x, J.y), l = 1, sp = RUN * (1 + s.spd) * (Game.fast ? 2.6 : 1) * dt;
       moveEnt(p, cx / l * sp, cy / l * sp); p.dir = dirOf(cx, cy); moving = true;
     } else if ((lastJoyDir = -1, p.state !== 'attack' && p.state !== 'cast')) {

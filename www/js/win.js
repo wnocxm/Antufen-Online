@@ -259,33 +259,54 @@ const Win = (() => {
     if (e.a === 'complete') { const q = D.q; completeQuest(q); D.q = null; return; }
   }
   // ---------------- Görev listesi (NEW_FORM_TASK): solda görev satırları, sağda seçili görevin bilgisi ----------------
-  const K2ROWS = [50274, 50275, 50276, 50277, 50278, 50279], R2 = 'AnbufenUI_2_Resource';
+  const K2ROWS = [50274, 50275, 50276, 50277, 50278], R2 = 'AnbufenUI_2_Resource';
+  // iki liste: Aktif (alınmış görevler) ve Alınabilir (şimdi alınabilenler + 5 seviye içinde açılacaklar)
+  function taskList() {
+    const P = Game.P;
+    if (K.mode !== 'avail') return QUESTS.filter(q => P.quests[q.id]);
+    return QUESTS.filter(q => { const st = questState(q); return st === 'new' || (st === 'soon' && questMinLv(q) <= P.lv + 5); })
+      .sort((a, b) => (questState(a) === 'new' ? 0 : 1) - (questState(b) === 'new' ? 0 : 1) || questMinLv(a) - questMinLv(b) || a.id - b.id);
+  }
   function drawTask2(ctx, vw, VH) {
-    nBegin(ctx, VH, { oy: 42 }); const f = 'n_task', P = Game.P, act = QUESTS.filter(q => P.quests[q.id]);
-    if (K.sel && !P.quests[K.sel]) K.sel = null; if (!K.sel && act.length) K.sel = act[0].id;
-    if (K.off == null || K.off > Math.max(0, act.length - 6)) K.off = 0;
+    nBegin(ctx, VH, { oy: 42 }); const f = 'n_task', P = Game.P, list = taskList(), avail = K.mode === 'avail';
+    if (K.sel && !list.some(q => q.id === K.sel)) K.sel = null; if (!K.sel && list.length) K.sel = list[0].id;
+    if (K.off == null || K.off > Math.max(0, list.length - 5)) K.off = 0;
     const selQ = K.sel && QBY[K.sel];
     nDraw(ctx, f, 50787, 0); nHit('frame', 0, 42, 227, 320);
-    act.slice(K.off, K.off + 6).forEach((q, i) => { const id = K2ROWS[i], st = P.quests[q.id], c = nC(f, id), r = c.s[0].r, on = q.id === K.sel || pressed === id;
-      Forms.drawCtrl(ctx, c, on ? 1 : 0, 0, 0); nText(ctx, q.title, r[0] + 12, r[1] + 17, on ? '#ffffff' : '#3a1c08', 12, 'left', 190);
-      nText(ctx, st.ready ? tx('Tamam') : q.count ? `${st.n}/${q.count}` : '…', r[0] + 204, r[1] + 35, st.ready ? '#1c6a12' : '#6a4a14', 10, 'right'); nHit(id, r[0], r[1], r[2], 50); });
-    if (!act.length) { nText(ctx, 'Aktif görev yok.', 113, 150, '#5a4020', 12, 'center'); nText(ctx, 'Başında ! olan kişilerle konuş.', 113, 168, '#5a4020', 11, 'center', 200); }
-    if (act.length > 6) { nText(ctx, `${K.off + 1}-${Math.min(act.length, K.off + 6)} / ${act.length}  ▾`, 113, 352, '#5a4020', 10, 'center'); nHit('more', 40, 340, 150, 22); }
+    list.slice(K.off, K.off + 5).forEach((q, i) => { const id = K2ROWS[i], c = nC(f, id), r = c.s[0].r, on = q.id === K.sel || pressed === id, st = questState(q);
+      Forms.drawCtrl(ctx, c, on ? 1 : 0, 0, 0); nText(ctx, (avail ? (st === 'new' ? '! ' : '') : '') + q.title, r[0] + 12, r[1] + 17, on ? '#ffffff' : st === 'soon' ? '#7a6a50' : '#3a1c08', 12, 'left', 190);
+      let sub, col = '#6a4a14';
+      if (avail) { sub = st === 'soon' ? `${tx('Sv')} ${questMinLv(q)}` : trName(q.giver); col = st === 'soon' ? '#a03010' : '#3a2a14'; }
+      else { const a = P.quests[q.id]; sub = a.ready ? tx('Tamam') : q.count ? `${a.n}/${q.count}` : '…'; col = a.ready ? '#1c6a12' : '#6a4a14'; }
+      nText(ctx, sub, r[0] + 204, r[1] + 35, col, 10, 'right', 150); nHit(id, r[0], r[1], r[2], 50); });
+    if (!list.length) { nText(ctx, avail ? 'Şu an alınabilecek görev yok.' : 'Aktif görev yok.', 113, 150, '#5a4020', 12, 'center', 200); if (!avail) nText(ctx, 'Alınabilir listesine bak.', 113, 168, '#5a4020', 11, 'center', 200); }
+    // alt kısım: liste seçimi ve sayfa
+    const nA = QUESTS.filter(q => P.quests[q.id]).length, nN = QUESTS.filter(q => questState(q) === 'new').length;
+    for (const [k, label, x] of [['act', `${tx('Aktif')} (${nA})`, 10], ['avail', `${tx('Alınabilir')} (${nN})`, 116]]) {
+      const on = (K.mode || 'act') === k, I = Forms.img(7019, R2); if (I.complete && I.naturalWidth) { ctx.globalAlpha = on ? 1 : 0.6; ctx.drawImage(I, 0, 0, 84, 24, x, 312, 100, 26); ctx.globalAlpha = 1; }
+      Forms.label(ctx, label, x, 312, 100, 26, on ? '#ffe070' : '#d8d0c0', 'center', 11); nHit('mode:' + k, x, 312, 100, 26); }
+    if (list.length > 5) { nText(ctx, `${K.off + 1}-${Math.min(list.length, K.off + 5)} / ${list.length}  ▾`, 113, 348, '#5a4020', 10, 'center'); nHit('more', 40, 340, 150, 20); }
     { const r = nDraw(ctx, f, 50280, pressed === 'close'); nHit('close', r[0] + 6, r[1], 36, 36); }
-    if (selQ) nSub(ctx, 232, 62, () => { const g = 'n_item_info';
+    if (selQ) nSub(ctx, 232, 62, () => { const g = 'n_item_info', st = questState(selQ), S = Assets.D.scenes;
       nDraw(ctx, g, 50419, 0); nHit('frame', 0, 9, 227, 250);
-      nText(ctx, selQ.title, 18, 36, '#6a0c00', 12.5, 'left', 192); nText(ctx, `${tx('Teslim')}: ${trName(selQ.to)}`, 18, 52, '#2a1608', 10, 'left', 192);
-      const L = wrap(ctx, selQ.goal, 190, 10).map(l => [l, '#0c4208']).concat([['', '']], wrap(ctx, selQ.text || '', 190, 10).map(l => [l, '#1a0f05']));
-      L.slice(0, 11).forEach(([l, c], i) => nText(ctx, l, 18, 72 + i * 12.5, c, 10, 'left', 192));
-      for (const [id, label, key] of [[50423, 'Yol Bul', 'walk'], [50424, 'Bırak', 'drop']]) { const r = nDraw(ctx, g, id, pressed === key, ''); Forms.label(ctx, label, r[0], r[1], r[2], r[3], '#f4ead0', 'center', 11); nHit(key, r[0], r[1], r[2], r[3]); } });
+      nText(ctx, selQ.title, 18, 36, '#6a0c00', 12.5, 'left', 192);
+      const L = [];
+      if (avail) { const sid = npcSceneNear(selQ.giver); L.push([`${tx('Veren')}: ${trName(selQ.giver)}${sid ? ' · ' + trName(S[sid].name) : ''}`, '#2a1608']); L.push([`${tx('Seviye')}: ${questMinLv(selQ)}${st === 'soon' ? ' · ' + tx('henüz açılmadı') : ''}`, st === 'soon' ? '#b01808' : '#0c4208']); }
+      else L.push([`${tx('Teslim')}: ${trName(selQ.to)}`, '#2a1608']);
+      wrap(ctx, selQ.goal, 190, 10).forEach(l => L.push([l, '#0c4208'])); L.push(['', '']);
+      wrap(ctx, selQ.text || '', 190, 10).forEach(l => L.push([l, '#1a0f05']));
+      L.slice(0, 12).forEach(([l, c], i) => nText(ctx, l, 18, 54 + i * 12.5, c, 10, 'left', 192));
+      const B = avail ? [[50423, 'Yol Bul', 'walk']] : [[50423, 'Yol Bul', 'walk'], [50424, 'Bırak', 'drop']];
+      for (const [id, label, key] of B) { const r = nDraw(ctx, g, id, pressed === key, ''); Forms.label(ctx, label, r[0], r[1], r[2], r[3], '#f4ead0', 'center', 11); nHit(key, r[0], r[1], r[2], r[3]); } });
     nEnd(ctx);
   }
   function tapTask2(id) {
-    const P = Game.P, act = QUESTS.filter(q => P.quests[q.id]), i = K2ROWS.indexOf(id);
-    if (i >= 0 && act[K.off + i]) { K.sel = act[K.off + i].id; SFX.play('menusel', 0.6); return; }
-    if (id === 'more') { K.off = K.off + 6 >= act.length ? 0 : K.off + 6; return; }
+    const P = Game.P, list = taskList(), i = K2ROWS.indexOf(id);
+    if (typeof id === 'string' && id.startsWith('mode:')) { K.mode = id.slice(5); K.sel = null; K.off = 0; SFX.play('skill_pageflip'); return; }
+    if (i >= 0 && list[K.off + i]) { K.sel = list[K.off + i].id; SFX.play('menusel', 0.6); return; }
+    if (id === 'more') { K.off = K.off + 5 >= list.length ? 0 : K.off + 5; return; }
     const q = K.sel && QBY[K.sel]; if (!q) return;
-    if (id === 'walk') { UI.closeAll(); questWalk(q); return; }
+    if (id === 'walk') { UI.closeAll(); if (K.mode === 'avail') routeToNpc(q.giver); else questWalk(q); return; }
     if (id === 'drop') ask(`${q.title}: ${tx('görev bırakılsın mı?')}`, () => { delete P.quests[q.id]; K.sel = null; UI.log(`${tx('Görev bırakıldı')}: ${q.title}`); save(); });
   }
   // ---------------- Beceri ağacı (NEW_FORM_SKILLTREE): solda ağaçlar, ortada 3x3 yuva, sağda Yükselt / Kısayol ve açıklama ----------------
