@@ -18,6 +18,8 @@ const EN_UI = {
   'Savaşçı': 'Warrior', 'Büyücü': 'Mage', 'Kutsal Elçi': 'Priest', 'İnsan': 'Human', 'Gece Elfi': 'Night Elf',
   'Parmağınla kaydır': 'Drag to scroll', 'Sarı: sen · Yeşil: NPC · Mavi: çıkış': 'Yellow: you · Green: NPC · Blue: exit',
   // çevrimiçi
+  'Otomatik Yol': 'Auto-Path', 'Şimdi': 'Now', 'Önce haritadan bir yer seç.': 'Select a place on the map first.', 'Zaten buradasın.': 'You are already here.', 'Hedefe vardın.': 'You have arrived.',
+  'Buradan oraya yürüyerek gidilemiyor.': 'You cannot walk there from here.', 'Yol bulunamadı.': 'No path found.',
   'GM Paneli': 'GM Panel', 'NPC Listesi': 'NPC List', 'Harita ara: ad ya da numara…': 'Search map: name or number…', 'NPC ara…': 'Search NPC…', 'ölümsüz': 'god mode', 'hızlı': 'fast',
   'Şehir': 'Town', 'Kır': 'Wild', 'Başlangıç': 'Starter', 'Zindan': 'Dungeon', 'Özel': 'Special', 'Sv': 'Lv', 'harita daha var; aramayı daralt.': 'more maps; narrow the search.', 'Bu haritada NPC yok.': 'No NPCs on this map.',
   'Seviye (1-120):': 'Level (1-120):', 'Seviye +1': 'Level +1', 'Seviye +10': 'Level +10', 'Seviye seç': 'Set level', 'Ekipman giydir': 'Equip gear', 'Beceri puanı +20': 'Skill points +20', 'Altın +100.000': 'Gold +100,000',

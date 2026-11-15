@@ -48,9 +48,23 @@ for sid, s in scenes.items():
             c = sorted(back, key=lambda x: abs(int(x) - int(sid))); amb += 1
         e[:] = [e[0], e[1], c[0] if c else None]
 
+# kesin hedefler: Android sürümünün geçit tablosu (sahne, kapı) -> hedef sahne. Tahmini eşleşmenin yanıldığı yerleri (lağım labirenti) düzeltir.
+fixed = 0
+if os.path.exists('kaynak/apk/gecitler.json'):
+    G = json.load(open('kaynak/apk/gecitler.json'))
+    for sid, s in scenes.items():
+        for e in s['exits']:
+            t = G.get(f'{sid}:{e[0]}')
+            if t and t in scenes and t != e[2]: e[2] = t; fixed += 1
+print('geçit tablosundan düzeltilen', fixed)
+
 # ---------- sahne seviyesi: harita dosyası adının sonundaki sayı (…-10, …-50); yoksa komşulardan ----------
 for sid, s in scenes.items():
     m = re.search(r'-(\d+)$', s['map']); s['lv'] = int(m.group(1)) if m and int(m.group(1)) >= 10 else 0
+# gerçek seviye aralıkları: Android sürümünün dünya haritası tablosundaki adlardan ("…(27-29级)")
+if os.path.exists('kaynak/apk/seviyeler.json'):
+    for sid, r in json.load(open('kaynak/apk/seviyeler.json')).items():
+        if sid in scenes: scenes[sid]['lvr'] = r; scenes[sid]['lv'] = r[1]
 for _ in range(6):
     for sid, s in scenes.items():
         if s['lv']: continue

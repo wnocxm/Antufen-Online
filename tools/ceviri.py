@@ -83,6 +83,11 @@ N={
 '☆邪教献祭者':('☆Tarikat Kurbancısı','☆Cult Sacrificer'),'☆灭寂之灵':('☆Sönmüş Ruh','☆Spirit of Extinction'),'☆恐惧卫士':('☆Korku Muhafızı','☆Fear Guard'),'☆凝望守卫':('☆Gözcü Muhafız','☆Gazing Guard'),
 '灵魂收割者':('Ruh Biçici','Soul Reaper'),'☆灵魂碎裂者':('☆Ruh Parçalayıcı','☆Soul Shatterer'),'☆血腥献祭者':('☆Kanlı Kurbancı','☆Bloody Sacrificer'),'夜精灵渗透者':('Gece Elfi Casusu','Night Elf Infiltrator'),
 '☆死亡禁卫':('☆Ölüm Muhafızı','☆Death Guard'),'☆☆【偷心法师】罗姆塞恩':('☆☆【Kalp Hırsızı Büyücü】Romsen','☆☆【Heart-Stealing Mage】Romsen'),'森林警卫官':('Orman Muhafız Subayı','Forest Guard Officer'),
+# Karanlık Gözcü Kulesi çevresindeki korular
+'☆吸血仙子':('☆Kan Emici Peri','☆Bloodsucking Fairy'),'林地夜行者':('Koru Gece Avcısı','Woodland Nightstalker'),'暗影巨魔':('Gölge Trolü','Shadow Troll'),'完好的遗迹':('Sağlam Kalıntı','Intact Relic'),
+'织网毒蜘蛛':('Ağ Ören Zehirli Örümcek','Webspinner Venom Spider'),'剑蜘蛛':('Kılıç Örümceği','Sword Spider'),'☆【欺诈女王】科琳娜':('☆【Hilekâr Kraliçe】Corinna','☆【Deceiver Queen】Corinna'),
+'☆蜘蛛护卫':('☆Örümcek Muhafız','☆Spider Guard'),'堕落学者':('Yozlaşmış Bilgin','Fallen Scholar'),'☆仙子邪术师':('☆Peri Büyücüsü','☆Fairy Sorcerer'),'无脑僵尸':('Beyinsiz Zombi','Brainless Zombie'),
+'☆剧毒撕裂者':('☆Zehirli Parçalayıcı','☆Venomous Ripper'),'污染者':('Kirletici','Defiler'),'☆鬼巨魔':('☆Hayalet Trol','☆Ghost Troll'),'奔马城城主':('Koşanat Şehri Beyi','Lord of Galloping Horse City'),
 '【工人】乔治':('【İşçi】George','【Worker】George'),'【美女炼金师】爱丽丝':('【Güzel Simyacı】Alice','【Beautiful Alchemist】Alice'),'【兽医】詹姆斯':('【Veteriner】James','【Vet】James'),'【蠢蛋将军】米斯特':('【Ahmak General】Mister','【Blockhead General】Mister'),
 }
 NUM={'一':1,'二':2,'三':3,'四':4,'五':5,'六':6,'七':7,'八':8,'九':9}

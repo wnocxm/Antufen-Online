@@ -240,12 +240,19 @@ class Player extends Ent {
 // Elle ayarlanmamış canavarlar: seviye sahnenin seviyesinden, sıra adındaki yıldızlardan (☆ seçkin, ☆☆ patron) gelir.
 // Sahnenin seviyesi harita dosyası adındaki sayıdır (…-10, …-50); bir sahnedeki canavarlar o aralığa sırayla dağıtılır.
 function monDef(nm, sc) {
-  if (MON[nm]) return MON[nm];
+  const R = sc && sc.lvr, xpOf = (lv, rank) => Math.round((4 + 5 * lv) * (rank === 2 ? 25 : rank ? 3 : 1));
+  if (MON[nm]) {
+    const d = MON[nm];
+    // elle yazılmış değerler gerçek seviye aralığının dışındaysa aralığa çekilir (aralıklar dünya haritası tablosundan)
+    if (R && !d.auto && !d.fit && d.lv) { d.fit = true; const lv = clamp(d.lv, R[0], R[1] + (d.rank === 2 ? 2 : d.rank ? 1 : 0)); if (lv !== d.lv) { d.lv = lv; d.xp = xpOf(lv, d.rank || 0); } }
+    return d;
+  }
   const rank = nm.startsWith('☆☆') ? 2 : nm.includes('☆') ? 1 : 0, S = (sc && sc.lv) || 1;
   const kinds = sc ? [...new Set(sc.ents.filter(e => Assets.D.mon[e[0]] && !e[1].includes('☆')).map(e => e[1]))] : [], i = Math.max(0, kinds.indexOf(nm));
-  const base = Math.max(1, S - 9), span = Math.max(1, Math.min(9, kinds.length));
-  const lv = Math.min(S + 5, base + Math.round(i * 8 / span) + (rank === 2 ? 6 : rank ? 3 : 0));
-  return MON[nm] = { lv, rank, xp: Math.round((4 + 5 * lv) * (rank === 2 ? 25 : rank ? 3 : 1)), n: rank === 2 ? 1 : rank ? 2 : 7, wide: rank ? 4 : 8, auto: true };
+  let lv;
+  if (R) lv = rank === 2 ? R[1] + 2 : rank ? R[1] + 1 : R[0] + Math.round(i * (R[1] - R[0]) / Math.max(1, kinds.length - 1));
+  else { const base = Math.max(1, S - 9), span = Math.max(1, Math.min(9, kinds.length)); lv = Math.min(S + 5, base + Math.round(i * 8 / span) + (rank === 2 ? 6 : rank ? 3 : 0)); }
+  return MON[nm] = { lv, rank, xp: xpOf(lv, rank), n: rank === 2 ? 1 : rank ? 2 : 7, wide: rank ? 4 : 8, auto: true };
 }
 class Mob extends Ent {
   constructor(name, x, y, home) {
@@ -322,6 +329,7 @@ async function loadScene(sid, arrive) {
   if (map.blocked(px, py)) { outer: for (let r = 1; r < 30; r++) for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) if (!map.blocked(px + dx, py + dy)) { px += dx; py += dy; break outer; } }
   Game.player = new Player(px, py); Game.ents.push(Game.player);
   Net.scene(sid, px, py);   // çevrimiçiyse sunucuya bu haritada olduğumuzu bildir
+  if (Game.route) setTimeout(routeStep, 400);   // otomatik yol sürüyorsa sonraki geçide yürü
   Game.cam.x = Game.player.X; Game.cam.y = Game.player.Y;
   Game.arriveT = 1.5;
   UI.zone(trName(sc.name));
@@ -492,6 +500,8 @@ function takeGive(q) { let n = q.count; for (const id of q.give || []) { const k
 // ödülü verilmemiş görevlere seviyeden ödül
 for (const q of QUESTS) if (!q.reward) { const L = q.lv || (MON[q.target] && MON[q.target].lv) || 3, mx = (MON[q.target] && MON[q.target].xp) || 20;
   q.reward = q.type === 'kill' || q.type === 'collect' ? { xp: Math.round((q.count || 1) * mx * 1.6 + 60 * L), gold: 10 + L * 6 } : { xp: 80 + 50 * L, gold: 8 + L * 4 }; }
+// orijinal tablodaki altın ve eşya ödülü (tools/gorevler.py)
+for (const q of QUESTS) if (q.rw) { if (q.rw.gold) q.reward.gold = q.rw.gold; if (q.rw.items && q.rw.items.length) q.reward.items = q.rw.items; }
 function acceptQuest(q) { const P = Game.P; P.quests[q.id] = { n: 0, ready: q.type === 'talk' }; if (q.type === 'special' && Game.flags[q.flag]) P.quests[q.id].ready = true; UI.log(`Görev alındı: ${q.title}`, 'q'); SFX.play('accept_task'); UI.refresh(); save(); }
 function questKill(name) {
   const P = Game.P;
@@ -506,7 +516,7 @@ function readyQuest(q) { Game.P.quests[q.id].ready = true; SFX.play('message'); 
 function completeQuest(q) {
   if (q.type === 'deliver') { if (giveCount(q) < q.count) return UI.toast(`${q.item}: ${giveCount(q)}/${q.count}`); takeGive(q); }
   const P = Game.P, r = q.reward; delete P.quests[q.id]; P.done[q.id] = true; SFX.play('finish_task');
-  if (r.gold) P.gold += r.gold; if (r.items) r.items.forEach(([id, n]) => addItem(id, n));
+  if (r.gold) P.gold += r.gold; if (r.items) r.items.forEach(([id, n]) => { if (ITEMS[id]) addItem(id, n); });
   gainXp(r.xp || 0); UI.log(`Ödül: ${r.xp} TP${r.gold ? ', ' + r.gold + ' altın' : ''}`, 'q');
   UI.refresh(); save();
 }
@@ -525,6 +535,30 @@ function gmGear() {
   refreshLook(); const s = stats(); Game.player.hp = s.hp; Game.player.mp = s.mp;
 }
 function gmHeal() { const s = stats(), p = Game.player; p.hp = s.hp; p.mp = s.mp; if (p.dead) { p.dead = false; p.state = 'idle'; } }
+// ---------------- Otomatik yol: haritalar arası geçitlerden hedef haritaya yürür ----------------
+function routeTo(sid) {
+  if (sid === Game.sceneId) return UI.toast('Zaten buradasın.');
+  if (!scenePath(Game.sceneId, sid)) { if (isGM()) { Game.route = null; return gotoScene(sid, null, null, null); } return UI.toast('Buradan oraya yürüyerek gidilemiyor.'); }
+  Game.route = sid; routeStep();
+}
+// geçit bağlantıları üzerinde en kısa sahne zinciri
+function scenePath(from, to) {
+  const S = Assets.D.scenes, prev = { [from]: null }, q = [from];
+  while (q.length) { const c = q.shift(); if (c === to) { const out = []; for (let x = to; x; x = prev[x]) out.unshift(x); return out; }
+    for (const e of S[c].exits) if (e[2] && S[e[2]] && !(e[2] in prev)) { prev[e[2]] = c; q.push(e[2]); } }
+  return null;
+}
+function routeStep() {
+  const to = Game.route; if (!to || !Game.player) return;
+  if (to === Game.sceneId) { Game.route = null; return UI.toast('Hedefe vardın.'); }
+  const path = scenePath(Game.sceneId, to), ex = path && Game.scene.exits.find(e => e[2] === path[1]), r = ex && Game.map.regionsOf(1).find(g => g[0] === ex[0]);
+  if (!r) { Game.route = null; return UI.toast('Yol bulunamadı.'); }
+  const p = Game.player; let best = null;
+  for (let y = r[3]; y <= r[5]; y++) for (let x = r[2]; x <= r[4]; x++) if (!Game.map.blocked(x, y)) { const d = Math.hypot(x - p.x, y - p.y); if (!best || d < best[2]) best = [x, y, d]; }
+  const path2 = best && findPath(Game.map, p.x, p.y, best[0], best[1]);
+  if (!path2) { Game.route = null; return UI.toast('Yol bulunamadı.'); }
+  p.path = path2; Game.goTarget = null; setTarget(null);
+}
 // bu haritadaki bir NPC'ye yürü (harita penceresindeki NPC listesi)
 function walkToEnt(t) { const p = Game.player; p.path = findPath(Game.map, p.x, p.y, t.x, t.y + 1); Game.goTarget = t; setTarget(null); if (!p.path) UI.toast('Oraya yol bulunamadı.'); }
 function questWalk(q) {
@@ -579,7 +613,7 @@ function update(dt) {
     const J = Input.joy();
     let moving = false;
     if (J) {
-      p.path = null; p.pending = null; Game.goTarget = null;
+      p.path = null; p.pending = null; Game.goTarget = null; Game.route = null;
       const [cx, cy] = snapScreen4(J.x, J.y), l = 1, sp = RUN * (1 + s.spd) * (Game.fast ? 2.6 : 1) * dt;
       moveEnt(p, cx / l * sp, cy / l * sp); p.dir = dirOf(cx, cy); moving = true;
     } else if ((lastJoyDir = -1, p.state !== 'attack' && p.state !== 'cast')) {
@@ -672,6 +706,6 @@ function tapWorld(sx, sy) {
   }
   const c = Game.map.toCell(W.x, W.y);
   const path = findPath(Game.map, p.x, p.y, c.x, c.y);
-  if (path) { p.path = path; setTarget(null); Game.goTarget = null; Game.fx.push(Object.assign(new Fx('路标-左上', Math.round(c.x), Math.round(c.y)), { len: 6 })); }
+  if (path) { Game.route = null; p.path = path; setTarget(null); Game.goTarget = null; Game.fx.push(Object.assign(new Fx('路标-左上', Math.round(c.x), Math.round(c.y)), { len: 6 })); }
 }
 function revive() { const p = Game.player, s = stats(); p.dead = false; p.state = 'idle'; p.hp = Math.round(s.hp * 0.5); p.mp = Math.round(s.mp * 0.5); const P0 = Game.P; if (!P0.home && (P0.done[80003] || P0.quests[80003])) P0.home = ['120005', 33, 20]; const town = P0.home; if (town) gotoScene(town[0], null, town[1] != null ? [town[1], town[2]] : null); else { const r = Game.map.regionsOf(0)[0]; if (r) { p.x = r[2]; p.y = r[3]; } } }

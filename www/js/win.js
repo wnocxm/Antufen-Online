@@ -44,7 +44,7 @@ const Win = (() => {
     else if (h.id === 'm50761') m.n = m.n === m.max ? 1 : Math.min(m.max, m.n < 10 ? 10 : m.max);   // sayıya dokun: 10, sonra en fazla
     else if (h.id === 'm52791') { modal = null; m.onOk(m.n); }
   }
-  function open(name, o = {}) { cur = name; opt = o; if (name === 'npc') { D.q = null; SFX.play('request', 0.6); } if (name === 'task') { K.sel = null; K.sure = false; } if (name === 'menu') M.page = 0; if (name === 'shop') { H.tab = 0; H.sel = null; H.off = 0; } B.sel = null; B.sure = false; B.assign = false; B.page = 0; if (o.cat != null) B.cat = o.cat; SFX.play('menu_appear', 0.5); if (name === 'bag') questFlag('openBag'); }
+  function open(name, o = {}) { cur = name; opt = o; if (name === 'map') { WM.mode = 'world'; WM.sel = null; wmData(); } if (name === 'npc') { D.q = null; SFX.play('request', 0.6); } if (name === 'task') { K.sel = null; K.sure = false; } if (name === 'menu') M.page = 0; if (name === 'shop') { H.tab = 0; H.sel = null; H.off = 0; } B.sel = null; B.sure = false; B.assign = false; B.page = 0; if (o.cat != null) B.cat = o.cat; SFX.play('menu_appear', 0.5); if (name === 'bag') questFlag('openBag'); }
   function close() { cur = null; opt = {}; modal = null; }
   const isOpen = () => !!cur;
 
@@ -108,45 +108,65 @@ const Win = (() => {
     else if (id === 'newc') ask('Karakterin silinecek ve yeni karakter oluşturacaksın. Emin misin?', () => { localStorage.removeItem(SAVE_KEY); location.reload(); });
   }
   // ---------------- Dünya haritası (dosyadaki orijinal harita görselleri) ----------------
-  // Orijinal FORM_WORLDMAP: 480x320 siyah çizim alanı (51935), altında Çıkış / Değiştir / Yol Bul düğmeleri.
-  // Dünya haritası iki parça mürekkep çizimidir (2047 + 2048 = 880x752) ve 1:1 boyutta parmakla kaydırılır.
-  // "Değiştir" bulunduğun haritanın yakın görünümüne geçer (oyuncu, NPC'ler, çıkışlar).
-  const mapImg = {}, WM = { mode: 'world', x: null, y: null };
-  function mapRect(vw, VH) { const W = 480, H = 320; return { W, H, ox: Math.max(80, Math.round((vw - W) / 2) + 30), oy: Math.round((VH - H) / 2) }; }
+  // ---------------- Dünya haritası ----------------
+  // Üç görünüm: kıta (renkli harita, bölge noktaları) -> bölge (şehir, kamp, kır ve zindan simgeleri) ; ve bulunduğun haritanın yakın görünümü.
+  // Resimler ve yerleşim Android sürümünden (tools/dunya.py); düğmeler orijinal 70x30 düğmeler.
+  const wmImg = {}, WM = { mode: 'world', area: null, sel: null, data: null, load: false };
+  const wimg = k => wmImg[k] || (wmImg[k] = Object.assign(new Image(), { src: vq(`${Assets.base}wm/${k}`) }));
+  function wmData() { if (!WM.data && !WM.load) { WM.load = true; fetch(vq(Assets.base + 'wm/wm.json')).then(r => r.json()).then(d => { WM.data = d; }).catch(() => { WM.load = false; }); } return WM.data; }
+  const areaOf = sid => { const d = WM.data; return d ? d.areas.find(a => a.scenes.some(s => s.sid === sid)) : null; };
+  function mapRect(vw, VH) { const W = Math.min(560, Math.round(vw - 96)), H = Math.min(344, VH - 12); return { W, H, ox: Math.max(80, Math.round((vw - W) / 2) + 34), oy: Math.round((VH - H) / 2) }; }
+  function mapBtn(ctx, id, label, x, y) { Forms.drawCtrl(ctx, Forms.ctrl('worldmap', 52801), pressed === id ? 1 : 0, x - 1, y - 1, ''); Forms.label(ctx, tx(label), x, y, 70, 30, '#ffffff', 'center', 10); hits.push({ id, x, y, w: 70, h: 30 }); }
   function drawMap(ctx, vw, VH) {
-    const { W, H, ox, oy } = mapRect(vw, VH), top = 26, bh = 36, vh = H - top - bh;
+    const { W, H, ox, oy } = mapRect(vw, VH), top = 4, bh = 36, vh = H - top - bh, vx = ox + 4, vy = oy + top, vwid = W - 8, D = wmData();
     ctx.fillStyle = '#000'; ctx.fillRect(ox, oy, W, H); ctx.strokeStyle = '#9f998f'; ctx.strokeRect(ox + 0.5, oy + 0.5, W - 1, H - 1); ctx.strokeStyle = '#4b4547'; ctx.strokeRect(ox + 1.5, oy + 1.5, W - 3, H - 3);
-    ctx.save(); ctx.beginPath(); ctx.rect(ox + 2, oy + top, W - 4, vh); ctx.clip();
+    hits.push({ id: 'frame', x: ox, y: oy, w: W, h: H });
+    ctx.save(); ctx.beginPath(); ctx.rect(vx, vy, vwid, vh); ctx.clip(); ctx.imageSmoothingEnabled = true;
+    const pulse = 0.5 + 0.5 * Math.sin(Game.time * 5), here = D && areaOf(Game.sceneId);
     if (WM.mode === 'world') {
-      const parts = ['UIData_2047', 'UIData_2048'].map(k => mapImg[k] || (mapImg[k] = Object.assign(new Image(), { src: `${Assets.base}ui/${k}.png` })));
-      const tw = 880, th = 752;
-      if (WM.x == null) { WM.x = (tw - W) / 2; WM.y = (th - vh) / 2; }
-      WM.x = clamp(WM.x, 0, tw - (W - 4)); WM.y = clamp(WM.y, 0, th - vh);
-      const mx = Math.round(ox + 2 - WM.x), my = Math.round(oy + top - WM.y);
-      // mürekkep çizimi koyu zeminde okunmuyor: eski harita gibi parşömen rengi üzerine çizilir
-      const pg = ctx.createRadialGradient(ox + W / 2, oy + top + vh / 2, 40, ox + W / 2, oy + top + vh / 2, W * 0.7); pg.addColorStop(0, '#d9c79c'); pg.addColorStop(1, '#a8926a');
-      ctx.fillStyle = pg; ctx.fillRect(ox + 2, oy + top, W - 4, vh);
-      if (parts.every(i => i.complete && i.naturalWidth)) { ctx.drawImage(parts[0], mx, my); ctx.drawImage(parts[1], mx + 400, my); }
+      const im = wimg('world.jpg'); if (im.complete && im.naturalWidth) ctx.drawImage(im, vx, vy, vwid, vh);
+      if (D) for (const a of D.areas) {
+        const x = vx + a.cx / 100 * vwid, y = vy + a.cy / 100 * vh, cur = a === here;
+        ctx.fillStyle = 'rgba(0,0,0,.45)'; ctx.beginPath(); ctx.arc(x + 1, y + 2, 11, 0, 7); ctx.fill();
+        const g = ctx.createRadialGradient(x - 3, y - 3, 1, x, y, 11); g.addColorStop(0, '#ff7a3a'); g.addColorStop(1, '#c8300e'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, 10, 0, 7); ctx.fill();
+        if (cur) { ctx.strokeStyle = `rgba(255,255,255,${0.5 + 0.5 * pulse})`; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(x, y, 13 + pulse * 2, 0, 7); ctx.stroke(); ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(x, y - 1, 3.2, 0, 7); ctx.fill(); }
+        hits.push({ id: 'area:' + a.i, x: x - 16, y: y - 16, w: 32, h: 32 });
+      }
+    } else if (WM.mode === 'area' && WM.area) {
+      const a = WM.area, im = wimg(a.img); if (im.complete && im.naturalWidth) ctx.drawImage(im, vx, vy, vwid, vh);
+      for (const s of a.scenes) {
+        const x = vx + s.x / 100 * vwid, y = vy + s.y / 100 * vh, ic = wimg(s.icon + '.png'), sz = 22;
+        if (s.sid === Game.sceneId || s.sid === WM.sel) { const r = wimg('ring.png'), k = s.sid === WM.sel ? 34 : 30 + pulse * 4; if (r.complete && r.naturalWidth) ctx.drawImage(r, x - k / 2, y - k / 2, k, k); }
+        if (ic.complete && ic.naturalWidth) ctx.drawImage(ic, x - sz / 2, y - sz / 2, sz, sz);
+        hits.push({ id: 'sc:' + s.sid, x: x - 15, y: y - 15, w: 30, h: 30 });
+      }
     } else {
       // bulunduğun harita: zemin görüntüsü sığacak kadar küçültülür
-      const map = Game.map, g = map.ground, k = Math.min((W - 8) / map.pw, (vh - 4) / map.ph), gw = map.pw * k, gh = map.ph * k, gx = ox + (W - gw) / 2, gy = oy + top + (vh - gh) / 2;
-      ctx.imageSmoothingEnabled = true; ctx.drawImage(g, 0, 0, map.pw, map.ph, gx, gy, gw, gh); ctx.imageSmoothingEnabled = false;
+      const map = Game.map, g = map.ground, k = Math.min((vwid - 8) / map.pw, (vh - 4) / map.ph), gw = map.pw * k, gh = map.ph * k, gx = vx + (vwid - gw) / 2, gy = vy + (vh - gh) / 2;
+      ctx.drawImage(g, 0, 0, map.pw, map.ph, gx, gy, gw, gh);
       const dot = (e, c, r) => { ctx.fillStyle = c; ctx.beginPath(); ctx.arc(gx + map.px(e.x, e.y) * k, gy + map.py(e.x, e.y) * k, r, 0, 7); ctx.fill(); };
       for (const r of map.regionsOf(1)) dot({ x: (r[2] + r[4]) / 2, y: (r[3] + r[5]) / 2 }, '#4aa8ff', 3.5);
       for (const e of Game.ents) if (e.kind === 'npc' && !e.dummy && !e.hidden) dot(e, '#7cf06a', 2);
       if (Math.floor(Game.time * 3) % 2 === 0) { dot(Game.player, '#000', 4); dot(Game.player, '#ffe048', 3); }
     }
-    ctx.restore();
-    Forms.label(ctx, WM.mode === 'world' ? tx('Dünya Haritası') : tx(trName(Game.scene.name)), ox + 8, oy + 4, W - 16, 18, '#e6cf89', 'left', 12);
-    // alt düğmeler: orijinal 70x30 düğmeler (7130/7131)
-    const by = oy + H - bh + 3, B = [[52938, ox + 8], [52802, ox + W - 78]];
-    for (const [id, x] of B) { Forms.drawCtrl(ctx, Forms.ctrl('worldmap', id), pressed === id ? 1 : 0, x - 1, by - 1); hits.push({ id, x, y: by, w: 70, h: 30 }); }
-    // NPC listesi: bu haritadaki kişiler, seçilene kendiliğinden yürünür
-    { const x = ox + W - 156; Forms.drawCtrl(ctx, Forms.ctrl('worldmap', 52801), pressed === 'npcs' ? 1 : 0, x - 1, by - 1, ''); Forms.label(ctx, tx('NPC Listesi'), x, by, 70, 30, '#ffffff', 'center', 10); hits.push({ id: 'npcs', x, y: by, w: 70, h: 30 }); }
-    Forms.label(ctx, WM.mode === 'world' ? tx('Parmağınla kaydır') : tx('Sarı: sen · Yeşil: NPC · Mavi: çıkış'), ox + 82, by, W - 244, 30, '#8d8983', 'center', 9);
-    hits.push({ id: 'frame', x: ox, y: oy, w: W, h: H });
+    ctx.imageSmoothingEnabled = false; ctx.restore();
+    // kapatma düğmesi (orijinal çanta penceresinin düğmesi) ve alt satır
+    Forms.drawCtrl(ctx, Forms.ctrl('bag', 52696), pressed === 'close' ? 1 : 0, ox + W - 306, oy - 6); hits.push({ id: 'close', x: ox + W - 34, y: oy - 6, w: 34, h: 34 });
+    const by = oy + H - bh + 3;
+    mapBtn(ctx, 'sw', WM.mode === 'area' ? 'Geri' : 'Değiştir', ox + 8, by);
+    if (WM.mode === 'area') mapBtn(ctx, 'go', 'Otomatik Yol', ox + W - 156, by);
+    mapBtn(ctx, 'npcs', 'NPC Listesi', ox + W - 78, by);
+    const S = Assets.D.scenes; let info = `${tx('Şimdi')}: ${tx(trName(Game.scene.name))}`, col = '#e6cf89';
+    if (WM.mode === 'area' && WM.sel) { const s = WM.area.scenes.find(q => q.sid === WM.sel); info = tx(trName(S[WM.sel].name)) + (s && s.lv ? `  ·  ${tx('Sv')} ${s.lv[0]}${s.lv[1] !== s.lv[0] ? '-' + s.lv[1] : ''}` : ''); col = '#ffffff'; }
+    Forms.label(ctx, info, ox + 84, by, W - (WM.mode === 'area' ? 246 : 168), 30, col, 'center', 11);
   }
-  function tapMap(id) { if (id === 'npcs') { UI.open('npcs'); return; } if (id === 52802) UI.closeAll(); else if (id === 52938) { WM.mode = WM.mode === 'world' ? 'local' : 'world'; SFX.play('skill_pageflip'); } }
+  function tapMap(id) {
+    if (id === 'npcs') return UI.open('npcs');
+    if (id === 'sw') { SFX.play('skill_pageflip'); WM.sel = null; WM.mode = WM.mode === 'area' ? 'world' : WM.mode === 'world' ? 'local' : 'world'; return; }
+    if (id === 'go') { if (!WM.sel) return UI.toast('Önce haritadan bir yer seç.'); const t = WM.sel; UI.closeAll(); routeTo(t); return; }
+    if (typeof id === 'string' && id.startsWith('area:')) { WM.area = WM.data.areas.find(a => a.i === +id.slice(5)); WM.mode = 'area'; WM.sel = null; SFX.play('skill_pageflip'); return; }
+    if (typeof id === 'string' && id.startsWith('sc:')) { WM.sel = id.slice(3); SFX.play('menusel', 0.6); }
+  }
   function drawBag(ctx, vw, VH) {
     const P = Game.P, f = Forms.get('bag'), ox = Math.round((vw - f.w) / 2), oy = Math.round((VH - f.h) / 2);
     const items = bagItems(), slots = slotIds(), quick = quickIds(), per = slots.length, pages = Math.max(1, Math.ceil(items.length / per));
@@ -489,7 +509,7 @@ const Win = (() => {
     if (id === 50751) { if (!H.sel) return UI.toast('Listeden bir eşya seç.'); buyAsk(H.sel); return; }
   }
   // liste kaydırma (parmakla sürükleme)
-  function drag(dy, x, y, dx = 0) { if (cur === 'map') { if (WM.mode === 'world' && WM.x != null) { WM.x -= dx; WM.y -= dy; } return; } if (cur !== 'shop') return; H.acc += dy; while (H.acc <= -HROW_H) { H.off++; H.acc += HROW_H; } while (H.acc >= HROW_H) { H.off--; H.acc -= HROW_H; } if (H.off < 0) H.off = 0; }
+  function drag(dy, x, y, dx = 0) { if (cur !== 'shop') return; H.acc += dy; while (H.acc <= -HROW_H) { H.off++; H.acc += HROW_H; } while (H.acc >= HROW_H) { H.off--; H.acc -= HROW_H; } if (H.off < 0) H.off = 0; }
   // ---------------- Ölüm ekranı (FORM_DEADSELECT): üstte mesaj, altta seçenek satırları ----------------
   function drawDead(ctx, vw, VH) {
     const f = Forms.get('dead'), ox = Math.round((vw - f.w) / 2), oy = Math.round((VH - 226) / 2), P = Game.P;
