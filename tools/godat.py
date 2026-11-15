@@ -1,7 +1,7 @@
 import struct,zlib,sys,re
 def read(path):
     b=open(path,'rb').read()
-    assert b[:8] in (b'sy2dr2.6',b'GODAT2.5'), path
+    assert b[:8] in (b'sy2dr2.6',b'GODAT2.5',b'\0'*8), path   # bazı yeni arşivlerde imza boş bırakılmış
     n,tsize=struct.unpack_from('<II',b,15)
     p=23; ents=[]
     for i in range(n):
@@ -9,8 +9,11 @@ def read(path):
         name=b[p:p+nl].decode('latin1'); p+=nl
         ents.append((id_,off,name))
     out=[]
+    # kayıt sonu: dosyadaki bir sonraki başlangıç (dizin her zaman konuma göre sıralı değildir)
+    offs=sorted(set(e[1] for e in ents))+[len(b)]
+    import bisect
     for i,(id_,off,name) in enumerate(ents):
-        end=ents[i+1][1] if i+1<n else len(b)
+        end=offs[bisect.bisect_right(offs,off)]
         out.append((id_,name,b[off:end]))
     return out
 def unpack(r):

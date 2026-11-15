@@ -1,0 +1,6171 @@
+{
+  "header": "sy2dr2.6",
+  "total": 589,
+  "items": [
+    {
+      "id": 210000,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "抗性光环",
+        "icon\\buff\\BUFF_basic7.bmp"
+      ]
+    },
+    {
+      "id": 210001,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "神圣之盾",
+        "icon\\buff\\BUFF_ex11.bmp",
+        "特效-神圣之盾"
+      ]
+    },
+    {
+      "id": 210002,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "体力增加",
+        "icon\\buff\\BUFF_ex11.bmp",
+        "特效-神圣之盾"
+      ]
+    },
+    {
+      "id": 210003,
+      "index": 0,
+      "type": 3,
+      "subtype": 0,
+      "strings": [
+        "法力盾",
+        "icon\\buff\\BUFF_ex7.bmp",
+        "特效-法力盾"
+      ]
+    },
+    {
+      "id": 210004,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "神圣之盾",
+        "icon\\buff\\BUFF_ex11.bmp",
+        "特效-神圣之盾"
+      ]
+    },
+    {
+      "id": 210005,
+      "index": 0,
+      "type": 5,
+      "subtype": 0,
+      "strings": [
+        "骑士"
+      ]
+    },
+    {
+      "id": 210006,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "冻结",
+        "icon\\buff\\BUFF_ex11.bmp"
+      ]
+    },
+    {
+      "id": 210007,
+      "index": 0,
+      "type": 3,
+      "subtype": 0,
+      "strings": [
+        "弱化术",
+        "icon\\buff\\BUFF_basic5.bmp",
+        "特效-弱化术"
+      ]
+    },
+    {
+      "id": 210008,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "死亡标记",
+        "icon\\buff\\BUFF_ex16.bmp",
+        "特效-死亡标记"
+      ]
+    },
+    {
+      "id": 210009,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "抗性降低",
+        "icon\\buff\\BUFF_basic7.bmp",
+        "特效-抗性减少"
+      ]
+    },
+    {
+      "id": 210010,
+      "index": 0,
+      "type": 3,
+      "subtype": 0,
+      "strings": [
+        "狂暴化",
+        "icon\\buff\\BUFF_ex19.bmp",
+        "特效-狂暴BUFF"
+      ]
+    },
+    {
+      "id": 210011,
+      "index": 0,
+      "type": 0,
+      "subtype": 0,
+      "strings": [
+        "",
+        "buff\\BUFF_ex21.bmp"
+      ]
+    },
+    {
+      "id": 210012,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "法力光环",
+        "buff\\BUFF_ex3.bmp"
+      ]
+    },
+    {
+      "id": 210013,
+      "index": 0,
+      "type": 3,
+      "subtype": 0,
+      "strings": [
+        "魔法盾",
+        "buff\\BUFF_ex11.bmp",
+        "特效-弱化术"
+      ]
+    },
+    {
+      "id": 210014,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "元素赐生",
+        "buff\\BUFF_ex1.bmp"
+      ]
+    },
+    {
+      "id": 210015,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "冻结",
+        "buff\\BUFF_basic4.bmp",
+        "特效-冻结"
+      ]
+    },
+    {
+      "id": 210016,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "元素支配",
+        "buff\\BUFF_ex7.bmp"
+      ]
+    },
+    {
+      "id": 210017,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "死亡标记",
+        "buff\\BUFF_sp3.bmp"
+      ]
+    },
+    {
+      "id": 210018,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "暗影诅咒",
+        "buff\\BUFF_sp3.bmp",
+        "特效-抗性减少"
+      ]
+    },
+    {
+      "id": 210019,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "速度爆发",
+        "buff\\BUFF_basic3.bmp",
+        "特效-加速",
+        "\u0000\u0000"
+      ]
+    },
+    {
+      "id": 210020,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "坚韧光环",
+        "buff\\BUFF_ex1.bmp"
+      ]
+    },
+    {
+      "id": 210021,
+      "index": 0,
+      "type": 3,
+      "subtype": 0,
+      "strings": [
+        "狂暴化",
+        "buff\\BUFF_basic7.bmp",
+        "特效-狂暴BUFF"
+      ]
+    },
+    {
+      "id": 210022,
+      "index": 0,
+      "type": 3,
+      "subtype": 0,
+      "strings": [
+        "骑士盾",
+        "buff\\BUFF_basic6.bmp",
+        "特效-法力盾"
+      ]
+    },
+    {
+      "id": 210023,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "体力回复",
+        "buff\\BUFF_ex21.bmp",
+        "特效-缓缓加红"
+      ]
+    },
+    {
+      "id": 210024,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "法力灼烧",
+        "buff\\BUFF_ex22.bmp",
+        "特效-缓缓加蓝"
+      ]
+    },
+    {
+      "id": 210025,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "抗性增加",
+        "buff\\BUFF_ex7.bmp"
+      ]
+    },
+    {
+      "id": 210026,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "防御增加",
+        "buff\\BUFF_ex11.bmp"
+      ]
+    },
+    {
+      "id": 210027,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "物攻增加",
+        "buff\\BUFF_ex9.bmp"
+      ]
+    },
+    {
+      "id": 210028,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "魔攻增加",
+        "buff\\BUFF_ex5.bmp"
+      ]
+    },
+    {
+      "id": 210029,
+      "index": 0,
+      "type": 1,
+      "subtype": 0,
+      "strings": [
+        "毒",
+        "buff\\BUFF_ex6.bmp",
+        "特效-抗性减少"
+      ]
+    },
+    {
+      "id": 210030,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "黑暗之盾",
+        "buff\\BUFF_ex7.bmp",
+        "特效-法力盾"
+      ]
+    },
+    {
+      "id": 210031,
+      "index": 0,
+      "type": 3,
+      "subtype": 0,
+      "strings": [
+        "固体化",
+        "buff\\BUFF_ex17.bmp",
+        "特效-神圣之盾"
+      ]
+    },
+    {
+      "id": 210032,
+      "index": 0,
+      "type": 3,
+      "subtype": 0,
+      "strings": [
+        "液体化",
+        "buff\\BUFF_res3.bmp",
+        "特效-弱化术"
+      ]
+    },
+    {
+      "id": 210033,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "气化",
+        "buff\\BUFF_res7.bmp",
+        "特效-法力盾"
+      ]
+    },
+    {
+      "id": 210034,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "衰老",
+        "buff\\BUFF_basic6.bmp",
+        "特效-死亡标记"
+      ]
+    },
+    {
+      "id": 210035,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "流血",
+        "buff\\BUFF_basic2.bmp"
+      ]
+    },
+    {
+      "id": 210036,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "祭品",
+        "buff\\BUFF_ex20.bmp",
+        "特效-死亡标记"
+      ]
+    },
+    {
+      "id": 210037,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "补充体力",
+        "buff\\BUFF_ex21.bmp"
+      ]
+    },
+    {
+      "id": 210038,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "补充法力",
+        "buff\\BUFF_ex22.bmp"
+      ]
+    },
+    {
+      "id": 210039,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "用力过猛",
+        "buff\\BUFF_ex15.bmp"
+      ]
+    },
+    {
+      "id": 210040,
+      "index": 0,
+      "type": 3,
+      "subtype": 0,
+      "strings": [
+        "计时器",
+        "buff\\BUFF_ex9.bmp"
+      ]
+    },
+    {
+      "id": 210041,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "战争药剂",
+        "buff\\BUFF_ex9.bmp"
+      ]
+    },
+    {
+      "id": 210042,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "钢铁药剂",
+        "buff\\BUFF_ex11.bmp"
+      ]
+    },
+    {
+      "id": 210043,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "杀戮药剂",
+        "buff\\BUFF_ex13.bmp"
+      ]
+    },
+    {
+      "id": 210044,
+      "index": 0,
+      "type": 5,
+      "subtype": 0,
+      "strings": [
+        "史莱姆药剂",
+        "buff\\BUFF_ex17.bmp"
+      ]
+    },
+    {
+      "id": 210045,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "自愈倒数",
+        "buff\\BUFF_basic1.bmp",
+        "特效-狂暴BUFF"
+      ]
+    },
+    {
+      "id": 210046,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "法力泄露",
+        "buff\\BUFF_ex6.bmp",
+        "特效-抗性减少"
+      ]
+    },
+    {
+      "id": 210047,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "深水狂躁",
+        "buff\\BUFF_basic7.bmp",
+        "特效-缓缓加红"
+      ]
+    },
+    {
+      "id": 210048,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "压榨",
+        "buff\\BUFF_ex15.bmp",
+        "特效-死亡标记"
+      ]
+    },
+    {
+      "id": 210049,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "压迫",
+        "buff\\BUFF_ex13.bmp",
+        "特效-抗性减少"
+      ]
+    },
+    {
+      "id": 210050,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "水遁",
+        "buff\\BUFF_ex11.bmp",
+        "特效-弱化术"
+      ]
+    },
+    {
+      "id": 210051,
+      "index": 0,
+      "type": 3,
+      "subtype": 0,
+      "strings": [
+        "倒计时",
+        "buff\\BUFF_ex9.bmp"
+      ]
+    },
+    {
+      "id": 210052,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "闪光",
+        "buff\\BUFF_ex9.bmp",
+        "特效-加速",
+        "\u0000\u0000"
+      ]
+    },
+    {
+      "id": 210053,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "防御光环",
+        "buff\\BUFF_ex7.bmp",
+        "特效-弱化术"
+      ]
+    },
+    {
+      "id": 210054,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "抗性光环",
+        "buff\\BUFF_ex11.bmp",
+        "特效-法力盾"
+      ]
+    },
+    {
+      "id": 210055,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "猛虎之魂",
+        "buff\\BUFF_basic3.bmp",
+        "特效-加速",
+        "\u0000\u0000"
+      ]
+    },
+    {
+      "id": 210056,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "阴霾",
+        "buff\\BUFF_ex20.bmp"
+      ]
+    },
+    {
+      "id": 210057,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "狂风裂伤",
+        "buff\\BUFF_basic2.bmp"
+      ]
+    },
+    {
+      "id": 210058,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "台风",
+        "buff\\BUFF_res7.bmp",
+        "特效-加速",
+        "\u0000\u0000"
+      ]
+    },
+    {
+      "id": 210059,
+      "index": 0,
+      "type": 3,
+      "subtype": 0,
+      "strings": [
+        "台风眼",
+        "buff\\BUFF_ex17.bmp",
+        "特效-法力盾"
+      ]
+    },
+    {
+      "id": 210060,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "雷霆震击",
+        "buff\\BUFF_basic4.bmp",
+        "特效-缓缓加蓝"
+      ]
+    },
+    {
+      "id": 210061,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "加速",
+        "buff\\BUFF_basic3.bmp",
+        "特效-加速",
+        "\u0000\u0000"
+      ]
+    },
+    {
+      "id": 210062,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "考验之盾",
+        "buff\\BUFF_ex11.bmp",
+        "特效-神圣之盾"
+      ]
+    },
+    {
+      "id": 210063,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "风之咆哮",
+        "buff\\BUFF_ex9.bmp",
+        "特效-死亡标记"
+      ]
+    },
+    {
+      "id": 210064,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "风之祝福",
+        "buff\\BUFF_basic1.bmp",
+        "特效-狂暴BUFF"
+      ]
+    },
+    {
+      "id": 210065,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "旋风",
+        "buff\\BUFF_res8.bmp",
+        "特效-抗性减少"
+      ]
+    },
+    {
+      "id": 210066,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "决战鼓舞",
+        "buff\\BUFF_ex9.bmp",
+        "特效-死亡标记"
+      ]
+    },
+    {
+      "id": 210067,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "决战鼓舞",
+        "buff\\BUFF_res7.bmp",
+        "特效-狂暴BUFF"
+      ]
+    },
+    {
+      "id": 210068,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "残暴",
+        "buff\\BUFF_ex9.bmp",
+        "特效-死亡标记"
+      ]
+    },
+    {
+      "id": 210069,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "燃烧",
+        "buff\\BUFF_ex6.bmp",
+        "特效-缓缓加红"
+      ]
+    },
+    {
+      "id": 210070,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "神经衰弱",
+        "buff\\BUFF_ex4.bmp",
+        "特效-抗性减少"
+      ]
+    },
+    {
+      "id": 210071,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "恐惧",
+        "buff\\BUFF_ex10.bmp",
+        "特效-死亡标记"
+      ]
+    },
+    {
+      "id": 210072,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "噩梦",
+        "buff\\BUFF_ex6.bmp",
+        "特效-狂暴BUFF"
+      ]
+    },
+    {
+      "id": 210073,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "折磨",
+        "buff\\BUFF_basic4.bmp",
+        "特效-缓缓加蓝"
+      ]
+    },
+    {
+      "id": 210074,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "神经断裂",
+        "buff\\BUFF_ex2.bmp",
+        "特效-抗性减少"
+      ]
+    },
+    {
+      "id": 210075,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "瘫软",
+        "buff\\BUFF_ex20.bmp",
+        "特效-抗性减少"
+      ]
+    },
+    {
+      "id": 210076,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "极冷",
+        "buff\\BUFF_res8.bmp",
+        "特效-缓缓加蓝"
+      ]
+    },
+    {
+      "id": 210077,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "极热",
+        "buff\\BUFF_res2.bmp",
+        "特效-缓缓加红"
+      ]
+    },
+    {
+      "id": 210078,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "痛苦双极",
+        "buff\\BUFF_basic6.bmp",
+        "特效-狂暴BUFF"
+      ]
+    },
+    {
+      "id": 210079,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "深蓝游离",
+        "buff\\BUFF_res7.bmp",
+        "特效-缓缓加蓝"
+      ]
+    },
+    {
+      "id": 210080,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "暗红游离",
+        "buff\\BUFF_res1.bmp",
+        "特效-缓缓加红"
+      ]
+    },
+    {
+      "id": 210081,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "幻梦之力",
+        "buff\\BUFF_basic7.bmp",
+        "特效-神圣之盾"
+      ]
+    },
+    {
+      "id": 210082,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "碎梦计时",
+        "buff\\BUFF_ex6.bmp"
+      ]
+    },
+    {
+      "id": 210083,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "灾难降临",
+        "buff\\BUFF_res3.bmp"
+      ]
+    },
+    {
+      "id": 210084,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "不死形态",
+        "buff\\BUFF_ex19.bmp",
+        "特效-法力盾"
+      ]
+    },
+    {
+      "id": 210085,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "孢子气息",
+        "buff\\BUFF_ex19.bmp"
+      ]
+    },
+    {
+      "id": 210086,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "热血赞歌",
+        "buff\\BUFF_ex9.bmp"
+      ]
+    },
+    {
+      "id": 210087,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "壁垒赞歌",
+        "buff\\BUFF_ex7.bmp"
+      ]
+    },
+    {
+      "id": 210088,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "破甲",
+        "buff\\BUFF_ex8.bmp",
+        "特效-缓缓加蓝"
+      ]
+    },
+    {
+      "id": 210089,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "白骨之盾",
+        "buff\\BUFF_ex11.bmp",
+        "特效-法力盾"
+      ]
+    },
+    {
+      "id": 210090,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "深冰冻结",
+        "buff\\BUFF_basic4.bmp",
+        "特效-冻结"
+      ]
+    },
+    {
+      "id": 210091,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "雪人狂怒",
+        "buff\\BUFF_ex9.bmp",
+        "特效-死亡标记"
+      ]
+    },
+    {
+      "id": 210092,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "燃烧之魂",
+        "buff\\BUFF_ex9.bmp",
+        "特效-死亡标记"
+      ]
+    },
+    {
+      "id": 210093,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "自焚",
+        "buff\\BUFF_basic2.bmp"
+      ]
+    },
+    {
+      "id": 210094,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "冻伤",
+        "buff\\BUFF_ex6.bmp"
+      ]
+    },
+    {
+      "id": 210095,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "冻结",
+        "buff\\BUFF_basic4.bmp",
+        "特效-冻结"
+      ]
+    },
+    {
+      "id": 210096,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "震击",
+        "buff\\BUFF_ex10.bmp",
+        "特效-抗性减少"
+      ]
+    },
+    {
+      "id": 210097,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "减速",
+        "buff\\BUFF_basic4.bmp",
+        "特效-缓缓加蓝"
+      ]
+    },
+    {
+      "id": 210098,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "隐身",
+        "buff\\BUFF_ex19.bmp",
+        "特效-神圣之盾"
+      ]
+    },
+    {
+      "id": 210099,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "防御降低",
+        "buff\\BUFF_ex12.bmp"
+      ]
+    },
+    {
+      "id": 210100,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "衰弱",
+        "buff\\BUFF_ex20.bmp",
+        "特效-缓缓加蓝"
+      ]
+    },
+    {
+      "id": 210101,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "修理",
+        "buff\\BUFF_basic1.bmp",
+        "特效-缓缓加红"
+      ]
+    },
+    {
+      "id": 210102,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "超载",
+        "buff\\BUFF_ex12.bmp",
+        "特效-死亡标记"
+      ]
+    },
+    {
+      "id": 210103,
+      "index": 0,
+      "type": 3,
+      "subtype": 0,
+      "strings": [
+        "超载2"
+      ]
+    },
+    {
+      "id": 210104,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "减速",
+        "buff\\BUFF_basic4.bmp",
+        "特效-缓缓加蓝"
+      ]
+    },
+    {
+      "id": 210105,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "必定暴击",
+        "buff\\BUFF_ex15.bmp",
+        "特效-加速",
+        "\u0000\u0000"
+      ]
+    },
+    {
+      "id": 210106,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "防御降低",
+        "buff\\BUFF_ex12.bmp",
+        "特效-神圣之盾"
+      ]
+    },
+    {
+      "id": 210107,
+      "index": 0,
+      "type": 3,
+      "subtype": 0,
+      "strings": [
+        "魔法盾",
+        "buff\\BUFF_ex11.bmp",
+        "特效-弱化术"
+      ]
+    },
+    {
+      "id": 210108,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "瘟疫感染",
+        "buff\\BUFF_basic2.bmp"
+      ]
+    },
+    {
+      "id": 210109,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "流血",
+        "buff\\BUFF_ex6.bmp"
+      ]
+    },
+    {
+      "id": 210110,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "流血",
+        "buff\\BUFF_ex6.bmp"
+      ]
+    },
+    {
+      "id": 210111,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "流血",
+        "buff\\BUFF_ex6.bmp"
+      ]
+    },
+    {
+      "id": 210112,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "流血",
+        "buff\\BUFF_ex6.bmp"
+      ]
+    },
+    {
+      "id": 210113,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "流血",
+        "buff\\BUFF_ex6.bmp"
+      ]
+    },
+    {
+      "id": 210114,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "进食",
+        "buff\\BUFF_basic1.bmp",
+        "特效-死亡标记"
+      ]
+    },
+    {
+      "id": 210115,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "弱点暴露",
+        "buff\\BUFF_ex20.bmp"
+      ]
+    },
+    {
+      "id": 210116,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "软弱无力",
+        "buff\\BUFF_ex20.bmp"
+      ]
+    },
+    {
+      "id": 210117,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "体力监控"
+      ]
+    },
+    {
+      "id": 210118,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "攻击增加",
+        "buff\\BUFF_ex9.bmp",
+        "特效-死亡标记"
+      ]
+    },
+    {
+      "id": 210119,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "神圣治愈",
+        "buff\\BUFF_basic1.bmp",
+        "特效-神圣之盾"
+      ]
+    },
+    {
+      "id": 210120,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "血液沸腾",
+        "buff\\BUFF_basic1.bmp",
+        "特效-缓缓加红"
+      ]
+    },
+    {
+      "id": 210121,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "不知疲倦",
+        "buff\\BUFF_basic1.bmp",
+        "特效-缓缓加红"
+      ]
+    },
+    {
+      "id": 210122,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "情绪激动",
+        "buff\\BUFF_basic1.bmp",
+        "特效-缓缓加红"
+      ]
+    },
+    {
+      "id": 210123,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "仙子之舞",
+        "buff\\BUFF_ex21.bmp"
+      ]
+    },
+    {
+      "id": 210124,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "蝙蝠之啸",
+        "buff\\BUFF_ex9.bmp"
+      ]
+    },
+    {
+      "id": 210125,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "黑暗魔力",
+        "buff\\BUFF_basic1.bmp",
+        "特效-狂暴BUFF"
+      ]
+    },
+    {
+      "id": 210126,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "夫妻情深",
+        "buff\\BUFF_ex21.bmp",
+        "特效-缓缓加红"
+      ]
+    },
+    {
+      "id": 210127,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "虚弱",
+        "buff\\BUFF_basic6.bmp",
+        "特效-死亡标记"
+      ]
+    },
+    {
+      "id": 210128,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "增强",
+        "buff\\BUFF_basic7.bmp",
+        "特效-狂暴BUFF"
+      ]
+    },
+    {
+      "id": 210129,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "七夕烟火",
+        "buff\\BUFF_sp3.bmp",
+        "特效-上升"
+      ]
+    },
+    {
+      "id": 210130,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "中秋礼花",
+        "icon\\buff\\BUFF_mooncake.bmp",
+        "特效-月饼动画"
+      ]
+    },
+    {
+      "id": 210131,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "新春祝福",
+        "buff\\BUFF_sp3.bmp",
+        "特效-狂暴BUFF"
+      ]
+    },
+    {
+      "id": 210132,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "冰天雪地",
+        "buff\\BUFF_res3.bmp",
+        "特效-冻结"
+      ]
+    },
+    {
+      "id": 210133,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "伪装诅咒",
+        "buff\\BUFF_basic5.bmp",
+        "特效-弱化术"
+      ]
+    },
+    {
+      "id": 210134,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "随机移动",
+        "buff\\BUFF_basic3.bmp"
+      ]
+    },
+    {
+      "id": 210135,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "熊猫之力",
+        "buff\\BUFF_ex9.bmp"
+      ]
+    },
+    {
+      "id": 210136,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "伤害觉醒",
+        "buff\\BUFF_ex9.bmp",
+        "特效-死亡标记"
+      ]
+    },
+    {
+      "id": 210137,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "韧性觉醒",
+        "buff\\BUFF_ex11.bmp",
+        "特效-弱化术"
+      ]
+    },
+    {
+      "id": 210138,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "命中觉醒",
+        "buff\\BUFF_ex15.bmp",
+        "特效-加速"
+      ]
+    },
+    {
+      "id": 210139,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "暴击觉醒",
+        "buff\\BUFF_basic1.bmp",
+        "特效-神圣之盾"
+      ]
+    },
+    {
+      "id": 210140,
+      "index": 0,
+      "type": 3,
+      "subtype": 0,
+      "strings": [
+        "治疗中",
+        "buff\\BUFF_basic1.bmp",
+        "特效-缓缓加蓝"
+      ]
+    },
+    {
+      "id": 210141,
+      "index": 0,
+      "type": 3,
+      "subtype": 0,
+      "strings": [
+        "被治疗",
+        "buff\\BUFF_basic1.bmp",
+        "特效-缓缓加红"
+      ]
+    },
+    {
+      "id": 210142,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "暗影易伤",
+        "icon\\buff\\BUFF_basic5.bmp"
+      ]
+    },
+    {
+      "id": 210143,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "腐蚀",
+        "buff\\new\\buff_lingpai13.bmp"
+      ]
+    },
+    {
+      "id": 210144,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "神怒",
+        "buff\\new\\buff_longtou2.bmp",
+        "特效-神努buff"
+      ]
+    },
+    {
+      "id": 210145,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "疲惫",
+        "buff\\BUFF_basic6.bmp"
+      ]
+    },
+    {
+      "id": 210146,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "神之威慑",
+        "buff\\new\\buff_juexing3.bmp",
+        "特效-抗性衰减buff"
+      ]
+    },
+    {
+      "id": 210147,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "必爆",
+        "buff\\BUFF_ex13.bmp"
+      ]
+    },
+    {
+      "id": 210148,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "减速",
+        "buff\\BUFF_basic4.bmp",
+        "特效-缓缓加蓝"
+      ]
+    },
+    {
+      "id": 210149,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "失衡",
+        "buff\\BUFF_ex18.bmp",
+        "特效-抗性减少"
+      ]
+    },
+    {
+      "id": 210150,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "时光消退",
+        "buff\\BUFF_sp3.bmp",
+        "特效-神努buff"
+      ]
+    },
+    {
+      "id": 210151,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "界域之力",
+        "buff\\BUFF_res3.bmp"
+      ]
+    },
+    {
+      "id": 210152,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "死亡标记",
+        "buff\\BUFF_sp3.bmp"
+      ]
+    },
+    {
+      "id": 210153,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "流血",
+        "buff\\BUFF_basic2.bmp"
+      ]
+    },
+    {
+      "id": 210154,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "断筋",
+        "buff\\BUFF_ex20.bmp"
+      ]
+    },
+    {
+      "id": 210155,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "诅咒",
+        "buff\\BUFF_basic6.bmp",
+        "特效-抗性减少"
+      ]
+    },
+    {
+      "id": 210156,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "感染",
+        "buff\\BUFF_sp3.bmp"
+      ]
+    },
+    {
+      "id": 210157,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "壁垒",
+        "buff\\BUFF_ex11.bmp"
+      ]
+    },
+    {
+      "id": 210158,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "制裁",
+        "buff\\BUFF_ex6.bmp"
+      ]
+    },
+    {
+      "id": 210159,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "死亡图腾",
+        "buff\\BUFF_basic6.bmp",
+        "特效-抗性减少"
+      ]
+    },
+    {
+      "id": 210160,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "好奇惩罚",
+        "buff\\BUFF_sp4.bmp",
+        "特效-抗性减少"
+      ]
+    },
+    {
+      "id": 210161,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "韧性觉醒",
+        "buff\\BUFF_basic7.bmp",
+        "特效-狂暴BUFF"
+      ]
+    },
+    {
+      "id": 210162,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "昏迷",
+        "buff\\BUFF_ex4.bmp"
+      ]
+    },
+    {
+      "id": 210163,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "沉默",
+        "buff\\BUFF_res7.bmp"
+      ]
+    },
+    {
+      "id": 210164,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "定身",
+        "buff\\BUFF_basic4.bmp"
+      ]
+    },
+    {
+      "id": 210165,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "韧性上升",
+        "buff\\BUFF_ex11.bmp",
+        "特效-弱化术"
+      ]
+    },
+    {
+      "id": 210166,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "速度降低",
+        "buff\\BUFF_ex15.bmp",
+        "特效-加速"
+      ]
+    },
+    {
+      "id": 210167,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "停止移动",
+        "buff\\BUFF_ex9.bmp",
+        "特效-死亡标记"
+      ]
+    },
+    {
+      "id": 210168,
+      "index": 0,
+      "type": 6,
+      "subtype": 0,
+      "strings": [
+        "锯齿利刃一层",
+        "buff\\BUFF_basic2.bmp"
+      ]
+    },
+    {
+      "id": 210169,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "鲜血印记",
+        "buff\\new\\buff_duanjian2.bmp",
+        "特效-鲜血印记",
+        "\u0001\u0000"
+      ]
+    },
+    {
+      "id": 210170,
+      "index": 0,
+      "type": 6,
+      "subtype": 0,
+      "strings": [
+        "锯齿利刃二层",
+        "buff\\BUFF_basic2.bmp"
+      ]
+    },
+    {
+      "id": 210171,
+      "index": 0,
+      "type": 6,
+      "subtype": 0,
+      "strings": [
+        "锯齿利刃三层",
+        "buff\\BUFF_basic2.bmp"
+      ]
+    },
+    {
+      "id": 210172,
+      "index": 0,
+      "type": 6,
+      "subtype": 0,
+      "strings": [
+        "锯齿利刃四层",
+        "buff\\BUFF_basic2.bmp"
+      ]
+    },
+    {
+      "id": 210173,
+      "index": 0,
+      "type": 6,
+      "subtype": 0,
+      "strings": [
+        "锯齿利刃五层",
+        "buff\\BUFF_basic2.bmp"
+      ]
+    },
+    {
+      "id": 210174,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "绝望之力",
+        "buff\\new\\buff_fuhao1.bmp"
+      ]
+    },
+    {
+      "id": 210175,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "绝望之力",
+        "buff\\BUFF_basic8.bmp"
+      ]
+    },
+    {
+      "id": 210176,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "烈焰打击",
+        "buff\\BUFF_ex5.bmp"
+      ]
+    },
+    {
+      "id": 210177,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "冰霜新星",
+        "buff\\BUFF_basic4.bmp",
+        "特效-缓缓加蓝"
+      ]
+    },
+    {
+      "id": 210178,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "元素赐生",
+        "buff\\BUFF_basic8.bmp",
+        "特效-元素赐生"
+      ]
+    },
+    {
+      "id": 210179,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "元素赐生",
+        "buff\\BUFF_basic5.bmp"
+      ]
+    },
+    {
+      "id": 210180,
+      "index": 0,
+      "type": 6,
+      "subtype": 0,
+      "strings": [
+        "魔能冲击一层",
+        "buff\\BUFF_basic5.bmp"
+      ]
+    },
+    {
+      "id": 210181,
+      "index": 0,
+      "type": 6,
+      "subtype": 0,
+      "strings": [
+        "魔能冲击二层",
+        "buff\\BUFF_basic5.bmp"
+      ]
+    },
+    {
+      "id": 210182,
+      "index": 0,
+      "type": 6,
+      "subtype": 0,
+      "strings": [
+        "魔能冲击三层",
+        "buff\\BUFF_basic5.bmp"
+      ]
+    },
+    {
+      "id": 210183,
+      "index": 0,
+      "type": 6,
+      "subtype": 0,
+      "strings": [
+        "魔幻幻象属性",
+        "buff\\BUFF_ex18.bmp"
+      ]
+    },
+    {
+      "id": 210184,
+      "index": 0,
+      "type": 6,
+      "subtype": 0,
+      "strings": [
+        "魔法幻象时间",
+        "buff\\new\\buff_huoyan1.bmp"
+      ]
+    },
+    {
+      "id": 210185,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "相位转移",
+        "buff\\BUFF_ex18.bmp",
+        "特效-神圣之盾",
+        "\u0000\u0000"
+      ]
+    },
+    {
+      "id": 210186,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "神圣分流",
+        "buff\\new\\buff_huoyan1.bmp"
+      ]
+    },
+    {
+      "id": 210187,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "神佑之躯",
+        "icon\\buff"
+      ]
+    },
+    {
+      "id": 210188,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "圣光壁垒",
+        "buff\\BUFF_ex7.bmp",
+        "特效-圣光壁垒"
+      ]
+    },
+    {
+      "id": 210189,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "末日审判",
+        "buff\\BUFF_fireworksdisplay.bmp"
+      ]
+    },
+    {
+      "id": 210190,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "末日审判",
+        "buff\\BUFF_ex1.bmp"
+      ]
+    },
+    {
+      "id": 210191,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "黑暗契约",
+        "buff\\BUFF_ex1.bmp",
+        "特效-黑暗契约"
+      ]
+    },
+    {
+      "id": 210192,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "漆黑之幕",
+        "buff\\BUFF_ex18.bmp",
+        "特效-漆黑之幕"
+      ]
+    },
+    {
+      "id": 210193,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "漆黑之幕",
+        "buff\\new\\buff_lingpai8.bmp"
+      ]
+    },
+    {
+      "id": 210194,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "胆怯",
+        "buff\\BUFF_ex20.bmp",
+        "特效-缓缓加蓝"
+      ]
+    },
+    {
+      "id": 210195,
+      "index": 0,
+      "type": 0,
+      "subtype": 0,
+      "strings": [
+        "",
+        "icon\\buff"
+      ]
+    },
+    {
+      "id": 210196,
+      "index": 0,
+      "type": 0,
+      "subtype": 0,
+      "strings": [
+        "",
+        "buff\\new\\buff_lingpai12.bmp"
+      ]
+    },
+    {
+      "id": 210197,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "苦痛诅咒",
+        "buff\\BUFF_ex2.bmp"
+      ]
+    },
+    {
+      "id": 210198,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "悲惨嚎叫",
+        "buff\\BUFF_ex4.bmp"
+      ]
+    },
+    {
+      "id": 210199,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "灵魂熔解",
+        "buff\\BUFF_basic5.bmp"
+      ]
+    },
+    {
+      "id": 210200,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "虚弱诅咒",
+        "buff\\BUFF_ex13.bmp"
+      ]
+    },
+    {
+      "id": 210201,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "迷乱之惑",
+        "buff\\BUFF_mooncake.bmp"
+      ]
+    },
+    {
+      "id": 210202,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "穿刺之痛",
+        "buff\\BUFF_ex20.bmp"
+      ]
+    },
+    {
+      "id": 210203,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "侵蚀诅咒",
+        "buff\\BUFF_ex11.bmp"
+      ]
+    },
+    {
+      "id": 210204,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "污浊迷雾",
+        "buff\\BUFF_ex12.bmp"
+      ]
+    },
+    {
+      "id": 210205,
+      "index": 0,
+      "type": 6,
+      "subtype": 0,
+      "strings": [
+        "达普尼的憎恨",
+        "buff\\BUFF_basic7.bmp"
+      ]
+    },
+    {
+      "id": 210206,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "法力锁链",
+        "buff\\BUFF_basic8.bmp"
+      ]
+    },
+    {
+      "id": 210207,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "土灵禁锢",
+        "buff\\BUFF_basic4.bmp"
+      ]
+    },
+    {
+      "id": 210208,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "噩梦",
+        "buff\\BUFF_res3.bmp"
+      ]
+    },
+    {
+      "id": 210209,
+      "index": 0,
+      "type": 7,
+      "subtype": 0,
+      "strings": [
+        "艾因霍克的惩戒",
+        "buff\\BUFF_ex14.bmp"
+      ]
+    },
+    {
+      "id": 210210,
+      "index": 0,
+      "type": 5,
+      "subtype": 0,
+      "strings": [
+        "好奇的代价",
+        "buff\\BUFF_sp5.bmp",
+        "特效-抗性减少"
+      ]
+    },
+    {
+      "id": 210211,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "意外事故",
+        "buff\\BUFF_sp3.bmp",
+        "特效-弱化术"
+      ]
+    },
+    {
+      "id": 210212,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "小丑之灵",
+        "buff\\BUFF_basic4.bmp",
+        "特效-加速"
+      ]
+    },
+    {
+      "id": 210213,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "野兽狂暴",
+        "buff\\BUFF_basic7.bmp"
+      ]
+    },
+    {
+      "id": 210214,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "野兽狂暴",
+        "buff\\BUFF_ex9.bmp"
+      ]
+    },
+    {
+      "id": 210215,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "昏迷",
+        "buff\\BUFF_ex4.bmp"
+      ]
+    },
+    {
+      "id": 210216,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "岩石皮肤",
+        "buff\\BUFF_ex11.bmp"
+      ]
+    },
+    {
+      "id": 210217,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "昏迷",
+        "buff\\BUFF_ex4.bmp"
+      ]
+    },
+    {
+      "id": 210218,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "细胞转换",
+        "buff\\BUFF_res7.bmp"
+      ]
+    },
+    {
+      "id": 210219,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "致死打击",
+        "buff\\new\\buff_fuhao1.bmp"
+      ]
+    },
+    {
+      "id": 210220,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "熔岩重击",
+        "buff\\BUFF_ex4.bmp"
+      ]
+    },
+    {
+      "id": 210221,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "绞杀",
+        "buff\\BUFF_res7.bmp"
+      ]
+    },
+    {
+      "id": 210222,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "绞杀",
+        "buff\\BUFF_res7.bmp"
+      ]
+    },
+    {
+      "id": 210223,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "压制",
+        "buff\\BUFF_ex4.bmp"
+      ]
+    },
+    {
+      "id": 210224,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "厚皮",
+        "buff\\BUFF_ex7.bmp"
+      ]
+    },
+    {
+      "id": 210225,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "大地咆哮",
+        "buff\\BUFF_ex11.bmp"
+      ]
+    },
+    {
+      "id": 210226,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "大地冲击",
+        "buff\\BUFF_basic4.bmp"
+      ]
+    },
+    {
+      "id": 210227,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "上古之力",
+        "buff\\new\\buff_longtou2.bmp"
+      ]
+    },
+    {
+      "id": 210228,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "净化符文",
+        "buff\\BUFF_ex15.bmp",
+        "特效-加速"
+      ]
+    },
+    {
+      "id": 210229,
+      "index": 0,
+      "type": 5,
+      "subtype": 0,
+      "strings": [
+        "变换NPC",
+        "buff\\BUFF_ex21.bmp"
+      ]
+    },
+    {
+      "id": 210230,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "疯狂撕咬",
+        "buff\\BUFF_basic7.bmp"
+      ]
+    },
+    {
+      "id": 210231,
+      "index": 0,
+      "type": 6,
+      "subtype": 0,
+      "strings": [
+        "机械护甲光环",
+        "buff\\buff_yanjing1.bmp"
+      ]
+    },
+    {
+      "id": 210232,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "机械禁锢",
+        "buff\\BUFF_res8.bmp"
+      ]
+    },
+    {
+      "id": 210233,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "野性毒刺",
+        "buff\\BUFF_basic4.bmp"
+      ]
+    },
+    {
+      "id": 210234,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "冰冷撞击",
+        "buff\\BUFF_basic4.bmp"
+      ]
+    },
+    {
+      "id": 210235,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "元素易伤",
+        "buff\\BUFF_ex11.bmp",
+        "特效-抗性减少"
+      ]
+    },
+    {
+      "id": 210236,
+      "index": 0,
+      "type": 5,
+      "subtype": 0,
+      "strings": [
+        "地狱火光环",
+        "buff\\BUFF_ex1.bmp"
+      ]
+    },
+    {
+      "id": 210237,
+      "index": 0,
+      "type": 6,
+      "subtype": 0,
+      "strings": [
+        "冰冷之槌光环",
+        "buff\\BUFF_ex4.bmp"
+      ]
+    },
+    {
+      "id": 210238,
+      "index": 0,
+      "type": 5,
+      "subtype": 0,
+      "strings": [
+        "震地者光环",
+        "buff\\new\\buff_zhanchui1.bmp"
+      ]
+    },
+    {
+      "id": 210239,
+      "index": 0,
+      "type": 5,
+      "subtype": 0,
+      "strings": [
+        "震地者光环",
+        "buff\\new\\buff_zhanchui1.bmp",
+        "特效-抗性减少"
+      ]
+    },
+    {
+      "id": 210240,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "地狱烈焰",
+        "buff\\buff_lingpai5.bmp"
+      ]
+    },
+    {
+      "id": 210241,
+      "index": 0,
+      "type": 5,
+      "subtype": 0,
+      "strings": [
+        "石像鬼皮肤",
+        "buff\\BUFF_ex11.bmp"
+      ]
+    },
+    {
+      "id": 210242,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "诅咒护盾",
+        "buff\\BUFF_ex12.bmp",
+        "特效-弱化术"
+      ]
+    },
+    {
+      "id": 210243,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "恶毒酸雾",
+        "buff\\BUFF_ex14.bmp"
+      ]
+    },
+    {
+      "id": 210244,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "重锤之击",
+        "buff\\BUFF_res8.bmp"
+      ]
+    },
+    {
+      "id": 210245,
+      "index": 0,
+      "type": 5,
+      "subtype": 0,
+      "strings": [
+        "蠢蛋的低语",
+        "buff\\BUFF_basic7.bmp",
+        "特效-大喷血"
+      ]
+    },
+    {
+      "id": 210246,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "战争践踏",
+        "buff\\BUFF_res8.bmp"
+      ]
+    },
+    {
+      "id": 210247,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "凝血打击",
+        "buff\\new\\buff_lingpai13.bmp",
+        "特效-黑暗降临"
+      ]
+    },
+    {
+      "id": 210248,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "昏迷",
+        "buff\\BUFF_ex4.bmp"
+      ]
+    },
+    {
+      "id": 210249,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "撕裂大地",
+        "buff\\buff_lingpai8.bmp",
+        "特效-黑暗火球"
+      ]
+    },
+    {
+      "id": 210250,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "集束光线",
+        "buff\\BUFF_basic4.bmp"
+      ]
+    },
+    {
+      "id": 210251,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "粘性攻击",
+        "buff\\BUFF_res2.bmp"
+      ]
+    },
+    {
+      "id": 210252,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "致命毒刺",
+        "buff\\BUFF_sp3.bmp"
+      ]
+    },
+    {
+      "id": 210253,
+      "index": 0,
+      "type": 5,
+      "subtype": 0,
+      "strings": [
+        "咯咯鸡喊话"
+      ]
+    },
+    {
+      "id": 210254,
+      "index": 0,
+      "type": 5,
+      "subtype": 0,
+      "strings": [
+        "咯咯鸡祝福",
+        "buff\\BUFF_ex21.bmp",
+        "SPECIAL_ATTACK"
+      ]
+    },
+    {
+      "id": 210255,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "毁灭爆炸"
+      ]
+    },
+    {
+      "id": 210256,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "寒冷之触",
+        "buff\\BUFF_res4.bmp",
+        "特效-狂暴BUFF"
+      ]
+    },
+    {
+      "id": 210257,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "火焰之触",
+        "buff\\BUFF_res3.bmp",
+        "特效-死亡标记"
+      ]
+    },
+    {
+      "id": 210258,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "虚弱冲击",
+        "buff\\buff_lingpai14.bmp",
+        "RESUME"
+      ]
+    },
+    {
+      "id": 210259,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "暮色光环",
+        "buff\\buff_haojiao2.bmp"
+      ]
+    },
+    {
+      "id": 210260,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "暮色光环",
+        "buff\\buff_haojiao2.bmp"
+      ]
+    },
+    {
+      "id": 210261,
+      "index": 0,
+      "type": 5,
+      "subtype": 0,
+      "strings": [
+        "法力冲击波",
+        "buff\\BUFF_basic7.bmp"
+      ]
+    },
+    {
+      "id": 210262,
+      "index": 0,
+      "type": 6,
+      "subtype": 0,
+      "strings": [
+        "机器人大爆炸",
+        "buff\\BUFF_res5.bmp",
+        "LEVELUP"
+      ]
+    },
+    {
+      "id": 210263,
+      "index": 0,
+      "type": 6,
+      "subtype": 0,
+      "strings": [
+        "大地震颤光环",
+        "buff\\BUFF_sp3.bmp"
+      ]
+    },
+    {
+      "id": 210264,
+      "index": 0,
+      "type": 6,
+      "subtype": 0,
+      "strings": [
+        "大地震颤光环",
+        "buff\\BUFF_sp3.bmp"
+      ]
+    },
+    {
+      "id": 210265,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "死亡裂伤",
+        "buff\\buff_lingpai14.bmp",
+        "特效-死亡标记"
+      ]
+    },
+    {
+      "id": 210266,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "机械护甲",
+        "buff\\buff_yanjing1.bmp",
+        "特效-弱化术"
+      ]
+    },
+    {
+      "id": 210267,
+      "index": 0,
+      "type": 6,
+      "subtype": 0,
+      "strings": [
+        "存活固定时间",
+        "buff\\BUFF_ex11.bmp"
+      ]
+    },
+    {
+      "id": 210268,
+      "index": 0,
+      "type": 8,
+      "subtype": 0,
+      "strings": [
+        "变换NPC",
+        "buff\\BUFF_res2.bmp"
+      ]
+    },
+    {
+      "id": 210269,
+      "index": 0,
+      "type": 9,
+      "subtype": 0,
+      "strings": [
+        "机械护甲光环",
+        "buff\\BUFF_sp3.bmp",
+        "t_npc\u0000\u0000\u0000\u0000\u0000\u0000ᛒ\u0001\u0000\u0000\u0000\u0000\u0000\u0000\u0010\u0000bgbtnn_give_buff\u0000\u0000\u0000\u0000\u0000\u0000㕚\u0003\u0000\u0000\u0000\u0000\u0000\u0000\u0013\u0000bgbtnn_give_buff_lv\u0000\u0000\u0001\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0014\u0000bgbtnn_effect"
+      ]
+    },
+    {
+      "id": 210270,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "负罪",
+        "icon\\BUFF_ex9.bmp",
+        "特效-死亡标记"
+      ]
+    },
+    {
+      "id": 210271,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "毁灭爆炸"
+      ]
+    },
+    {
+      "id": 210272,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "死亡利爪",
+        "buff\\BUFF_ex10.bmp",
+        "特效-死亡标记"
+      ]
+    },
+    {
+      "id": 210273,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "利爪突袭",
+        "buff\\BUFF_ex8.bmp",
+        "特效-抗性减少"
+      ]
+    },
+    {
+      "id": 210274,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "暗冰",
+        "buff\\BUFF_ex6.bmp",
+        "特效-狂暴BUFF"
+      ]
+    },
+    {
+      "id": 210275,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "猪突猛进",
+        "buff\\BUFF_basic3.bmp",
+        "特效-加速",
+        "\u0001\u0000"
+      ]
+    },
+    {
+      "id": 210276,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "灼热痰涕",
+        "buff\\BUFF_ex18.bmp",
+        "特效-法力盾"
+      ]
+    },
+    {
+      "id": 210277,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "抗魔幻冰",
+        "buff\\BUFF_ex18.bmp",
+        "特效-漆黑之幕"
+      ]
+    },
+    {
+      "id": 210278,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "游斗",
+        "buff\\BUFF_basic3.bmp",
+        "特效-加速",
+        "\u0001\u0000"
+      ]
+    },
+    {
+      "id": 210279,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "鸣叫",
+        "buff\\new\\buff_danao2.bmp"
+      ]
+    },
+    {
+      "id": 210280,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "鼓舞",
+        "buff\\new\\buff_danao3.bmp"
+      ]
+    },
+    {
+      "id": 210281,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "尖啸",
+        "buff\\new\\buff_danao5.bmp"
+      ]
+    },
+    {
+      "id": 210282,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "仙子之舞",
+        "buff\\BUFF_ex21.bmp",
+        "特效-狂暴之怒"
+      ]
+    },
+    {
+      "id": 210283,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "熊猫之力",
+        "buff\\new\\buff_haojiao2.bmp"
+      ]
+    },
+    {
+      "id": 210284,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "瘟疫光环",
+        "buff\\BUFF_ex6.bmp",
+        "特效-加速",
+        "\u0001\u0000"
+      ]
+    },
+    {
+      "id": 210285,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "野性毒药",
+        "buff\\BUFF_ex1.bmp",
+        "特效-缓缓加红"
+      ]
+    },
+    {
+      "id": 210286,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "沼泽迷雾",
+        "buff\\BUFF_ex14.bmp",
+        "特性-聚气"
+      ]
+    },
+    {
+      "id": 210287,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "昏迷",
+        "buff\\BUFF_res8.bmp"
+      ]
+    },
+    {
+      "id": 210288,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "割裂之刃",
+        "buff\\BUFF_basic4.bmp"
+      ]
+    },
+    {
+      "id": 210289,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "深海治愈",
+        "buff\\BUFF_ex1.bmp",
+        "特效-缓缓加绿"
+      ]
+    },
+    {
+      "id": 210290,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "阴影裂伤",
+        "buff\\BUFF_ex10.bmp"
+      ]
+    },
+    {
+      "id": 210291,
+      "index": 0,
+      "type": 5,
+      "subtype": 0,
+      "strings": [
+        "戈隆的愤怒",
+        "buff\\BUFF_ex19.bmp"
+      ]
+    },
+    {
+      "id": 210292,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "砸伤",
+        "buff\\BUFF_res1.bmp"
+      ]
+    },
+    {
+      "id": 210293,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "半神狂暴",
+        "buff\\BUFF_ex15.bmp",
+        "特效-加速",
+        "\u0001\u0000"
+      ]
+    },
+    {
+      "id": 210294,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "死亡荒漠",
+        "buff\\BUFF_ex5.bmp",
+        "特效-加速",
+        "\u0001\u0000"
+      ]
+    },
+    {
+      "id": 210295,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "流沙",
+        "buff\\BUFF_basic4.bmp"
+      ]
+    },
+    {
+      "id": 210296,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "落日沁入",
+        "buff\\BUFF_ex15.bmp",
+        "特效-死亡标记"
+      ]
+    },
+    {
+      "id": 210297,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "沉默",
+        "buff\\BUFF_basic2.bmp"
+      ]
+    },
+    {
+      "id": 210298,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "沙漠之风",
+        "buff\\BUFF_ex11.bmp",
+        "特效-弱化术"
+      ]
+    },
+    {
+      "id": 210299,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "骑士之舞",
+        "buff\\BUFF_res1.bmp",
+        "特效-缓缓加红"
+      ]
+    },
+    {
+      "id": 210300,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "昏迷",
+        "buff\\BUFF_mooncake.bmp"
+      ]
+    },
+    {
+      "id": 210301,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "绝对防御",
+        "buff\\BUFF_ex11.bmp",
+        "特效-法力盾"
+      ]
+    },
+    {
+      "id": 210302,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "区别对待",
+        "buff\\BUFF_sp3.bmp"
+      ]
+    },
+    {
+      "id": 210303,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "区别对待",
+        "buff\\BUFF_sp3.bmp"
+      ]
+    },
+    {
+      "id": 210304,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "骸骨光环",
+        "buff\\BUFF_ex11.bmp",
+        "特效-加速",
+        "\u0001\u0000"
+      ]
+    },
+    {
+      "id": 210305,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "骸骨光环",
+        "buff\\BUFF_ex12.bmp",
+        "特效-加速",
+        "\u0001\u0000"
+      ]
+    },
+    {
+      "id": 210306,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "仇恨印记",
+        "buff\\BUFF_ex7.bmp",
+        "特效-黑暗降临"
+      ]
+    },
+    {
+      "id": 210307,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "王储威势",
+        "buff\\BUFF_ex9.bmp",
+        "特效-缓缓加绿"
+      ]
+    },
+    {
+      "id": 210308,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "致伤",
+        "buff\\BUFF_res1.bmp",
+        "BLOOD"
+      ]
+    },
+    {
+      "id": 210309,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "末日光环",
+        "buff\\BUFF_ex10.bmp",
+        "特效-加速",
+        "\u0001\u0000"
+      ]
+    },
+    {
+      "id": 210310,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "末日光环",
+        "buff\\BUFF_ex10.bmp",
+        "特效-加速",
+        "\u0001\u0000"
+      ]
+    },
+    {
+      "id": 210311,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "沉默",
+        "buff\\BUFF_basic2.bmp",
+        "特效-死亡标记"
+      ]
+    },
+    {
+      "id": 210312,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "恶魔护盾",
+        "buff\\BUFF_ex12.bmp",
+        "特效-弱化术"
+      ]
+    },
+    {
+      "id": 210313,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "灭寂之恶",
+        "buff\\BUFF_ex13.bmp"
+      ]
+    },
+    {
+      "id": 210314,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "恶魔之血",
+        "buff\\BUFF_basic7.bmp",
+        "特效-缓缓加红"
+      ]
+    },
+    {
+      "id": 210315,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "软泥光环",
+        "buff\\BUFF_res2.bmp",
+        "特效-加速",
+        "\u0001\u0000"
+      ]
+    },
+    {
+      "id": 210316,
+      "index": 0,
+      "type": 6,
+      "subtype": 0,
+      "strings": [
+        "移动速度降低",
+        "buff\\BUFF_basic4.bmp"
+      ]
+    },
+    {
+      "id": 210317,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "死亡泥沼",
+        "buff\\BUFF_basic4.bmp"
+      ]
+    },
+    {
+      "id": 210318,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "糜烂",
+        "buff\\BUFF_res1.bmp",
+        "特效-缓缓加红"
+      ]
+    },
+    {
+      "id": 210319,
+      "index": 0,
+      "type": 5,
+      "subtype": 0,
+      "strings": [
+        "温妮迪之光",
+        "buff\\BUFF_sp4.bmp"
+      ]
+    },
+    {
+      "id": 210320,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "碎裂"
+      ]
+    },
+    {
+      "id": 210321,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "邪恶能量"
+      ]
+    },
+    {
+      "id": 210322,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "邪恶能量",
+        "buff\\BUFF_sp5.bmp",
+        "特效-缓缓加绿"
+      ]
+    },
+    {
+      "id": 210323,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "存活时间"
+      ]
+    },
+    {
+      "id": 210324,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "哀伤",
+        "buff\\BUFF_res7.bmp",
+        "特效-加速",
+        "\u0001\u0000"
+      ]
+    },
+    {
+      "id": 210325,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "哀伤",
+        "buff\\BUFF_res7.bmp",
+        "特效-加速",
+        "\u0001\u0000"
+      ]
+    },
+    {
+      "id": 210326,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "魔舞",
+        "buff\\BUFF_res1.bmp",
+        "特效-缓缓加红"
+      ]
+    },
+    {
+      "id": 210327,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "存活时间"
+      ]
+    },
+    {
+      "id": 210328,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "消亡",
+        "buff\\BUFF_ex12.bmp",
+        "特效-弱化术"
+      ]
+    },
+    {
+      "id": 210329,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "恶咒",
+        "buff\\BUFF_ex19.bmp",
+        "特效-抗性减少"
+      ]
+    },
+    {
+      "id": 210330,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "缠杀",
+        "buff\\BUFF_mooncake.bmp"
+      ]
+    },
+    {
+      "id": 210331,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "黑暗炸裂"
+      ]
+    },
+    {
+      "id": 210332,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "赦令",
+        "buff\\BUFF_ex11.bmp"
+      ]
+    },
+    {
+      "id": 210333,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "裂伤",
+        "buff\\BUFF_res3.bmp",
+        "特效-缓缓加红"
+      ]
+    },
+    {
+      "id": 210334,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "神光",
+        "buff\\BUFF_sp3.bmp"
+      ]
+    },
+    {
+      "id": 210335,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "神光",
+        "buff\\BUFF_sp3.bmp"
+      ]
+    },
+    {
+      "id": 210336,
+      "index": 0,
+      "type": 5,
+      "subtype": 0,
+      "strings": [
+        "守护者光环"
+      ]
+    },
+    {
+      "id": 210337,
+      "index": 0,
+      "type": 5,
+      "subtype": 0,
+      "strings": [
+        "守护者光环",
+        "buff\\BUFF_sp5.bmp",
+        "特效-加速",
+        "\u0001\u0000"
+      ]
+    },
+    {
+      "id": 210338,
+      "index": 0,
+      "type": 5,
+      "subtype": 0,
+      "strings": [
+        "守护者光环",
+        "buff\\BUFF_sp5.bmp",
+        "特效-加速",
+        "\u0001\u0000"
+      ]
+    },
+    {
+      "id": 210339,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "碎颅",
+        "buff\\BUFF_res1.bmp",
+        "特效-死亡标记"
+      ]
+    },
+    {
+      "id": 210340,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "天罚",
+        "buff\\BUFF_ex19.bmp",
+        "特效-狂暴BUFF"
+      ]
+    },
+    {
+      "id": 210341,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "增强",
+        "buff\\BUFF_ex11.bmp"
+      ]
+    },
+    {
+      "id": 210342,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "减弱",
+        "buff\\BUFF_ex4.bmp"
+      ]
+    },
+    {
+      "id": 210343,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "冰触",
+        "buff\\BUFF_res6.bmp",
+        "特效-抗性减少"
+      ]
+    },
+    {
+      "id": 210344,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "熔击",
+        "buff\\BUFF_res1.bmp",
+        "特效-缓缓加红"
+      ]
+    },
+    {
+      "id": 210345,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "鞭笞",
+        "buff\\BUFF_basic2.bmp",
+        "特效-黑暗降临"
+      ]
+    },
+    {
+      "id": 210346,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "碎灵",
+        "buff\\BUFF_res7.bmp",
+        "特效-加速",
+        "\u0001\u0000"
+      ]
+    },
+    {
+      "id": 210347,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "碎灵",
+        "buff\\BUFF_res7.bmp",
+        "特效-加速",
+        "\u0001\u0000"
+      ]
+    },
+    {
+      "id": 210348,
+      "index": 0,
+      "type": 9,
+      "subtype": 0,
+      "strings": [
+        "珊瑚岛刷怪BUFF"
+      ]
+    },
+    {
+      "id": 210349,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "增强",
+        "buff\\BUFF_ex11.bmp"
+      ]
+    },
+    {
+      "id": 210350,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "减弱",
+        "buff\\BUFF_ex4.bmp"
+      ]
+    },
+    {
+      "id": 210351,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "攻击灵气",
+        "buff\\BUFF_ex9.bmp"
+      ]
+    },
+    {
+      "id": 210352,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "防御灵气",
+        "buff\\BUFF_ex7.bmp"
+      ]
+    },
+    {
+      "id": 210353,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "抗性灵气",
+        "buff\\BUFF_ex5.bmp"
+      ]
+    },
+    {
+      "id": 210354,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "体力灵气",
+        "buff\\BUFF_ex1.bmp"
+      ]
+    },
+    {
+      "id": 210355,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "法力灵气",
+        "buff\\BUFF_ex3.bmp"
+      ]
+    },
+    {
+      "id": 210356,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "火抗灵气",
+        "buff\\BUFF_res1.bmp"
+      ]
+    },
+    {
+      "id": 210357,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "水抗灵气",
+        "buff\\BUFF_res3.bmp"
+      ]
+    },
+    {
+      "id": 210358,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "暗抗灵气",
+        "buff\\new\\buff_lingpai14.bmp"
+      ]
+    },
+    {
+      "id": 210359,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "圣抗灵气",
+        "buff\\new\\buff_yue2.bmp"
+      ]
+    },
+    {
+      "id": 210360,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "闪避灵气",
+        "buff\\new\\buff_zhuazi2.bmp"
+      ]
+    },
+    {
+      "id": 210361,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "命中灵气",
+        "buff\\new\\buff_zhanchui2.bmp"
+      ]
+    },
+    {
+      "id": 210362,
+      "index": 0,
+      "type": 6,
+      "subtype": 0,
+      "strings": [
+        "攻击灵气II",
+        "buff\\BUFF_ex9.bmp"
+      ]
+    },
+    {
+      "id": 210363,
+      "index": 0,
+      "type": 6,
+      "subtype": 0,
+      "strings": [
+        "防御灵气II",
+        "buff\\BUFF_ex7.bmp"
+      ]
+    },
+    {
+      "id": 210364,
+      "index": 0,
+      "type": 6,
+      "subtype": 0,
+      "strings": [
+        "抗性灵气II",
+        "buff\\BUFF_ex5.bmp"
+      ]
+    },
+    {
+      "id": 210365,
+      "index": 0,
+      "type": 6,
+      "subtype": 0,
+      "strings": [
+        "体力灵气II",
+        "buff\\BUFF_ex1.bmp"
+      ]
+    },
+    {
+      "id": 210366,
+      "index": 0,
+      "type": 6,
+      "subtype": 0,
+      "strings": [
+        "法力灵气II",
+        "buff\\BUFF_ex3.bmp"
+      ]
+    },
+    {
+      "id": 210367,
+      "index": 0,
+      "type": 6,
+      "subtype": 0,
+      "strings": [
+        "火抗灵气II",
+        "buff\\BUFF_res1.bmp"
+      ]
+    },
+    {
+      "id": 210368,
+      "index": 0,
+      "type": 6,
+      "subtype": 0,
+      "strings": [
+        "水抗灵气II",
+        "buff\\BUFF_res3.bmp"
+      ]
+    },
+    {
+      "id": 210369,
+      "index": 0,
+      "type": 6,
+      "subtype": 0,
+      "strings": [
+        "暗抗灵气II",
+        "buff\\new\\buff_lingpai14.bmp"
+      ]
+    },
+    {
+      "id": 210370,
+      "index": 0,
+      "type": 6,
+      "subtype": 0,
+      "strings": [
+        "圣抗灵气II",
+        "buff\\new\\buff_yue2.bmp"
+      ]
+    },
+    {
+      "id": 210371,
+      "index": 0,
+      "type": 6,
+      "subtype": 0,
+      "strings": [
+        "闪避灵气II",
+        "buff\\new\\buff_zhuazi2.bmp"
+      ]
+    },
+    {
+      "id": 210372,
+      "index": 0,
+      "type": 6,
+      "subtype": 0,
+      "strings": [
+        "命中灵气II",
+        "buff\\new\\buff_zhanchui2.bmp"
+      ]
+    },
+    {
+      "id": 210373,
+      "index": 0,
+      "type": 7,
+      "subtype": 0,
+      "strings": [
+        "攻击灵气III",
+        "buff\\BUFF_ex9.bmp"
+      ]
+    },
+    {
+      "id": 210374,
+      "index": 0,
+      "type": 7,
+      "subtype": 0,
+      "strings": [
+        "防御灵气III",
+        "buff\\BUFF_ex7.bmp"
+      ]
+    },
+    {
+      "id": 210375,
+      "index": 0,
+      "type": 7,
+      "subtype": 0,
+      "strings": [
+        "抗性灵气III",
+        "buff\\BUFF_ex5.bmp"
+      ]
+    },
+    {
+      "id": 210376,
+      "index": 0,
+      "type": 7,
+      "subtype": 0,
+      "strings": [
+        "体力灵气III",
+        "buff\\BUFF_ex1.bmp"
+      ]
+    },
+    {
+      "id": 210377,
+      "index": 0,
+      "type": 7,
+      "subtype": 0,
+      "strings": [
+        "法力灵气III",
+        "buff\\BUFF_ex3.bmp"
+      ]
+    },
+    {
+      "id": 210378,
+      "index": 0,
+      "type": 7,
+      "subtype": 0,
+      "strings": [
+        "火抗灵气III",
+        "buff\\BUFF_res1.bmp"
+      ]
+    },
+    {
+      "id": 210379,
+      "index": 0,
+      "type": 7,
+      "subtype": 0,
+      "strings": [
+        "水抗灵气III",
+        "buff\\BUFF_res3.bmp"
+      ]
+    },
+    {
+      "id": 210380,
+      "index": 0,
+      "type": 7,
+      "subtype": 0,
+      "strings": [
+        "暗抗灵气III",
+        "buff\\new\\buff_lingpai14.bmp"
+      ]
+    },
+    {
+      "id": 210381,
+      "index": 0,
+      "type": 7,
+      "subtype": 0,
+      "strings": [
+        "圣抗灵气III",
+        "buff\\new\\buff_yue2.bmp"
+      ]
+    },
+    {
+      "id": 210382,
+      "index": 0,
+      "type": 7,
+      "subtype": 0,
+      "strings": [
+        "闪避灵气III",
+        "buff\\new\\buff_zhuazi2.bmp"
+      ]
+    },
+    {
+      "id": 210383,
+      "index": 0,
+      "type": 7,
+      "subtype": 0,
+      "strings": [
+        "命中灵气III",
+        "buff\\new\\buff_zhanchui2.bmp"
+      ]
+    },
+    {
+      "id": 210384,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "哀嚎献祭",
+        "buff\\BUFF_res2.bmp",
+        "特效-加速",
+        "\u0001\u0000"
+      ]
+    },
+    {
+      "id": 210385,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "哀嚎献祭",
+        "buff\\BUFF_res2.bmp",
+        "特效-加速",
+        "\u0001\u0000"
+      ]
+    },
+    {
+      "id": 210386,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "哀嚎禁锢",
+        "buff\\BUFF_basic4.bmp"
+      ]
+    },
+    {
+      "id": 210387,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "哀嚎禁锢",
+        "buff\\BUFF_basic4.bmp"
+      ]
+    },
+    {
+      "id": 210388,
+      "index": 0,
+      "type": 9,
+      "subtype": 0,
+      "strings": [
+        "钢筋铁骨就掉一滴血"
+      ]
+    },
+    {
+      "id": 210389,
+      "index": 0,
+      "type": 7,
+      "subtype": 0,
+      "strings": [
+        "召唤传送NPC",
+        "buff\\BUFF_ex12.bmp"
+      ]
+    },
+    {
+      "id": 210390,
+      "index": 0,
+      "type": 7,
+      "subtype": 0,
+      "strings": [
+        "召唤传送NPC",
+        "buff\\BUFF_res2.bmp"
+      ]
+    },
+    {
+      "id": 210391,
+      "index": 0,
+      "type": 7,
+      "subtype": 0,
+      "strings": [
+        "召唤传送NPC",
+        "buff\\BUFF_ex11.bmp"
+      ]
+    },
+    {
+      "id": 210392,
+      "index": 0,
+      "type": 7,
+      "subtype": 0,
+      "strings": [
+        "召唤传送NPC",
+        "buff\\BUFF_ex12.bmp"
+      ]
+    },
+    {
+      "id": 210393,
+      "index": 0,
+      "type": 7,
+      "subtype": 0,
+      "strings": [
+        "召唤传送NPC",
+        "buff\\BUFF_res3.bmp"
+      ]
+    },
+    {
+      "id": 210394,
+      "index": 0,
+      "type": 7,
+      "subtype": 0,
+      "strings": [
+        "召唤传送NPC",
+        "buff\\BUFF_res3.bmp"
+      ]
+    },
+    {
+      "id": 210395,
+      "index": 0,
+      "type": 7,
+      "subtype": 0,
+      "strings": [
+        "召唤传送NPC",
+        "buff\\BUFF_basic7.bmp"
+      ]
+    },
+    {
+      "id": 210396,
+      "index": 0,
+      "type": 7,
+      "subtype": 0,
+      "strings": [
+        "召唤传送NPC",
+        "buff\\BUFF_res2.bmp"
+      ]
+    },
+    {
+      "id": 210397,
+      "index": 0,
+      "type": 7,
+      "subtype": 0,
+      "strings": [
+        "召唤传送NPC",
+        "icon\\buff"
+      ]
+    },
+    {
+      "id": 210398,
+      "index": 0,
+      "type": 7,
+      "subtype": 0,
+      "strings": [
+        "召唤传送NPC",
+        "icon\\buff"
+      ]
+    },
+    {
+      "id": 210399,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "上古侵蚀",
+        "buff\\BUFF_ex11.bmp",
+        "特效-加速",
+        "\u0001\u0000"
+      ]
+    },
+    {
+      "id": 210400,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "上古侵蚀",
+        "buff\\BUFF_ex12.bmp",
+        "特效-抗性减少"
+      ]
+    },
+    {
+      "id": 210401,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "上古虚弱",
+        "buff\\BUFF_basic7.bmp",
+        "特效-加速",
+        "\u0001\u0000"
+      ]
+    },
+    {
+      "id": 210402,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "上古虚弱",
+        "buff\\BUFF_basic8.bmp",
+        "特效-死亡标记"
+      ]
+    },
+    {
+      "id": 210403,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "上古急速",
+        "buff\\BUFF_basic3.bmp",
+        "特效-加速",
+        "\u0001\u0000"
+      ]
+    },
+    {
+      "id": 210404,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "上古急速",
+        "buff\\BUFF_basic4.bmp"
+      ]
+    },
+    {
+      "id": 210405,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "上古精确",
+        "buff\\BUFF_ex9.bmp",
+        "特效-加速",
+        "\u0001\u0000"
+      ]
+    },
+    {
+      "id": 210406,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "上古精确",
+        "buff\\BUFF_ex10.bmp"
+      ]
+    },
+    {
+      "id": 210407,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "岩石皮肤",
+        "buff\\BUFF_ex11.bmp"
+      ]
+    },
+    {
+      "id": 210408,
+      "index": 0,
+      "type": 5,
+      "subtype": 0,
+      "strings": [
+        "地狱火光环",
+        "buff\\BUFF_ex1.bmp"
+      ]
+    },
+    {
+      "id": 210409,
+      "index": 0,
+      "type": 6,
+      "subtype": 0,
+      "strings": [
+        "冰冷之槌光环",
+        "buff\\BUFF_ex4.bmp"
+      ]
+    },
+    {
+      "id": 210410,
+      "index": 0,
+      "type": 5,
+      "subtype": 0,
+      "strings": [
+        "咯咯鸡祝福",
+        "buff\\BUFF_ex21.bmp",
+        "SPECIAL_ATTACK"
+      ]
+    },
+    {
+      "id": 210411,
+      "index": 0,
+      "type": 5,
+      "subtype": 0,
+      "strings": [
+        "咯咯鸡喊话"
+      ]
+    },
+    {
+      "id": 210412,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "元素赐生",
+        "buff\\BUFF_res1.bmp"
+      ]
+    },
+    {
+      "id": 210413,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "反击风暴",
+        "buff\\new\\buff_lingpai8.bmp",
+        "特效-反击风暴"
+      ]
+    },
+    {
+      "id": 210414,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "狂暴之怒",
+        "icon\\new\\buff_juexing2.bmp",
+        "特效-狂暴之怒"
+      ]
+    },
+    {
+      "id": 210415,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "狂暴之怒",
+        "buff\\BUFF_ex4.bmp"
+      ]
+    },
+    {
+      "id": 210416,
+      "index": 0,
+      "type": 3,
+      "subtype": 0,
+      "strings": [
+        "霜甲术",
+        "buff\\new\\buff_lingpai12.bmp",
+        "特效-漆黑之幕"
+      ]
+    },
+    {
+      "id": 210417,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "暗影主宰",
+        "buff\\new\\buff_yue2.bmp",
+        "特效-缓缓加红"
+      ]
+    },
+    {
+      "id": 210418,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "邪术之躯",
+        "buff\\BUFF_ex12.bmp"
+      ]
+    },
+    {
+      "id": 210419,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "狡诈之舞",
+        "buff\\BUFF_basic7.bmp"
+      ]
+    },
+    {
+      "id": 210420,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "狡诈之舞",
+        "buff\\BUFF_basic8.bmp"
+      ]
+    },
+    {
+      "id": 210421,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "神圣新星",
+        "buff\\BUFF_ex4.bmp"
+      ]
+    },
+    {
+      "id": 210422,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "神圣新星",
+        "buff\\BUFF_res1.bmp"
+      ]
+    },
+    {
+      "id": 210423,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "寒冰噬骨",
+        "buff\\BUFF_basic4.bmp"
+      ]
+    },
+    {
+      "id": 210424,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "神圣惩戒",
+        "buff\\new\\buff_danao5.bmp"
+      ]
+    },
+    {
+      "id": 210425,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "神圣惩戒",
+        "buff\\BUFF_ex21.bmp"
+      ]
+    },
+    {
+      "id": 210426,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "暗影主宰",
+        "buff\\BUFF_ex11.bmp"
+      ]
+    },
+    {
+      "id": 210427,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "暴怒",
+        "buff\\BUFF_ex15.bmp"
+      ]
+    },
+    {
+      "id": 210428,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "焚烧",
+        "buff\\buff_lingpai5.bmp"
+      ]
+    },
+    {
+      "id": 210429,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "灵魂撞击",
+        "buff\\BUFF_res5.bmp",
+        "特效-黑暗降临"
+      ]
+    },
+    {
+      "id": 210430,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "存活时间"
+      ]
+    },
+    {
+      "id": 210431,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "梦魇光环",
+        "buff\\BUFF_res2.bmp",
+        "特效-加速",
+        "\u0001\u0000"
+      ]
+    },
+    {
+      "id": 210432,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "表妹的爱"
+      ]
+    },
+    {
+      "id": 210433,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "表妹的爱",
+        "buff\\BUFF_ex21.bmp",
+        "SPECIAL_ATTACK"
+      ]
+    },
+    {
+      "id": 210434,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "月夜之幕",
+        "buff\\BUFF_ex12.bmp",
+        "特效-弱化术"
+      ]
+    },
+    {
+      "id": 210435,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "月光灼烧",
+        "buff\\BUFF_res1.bmp",
+        "特效-缓缓加红"
+      ]
+    },
+    {
+      "id": 210436,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "灵魂碎裂",
+        "buff\\BUFF_sp4.bmp"
+      ]
+    },
+    {
+      "id": 210437,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "灵魂碎裂",
+        "buff\\BUFF_sp4.bmp"
+      ]
+    },
+    {
+      "id": 210438,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "日尘光环",
+        "buff\\BUFF_ex4.bmp"
+      ]
+    },
+    {
+      "id": 210439,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "燃魂",
+        "buff\\BUFF_ex19.bmp"
+      ]
+    },
+    {
+      "id": 210440,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "穿刺",
+        "buff\\BUFF_ex11.bmp",
+        "特效-加速",
+        "\u0001\u0000"
+      ]
+    },
+    {
+      "id": 210441,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "穿刺",
+        "buff\\BUFF_ex12.bmp",
+        "特效-加速",
+        "\u0001\u0000"
+      ]
+    },
+    {
+      "id": 210442,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "力竭",
+        "buff\\BUFF_basic7.bmp",
+        "特效-加速",
+        "\u0001\u0000"
+      ]
+    },
+    {
+      "id": 210443,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "力竭",
+        "buff\\BUFF_basic8.bmp",
+        "特效-加速",
+        "\u0001\u0000"
+      ]
+    },
+    {
+      "id": 210444,
+      "index": 0,
+      "type": 6,
+      "subtype": 0,
+      "strings": [
+        "阿斯克的祝福",
+        "buff\\BUFF_sp5.bmp"
+      ]
+    },
+    {
+      "id": 210445,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "刺伤",
+        "buff\\BUFF_sp3.bmp"
+      ]
+    },
+    {
+      "id": 210446,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "野蛮撕咬",
+        "buff\\BUFF_res1.bmp"
+      ]
+    },
+    {
+      "id": 210447,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "撕碎",
+        "buff\\BUFF_res1.bmp"
+      ]
+    },
+    {
+      "id": 210448,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "风之图腾",
+        "buff\\BUFF_res8.bmp"
+      ]
+    },
+    {
+      "id": 210449,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "风之图腾",
+        "buff\\BUFF_res8.bmp",
+        "特效-抗性减少"
+      ]
+    },
+    {
+      "id": 210450,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "地之图腾",
+        "buff\\BUFF_res2.bmp"
+      ]
+    },
+    {
+      "id": 210451,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "地之图腾",
+        "buff\\BUFF_res2.bmp",
+        "特效-弱化术"
+      ]
+    },
+    {
+      "id": 210452,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "火之图腾",
+        "buff\\BUFF_res4.bmp"
+      ]
+    },
+    {
+      "id": 210453,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "水之图腾",
+        "buff\\BUFF_ex18.bmp"
+      ]
+    },
+    {
+      "id": 210454,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "水之图腾",
+        "buff\\BUFF_ex18.bmp",
+        "特效-缓缓加绿"
+      ]
+    },
+    {
+      "id": 210455,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "野猪守护",
+        "buff\\BUFF_ex12.bmp",
+        "特效-抗性减少"
+      ]
+    },
+    {
+      "id": 210456,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "雄鹰之怒",
+        "buff\\BUFF_ex10.bmp",
+        "特效-死亡标记"
+      ]
+    },
+    {
+      "id": 210457,
+      "index": 0,
+      "type": 3,
+      "subtype": 0,
+      "strings": [
+        "血爆术",
+        "buff\\BUFF_ex15.bmp"
+      ]
+    },
+    {
+      "id": 210458,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "血沸",
+        "buff\\BUFF_sp3.bmp"
+      ]
+    },
+    {
+      "id": 210459,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "暗血之幕",
+        "buff\\BUFF_ex11.bmp",
+        "特效-弱化术"
+      ]
+    },
+    {
+      "id": 210460,
+      "index": 0,
+      "type": 5,
+      "subtype": 0,
+      "strings": [
+        "虎灵的祝福",
+        "buff\\BUFF_sp4.bmp",
+        "特效-加速",
+        "\u0001\u0000"
+      ]
+    },
+    {
+      "id": 210461,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "虎啸",
+        "buff\\BUFF_basic2.bmp"
+      ]
+    },
+    {
+      "id": 210462,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "高压空间",
+        "buff\\BUFF_ex11.bmp",
+        "特效-死亡标记"
+      ]
+    },
+    {
+      "id": 210463,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "爆炸计时",
+        "buff\\BUFF_ex4.bmp"
+      ]
+    },
+    {
+      "id": 210464,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "爆裂",
+        "buff\\BUFF_ex4.bmp"
+      ]
+    },
+    {
+      "id": 210465,
+      "index": 0,
+      "type": 0,
+      "subtype": 0,
+      "strings": [
+        "",
+        "icon\\buff"
+      ]
+    },
+    {
+      "id": 210466,
+      "index": 0,
+      "type": 0,
+      "subtype": 0,
+      "strings": [
+        "",
+        "buff\\BUFF_sp5.bmp"
+      ]
+    },
+    {
+      "id": 210467,
+      "index": 0,
+      "type": 5,
+      "subtype": 0,
+      "strings": [
+        "梦境",
+        "火\u0018\u0000buff\\new\\buff_danao1.bmp\u0007\u0000特效-狂暴之怒\u0000\u0000\u0001\u0000T\u0000\u0001\u0000\u0010"
+      ]
+    },
+    {
+      "id": 210468,
+      "index": 0,
+      "type": 5,
+      "subtype": 0,
+      "strings": [
+        "梦境",
+        "buff\\BUFF_sp5.bmp"
+      ]
+    },
+    {
+      "id": 210469,
+      "index": 0,
+      "type": 3,
+      "subtype": 0,
+      "strings": [
+        "铁壁"
+      ]
+    },
+    {
+      "id": 210470,
+      "index": 0,
+      "type": 3,
+      "subtype": 0,
+      "strings": [
+        "屠杀"
+      ]
+    },
+    {
+      "id": 210471,
+      "index": 0,
+      "type": 3,
+      "subtype": 0,
+      "strings": [
+        "屠杀"
+      ]
+    },
+    {
+      "id": 210472,
+      "index": 0,
+      "type": 5,
+      "subtype": 0,
+      "strings": [
+        "梦境",
+        "无\u0018\u0000buff\\new\\buff_danao1.bmp\u0007\u0000特效-圣光壁垒\u0000\u0000\u0001\u0000T\u0000\u0001\u0000\u0010"
+      ]
+    },
+    {
+      "id": 210473,
+      "index": 0,
+      "type": 5,
+      "subtype": 0,
+      "strings": [
+        "梦魇",
+        "沼\u0018\u0000buff\\new\\buff_danao1.bmp\u0007\u0000特效-死亡标记\u0000\u0000\u0001\u0000T\u0000\u0001\u0000\u0010"
+      ]
+    },
+    {
+      "id": 210474,
+      "index": 0,
+      "type": 5,
+      "subtype": 0,
+      "strings": [
+        "梦魇",
+        "乱\u0018\u0000buff\\new\\buff_danao1.bmp\u0007\u0000特效-神圣之盾\u0000\u0000\u0001\u0000T\u0000\u0001\u0000\u0010"
+      ]
+    },
+    {
+      "id": 210475,
+      "index": 0,
+      "type": 5,
+      "subtype": 0,
+      "strings": [
+        "梦魇",
+        "锁\u0018\u0000buff\\new\\buff_danao1.bmp\u0007\u0000特效-抗性减少\u0000\u0000\u0001\u0000T\u0000\u0001\u0000\u0010"
+      ]
+    },
+    {
+      "id": 210476,
+      "index": 0,
+      "type": 5,
+      "subtype": 0,
+      "strings": [
+        "梦境",
+        "buff\\BUFF_res2.bmp"
+      ]
+    },
+    {
+      "id": 210477,
+      "index": 0,
+      "type": 5,
+      "subtype": 0,
+      "strings": [
+        "梦魇",
+        "buff\\new\\buff_fuhao1.bmp"
+      ]
+    },
+    {
+      "id": 210478,
+      "index": 0,
+      "type": 5,
+      "subtype": 0,
+      "strings": [
+        "梦境",
+        "buff\\BUFF_ex12.bmp"
+      ]
+    },
+    {
+      "id": 210479,
+      "index": 0,
+      "type": 5,
+      "subtype": 0,
+      "strings": [
+        "梦魇",
+        "buff\\BUFF_res1.bmp"
+      ]
+    },
+    {
+      "id": 210480,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "燃血结界",
+        "buff\\BUFF_ex5.bmp",
+        "特效-缓缓加红"
+      ]
+    },
+    {
+      "id": 210481,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "燃血之魂",
+        "buff\\BUFF_ex5.bmp",
+        "特效-缓缓加绿"
+      ]
+    },
+    {
+      "id": 210482,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "召唤结界",
+        "buff\\BUFF_ex5.bmp",
+        "特效-反击风暴"
+      ]
+    },
+    {
+      "id": 210483,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "锐不可挡",
+        "icon\\buff"
+      ]
+    },
+    {
+      "id": 210484,
+      "index": 0,
+      "type": 5,
+      "subtype": 0,
+      "strings": [
+        "兵败如山倒",
+        "icon\\buff"
+      ]
+    },
+    {
+      "id": 210485,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "平分秋色",
+        "buff\\BUFF_ex15.bmp"
+      ]
+    },
+    {
+      "id": 210486,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "月光灼烧",
+        "buff\\BUFF_res1.bmp",
+        "特效-缓缓加红"
+      ]
+    },
+    {
+      "id": 210487,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "灵魂撞击",
+        "buff\\BUFF_res5.bmp",
+        "特效-黑暗降临"
+      ]
+    },
+    {
+      "id": 210488,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "表妹的爱"
+      ]
+    },
+    {
+      "id": 210489,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "表妹的爱",
+        "buff\\BUFF_ex21.bmp",
+        "SPECIAL_ATTACK"
+      ]
+    },
+    {
+      "id": 210490,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "野猪守护",
+        "buff\\BUFF_ex12.bmp",
+        "特效-抗性减少"
+      ]
+    },
+    {
+      "id": 210491,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "血沸",
+        "buff\\BUFF_sp3.bmp"
+      ]
+    },
+    {
+      "id": 210492,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "虎啸",
+        "buff\\BUFF_basic2.bmp"
+      ]
+    },
+    {
+      "id": 210493,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "刺伤",
+        "buff\\BUFF_sp3.bmp"
+      ]
+    },
+    {
+      "id": 210494,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "风之图腾",
+        "buff\\BUFF_res8.bmp"
+      ]
+    },
+    {
+      "id": 210495,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "风之图腾",
+        "buff\\BUFF_res8.bmp",
+        "特效-抗性减少"
+      ]
+    },
+    {
+      "id": 210496,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "地之图腾",
+        "buff\\BUFF_res2.bmp"
+      ]
+    },
+    {
+      "id": 210497,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "地之图腾",
+        "buff\\BUFF_res2.bmp",
+        "特效-弱化术"
+      ]
+    },
+    {
+      "id": 210498,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "水之图腾",
+        "buff\\BUFF_ex18.bmp"
+      ]
+    },
+    {
+      "id": 210499,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "水之图腾",
+        "buff\\BUFF_ex18.bmp",
+        "特效-缓缓加绿"
+      ]
+    },
+    {
+      "id": 210500,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "穿刺",
+        "buff\\BUFF_ex11.bmp",
+        "特效-加速",
+        "\u0001\u0000"
+      ]
+    },
+    {
+      "id": 210501,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "力竭",
+        "buff\\BUFF_basic7.bmp",
+        "特效-加速",
+        "\u0001\u0000"
+      ]
+    },
+    {
+      "id": 210502,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "击鼓计时",
+        "buff\\BUFF_ex11.bmp"
+      ]
+    },
+    {
+      "id": 210503,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "生命吞吸",
+        "buff\\BUFF_sp3.bmp",
+        "特效-死亡标记"
+      ]
+    },
+    {
+      "id": 210504,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "吞噬",
+        "buff\\new\\buff_lingpai12.bmp",
+        "特效-抗性减少"
+      ]
+    },
+    {
+      "id": 210505,
+      "index": 0,
+      "type": 9,
+      "subtype": 0,
+      "strings": [
+        "公会BUFF",
+        "buff\\new\\buff_lingpai12.bmp"
+      ]
+    },
+    {
+      "id": 210506,
+      "index": 0,
+      "type": 11,
+      "subtype": 0,
+      "strings": [
+        "公会BUFF",
+        "续减血\u0011\u0000buff\\BUFF_ex2.bmp\u0000\u0000\u0000\u0000\u0001\u0000\u0000\u0002\u0000\u0016\u0000ubdhv_dec_h"
+      ]
+    },
+    {
+      "id": 210507,
+      "index": 0,
+      "type": 6,
+      "subtype": 0,
+      "strings": [
+        "托特斯的玩笑",
+        "buff\\BUFF_basic4.bmp",
+        "特效-加速",
+        "\u0001\u0000"
+      ]
+    },
+    {
+      "id": 210508,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "圣光壁垒",
+        "icon\\buff"
+      ]
+    },
+    {
+      "id": 210509,
+      "index": 0,
+      "type": 0,
+      "subtype": 0,
+      "strings": [
+        "",
+        "buff\\BUFF_ex11.bmp"
+      ]
+    },
+    {
+      "id": 210510,
+      "index": 0,
+      "type": 0,
+      "subtype": 0,
+      "strings": [
+        "",
+        "buff\\BUFF_basic3.bmp"
+      ]
+    },
+    {
+      "id": 210511,
+      "index": 0,
+      "type": 0,
+      "subtype": 0,
+      "strings": [
+        "",
+        "buff\\BUFF_ex2.bmp"
+      ]
+    },
+    {
+      "id": 210512,
+      "index": 0,
+      "type": 0,
+      "subtype": 0,
+      "strings": [
+        "",
+        "icon\\buff"
+      ]
+    },
+    {
+      "id": 210513,
+      "index": 0,
+      "type": 0,
+      "subtype": 0,
+      "strings": [
+        "",
+        "icon\\buff"
+      ]
+    },
+    {
+      "id": 210514,
+      "index": 0,
+      "type": 3,
+      "subtype": 0,
+      "strings": [
+        "铁壁"
+      ]
+    },
+    {
+      "id": 210515,
+      "index": 0,
+      "type": 3,
+      "subtype": 0,
+      "strings": [
+        "屠杀"
+      ]
+    },
+    {
+      "id": 210516,
+      "index": 0,
+      "type": 3,
+      "subtype": 0,
+      "strings": [
+        "屠杀"
+      ]
+    },
+    {
+      "id": 210517,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "日之水晶",
+        "buff\\BUFF_sp3.bmp"
+      ]
+    },
+    {
+      "id": 210518,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "月之水晶",
+        "buff\\BUFF_sp4.bmp"
+      ]
+    },
+    {
+      "id": 210519,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "星之水晶",
+        "buff\\BUFF_sp5.bmp"
+      ]
+    },
+    {
+      "id": 210520,
+      "index": 0,
+      "type": 7,
+      "subtype": 0,
+      "strings": [
+        "召唤传送NPC",
+        "icon\\buff"
+      ]
+    },
+    {
+      "id": 210521,
+      "index": 0,
+      "type": 7,
+      "subtype": 0,
+      "strings": [
+        "召唤传送NPC",
+        "icon\\buff"
+      ]
+    },
+    {
+      "id": 210522,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "复仇",
+        "buff\\BUFF_basic1.bmp",
+        "特效-抗性减少"
+      ]
+    },
+    {
+      "id": 210523,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "亵渎",
+        "buff\\BUFF_ex11.bmp",
+        "特效-弱化术"
+      ]
+    },
+    {
+      "id": 210524,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "绞刑",
+        "buff\\BUFF_basic2.bmp",
+        "特效-黑暗降临"
+      ]
+    },
+    {
+      "id": 210525,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "腐刑",
+        "buff\\BUFF_res1.bmp",
+        "特效-大喷血"
+      ]
+    },
+    {
+      "id": 210526,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "公爵之怒",
+        "buff\\BUFF_ex15.bmp",
+        "特效-加速",
+        "\u0001\u0000"
+      ]
+    },
+    {
+      "id": 210527,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "尸爆"
+      ]
+    },
+    {
+      "id": 210528,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "怨灵之寒"
+      ]
+    },
+    {
+      "id": 210529,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "碎魂"
+      ]
+    },
+    {
+      "id": 210530,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "恢复",
+        "buff\\BUFF_sp5.bmp",
+        "特效-缓缓加绿"
+      ]
+    },
+    {
+      "id": 210531,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "忏悔",
+        "buff\\BUFF_ex19.bmp",
+        "特效-抗性减少"
+      ]
+    },
+    {
+      "id": 210532,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "灵魂抽取",
+        "buff\\BUFF_res3.bmp",
+        "特效-缓缓加红"
+      ]
+    },
+    {
+      "id": 210533,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "炎爆"
+      ]
+    },
+    {
+      "id": 210534,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "炎心"
+      ]
+    },
+    {
+      "id": 210535,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "黑暗秩序",
+        "buff\\BUFF_res1.bmp",
+        "特效-缓缓加红"
+      ]
+    },
+    {
+      "id": 210536,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "寂静",
+        "buff\\BUFF_sp3.bmp"
+      ]
+    },
+    {
+      "id": 210537,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "寂静",
+        "buff\\BUFF_sp3.bmp"
+      ]
+    },
+    {
+      "id": 210538,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "哀嚎之盾",
+        "buff\\BUFF_ex12.bmp"
+      ]
+    },
+    {
+      "id": 210539,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "暗影之壁",
+        "buff\\BUFF_ex11.bmp",
+        "特效-加速",
+        "\u0001\u0000"
+      ]
+    },
+    {
+      "id": 210540,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "暗影之壁",
+        "buff\\BUFF_ex12.bmp",
+        "特效-加速",
+        "\u0001\u0000"
+      ]
+    },
+    {
+      "id": 210541,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "憎恨之光",
+        "buff\\BUFF_res2.bmp",
+        "特效-加速",
+        "\u0001\u0000"
+      ]
+    },
+    {
+      "id": 210542,
+      "index": 0,
+      "type": 1,
+      "subtype": 0,
+      "strings": [
+        "御",
+        "buff\\BUFF_ex11.bmp",
+        "特效-加速",
+        "\u0001\u0000"
+      ]
+    },
+    {
+      "id": 210543,
+      "index": 0,
+      "type": 1,
+      "subtype": 0,
+      "strings": [
+        "御",
+        "buff\\BUFF_ex12.bmp",
+        "特效-加速",
+        "\u0001\u0000"
+      ]
+    },
+    {
+      "id": 210544,
+      "index": 0,
+      "type": 1,
+      "subtype": 0,
+      "strings": [
+        "痛",
+        "buff\\BUFF_res3.bmp",
+        "特效-缓缓加红"
+      ]
+    },
+    {
+      "id": 210545,
+      "index": 0,
+      "type": 1,
+      "subtype": 0,
+      "strings": [
+        "死",
+        "buff\\BUFF_res3.bmp",
+        "特效-缓缓加红"
+      ]
+    },
+    {
+      "id": 210546,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "圣言",
+        "buff\\BUFF_basic7.bmp",
+        "特效-大喷血"
+      ]
+    },
+    {
+      "id": 210547,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "无尽黑暗",
+        "buff\\BUFF_res2.bmp",
+        "特效-加速",
+        "\u0001\u0000"
+      ]
+    },
+    {
+      "id": 210548,
+      "index": 0,
+      "type": 7,
+      "subtype": 0,
+      "strings": [
+        "召唤传送NPC",
+        "buff\\BUFF_res1.bmp"
+      ]
+    },
+    {
+      "id": 210549,
+      "index": 0,
+      "type": 7,
+      "subtype": 0,
+      "strings": [
+        "召唤传送NPC",
+        "buff\\BUFF_res3.bmp"
+      ]
+    },
+    {
+      "id": 210550,
+      "index": 0,
+      "type": 7,
+      "subtype": 0,
+      "strings": [
+        "召唤传送NPC",
+        "buff\\new\\buff_lingpai14.bmp"
+      ]
+    },
+    {
+      "id": 210551,
+      "index": 0,
+      "type": 7,
+      "subtype": 0,
+      "strings": [
+        "召唤传送NPC",
+        "buff\\new\\buff_yue2.bmp"
+      ]
+    },
+    {
+      "id": 210552,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "厚皮",
+        "buff\\BUFF_ex12.bmp",
+        "特效-弱化术"
+      ]
+    },
+    {
+      "id": 210553,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "疫病之爪",
+        "buff\\BUFF_res1.bmp",
+        "特效-缓缓加红"
+      ]
+    },
+    {
+      "id": 210554,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "鹿神之刺",
+        "buff\\BUFF_res3.bmp",
+        "特效-抗性减少"
+      ]
+    },
+    {
+      "id": 210555,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "仙子之尘"
+      ]
+    },
+    {
+      "id": 210556,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "荆棘光环",
+        "buff\\BUFF_res3.bmp",
+        "特效-加速",
+        "\u0001\u0000"
+      ]
+    },
+    {
+      "id": 210557,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "沉浸",
+        "buff\\buff_lingpai14.bmp"
+      ]
+    },
+    {
+      "id": 210558,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "破裂"
+      ]
+    },
+    {
+      "id": 210559,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "根须缠绕",
+        "buff\\BUFF_basic4.bmp",
+        "特效-抗性减少"
+      ]
+    },
+    {
+      "id": 210560,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "愈合"
+      ]
+    },
+    {
+      "id": 210561,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "愈合",
+        "buff\\BUFF_sp5.bmp",
+        "特效-缓缓加绿"
+      ]
+    },
+    {
+      "id": 210562,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "宁静"
+      ]
+    },
+    {
+      "id": 210563,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "宁静",
+        "buff\\BUFF_sp5.bmp",
+        "特效-缓缓加绿"
+      ]
+    },
+    {
+      "id": 210564,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "熔岩护甲",
+        "buff\\BUFF_ex12.bmp",
+        "特效-弱化术"
+      ]
+    },
+    {
+      "id": 210565,
+      "index": 0,
+      "type": 3,
+      "subtype": 0,
+      "strings": [
+        "冲击波",
+        "buff\\BUFF_basic4.bmp"
+      ]
+    },
+    {
+      "id": 210566,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "点燃",
+        "buff\\BUFF_res1.bmp",
+        "特效-缓缓加红"
+      ]
+    },
+    {
+      "id": 210567,
+      "index": 0,
+      "type": 7,
+      "subtype": 0,
+      "strings": [
+        "召唤传送NPC",
+        "buff\\BUFF_ex5.bmp"
+      ]
+    },
+    {
+      "id": 210568,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "碎岩光环",
+        "buff\\BUFF_res2.bmp",
+        "特效-加速",
+        "\u0001\u0000"
+      ]
+    },
+    {
+      "id": 210569,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "碎岩光环",
+        "buff\\new\\buff_fuhao1.bmp",
+        "特效-缓缓加红"
+      ]
+    },
+    {
+      "id": 210570,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "起源护甲",
+        "buff\\BUFF_ex12.bmp",
+        "特效-弱化术"
+      ]
+    },
+    {
+      "id": 210571,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "风祭",
+        "buff\\BUFF_res1.bmp",
+        "特效-缓缓加红"
+      ]
+    },
+    {
+      "id": 210572,
+      "index": 0,
+      "type": 2,
+      "subtype": 0,
+      "strings": [
+        "风蚀",
+        "buff\\BUFF_res2.bmp",
+        "特效-缓缓加绿"
+      ]
+    },
+    {
+      "id": 210573,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "王者护甲",
+        "buff\\BUFF_ex12.bmp",
+        "特效-弱化术"
+      ]
+    },
+    {
+      "id": 210574,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "古神之拳",
+        "buff\\BUFF_ex19.bmp",
+        "特效-死亡标记"
+      ]
+    },
+    {
+      "id": 210575,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "领导特权",
+        "buff\\new\\buff_lingpai12.bmp"
+      ]
+    },
+    {
+      "id": 210576,
+      "index": 0,
+      "type": 6,
+      "subtype": 0,
+      "strings": [
+        "一边玩儿蛋去",
+        "buff\\new\\buff_lingpai12.bmp"
+      ]
+    },
+    {
+      "id": 210577,
+      "index": 0,
+      "type": 6,
+      "subtype": 0,
+      "strings": [
+        "揉吧揉吧吃掉",
+        "buff\\new\\buff_lingpai12.bmp"
+      ]
+    },
+    {
+      "id": 210578,
+      "index": 0,
+      "type": 5,
+      "subtype": 0,
+      "strings": [
+        "小领导特权",
+        "buff\\new\\buff_lingpai12.bmp"
+      ]
+    },
+    {
+      "id": 210579,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "同生共死",
+        "buff\\new\\buff_lingpai12.bmp"
+      ]
+    },
+    {
+      "id": 210580,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "人用鸡血",
+        "buff\\new\\buff_lingpai12.bmp"
+      ]
+    },
+    {
+      "id": 210581,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "怪用鸡血",
+        "buff\\new\\buff_lingpai12.bmp"
+      ]
+    },
+    {
+      "id": 210582,
+      "index": 0,
+      "type": 7,
+      "subtype": 0,
+      "strings": [
+        "召唤传送NPC",
+        "buff\\new\\buff_danao1.bmp"
+      ]
+    },
+    {
+      "id": 210583,
+      "index": 0,
+      "type": 7,
+      "subtype": 0,
+      "strings": [
+        "召唤传送NPC",
+        "buff\\new\\buff_danao1.bmp"
+      ]
+    },
+    {
+      "id": 210584,
+      "index": 0,
+      "type": 7,
+      "subtype": 0,
+      "strings": [
+        "召唤传送NPC",
+        "buff\\new\\buff_danao1.bmp"
+      ]
+    },
+    {
+      "id": 210585,
+      "index": 0,
+      "type": 0,
+      "subtype": 0,
+      "strings": [
+        "",
+        "buff\\new\\buff_haojiao2.bmp"
+      ]
+    },
+    {
+      "id": 210586,
+      "index": 0,
+      "type": 0,
+      "subtype": 0,
+      "strings": [
+        "",
+        "buff\\BUFF_ex7.bmp"
+      ]
+    },
+    {
+      "id": 210587,
+      "index": 0,
+      "type": 0,
+      "subtype": 0,
+      "strings": [
+        "",
+        "buff\\BUFF_ex7.bmp"
+      ]
+    },
+    {
+      "id": 210588,
+      "index": 0,
+      "type": 4,
+      "subtype": 0,
+      "strings": [
+        "道具免伤",
+        "buff\\BUFF_ex11.bmp",
+        "特效-法力盾"
+      ]
+    }
+  ]
+}

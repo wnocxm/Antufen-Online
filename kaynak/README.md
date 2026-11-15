@@ -20,3 +20,11 @@ Yeniden çıkarmak için depo kökünden:
 python3 tools/extract_all.py
 python3 tools/katalog.py
 ```
+
+## Android sürümü (APK)
+
+`apk/cikti/` klasöründe, deponun Releases bölümündeki APK'nın (`apk-test / 1028.apk`) içindeki oyun kaynaklarının çıkarılmış hali durur: yüksek çözünürlüklü arayüz ve harita resimleri, 12 müziğin tamamı, ek ses efektleri ve çözülmüş oyun tabloları (`metin/config/`: görevler, canavarlar, NPC'ler, geçit hedefleri, dünya haritası yerleşimi, dükkânlar). Yeniden çıkarmak için:
+
+```bash
+sh tools/apk_cikar.sh
+```

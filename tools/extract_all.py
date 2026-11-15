@@ -8,7 +8,8 @@ from PIL import Image
 import godat
 from lstr import lstrings
 
-SRC, OUT = 'kaynak/orijinal', 'kaynak/cikti'
+# İsteğe bağlı: python3 tools/extract_all.py <girdi klasörü> <çıktı klasörü>  (ör. APK içindeki Resources klasörü için)
+SRC, OUT = (sys.argv[1], sys.argv[2]) if len(sys.argv) > 2 and __name__ == '__main__' else ('kaynak/orijinal', 'kaynak/cikti')
 def mk(p): os.makedirs(p, exist_ok=True); return p
 
 def chunks(b, p, need):
@@ -27,12 +28,17 @@ def spans(table, h):
         n = struct.unpack_from('<H', table, q)[0] // 8; q += 2
         for s in range(n):
             off, x0, x1 = struct.unpack_from('<IHH', table, q); q += 8; sp.append((y, off, x0, x1))
+    # bazı yeni arşivlerde konum alanı boş (hep 0): pikseller sırayla dizilidir
+    if len(sp) > 1 and all(x[1] == 0 for x in sp):
+        o = 0; fixed = []
+        for y, off, x0, x1 in sp: fixed.append((y, o, x0, x1)); o += max(0, x1 - x0)
+        sp = fixed
     return sp
 
 def decode8(b):
     """256 renkli görsel -> RGBA. Düz (satırlar 4 bayta tamamlanır) ya da satır-aralık sıkıştırmalı; bazıları piksel başına renk + saydamlık taşır."""
     hdr = struct.unpack_from('<6I', b, 0); w, h = hdr[3], hdr[4]
-    a = b.find(b'\x78\x9c', 24); cs, rs = struct.unpack_from('<II', b, a - 8)
+    a = 44; cs, rs = struct.unpack_from('<II', b, 36)   # palet her zaman 36. baytta başlar (sıkıştırma düzeyi dosyaya göre değişir)
     epal = zlib.decompress(b[a:a + cs]); p = a + cs
     pal = np.frombuffer(epal[:1024], dtype=np.uint8).reshape(256, 4)[:, [2, 1, 0]]
     L = np.zeros((h, w), np.uint8); A = np.zeros((h, w), np.uint8)
@@ -52,7 +58,7 @@ def decode8(b):
                         x1 = min(x1, fw); n = x1 - x0
                         if n <= 0: continue
                         seg = pxa[off:off + n]; L[fy * fh + y, fx * fw + x0:fx * fw + x0 + len(seg)] = seg; A[fy * fh + y, fx * fw + x0:fx * fw + x0 + len(seg)] = 255
-    elif hdr[5] == 0:
+    elif hdr[5] == 0 and not (p + 18 <= len(b) and 1 <= struct.unpack_from('<I', b, p + 4)[0] <= 256 and b[p + 16] == 0x78 and struct.unpack_from('<I', b, p + 8)[0] < w * h // 2 + 64 and struct.unpack_from('<I', b, p + 12)[0] <= h * 10 + 64 * h):
         st = (w + 3) & ~3
         px, p = chunks(b, p, st * h)
         if len(px) >= st * h: L = np.frombuffer(px[:st * h], np.uint8).reshape(h, st)[:, :w].copy()
@@ -124,6 +130,7 @@ def kind(d, name):
     if name.endswith(('.lua', '.ini')): return 'text'
     if len(d) >= 24 and d[:4] == b'\0\0\0\0':
         h = struct.unpack_from('<6I', d, 0)
+        if h[1] == 8 and h[2] == 4 and h[4] == 0 and len(d) > 40: return 'blob'
         if h[1] in (8, 16) and 0 < h[3] <= 4096 and 0 < h[4] <= 4096 and h[2] < 64: return 'img%d' % h[1]
     if d[:2] == b'\xff\xfe': return 'utf16'
     return 'data'
@@ -149,6 +156,9 @@ def main():
                     w.setnchannels(1); w.setsampwidth(2); w.setframerate(8000); w.writeframes(d); w.close()
                 elif k == 'text':
                     p = os.path.join(mk(f'{OUT}/betik/{base}'), name.replace('\\', '/').split('/')[-1]); open(p, 'wb').write(d)
+                elif k == 'blob':
+                    raw = zlib.decompress(d[40:]); txt = raw.decode('utf-16') if raw[:2] in (b'\xff\xfe', b'\xfe\xff') else raw.decode('utf-8', 'replace')
+                    open(os.path.join(mk(f'{OUT}/metin/{base}'), f'{id_}.txt'), 'w', encoding='utf-8').write(txt)
                 elif k == 'utf16': open(os.path.join(mk(f'{OUT}/metin/{base}'), f'{id_}.txt'), 'w', encoding='utf-8').write(d.decode('utf-16', 'replace'))
                 elif k == 'form': open(os.path.join(mk(f'{OUT}/form/{base}'), f'{id_}.bin'), 'wb').write(d); table.append({'id': id_, 'metin': [s for o, s in lstrings(d)]})
                 else:

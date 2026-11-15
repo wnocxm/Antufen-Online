@@ -1,0 +1,8 @@
+{
+    "HotfixUrl": "http://124.222.124.13/hotfix/",
+    "HotfixResources": "Resources",
+    "notice": "http://124.222.124.13/hotfix/notice.txt",
+    "ServerName": "永恒之石",
+    "ServerUrl": "124.222.124.13",
+    "ServerCode":"30000"
+}

@@ -1,0 +1,506 @@
+{
+  "90022": {
+    "name": "基础剑术",
+    "category": "Damage",
+    "attackType": "BLOOD",
+    "cd": 3.5,
+    "costMp": 5,
+    "maxLevel": 10,
+    "range": 0.25
+  },
+  "90044": {
+    "name": "投掷飞刀",
+    "category": "Damage",
+    "attackType": "BLOOD",
+    "cd": 3.5,
+    "costMp": 8,
+    "maxLevel": 10,
+    "range": 4.0
+  },
+  "90042": {
+    "name": "武器训练",
+    "category": "Passive",
+    "attackType": "",
+    "cd": 0,
+    "costMp": 0,
+    "maxLevel": 15,
+    "range": 0
+  },
+  "90104": {
+    "name": "精通防御",
+    "category": "Passive",
+    "attackType": "",
+    "cd": 0,
+    "costMp": 0,
+    "maxLevel": 15,
+    "range": 0
+  },
+  "90738": {
+    "name": "健壮",
+    "category": "Passive",
+    "attackType": "",
+    "cd": 0,
+    "costMp": 0,
+    "maxLevel": 10,
+    "range": 0
+  },
+  "90021": {
+    "name": "灵敏",
+    "category": "Passive",
+    "attackType": "",
+    "cd": 0,
+    "costMp": 0,
+    "maxLevel": 10,
+    "range": 0
+  },
+  "90040": {
+    "name": "双重打击",
+    "category": "Damage",
+    "attackType": "BLOOD",
+    "cd": 3.5,
+    "costMp": 10,
+    "maxLevel": 10,
+    "range": 0.25
+  },
+  "90096": {
+    "name": "速度爆发",
+    "category": "Buff",
+    "attackType": "BLOOD",
+    "cd": 3.5,
+    "costMp": 15,
+    "maxLevel": 10,
+    "range": 0
+  },
+  "90043": {
+    "name": "蓄力挥砍",
+    "category": "Damage",
+    "attackType": "BLOOD",
+    "cd": 3.5,
+    "costMp": 12,
+    "maxLevel": 10,
+    "range": 0.25
+  },
+  "90105": {
+    "name": "加速愈合",
+    "category": "Passive",
+    "attackType": "",
+    "cd": 0,
+    "costMp": 0,
+    "maxLevel": 10,
+    "range": 0
+  },
+  "90123": {
+    "name": "法力控制",
+    "category": "Passive",
+    "attackType": "",
+    "cd": 0,
+    "costMp": 0,
+    "maxLevel": 10,
+    "range": 0
+  },
+  "90128": {
+    "name": "法力再生",
+    "category": "Passive",
+    "attackType": "",
+    "cd": 0,
+    "costMp": 0,
+    "maxLevel": 10,
+    "range": 0
+  },
+  "90084": {
+    "name": "坚韧光环",
+    "category": "Passive",
+    "attackType": "",
+    "cd": 0,
+    "costMp": 0,
+    "maxLevel": 10,
+    "range": 0
+  },
+  "90106": {
+    "name": "破魂斩",
+    "category": "Damage",
+    "attackType": "DARK_ATTACK",
+    "cd": 3.5,
+    "costMp": 18,
+    "maxLevel": 10,
+    "range": 5.0
+  },
+  "90107": {
+    "name": "鲜血印记",
+    "category": "Buff",
+    "attackType": "BLOOD",
+    "cd": 3.5,
+    "costMp": 12,
+    "maxLevel": 15,
+    "range": 1.0
+  },
+  "90113": {
+    "name": "血之渴求",
+    "category": "Passive",
+    "attackType": "",
+    "cd": 0,
+    "costMp": 0,
+    "maxLevel": 15,
+    "range": 0
+  },
+  "90115": {
+    "name": "复仇之刃",
+    "category": "Damage",
+    "attackType": "BLOOD",
+    "cd": 3.5,
+    "costMp": 15,
+    "maxLevel": 10,
+    "range": 0.25
+  },
+  "90119": {
+    "name": "嗜血潜能",
+    "category": "Passive",
+    "attackType": "",
+    "cd": 0,
+    "costMp": 0,
+    "maxLevel": 15,
+    "range": 0
+  },
+  "90120": {
+    "name": "重伤撕裂",
+    "category": "Damage",
+    "attackType": "BLOOD",
+    "cd": 3.5,
+    "costMp": 20,
+    "maxLevel": 10,
+    "range": 5.0
+  },
+  "90118": {
+    "name": "锯齿利刃",
+    "category": "Damage",
+    "attackType": "BLOOD",
+    "cd": 3.5,
+    "costMp": 14,
+    "maxLevel": 15,
+    "range": 0.25
+  },
+  "90116": {
+    "name": "绝望之力",
+    "category": "Passive",
+    "attackType": "",
+    "cd": 0,
+    "costMp": 0,
+    "maxLevel": 15,
+    "range": 0
+  },
+  "90598": {
+    "name": "血魄转化",
+    "category": "Passive",
+    "attackType": "",
+    "cd": 0,
+    "costMp": 0,
+    "maxLevel": 10,
+    "range": 0
+  },
+  "90121": {
+    "name": "死亡屠戮",
+    "category": "Passive",
+    "attackType": "",
+    "cd": 0,
+    "costMp": 0,
+    "maxLevel": 10,
+    "range": 0
+  },
+  "90599": {
+    "name": "钢铁意志",
+    "category": "Passive",
+    "attackType": "",
+    "cd": 0,
+    "costMp": 0,
+    "maxLevel": 15,
+    "range": 0
+  },
+  "90124": {
+    "name": "火球术",
+    "category": "Damage",
+    "attackType": "FIRE_ATTACK",
+    "cd": 3.5,
+    "costMp": 15,
+    "maxLevel": 10,
+    "range": 5.0
+  },
+  "90127": {
+    "name": "冰冻术",
+    "category": "Damage",
+    "attackType": "WATER_ATTACK",
+    "cd": 3.5,
+    "costMp": 18,
+    "maxLevel": 10,
+    "range": 6.0
+  },
+  "90125": {
+    "name": "魔力学习",
+    "category": "Passive",
+    "attackType": "",
+    "cd": 0,
+    "costMp": 0,
+    "maxLevel": 15,
+    "range": 0
+  },
+  "90126": {
+    "name": "法力强化",
+    "category": "Passive",
+    "attackType": "",
+    "cd": 0,
+    "costMp": 0,
+    "maxLevel": 10,
+    "range": 0
+  },
+  "90097": {
+    "name": "霜甲术",
+    "category": "Buff",
+    "attackType": "WATER",
+    "cd": 3.5,
+    "costMp": 20,
+    "maxLevel": 10,
+    "range": 0
+  },
+  "90130": {
+    "name": "烈火焚烧",
+    "category": "Damage",
+    "attackType": "FIRE_ATTACK",
+    "cd": 3.9,
+    "costMp": 25,
+    "maxLevel": 10,
+    "range": 5.0
+  },
+  "90132": {
+    "name": "暴风雪",
+    "category": "Damage",
+    "attackType": "WATER_ATTACK",
+    "cd": 4.3,
+    "costMp": 30,
+    "maxLevel": 10,
+    "range": 5.0
+  },
+  "90098": {
+    "name": "魔法盾",
+    "category": "Buff",
+    "attackType": "",
+    "cd": 4.0,
+    "costMp": 25,
+    "maxLevel": 10,
+    "range": 0
+  },
+  "90131": {
+    "name": "自然抵抗",
+    "category": "Passive",
+    "attackType": "",
+    "cd": 0,
+    "costMp": 0,
+    "maxLevel": 15,
+    "range": 0
+  },
+  "90129": {
+    "name": "法力光环",
+    "category": "Buff",
+    "attackType": "",
+    "cd": 3.5,
+    "costMp": 15,
+    "maxLevel": 10,
+    "range": 0
+  },
+  "90133": {
+    "name": "烈焰打击",
+    "category": "Damage",
+    "attackType": "FIRE_ATTACK",
+    "cd": 3.5,
+    "costMp": 22,
+    "maxLevel": 15,
+    "range": 5.0
+  },
+  "90134": {
+    "name": "元素掌握",
+    "category": "Passive",
+    "attackType": "",
+    "cd": 0,
+    "costMp": 0,
+    "maxLevel": 10,
+    "range": 0
+  },
+  "90135": {
+    "name": "冰霜新星",
+    "category": "Damage",
+    "attackType": "WATER_ATTACK",
+    "cd": 3.5,
+    "costMp": 28,
+    "maxLevel": 15,
+    "range": 0
+  },
+  "90136": {
+    "name": "寒冰噬骨",
+    "category": "Passive",
+    "attackType": "",
+    "cd": 0,
+    "costMp": 0,
+    "maxLevel": 10,
+    "range": 0
+  },
+  "90600": {
+    "name": "元素赐生",
+    "category": "Buff",
+    "attackType": "",
+    "cd": 3.5,
+    "costMp": 20,
+    "maxLevel": 10,
+    "range": 0
+  },
+  "90141": {
+    "name": "魔能冲击",
+    "category": "Damage",
+    "attackType": "DARK_ATTACK",
+    "cd": 3.5,
+    "costMp": 22,
+    "maxLevel": 15,
+    "range": 5.0
+  },
+  "90139": {
+    "name": "幻术掌握",
+    "category": "Passive",
+    "attackType": "",
+    "cd": 0,
+    "costMp": 0,
+    "maxLevel": 10,
+    "range": 0
+  },
+  "90601": {
+    "name": "相位转移",
+    "category": "Buff",
+    "attackType": "",
+    "cd": 3.5,
+    "costMp": 18,
+    "maxLevel": 7,
+    "range": 0
+  },
+  "90138": {
+    "name": "魔法幻象",
+    "category": "Buff",
+    "attackType": "",
+    "cd": 3.5,
+    "costMp": 16,
+    "maxLevel": 15,
+    "range": 0
+  },
+  "90140": {
+    "name": "魔法共鸣",
+    "category": "Passive",
+    "attackType": "",
+    "cd": 0,
+    "costMp": 0,
+    "maxLevel": 15,
+    "range": 0
+  },
+  "90313": {
+    "name": "暗影冲击",
+    "category": "Damage",
+    "attackType": "DARK_ATTACK",
+    "cd": 3.5,
+    "costMp": 15,
+    "maxLevel": 10,
+    "range": 5.0
+  },
+  "90314": {
+    "name": "虔诚意志",
+    "category": "Passive",
+    "attackType": "",
+    "cd": 0,
+    "costMp": 0,
+    "maxLevel": 15,
+    "range": 0
+  },
+  "90315": {
+    "name": "腐蚀",
+    "category": "Damage",
+    "attackType": "DARK_ATTACK",
+    "cd": 3.5,
+    "costMp": 20,
+    "maxLevel": 10,
+    "range": 6.0
+  },
+  "90316": {
+    "name": "欺凌",
+    "category": "Passive",
+    "attackType": "",
+    "cd": 0,
+    "costMp": 0,
+    "maxLevel": 10,
+    "range": 0
+  },
+  "90317": {
+    "name": "血肉榨取",
+    "category": "Passive",
+    "attackType": "",
+    "cd": 0,
+    "costMp": 0,
+    "maxLevel": 10,
+    "range": 0
+  },
+  "90319": {
+    "name": "神之威慑",
+    "category": "Buff",
+    "attackType": "HOLY",
+    "cd": 3.5,
+    "costMp": 18,
+    "maxLevel": 10,
+    "range": 0
+  },
+  "90321": {
+    "name": "暗影灼烧",
+    "category": "Damage",
+    "attackType": "DARK_ATTACK",
+    "cd": 3.0,
+    "costMp": 22,
+    "maxLevel": 10,
+    "range": 5.0
+  },
+  "90320": {
+    "name": "治疗之泉",
+    "category": "Buff",
+    "attackType": "HOLY",
+    "cd": 3.5,
+    "costMp": 25,
+    "maxLevel": 10,
+    "range": 0
+  },
+  "90318": {
+    "name": "神之光铸",
+    "category": "Passive",
+    "attackType": "",
+    "cd": 0,
+    "costMp": 0,
+    "maxLevel": 15,
+    "range": 0
+  },
+  "90322": {
+    "name": "圣光降临",
+    "category": "Buff",
+    "attackType": "HOLY",
+    "cd": 3.5,
+    "costMp": 20,
+    "maxLevel": 10,
+    "range": 0
+  },
+  "90323": {
+    "name": "神怒",
+    "category": "Buff",
+    "attackType": "HOLY",
+    "cd": 4.0,
+    "costMp": 30,
+    "maxLevel": 10,
+    "range": 0
+  },
+  "90602": {
+    "name": "神罚",
+    "category": "Passive",
+    "attackType": "",
+    "cd": 0,
+    "costMp": 0,
+    "maxLevel": 10,
+    "range": 0
+  }
+}

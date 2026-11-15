@@ -1,0 +1,1516 @@
+{
+ "toplam": {
+  "form": 95,
+  "data": 14201,
+  "img8": 3515,
+  "text": 104,
+  "img16": 3,
+  "HATA": 1,
+  "pal": 997,
+  "blob": 58,
+  "pcm": 42
+ },
+ "dosyalar": {
+  "AnbufenUI": {
+   "form": 4,
+   "data": 1
+  },
+  "AnbufenUI_1": {
+   "form": 16,
+   "data": 1
+  },
+  "AnbufenUI_1_Resource": {
+   "img8": 40,
+   "data": 1
+  },
+  "AnbufenUI_1_Script": {
+   "text": 18,
+   "data": 1
+  },
+  "AnbufenUI_2": {
+   "form": 32,
+   "data": 1
+  },
+  "AnbufenUI_2_Resource": {
+   "img8": 60,
+   "data": 1
+  },
+  "AnbufenUI_2_Script": {
+   "text": 34,
+   "data": 1
+  },
+  "AnbufenUI_3": {
+   "form": 43,
+   "data": 1
+  },
+  "AnbufenUI_3_Resource": {
+   "img8": 75,
+   "data": 1
+  },
+  "AnbufenUI_3_Script": {
+   "text": 45,
+   "data": 1
+  },
+  "AnbufenUI_Resource": {
+   "img8": 161,
+   "data": 1
+  },
+  "AnbufenUI_Script": {
+   "text": 6,
+   "data": 1
+  },
+  "Encampment": {
+   "img8": 2,
+   "data": 1
+  },
+  "Portrait": {
+   "img8": 36,
+   "data": 1
+  },
+  "ProfileFrame": {
+   "img8": 10
+  },
+  "UIData": {
+   "img8": 87,
+   "data": 2,
+   "img16": 1
+  },
+  "UIDataCmcc": {
+   "img8": 5,
+   "data": 2
+  },
+  "UIData_iphone": {
+   "img8": 97,
+   "img16": 2,
+   "data": 1
+  },
+  "UIData_iphone1": {
+   "img8": 168,
+   "HATA": 1
+  },
+  "all_arena": {
+   "data": 2
+  },
+  "all_battle": {
+   "data": 55
+  },
+  "all_broadCast": {
+   "data": 88
+  },
+  "all_business": {
+   "data": 49
+  },
+  "all_citybattle": {
+   "data": 2
+  },
+  "all_combine": {
+   "data": 73
+  },
+  "all_extprop": {
+   "data": 27
+  },
+  "all_formula": {
+   "data": 287
+  },
+  "all_help": {
+   "data": 27
+  },
+  "all_instance": {
+   "data": 87
+  },
+  "all_monsterAI": {
+   "data": 43
+  },
+  "all_property": {
+   "data": 4459
+  },
+  "all_split": {
+   "data": 7
+  },
+  "all_success": {
+   "data": 820
+  },
+  "all_suit": {
+   "data": 73
+  },
+  "all_task": {
+   "data": 3598
+  },
+  "all_union": {
+   "data": 3
+  },
+  "all_unionBattle": {
+   "data": 2
+  },
+  "ani_comm_pal": {
+   "pal": 47,
+   "data": 2
+  },
+  "ani_horse_lv0": {
+   "pal": 4,
+   "img8": 1,
+   "data": 2
+  },
+  "ani_horse_lv1": {
+   "pal": 4,
+   "img8": 5,
+   "data": 5
+  },
+  "ani_horse_lv2": {
+   "pal": 4,
+   "img8": 1,
+   "data": 2
+  },
+  "ani_horse_lv3": {
+   "img8": 4,
+   "data": 5,
+   "pal": 1
+  },
+  "ani_kni_body_lv1": {
+   "img8": 24,
+   "pal": 13,
+   "data": 1
+  },
+  "ani_kni_body_lv2": {
+   "img8": 8,
+   "pal": 12,
+   "data": 1
+  },
+  "ani_kni_body_lv3": {
+   "img8": 8,
+   "pal": 12,
+   "data": 1
+  },
+  "ani_kni_body_lv4": {
+   "img8": 8,
+   "pal": 12,
+   "data": 1
+  },
+  "ani_kni_head_lv1": {
+   "img8": 32,
+   "pal": 7,
+   "data": 1
+  },
+  "ani_kni_head_lv2": {
+   "img8": 16,
+   "pal": 6,
+   "data": 1
+  },
+  "ani_kni_head_lv3": {
+   "img8": 16,
+   "pal": 6,
+   "data": 1
+  },
+  "ani_kni_head_lv4": {
+   "img8": 16,
+   "pal": 6,
+   "data": 1
+  },
+  "ani_kni_orn1_lv1": {
+   "img8": 12,
+   "pal": 6
+  },
+  "ani_kni_weapon_lv1": {
+   "img8": 12,
+   "pal": 12,
+   "data": 1
+  },
+  "ani_kni_weapon_lv2": {
+   "img8": 4,
+   "pal": 12,
+   "data": 1
+  },
+  "ani_kni_weapon_lv3": {
+   "img8": 4,
+   "pal": 12,
+   "data": 1
+  },
+  "ani_kni_weapon_lv4": {
+   "img8": 4,
+   "pal": 12,
+   "data": 1
+  },
+  "ani_kni_weapon_lv5": {
+   "img8": 4,
+   "pal": 12,
+   "data": 1
+  },
+  "ani_kni_weapon_lv6": {
+   "img8": 4,
+   "pal": 12,
+   "data": 1
+  },
+  "ani_kor_body_lv1": {
+   "img8": 24,
+   "pal": 7,
+   "data": 1
+  },
+  "ani_kor_body_lv2": {
+   "img8": 8,
+   "pal": 6,
+   "data": 1
+  },
+  "ani_kor_body_lv3": {
+   "img8": 8,
+   "pal": 6,
+   "data": 1
+  },
+  "ani_kor_body_lv4": {
+   "img8": 8,
+   "pal": 6,
+   "data": 1
+  },
+  "ani_kor_head_lv1": {
+   "img8": 32,
+   "pal": 7,
+   "data": 1
+  },
+  "ani_kor_head_lv2": {
+   "img8": 16,
+   "pal": 6,
+   "data": 1
+  },
+  "ani_kor_head_lv3": {
+   "img8": 16,
+   "pal": 6,
+   "data": 1
+  },
+  "ani_kor_head_lv4": {
+   "img8": 16,
+   "pal": 6,
+   "data": 1
+  },
+  "ani_kor_orn1_lv1": {
+   "img8": 12,
+   "pal": 6
+  },
+  "ani_kor_weapon_lv1": {
+   "img8": 4,
+   "pal": 12,
+   "data": 1
+  },
+  "ani_kor_weapon_lv2": {
+   "img8": 4,
+   "pal": 12,
+   "data": 1
+  },
+  "ani_kor_weapon_lv3": {
+   "img8": 4,
+   "pal": 12,
+   "data": 1
+  },
+  "ani_kor_weapon_lv4": {
+   "img8": 4,
+   "pal": 12,
+   "data": 1
+  },
+  "ani_kor_weapon_lv5": {
+   "img8": 4,
+   "pal": 12,
+   "data": 1
+  },
+  "ani_kor_weapon_lv6": {
+   "img8": 4,
+   "pal": 12,
+   "data": 1
+  },
+  "ani_new_orn1": {
+   "img8": 8,
+   "data": 1
+  },
+  "ani_new_orn2": {
+   "pal": 6,
+   "img8": 1,
+   "data": 1
+  },
+  "ani_pas_body_lv1": {
+   "img8": 32,
+   "pal": 1,
+   "data": 1
+  },
+  "ani_pas_body_lv2": {
+   "img8": 16,
+   "data": 1
+  },
+  "ani_pas_body_lv3": {
+   "img8": 16,
+   "data": 1
+  },
+  "ani_pas_body_lv4": {
+   "img8": 16,
+   "data": 1
+  },
+  "ani_pas_head_lv1": {
+   "img8": 32,
+   "pal": 1,
+   "data": 1
+  },
+  "ani_pas_head_lv2": {
+   "img8": 16,
+   "data": 1
+  },
+  "ani_pas_head_lv3": {
+   "img8": 16,
+   "data": 1
+  },
+  "ani_pas_head_lv4": {
+   "img8": 16,
+   "data": 1
+  },
+  "ani_pas_weapon_lv1": {
+   "img8": 16,
+   "data": 1
+  },
+  "ani_pas_weapon_lv2": {
+   "img8": 8,
+   "data": 1
+  },
+  "ani_pas_weapon_lv3": {
+   "img8": 8,
+   "data": 1
+  },
+  "ani_pas_weapon_lv4": {
+   "img8": 8,
+   "data": 1
+  },
+  "ani_pas_weapon_lv5": {
+   "img8": 16,
+   "data": 1
+  },
+  "ani_pas_weapon_lv6": {
+   "img8": 8,
+   "data": 1
+  },
+  "ani_pas_weapon_lv7": {
+   "img8": 8,
+   "data": 1
+  },
+  "ani_pas_weapon_lv8": {
+   "img8": 8,
+   "data": 1
+  },
+  "birdman": {
+   "data": 2
+  },
+  "channel_res": {
+   "data": 2
+  },
+  "config": {
+   "blob": 29
+  },
+  "effect_res": {
+   "img8": 7,
+   "data": 8
+  },
+  "effect_res2": {
+   "img8": 13,
+   "data": 17,
+   "pal": 1
+  },
+  "effect_res3": {
+   "img8": 16,
+   "data": 19,
+   "pal": 8
+  },
+  "effect_res4": {
+   "img8": 12,
+   "data": 9,
+   "pal": 1
+  },
+  "effect_res5": {
+   "img8": 9,
+   "data": 10
+  },
+  "effect_res6": {
+   "img8": 10,
+   "data": 11
+  },
+  "frame_ani": {
+   "data": 37
+  },
+  "icon_res": {
+   "data": 2,
+   "img8": 463
+  },
+  "icon_res_buff": {
+   "data": 2,
+   "img8": 144
+  },
+  "icon_res_equip": {
+   "data": 2,
+   "img8": 285
+  },
+  "icon_res_item": {
+   "data": 2,
+   "img8": 277
+  },
+  "icon_res_monster": {
+   "data": 2,
+   "img8": 101
+  },
+  "icon_res_npc": {
+   "data": 2,
+   "img8": 148
+  },
+  "icon_res_skill": {
+   "data": 2,
+   "img8": 152
+  },
+  "map_act_object_ashes": {
+   "img8": 2,
+   "data": 3
+  },
+  "map_act_object_cocoon": {
+   "img8": 3,
+   "data": 4
+  },
+  "map_act_object_grass": {
+   "img8": 3,
+   "data": 4
+  },
+  "map_act_object_model": {
+   "img8": 1,
+   "data": 2
+  },
+  "map_act_object_ore": {
+   "img8": 4,
+   "data": 5
+  },
+  "map_file": {
+   "data": 162
+  },
+  "map_ground_axecity": {
+   "img8": 1,
+   "pal": 1,
+   "data": 1
+  },
+  "map_ground_benmahaian": {
+   "img8": 1,
+   "data": 1
+  },
+  "map_ground_capital_floor": {
+   "img8": 1,
+   "data": 1
+  },
+  "map_ground_capital_square": {
+   "img8": 1,
+   "data": 2
+  },
+  "map_ground_carpet": {
+   "img8": 1,
+   "data": 2
+  },
+  "map_ground_church": {
+   "img8": 2,
+   "data": 1
+  },
+  "map_ground_diduzhoubian": {
+   "img8": 1,
+   "data": 1
+  },
+  "map_ground_dreamhill": {
+   "img8": 1,
+   "pal": 1,
+   "data": 1
+  },
+  "map_ground_dreamsun": {
+   "img8": 6,
+   "data": 1
+  },
+  "map_ground_floor": {
+   "img8": 1,
+   "data": 1
+  },
+  "map_ground_floor_city": {
+   "img8": 3,
+   "pal": 1,
+   "data": 1
+  },
+  "map_ground_fogcity": {
+   "img8": 1,
+   "data": 1
+  },
+  "map_ground_forest": {
+   "pal": 9,
+   "img8": 3,
+   "data": 1
+  },
+  "map_ground_ghostforest": {
+   "img8": 2,
+   "data": 1
+  },
+  "map_ground_grass": {
+   "img8": 1,
+   "data": 1
+  },
+  "map_ground_hill": {
+   "img8": 1,
+   "pal": 1,
+   "data": 1
+  },
+  "map_ground_hole": {
+   "img8": 1,
+   "pal": 1,
+   "data": 1
+  },
+  "map_ground_horserun_floor": {
+   "img8": 5,
+   "data": 1
+  },
+  "map_ground_leadarrow": {
+   "img8": 3,
+   "data": 1
+  },
+  "map_ground_odorplain": {
+   "img8": 1,
+   "data": 1
+  },
+  "map_ground_palace": {
+   "img8": 1,
+   "data": 2
+  },
+  "map_ground_pebble": {
+   "img8": 1,
+   "data": 1
+  },
+  "map_ground_plain": {
+   "img8": 3,
+   "data": 1
+  },
+  "map_ground_prophets": {
+   "img8": 1,
+   "data": 1
+  },
+  "map_ground_sewer": {
+   "img8": 2,
+   "data": 1
+  },
+  "map_ground_soil": {
+   "img8": 1,
+   "data": 1
+  },
+  "map_ground_steppe": {
+   "img8": 1,
+   "pal": 1,
+   "data": 1
+  },
+  "map_ground_towerman": {
+   "img8": 1,
+   "data": 1
+  },
+  "map_ground_volcano": {
+   "img8": 2,
+   "data": 1
+  },
+  "map_ground_wharf": {
+   "img8": 3,
+   "data": 2
+  },
+  "map_ground_wilderness": {
+   "img8": 3,
+   "data": 1
+  },
+  "map_ground_yinanhaian": {
+   "img8": 1,
+   "data": 1
+  },
+  "map_ground_zhaoze": {
+   "img8": 2,
+   "data": 1
+  },
+  "map_object_altar": {
+   "img8": 2,
+   "data": 3
+  },
+  "map_object_bar": {
+   "img8": 1,
+   "data": 2
+  },
+  "map_object_battalion": {
+   "img8": 2,
+   "data": 3,
+   "pal": 1
+  },
+  "map_object_box": {
+   "data": 13,
+   "img8": 1
+  },
+  "map_object_cage": {
+   "data": 3,
+   "img8": 1
+  },
+  "map_object_camp": {
+   "img8": 6,
+   "data": 7
+  },
+  "map_object_capital_church": {
+   "img8": 1,
+   "data": 2
+  },
+  "map_object_capital_fair": {
+   "img8": 8,
+   "data": 9
+  },
+  "map_object_capital_otherbuilding": {
+   "img8": 4,
+   "data": 5
+  },
+  "map_object_capital_otherbuilding2": {
+   "img8": 3,
+   "data": 4
+  },
+  "map_object_capital_palace": {
+   "img8": 1,
+   "data": 2
+  },
+  "map_object_capital_shop": {
+   "img8": 4,
+   "data": 5
+  },
+  "map_object_capital_square": {
+   "img8": 1,
+   "data": 2
+  },
+  "map_object_capital_statue": {
+   "data": 10,
+   "img8": 8
+  },
+  "map_object_capital_tree": {
+   "img8": 2,
+   "data": 3
+  },
+  "map_object_capital_wall": {
+   "img8": 1,
+   "data": 2
+  },
+  "map_object_door": {
+   "img8": 2,
+   "data": 3
+  },
+  "map_object_dreamforest_house": {
+   "img8": 2,
+   "data": 3
+  },
+  "map_object_dreamforest_other": {
+   "img8": 3,
+   "data": 4
+  },
+  "map_object_dreamforest_otherbuilding": {
+   "img8": 2,
+   "data": 3
+  },
+  "map_object_dreamforest_shed": {
+   "img8": 3,
+   "data": 4
+  },
+  "map_object_dreamforest_shop": {
+   "img8": 2,
+   "data": 3
+  },
+  "map_object_dreamhill_house": {
+   "img8": 2,
+   "data": 3,
+   "pal": 2
+  },
+  "map_object_dreamhill_other": {
+   "data": 12,
+   "img8": 3,
+   "pal": 3
+  },
+  "map_object_dreamhill_otherbuilding": {
+   "img8": 4,
+   "data": 5,
+   "pal": 4
+  },
+  "map_object_dreamhill_shop": {
+   "img8": 2,
+   "data": 3,
+   "pal": 2
+  },
+  "map_object_evilhall": {
+   "img8": 2,
+   "data": 3
+  },
+  "map_object_evilplain": {
+   "data": 19,
+   "img8": 3,
+   "pal": 1
+  },
+  "map_object_fittings": {
+   "data": 20,
+   "img8": 8
+  },
+  "map_object_fittings2": {
+   "img8": 3,
+   "data": 4
+  },
+  "map_object_fittings3": {
+   "img8": 2,
+   "data": 3
+  },
+  "map_object_fittings4": {
+   "data": 9,
+   "img8": 4
+  },
+  "map_object_flag": {
+   "data": 5,
+   "img8": 2
+  },
+  "map_object_fogcity_house": {
+   "img8": 3,
+   "data": 4
+  },
+  "map_object_fogcity_other": {
+   "img8": 3,
+   "data": 4
+  },
+  "map_object_fogcity_wall": {
+   "img8": 3,
+   "data": 4
+  },
+  "map_object_forest_tree_1": {
+   "pal": 3,
+   "img8": 1,
+   "data": 2
+  },
+  "map_object_forest_tree_2": {
+   "pal": 3,
+   "img8": 1,
+   "data": 2
+  },
+  "map_object_gate": {
+   "img8": 1,
+   "data": 2
+  },
+  "map_object_hill_other_1": {
+   "img8": 2,
+   "data": 3
+  },
+  "map_object_hill_other_2": {
+   "img8": 2,
+   "data": 3
+  },
+  "map_object_hill_other_3": {
+   "img8": 2,
+   "data": 3
+  },
+  "map_object_hill_other_4": {
+   "img8": 1,
+   "data": 2
+  },
+  "map_object_hill_wall": {
+   "pal": 2,
+   "img8": 1,
+   "data": 2
+  },
+  "map_object_hole_other": {
+   "img8": 2,
+   "data": 3,
+   "pal": 1
+  },
+  "map_object_hole_wall": {
+   "img8": 1,
+   "data": 2,
+   "pal": 1
+  },
+  "map_object_horserun_house": {
+   "img8": 3,
+   "data": 4
+  },
+  "map_object_horserun_other": {
+   "img8": 2,
+   "data": 3
+  },
+  "map_object_horserun_otherbuilding": {
+   "img8": 3,
+   "data": 4
+  },
+  "map_object_horserun_shop": {
+   "img8": 2,
+   "data": 3
+  },
+  "map_object_horserun_wall": {
+   "img8": 2,
+   "data": 3
+  },
+  "map_object_jar": {
+   "data": 12,
+   "img8": 3
+  },
+  "map_object_ladder": {
+   "img8": 1,
+   "data": 2
+  },
+  "map_object_magic_array": {
+   "data": 11,
+   "img8": 1
+  },
+  "map_object_new_ornament1": {
+   "img8": 3,
+   "data": 4
+  },
+  "map_object_new_ornament10": {
+   "img8": 4,
+   "data": 5
+  },
+  "map_object_new_ornament11": {
+   "img8": 1,
+   "data": 2
+  },
+  "map_object_new_ornament2": {
+   "data": 10,
+   "img8": 8
+  },
+  "map_object_new_ornament3": {
+   "img8": 6,
+   "data": 7
+  },
+  "map_object_new_ornament4": {
+   "img8": 4,
+   "data": 5
+  },
+  "map_object_new_ornament5": {
+   "img8": 2,
+   "data": 3
+  },
+  "map_object_new_ornament6": {
+   "img8": 3,
+   "data": 4
+  },
+  "map_object_new_ornament7": {
+   "img8": 3,
+   "data": 4
+  },
+  "map_object_new_ornament8": {
+   "img8": 4,
+   "data": 5
+  },
+  "map_object_new_ornament9": {
+   "img8": 3,
+   "data": 4
+  },
+  "map_object_other": {
+   "img8": 4,
+   "data": 5
+  },
+  "map_object_plant": {
+   "img8": 1,
+   "data": 2
+  },
+  "map_object_pool": {
+   "img8": 1,
+   "data": 2
+  },
+  "map_object_pumpkin": {
+   "data": 14,
+   "img8": 1
+  },
+  "map_object_sewer": {
+   "img8": 3,
+   "data": 4
+  },
+  "map_object_statue": {
+   "img8": 3,
+   "data": 4,
+   "pal": 1
+  },
+  "map_object_steppe_other": {
+   "img8": 3,
+   "data": 4,
+   "pal": 3
+  },
+  "map_object_stone": {
+   "img8": 2,
+   "data": 3
+  },
+  "map_object_sun_other": {
+   "img8": 4,
+   "data": 5
+  },
+  "map_object_temple": {
+   "img8": 3,
+   "data": 4
+  },
+  "map_object_tree_city": {
+   "pal": 2,
+   "img8": 1,
+   "data": 2
+  },
+  "map_object_vehicles": {
+   "data": 3,
+   "img8": 1
+  },
+  "map_object_wall": {
+   "img8": 3,
+   "data": 4
+  },
+  "map_object_weapon": {
+   "data": 8,
+   "img8": 6
+  },
+  "map_object_well": {
+   "data": 3,
+   "img8": 1
+  },
+  "map_object_wreck": {
+   "data": 12,
+   "img8": 2
+  },
+  "mapfile_benmacaoyuan": {
+   "data": 7
+  },
+  "mapfile_boss": {
+   "data": 24
+  },
+  "mapfile_caoyuan": {
+   "data": 2
+  },
+  "mapfile_chengzhan": {
+   "data": 6
+  },
+  "mapfile_city": {
+   "data": 43
+  },
+  "mapfile_didu": {
+   "data": 7
+  },
+  "mapfile_emengpingyuan": {
+   "data": 7
+  },
+  "mapfile_fuben": {
+   "data": 197
+  },
+  "mapfile_guihuosenlin": {
+   "data": 19
+  },
+  "mapfile_heiansenlin": {
+   "data": 7
+  },
+  "mapfile_huangye": {
+   "data": 6
+  },
+  "mapfile_jingjichang": {
+   "data": 8
+  },
+  "mapfile_kuangdong": {
+   "data": 11
+  },
+  "mapfile_kuyeshanlu": {
+   "data": 14
+  },
+  "mapfile_liqingzhaoze": {
+   "data": 25
+  },
+  "mapfile_liutiefeixu": {
+   "data": 22
+  },
+  "mapfile_mengyanzhijing": {
+   "data": 33
+  },
+  "mapfile_mofahuayuan": {
+   "data": 2
+  },
+  "mapfile_mofaxueyuan": {
+   "data": 4
+  },
+  "mapfile_nuyanshan": {
+   "data": 17
+  },
+  "mapfile_rongyanzhidi": {
+   "data": 8
+  },
+  "mapfile_senlin": {
+   "data": 6
+  },
+  "mapfile_wangrichengzhoubian": {
+   "data": 5
+  },
+  "mapfile_xiachengqu": {
+   "data": 9
+  },
+  "mapfile_xiashuidao": {
+   "data": 12
+  },
+  "mapfile_xiejiaojidi": {
+   "data": 11
+  },
+  "mapfile_xueshan": {
+   "data": 13
+  },
+  "mapfile_xueyuan": {
+   "data": 9
+  },
+  "mapfile_yingxionglingqin": {
+   "data": 9
+  },
+  "mapfile_yinyingcheng": {
+   "data": 15
+  },
+  "mapfile_yinyingzhanchang": {
+   "data": 7
+  },
+  "mapfile_yishujiagonghui": {
+   "data": 11
+  },
+  "mapfile_zhanchang": {
+   "data": 21
+  },
+  "monster1": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster10": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster11": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster12": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster13": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster14": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster15": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster16": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster17": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster18": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster19": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster2": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster20": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster21": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster22": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster23": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster24": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster25": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster26": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster27": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster28": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster29": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster3": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster30": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster31": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster32": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster33": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster34": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster35": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster36": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster37": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster38": {
+   "pal": 9,
+   "img8": 1,
+   "data": 2
+  },
+  "monster39": {
+   "pal": 2,
+   "img8": 1,
+   "data": 2
+  },
+  "monster4": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster40": {
+   "img8": 1,
+   "data": 2
+  },
+  "monster41": {
+   "img8": 1,
+   "data": 2
+  },
+  "monster42": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster43": {
+   "pal": 7,
+   "img8": 1,
+   "data": 2
+  },
+  "monster44": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster45": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster46": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster47": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster48": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster49": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster5": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster50": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster51": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster52": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster53": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster54": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster55": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster56": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster57": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster58": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster59": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster6": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster60": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster61": {
+   "img8": 2,
+   "pal": 8,
+   "data": 2
+  },
+  "monster62": {
+   "img8": 2,
+   "data": 3
+  },
+  "monster63": {
+   "img8": 1,
+   "data": 2
+  },
+  "monster64": {
+   "pal": 8,
+   "img8": 2,
+   "data": 3
+  },
+  "monster65": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster66": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster67": {
+   "pal": 8,
+   "img8": 2,
+   "data": 2
+  },
+  "monster68": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster69": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster7": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster70": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster71": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster72": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster73": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster74": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster75": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster76": {
+   "img8": 1,
+   "data": 2
+  },
+  "monster77": {
+   "img8": 1,
+   "data": 2
+  },
+  "monster78": {
+   "img8": 1,
+   "data": 2
+  },
+  "monster79": {
+   "pal": 2,
+   "img8": 1,
+   "data": 2
+  },
+  "monster8": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster80": {
+   "data": 7,
+   "img8": 3
+  },
+  "monster81": {
+   "img8": 6,
+   "data": 6,
+   "pal": 13
+  },
+  "monster9": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "music_res": {
+   "data": 2,
+   "pcm": 12
+  },
+  "npc_res": {
+   "img8": 33,
+   "pal": 5,
+   "data": 2
+  },
+  "npc_res_2": {
+   "img8": 49,
+   "pal": 5,
+   "data": 2
+  },
+  "npc_res_3": {
+   "img8": 53,
+   "pal": 6,
+   "data": 16
+  },
+  "npc_sign": {
+   "img8": 24,
+   "data": 22
+  },
+  "panda": {
+   "data": 2
+  },
+  "pet_res": {
+   "data": 7,
+   "img8": 3,
+   "pal": 2
+  },
+  "platform_info": {
+   "data": 2
+  },
+  "snd_res": {
+   "data": 2,
+   "pcm": 30
+  },
+  "string_res": {
+   "data": 1817,
+   "text": 1
+  },
+  "svr_string_res": {
+   "data": 1037
+  },
+  "服务器config": {
+   "blob": 29
+  }
+ },
+ "hatalar": [
+  [
+   "UIData_iphone1",
+   2035,
+   "img8: eksik piksel"
+  ],
+  [
+   "effect_data",
+   "dosya",
+   "/tmp/claude-0/sp/apk/x/assets/Resources/effect_data.godat"
+  ]
+ ]
+}

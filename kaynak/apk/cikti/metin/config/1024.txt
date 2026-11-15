@@ -1,0 +1,114 @@
+{
+  "header": "sy2dr2.6",
+  "total": 4,
+  "pets": [
+    {
+      "id": 300001,
+      "name": "物理攻击型",
+      "subtype_map": 2,
+      "base_phys_atk": 1040,
+      "base_def": 400,
+      "base_mag_atk": 240,
+      "hp_growth": 6400,
+      "mp_growth": 4000,
+      "hit_growth": 480,
+      "dodge": 120,
+      "fixed_skill": 90014,
+      "evolutions": [
+        { "stage": 1, "attr_multiplier": 1.00, "item_cost": 0 },
+        { "stage": 2, "attr_multiplier": 1.10, "item_cost": 200 },
+        { "stage": 3, "attr_multiplier": 1.25, "item_cost": 400 },
+        { "stage": 4, "attr_multiplier": 1.45, "item_cost": 600 },
+        { "stage": 5, "attr_multiplier": 1.70, "item_cost": 800 },
+        { "stage": 6, "attr_multiplier": 2.00, "item_cost": 10000 },
+        { "stage": 7, "attr_multiplier": 2.50, "item_cost": 20000 }
+      ],
+      "skill_pool": {
+        "active": [90014, 90024, 90025, 90035, 90720, 90722, 90723, 90724, 90725, 90726, 90727, 90728],
+        "passive": [90023, 90053, 90054, 90027, 90738],
+        "aura": [90058, 90061, 90741, 90064, 90077]
+      }
+    },
+    {
+      "id": 300005,
+      "name": "魔法攻击型",
+      "subtype_map": 4,
+      "base_phys_atk": 240,
+      "base_def": 400,
+      "base_mag_atk": 1040,
+      "hp_growth": 4000,
+      "mp_growth": 6400,
+      "hit_growth": 480,
+      "dodge": 120,
+      "fixed_skill": 90036,
+      "evolutions": [
+        { "stage": 1, "attr_multiplier": 1.00, "item_cost": 0 },
+        { "stage": 2, "attr_multiplier": 1.10, "item_cost": 200 },
+        { "stage": 3, "attr_multiplier": 1.25, "item_cost": 400 },
+        { "stage": 4, "attr_multiplier": 1.45, "item_cost": 600 },
+        { "stage": 5, "attr_multiplier": 1.70, "item_cost": 800 },
+        { "stage": 6, "attr_multiplier": 2.00, "item_cost": 10000 },
+        { "stage": 7, "attr_multiplier": 2.50, "item_cost": 20000 }
+      ],
+      "skill_pool": {
+        "active": [90036, 90038, 90039, 90729, 90730, 90731, 90732, 90733, 90734, 90735, 90736, 90737],
+        "passive": [90037, 90051, 90052, 90027, 90738],
+        "aura": [90058, 90061, 90741, 90074, 90068, 90071, 90747, 90750]
+      }
+    },
+    {
+      "id": 300006,
+      "name": "防御型",
+      "subtype_map": 3,
+      "base_phys_atk": 550,
+      "base_def": 550,
+      "base_mag_atk": 550,
+      "hp_growth": 7000,
+      "mp_growth": 3200,
+      "hit_growth": 420,
+      "dodge": 160,
+      "fixed_skill": 90027,
+      "evolutions": [
+        { "stage": 1, "attr_multiplier": 1.00, "item_cost": 0 },
+        { "stage": 2, "attr_multiplier": 1.10, "item_cost": 200 },
+        { "stage": 3, "attr_multiplier": 1.25, "item_cost": 400 },
+        { "stage": 4, "attr_multiplier": 1.45, "item_cost": 600 },
+        { "stage": 5, "attr_multiplier": 1.70, "item_cost": 800 },
+        { "stage": 6, "attr_multiplier": 2.00, "item_cost": 10000 },
+        { "stage": 7, "attr_multiplier": 2.50, "item_cost": 20000 }
+      ],
+      "skill_pool": {
+        "active": [90014, 90024, 90036, 90038],
+        "passive": [90023, 90037, 90027, 90055, 90056, 90738, 90739, 90740],
+        "aura": [90061, 90062, 90063, 90741, 90742, 90743, 90064, 90065, 90066, 90744, 90745, 90746, 90068, 90071, 90747, 90750, 90074, 90077]
+      }
+    },
+    {
+      "id": 300007,
+      "name": "辅助型",
+      "subtype_map": 1,
+      "base_phys_atk": 550,
+      "base_def": 300,
+      "base_mag_atk": 550,
+      "hp_growth": 4500,
+      "mp_growth": 6800,
+      "hit_growth": 420,
+      "dodge": 300,
+      "fixed_skill": 90041,
+      "evolutions": [
+        { "stage": 1, "attr_multiplier": 1.00, "item_cost": 0 },
+        { "stage": 2, "attr_multiplier": 1.10, "item_cost": 200 },
+        { "stage": 3, "attr_multiplier": 1.25, "item_cost": 400 },
+        { "stage": 4, "attr_multiplier": 1.45, "item_cost": 600 },
+        { "stage": 5, "attr_multiplier": 1.70, "item_cost": 800 },
+        { "stage": 6, "attr_multiplier": 2.00, "item_cost": 10000 },
+        { "stage": 7, "attr_multiplier": 2.50, "item_cost": 20000 }
+      ],
+      "skill_pool": {
+        "active": [90041, 90049, 90057],
+        "passive": [90058, 90059, 90060, 90741, 90742, 90743, 90744, 90745, 90746, 90747, 90748, 90749, 90750, 90751, 90752],
+        "aura": [90061, 90062, 90063, 90064, 90065, 90066, 90068, 90069, 90070, 90071, 90072, 90073, 90074, 90075, 90076, 90077, 90078, 90079]
+      }
+    }
+  ]
+}

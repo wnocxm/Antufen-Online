@@ -1,0 +1,474 @@
+{
+  "header": "sy2dr2.6",
+  "date": "2012/1/11-11:50:30",
+  "race_skills": [
+    {
+      "race_id": 1,
+      "race_name": "人类",
+      "tree_id": 2088455866,
+      "skills": [
+        {
+          "type": 2,
+          "type_name": "tier2",
+          "skill_id": 90083
+        },
+        {
+          "type": 2,
+          "type_name": "tier2",
+          "skill_id": 90020
+        }
+      ]
+    },
+    {
+      "race_id": 2,
+      "race_name": "精灵",
+      "tree_id": 1886747838,
+      "skills": [
+        {
+          "type": 2,
+          "type_name": "tier2",
+          "skill_id": 90081
+        },
+        {
+          "type": 2,
+          "type_name": "tier2",
+          "skill_id": 90082
+        }
+      ]
+    }
+  ],
+  "class_skills": [
+    {
+      "index": 0,
+      "tree_id": 1314949569,
+      "skills": [
+        {
+          "type": 6,
+          "type_name": "root",
+          "skill_id": 90022
+        },
+        {
+          "type": 2,
+          "type_name": "tier2",
+          "skill_id": 90042
+        },
+        {
+          "type": 3,
+          "type_name": "tier3",
+          "skill_id": 90021
+        },
+        {
+          "type": 1,
+          "type_name": "tier4",
+          "skill_id": 90055
+        },
+        {
+          "type": 3,
+          "type_name": "tier3",
+          "skill_id": 90043
+        },
+        {
+          "type": 1,
+          "type_name": "tier4",
+          "skill_id": 90044
+        }
+      ]
+    },
+    {
+      "index": 1,
+      "tree_id": 1491821080,
+      "skills": [
+        {
+          "type": 6,
+          "type_name": "root",
+          "skill_id": 90040
+        },
+        {
+          "type": 2,
+          "type_name": "tier2",
+          "skill_id": 90104
+        },
+        {
+          "type": 3,
+          "type_name": "tier3",
+          "skill_id": 90105
+        },
+        {
+          "type": 1,
+          "type_name": "tier4",
+          "skill_id": 90096
+        },
+        {
+          "type": 3,
+          "type_name": "tier3",
+          "skill_id": 90084
+        },
+        {
+          "type": 1,
+          "type_name": "tier4",
+          "skill_id": 90106
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "tree_id": 2285917660,
+      "skills": [
+        {
+          "type": 6,
+          "type_name": "root",
+          "skill_id": 90107
+        },
+        {
+          "type": 2,
+          "type_name": "tier2",
+          "skill_id": 90113
+        },
+        {
+          "type": 3,
+          "type_name": "tier3",
+          "skill_id": 90115
+        },
+        {
+          "type": 1,
+          "type_name": "tier4",
+          "skill_id": 90598
+        },
+        {
+          "type": 3,
+          "type_name": "tier3",
+          "skill_id": 90119
+        },
+        {
+          "type": 1,
+          "type_name": "tier4",
+          "skill_id": 90117
+        }
+      ]
+    },
+    {
+      "index": 3,
+      "tree_id": 1723101890,
+      "skills": [
+        {
+          "type": 6,
+          "type_name": "root",
+          "skill_id": 90118
+        },
+        {
+          "type": 2,
+          "type_name": "tier2",
+          "skill_id": 90116
+        },
+        {
+          "type": 3,
+          "type_name": "tier3",
+          "skill_id": 90120
+        },
+        {
+          "type": 1,
+          "type_name": "tier4",
+          "skill_id": 90599
+        },
+        {
+          "type": 3,
+          "type_name": "tier3",
+          "skill_id": 90121
+        },
+        {
+          "type": 1,
+          "type_name": "tier4",
+          "skill_id": 90122
+        }
+      ]
+    },
+    {
+      "index": 4,
+      "tree_id": 1603427174,
+      "skills": [
+        {
+          "type": 6,
+          "type_name": "root",
+          "skill_id": 90124
+        },
+        {
+          "type": 2,
+          "type_name": "tier2",
+          "skill_id": 90125
+        },
+        {
+          "type": 3,
+          "type_name": "tier3",
+          "skill_id": 90126
+        },
+        {
+          "type": 1,
+          "type_name": "tier4",
+          "skill_id": 90123
+        },
+        {
+          "type": 3,
+          "type_name": "tier3",
+          "skill_id": 90097
+        },
+        {
+          "type": 1,
+          "type_name": "tier4",
+          "skill_id": 90127
+        }
+      ]
+    },
+    {
+      "index": 5,
+      "tree_id": 1577610453,
+      "skills": [
+        {
+          "type": 6,
+          "type_name": "root",
+          "skill_id": 90130
+        },
+        {
+          "type": 2,
+          "type_name": "tier2",
+          "skill_id": 90131
+        },
+        {
+          "type": 3,
+          "type_name": "tier3",
+          "skill_id": 90129
+        },
+        {
+          "type": 1,
+          "type_name": "tier4",
+          "skill_id": 90128
+        },
+        {
+          "type": 3,
+          "type_name": "tier3",
+          "skill_id": 90098
+        },
+        {
+          "type": 1,
+          "type_name": "tier4",
+          "skill_id": 90132
+        }
+      ]
+    },
+    {
+      "index": 6,
+      "tree_id": 2099269955,
+      "skills": [
+        {
+          "type": 6,
+          "type_name": "root",
+          "skill_id": 90133
+        },
+        {
+          "type": 2,
+          "type_name": "tier2",
+          "skill_id": 90134
+        },
+        {
+          "type": 3,
+          "type_name": "tier3",
+          "skill_id": 90135
+        },
+        {
+          "type": 1,
+          "type_name": "tier4",
+          "skill_id": 90600
+        },
+        {
+          "type": 3,
+          "type_name": "tier3",
+          "skill_id": 90136
+        },
+        {
+          "type": 1,
+          "type_name": "tier4",
+          "skill_id": 90137
+        }
+      ]
+    },
+    {
+      "index": 7,
+      "tree_id": 1731156325,
+      "skills": [
+        {
+          "type": 6,
+          "type_name": "root",
+          "skill_id": 90141
+        },
+        {
+          "type": 2,
+          "type_name": "tier2",
+          "skill_id": 90140
+        },
+        {
+          "type": 3,
+          "type_name": "tier3",
+          "skill_id": 90138
+        },
+        {
+          "type": 1,
+          "type_name": "tier4",
+          "skill_id": 90601
+        },
+        {
+          "type": 3,
+          "type_name": "tier3",
+          "skill_id": 90139
+        },
+        {
+          "type": 1,
+          "type_name": "tier4",
+          "skill_id": 90312
+        }
+      ]
+    },
+    {
+      "index": 8,
+      "tree_id": 2124894749,
+      "skills": [
+        {
+          "type": 6,
+          "type_name": "root",
+          "skill_id": 90313
+        },
+        {
+          "type": 2,
+          "type_name": "tier2",
+          "skill_id": 90314
+        },
+        {
+          "type": 3,
+          "type_name": "tier3",
+          "skill_id": 90315
+        },
+        {
+          "type": 1,
+          "type_name": "tier4",
+          "skill_id": 90316
+        },
+        {
+          "type": 3,
+          "type_name": "tier3",
+          "skill_id": 90317
+        },
+        {
+          "type": 1,
+          "type_name": "tier4",
+          "skill_id": 90319
+        }
+      ]
+    },
+    {
+      "index": 9,
+      "tree_id": 1333754206,
+      "skills": [
+        {
+          "type": 6,
+          "type_name": "root",
+          "skill_id": 90320
+        },
+        {
+          "type": 2,
+          "type_name": "tier2",
+          "skill_id": 90318
+        },
+        {
+          "type": 3,
+          "type_name": "tier3",
+          "skill_id": 90321
+        },
+        {
+          "type": 1,
+          "type_name": "tier4",
+          "skill_id": 90322
+        },
+        {
+          "type": 3,
+          "type_name": "tier3",
+          "skill_id": 90602
+        },
+        {
+          "type": 1,
+          "type_name": "tier4",
+          "skill_id": 90323
+        }
+      ]
+    },
+    {
+      "index": 10,
+      "tree_id": 1461942622,
+      "skills": [
+        {
+          "type": 6,
+          "type_name": "root",
+          "skill_id": 90603
+        },
+        {
+          "type": 2,
+          "type_name": "tier2",
+          "skill_id": 90604
+        },
+        {
+          "type": 3,
+          "type_name": "tier3",
+          "skill_id": 90605
+        },
+        {
+          "type": 1,
+          "type_name": "tier4",
+          "skill_id": 90607
+        },
+        {
+          "type": 3,
+          "type_name": "tier3",
+          "skill_id": 90606
+        },
+        {
+          "type": 1,
+          "type_name": "tier4",
+          "skill_id": 90608
+        }
+      ]
+    },
+    {
+      "index": 11,
+      "tree_id": 1601267351,
+      "skills": [
+        {
+          "type": 6,
+          "type_name": "root",
+          "skill_id": 90609
+        },
+        {
+          "type": 2,
+          "type_name": "tier2",
+          "skill_id": 90610
+        },
+        {
+          "type": 3,
+          "type_name": "tier3",
+          "skill_id": 90611
+        },
+        {
+          "type": 1,
+          "type_name": "tier4",
+          "skill_id": 90613
+        },
+        {
+          "type": 3,
+          "type_name": "tier3",
+          "skill_id": 90612
+        },
+        {
+          "type": 1,
+          "type_name": "tier4",
+          "skill_id": 90144
+        }
+      ]
+    }
+  ]
+}
