@@ -5,6 +5,7 @@ const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;',
 const VH = 360;
 
 const UIIMG = {};
+function uiImg2(k) { const key = '2:' + k; if (UIIMG[key]) return UIIMG[key]; const im = new Image(); im.src = Assets.base + 'ui2/' + k + '.png'; UIIMG[key] = im; return im; }
 function uiImg(k) { if (UIIMG[k]) return UIIMG[k]; const im = new Image(); im.src = Assets.base + 'ui/' + k + '.png'; UIIMG[k] = im; return im; }
 const U = k => uiImg('AnbufenUI_Resource_' + k);
 
@@ -171,11 +172,22 @@ const UI = (() => {
       ctx.fillStyle = 'rgba(0,0,0,.8)'; ctx.fillRect(x + 6, y + 17, w - 12, 7); ctx.fillStyle = '#e02818'; ctx.fillRect(x + 7, y + 18, (w - 14) * clamp(t.hp / t.maxHp, 0, 1), 5);
       ctx.textAlign = 'center'; ctx.font = '7px "Noto Sans", sans-serif'; text(`${Math.max(0, Math.ceil(t.hp))}/${t.maxHp}`, vw / 2, y + 24, '#fff');
     }
-    // sağ üst: mini harita
-    drawMinimap(vw - 92, 4, 88, 66);
-    hud.push([vw - 92, 4, 88, 66, () => open('map')]);
-    ctx.textAlign = 'right'; ctx.font = 'bold 10px "Noto Sans", sans-serif'; text(trName(Game.scene.name), vw - 6, 82, '#ffe48a');
-    ctx.font = '9px "Noto Sans", sans-serif'; text(`(${Math.round(p.x)},${Math.round(p.y)})  ${P.gold} altın`, vw - 6, 94, '#ffd060');
+    // sağ üst: küçük harita (çerçeve ve yuvarlak düğmeler Android sürümünün görselleri)
+    { const mw = 92, mh = 86, mx = vw - mw - 3, my = 3;
+      drawMinimap(mx + 5, my + 5, mw - 10, mh - 10);
+      const fr = uiImg2('hud_frame'); if (fr.complete && fr.naturalWidth) { ctx.imageSmoothingEnabled = true; ctx.drawImage(fr, mx, my, mw, mh); ctx.imageSmoothingEnabled = false; }
+      ctx.textAlign = 'center'; ctx.font = 'bold 9.5px "Noto Sans", sans-serif'; text(trName(Game.scene.name), mx + mw / 2, my + 17, '#ff9a30');
+      ctx.font = '8.5px "Noto Sans", sans-serif'; text(`(${Math.round(p.x)}, ${Math.round(p.y)})`, mx + mw / 2, my + mh - 9, '#ffb060');
+      hud.push([mx, my, mw, mh, () => open('map')]);
+      // yuvarlak düğmeler: iki sütun, üç satır (orijinaldeki tek harfli düğmelerin karşılığı)
+      const B = [['Karakter', () => open('char')], ['Çanta', () => open('bag')], ['Beceri', () => open('skill')], ['Görev', () => open('quest')], ['Harita', () => open('map')], Net.on ? ['Sohbet', () => openChat()] : ['Ayarlar', () => open('sys')]];
+      const bi = uiImg2('hud_btn'), d = 34;
+      B.forEach(([name, fn], i) => { const cx = mx - 22 - (1 - i % 2) * 38, cy = 20 + Math.floor(i / 2) * 37;
+        if (bi.complete && bi.naturalWidth) { ctx.imageSmoothingEnabled = true; ctx.drawImage(bi, 48, 0, 48, 48, cx - d / 2, cy - d / 2, d, d); ctx.imageSmoothingEnabled = false; }
+        ctx.textAlign = 'center'; ctx.font = 'bold 17px "Noto Serif", serif'; ctx.lineJoin = 'round'; ctx.lineWidth = 3; ctx.strokeStyle = '#5a1c00'; const L = tx(name)[0].toLocaleUpperCase(LANG === 'tr' ? 'tr' : 'en');
+        ctx.strokeText(L, cx, cy + 6); const g = ctx.createLinearGradient(0, cy - 8, 0, cy + 7); g.addColorStop(0, '#fff6c0'); g.addColorStop(1, '#f0b040'); ctx.fillStyle = g; ctx.fillText(L, cx, cy + 6);
+        hud.push([cx - d / 2 - 1, cy - d / 2 - 1, d + 2, d + 2, fn]); });
+    }
     // görev takibi
     drawTracker();
     // sol alt: ejderha madalyonu = yürüme kolu (orijinal FORM_ROCKER, 134x134)
@@ -202,9 +214,6 @@ const UI = (() => {
     // hedef değiştir: yayın dışında küçük düğme
     { const tx0 = ax - 142 * HS, ty0 = ay + 22 * HS; ctx.fillStyle = 'rgba(12,8,5,.8)'; ctx.beginPath(); ctx.arc(tx0, ty0, 14, 0, 7); ctx.fill(); ctx.strokeStyle = '#b89a50'; ctx.lineWidth = 1.5; ctx.stroke();
       ctx.textAlign = 'center'; ctx.font = 'bold 13px serif'; text('◎', tx0, ty0 + 5, '#ffe48a'); hud.push([tx0 - 18, ty0 - 18, 36, 36, () => cycleTarget()]); }
-    // sohbet düğmesi: yalnızca çevrimiçi
-    if (Net.on) { const cx0 = rockerPos().x + 76 * HS + 16, cy0 = VH - 88; ctx.fillStyle = 'rgba(12,8,5,.8)'; ctx.beginPath(); ctx.arc(cx0, cy0, 14, 0, 7); ctx.fill(); ctx.strokeStyle = Net.live ? '#b89a50' : '#6a3020'; ctx.lineWidth = 1.5; ctx.stroke();
-      ctx.textAlign = 'center'; ctx.font = 'bold 9px "Noto Sans", sans-serif'; text(LANG === 'en' ? 'Chat' : 'Sohbet', cx0, cy0 + 3, Net.live ? '#ffe48a' : '#a08070'); hud.push([cx0 - 18, cy0 - 18, 36, 36, () => openChat()]); }
     // orta alt: yarı saydam mesaj kutusu (orijinaldeki gibi)
     { const now = performance.now(), L = logs.filter(l => now - l.t < 10000).slice(-5);
       if (L.length) {
@@ -253,7 +262,7 @@ const UI = (() => {
     ctx.drawImage(mmCache, x + w / 2 - cx, y + h / 2 - cy);
     for (const e of Game.ents) { if (e.dead || e.hidden) continue; const ex = x + w / 2 + (e.X * k - cx), ey = y + h / 2 + (e.Y * k - cy); ctx.fillStyle = e.kind === 'npc' ? (npcMark(e.cn) ? '#ffd23a' : '#60e070') : e.kind === 'mob' ? '#ff4030' : '#fff'; ctx.fillRect(ex - 1, ey - 1, e.kind === 'player' ? 3 : 2, e.kind === 'player' ? 3 : 2); }
     for (const r of map.regionsOf(1)) { const X = map.px((r[2] + r[4]) / 2, (r[3] + r[5]) / 2) * k, Y = map.py((r[2] + r[4]) / 2, (r[3] + r[5]) / 2) * k; ctx.fillStyle = '#b080ff'; ctx.fillRect(x + w / 2 + X - cx - 2, y + h / 2 + Y - cy - 2, 4, 4); }
-    ctx.restore(); ctx.strokeStyle = '#a88a48'; ctx.lineWidth = 2; ctx.strokeRect(x, y, w, h);
+    ctx.restore();
   }
   function drawTracker() {
     const P = Game.P; const act = QUESTS.filter(q => P.quests[q.id]).slice(0, 3);
@@ -339,7 +348,7 @@ const UI = (() => {
       title = 'Ayarlar';
       h = `<div class="iact"><button class="obtn" data-act="tsfx">Ses efektleri: ${SFX.opt.sfx ? 'Açık' : 'Kapalı'}</button><button class="obtn" data-act="tmus">Müzik: ${SFX.opt.music ? 'Açık' : 'Kapalı'}</button></div>
         <div class="iact"><button class="obtn" data-act="lang">${LANG === 'tr' ? 'Language: English' : 'Dil: Türkçe'}</button></div>
-        <div class="iact"><button class="obtn" data-act="totitle">Giriş ekranına dön</button><button class="obtn" data-act="newchar">Yeni karakter oluştur</button></div><p class="hint">Oyun otomatik kaydedilir. Sürüm 11151313</p>`;
+        <div class="iact"><button class="obtn" data-act="totitle">Giriş ekranına dön</button><button class="obtn" data-act="newchar">Yeni karakter oluştur</button></div><p class="hint">Oyun otomatik kaydedilir. Sürüm 11151314</p>`;
     }
     ptitle.textContent = tx(title); pbody.innerHTML = h; txDom(pbody);
   }
