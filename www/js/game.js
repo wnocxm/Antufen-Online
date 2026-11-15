@@ -283,9 +283,21 @@ class Npc extends Ent {
   }
   draw(ctx, X, Y) { if (this.hidden) return; if (this.sp && this.sp.ok) this.sp.draw(ctx, Math.min(this.anim, this.sp.anims.length - 1), this.t, X, Y); }
 }
+// Efekt dosyalarında 0. animasyon tek karelik duruş karesidir; asıl efekt sonraki animasyondadır.
+// Yöne bağlı efektlerde (kılıç izi, kan sıçraması) her yönün kendi animasyonu vardır: bakılan yöne göre seçilir.
+function fxAnim(sp, dir) {
+  if (!sp.ok) return 0; const L = sp.anims.map(a => a.length), cand = [];
+  L.forEach((n, i) => { if (n > 1) cand.push(i); });
+  if (!cand.length) { const i = L.findIndex(n => n > 0); return i < 0 ? 0 : i; }
+  return cand.length === 1 ? cand[0] : cand[((dir || 0) % cand.length + cand.length) % cand.length];
+}
 class Fx {
-  constructor(name, x, y, opt = {}) { this.sp = Game.map.sprite(name); this.x = x; this.y = y; this.t = 0; this.loop = opt.loop || 0; this.follow = opt.follow; this.z = opt.z || 0; this.len = this.sp.ok ? this.sp.animLen(0) : 0; this.done = !this.sp.ok; }
-  draw(ctx, X, Y) { if (this.sp.ok) this.sp.draw(ctx, 0, this.t, X, Y - this.z); }
+  constructor(name, x, y, opt = {}) {
+    this.sp = Game.map.sprite(name); this.x = x; this.y = y; this.t = 0; this.loop = opt.loop || 0; this.follow = opt.follow; this.z = opt.z || 0;
+    this.anim = opt.anim != null ? opt.anim : fxAnim(this.sp, opt.dir != null ? opt.dir : Game.player ? Game.player.dir : 0);
+    this.len = this.sp.ok ? this.sp.animLen(this.anim) : 0; this.done = !this.sp.ok || !this.len;
+  }
+  draw(ctx, X, Y) { if (this.sp.ok) this.sp.draw(ctx, this.anim, this.t, X, Y - this.z); }
 }
 
 // ---------------- Sahne yükleme ----------------
@@ -770,7 +782,7 @@ function tapWorld(sx, sy) {
   }
   const c = Game.map.toCell(W.x, W.y);
   const path = findPath(Game.map, p.x, p.y, c.x, c.y);
-  if (path) { Game.route = null; p.path = path; setTarget(null); Game.goTarget = null; Game.fx.push(Object.assign(new Fx('路标-左上', Math.round(c.x), Math.round(c.y)), { len: 6 })); }
+  if (path) { Game.route = null; p.path = path; setTarget(null); Game.goTarget = null; Game.fx.push(Object.assign(new Fx('路标-左上', Math.round(c.x), Math.round(c.y), { anim: 0 }), { len: 6 })); }
 }
 // hedef alınmış NPC ile konuş: yakınsa hemen, uzaksa yanına yürüyüp konuşur (hedef korunur)
 function talkTo(n) {
