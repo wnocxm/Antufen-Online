@@ -39,6 +39,13 @@ async function session(token) {
   const s = r.rows[0]; if (!s || s.banned) return null;
   return { accountId: Number(s.account_id), isAdmin: s.is_admin };
 }
+async function changePassword(username, oldPass, newPass) {
+  const r = await pool.query('SELECT id, pass_hash FROM accounts WHERE lower(username) = lower($1)', [username]);
+  const a = r.rows[0]; if (!a || !checkPass(oldPass, a.pass_hash)) return false;
+  await pool.query('UPDATE accounts SET pass_hash = $2 WHERE id = $1', [a.id, hashPass(newPass)]);
+  await pool.query('DELETE FROM sessions WHERE account_id = $1', [a.id]);   // eski oturumlar kapanır
+  return true;
+}
 async function logout(token) { await pool.query('DELETE FROM sessions WHERE token = $1', [token]); }
 
 // ---------------- karakter <-> tablolar ----------------
@@ -130,4 +137,4 @@ async function stats() {
   return { accounts: a.n, characters: c.n, chats, top };
 }
 
-module.exports = { pool, register, login, session, logout, listCharacters, createCharacter, saveCharacter, loadCharacter, deleteCharacter, logChat, stats, hashPass, checkPass };
+module.exports = { pool, register, login, changePassword, session, logout, listCharacters, createCharacter, saveCharacter, loadCharacter, deleteCharacter, logChat, stats, hashPass, checkPass };

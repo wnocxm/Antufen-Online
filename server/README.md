@@ -18,6 +18,7 @@ Hesaplar, karakter kayıtları, aynı haritadaki oyuncuları gösterme ve sohbet
 
 - `POST /api/register` `{username, password}` → `{token}`
 - `POST /api/login` `{username, password}` → `{token, characters}`
+- `POST /api/password` `{username, oldPassword, newPassword}`
 - `POST /api/logout`
 - `GET /api/characters`, `POST /api/characters` `{state}`
 - `GET`, `PUT` `{state}` ve `DELETE /api/characters/:id`

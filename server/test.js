@@ -22,8 +22,14 @@ server.listen(0, async () => {
     const a = await call('POST', '/api/register', { username: 't_a' + tag, password: 'gizli123' }); assert.equal(a.code, 200);
     assert.equal((await call('POST', '/api/register', { username: 'T_A' + tag, password: 'gizli123' })).code, 409, 'aynı ad büyük harfle tekrar alınamaz');
     assert.equal((await call('POST', '/api/login', { username: 't_a' + tag, password: 'yanlis' })).code, 401);
-    const la = await call('POST', '/api/login', { username: 't_a' + tag, password: 'gizli123' }); assert.equal(la.code, 200); const TA = la.j.token;
+    const la = await call('POST', '/api/login', { username: 't_a' + tag, password: 'gizli123' }); assert.equal(la.code, 200); let TA = la.j.token;
     assert.equal((await call('GET', '/api/characters')).code, 401, 'oturumsuz erişim yok');
+    // şifre değiştirme: eski şifre yanlışsa olmaz; değişince eski oturum kapanır
+    assert.equal((await call('POST', '/api/password', { username: 't_a' + tag, oldPassword: 'yanlis', newPassword: 'yeni12345' })).code, 401);
+    assert.equal((await call('POST', '/api/password', { username: 't_a' + tag, oldPassword: 'gizli123', newPassword: 'yeni12345' })).code, 200);
+    assert.equal((await call('GET', '/api/characters', null, TA)).code, 401, 'şifre değişince eski oturum geçersiz');
+    assert.equal((await call('POST', '/api/login', { username: 't_a' + tag, password: 'gizli123' })).code, 401);
+    TA = (await call('POST', '/api/login', { username: 't_a' + tag, password: 'yeni12345' })).j.token; assert.ok(TA);
     // karakter
     const P = { v: 1, sv: 2, name: 'Ali' + tag.slice(0, 4), cls: '战士', race: '人类', sex: 'male', lv: 1, xp: 0, gold: 30, hp: 1000, mp: 200,
       gear: { weap: 0 }, eq: {}, bag: [{ id: 'hp1', n: 5 }, { id: 'mp1', n: 3 }], quests: {}, done: {}, qitems: {}, scene: '120207', x: 3, y: 13,

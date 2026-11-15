@@ -88,6 +88,8 @@ const SFX = (() => {
   const songs = new Map(), mbufs = new Map();
   // oyun paketinde bulunan orijinal müzikler. Sahne tablosundaki diğer parçalar (karlı dağ, kutsal dağ, mağara...) orijinalde
   // sunucudan sonradan indiriliyordu; dosyalarda olmadıkları için o haritalarda kır müziği çalar.
+  // her mp3: 0,5 sn ön pay + parça + 0,5 sn son pay. Parça uzunluğu (sn) MIDI'den hesaplandı; bu aralık kesintisiz döner.
+  const LOOP = { 'akadiya_music.mid': 41.1428, 'alica_music.mid': 36.0, 'cover.mid': 43.5985, 'grassland.mid': 42.3529, 'sliva_music.mid': 38.4067, 'sunnyforrest_music.mid': 41.1428 };
   const HAVE = ['akadiya_music.mid', 'alica_music.mid', 'cover.mid', 'grassland.mid', 'sliva_music.mid', 'sunnyforrest_music.mid'];
   const Music = {
     cur: null, pending: null, song: null, t0: 0, idx: 0, timer: null, src: null,
@@ -100,7 +102,7 @@ const SFX = (() => {
       if (!mbufs.has(name)) mbufs.set(name, fetch(vq('assets/music/' + mp3)).then(r => { if (!r.ok) throw 0; return r.arrayBuffer(); }).then(b => new Promise((ok, bad) => ac.decodeAudioData(b, ok, bad))).catch(() => null));
       const buf = await mbufs.get(name); if (this.cur !== name || this.timer || this.src) return;
       musGain.gain.cancelScheduledValues(ac.currentTime); musGain.gain.setValueAtTime(0.0001, ac.currentTime); musGain.gain.linearRampToValueAtTime(0.55, ac.currentTime + 0.6);
-      if (buf) { const s = ac.createBufferSource(); s.buffer = buf; s.loop = true; s.connect(musGain); s.start(); this.src = s; return; }
+      if (buf) { const s = ac.createBufferSource(); s.buffer = buf; s.loop = true; s.loopStart = 0.5; s.loopEnd = 0.5 + LOOP[name]; s.connect(musGain); s.start(0, 0.5); this.src = s; return; }
       // yedek: basit sentezleyici
       if (!songs.has(name)) songs.set(name, fetch('assets/music/' + name).then(r => r.arrayBuffer()).then(parseMidi).catch(() => null));
       const so = await songs.get(name); if (!so || this.cur !== name || this.timer || this.src) return;

@@ -56,6 +56,12 @@ async function api(req, res, url) {
     if (s.err) return send(res, s.err === 'banned' ? 403 : 401, { err: s.err });
     return send(res, 200, { token: s.token, characters: await db.listCharacters(s.accountId) });
   }
+  if (p === '/api/password' && m === 'POST') {
+    if (limited(req, 'login', 20)) return send(res, 429, { err: 'slow' });
+    const { username, oldPassword, newPassword } = await body(req);
+    if (typeof newPassword !== 'string' || newPassword.length < 6 || newPassword.length > 100) return send(res, 400, { err: 'invalid' });
+    return (await db.changePassword(String(username || ''), String(oldPassword || ''), newPassword)) ? send(res, 200, { ok: true }) : send(res, 401, { err: 'bad' });
+  }
   const ses = await db.session(bearer(req));
   if (!ses) return send(res, 401, { err: 'auth' });
   if (p === '/api/logout' && m === 'POST') { await db.logout(bearer(req)); return send(res, 200, { ok: true }); }

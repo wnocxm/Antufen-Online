@@ -338,7 +338,7 @@ const UI = (() => {
       title = 'Ayarlar';
       h = `<div class="iact"><button class="obtn" data-act="tsfx">Ses efektleri: ${SFX.opt.sfx ? 'Açık' : 'Kapalı'}</button><button class="obtn" data-act="tmus">Müzik: ${SFX.opt.music ? 'Açık' : 'Kapalı'}</button></div>
         <div class="iact"><button class="obtn" data-act="lang">${LANG === 'tr' ? 'Language: English' : 'Dil: Türkçe'}</button></div>
-        <div class="iact"><button class="obtn" data-act="totitle">Giriş ekranına dön</button><button class="obtn" data-act="newchar">Yeni karakter oluştur</button></div><p class="hint">Oyun otomatik kaydedilir. Sürüm 11142350</p>`;
+        <div class="iact"><button class="obtn" data-act="totitle">Giriş ekranına dön</button><button class="obtn" data-act="newchar">Yeni karakter oluştur</button></div><p class="hint">Oyun otomatik kaydedilir. Sürüm 11150002</p>`;
     }
     ptitle.textContent = tx(title); pbody.innerHTML = h; txDom(pbody);
   }
@@ -445,30 +445,60 @@ const UI = (() => {
   $('#ctext').addEventListener('keydown', e => { if (e.key === 'Enter') sendChat(); else if (e.key === 'Escape') closeChat(); });
   function chatLine(name, m, mine) { logs.push({ m: `${name}: ${m}`, c: mine ? '#ffe48a' : '#8fd8ff', t: performance.now() }); if (logs.length > 30) logs.shift(); SFX.play('message', 0.4); }
 
-  // ---------- giriş ekranı listeleri (orijinal kapak formu: seçili satır çerçeveli, sol alt "Seç" tuşu) ----------
-  function coverScale() { const k = Math.min(innerHeight / 360, innerWidth / 360); document.documentElement.style.setProperty('--ck', k); }
+  // ---------- giriş ekranı: orijinal ana menü (logo, kitap, oklarla seçilen sözcük) ----------
+  function coverScale() { const k = innerHeight / 360; document.documentElement.style.setProperty('--ck', k); document.documentElement.style.setProperty('--cw', (innerWidth / k) + 'px'); }
   addEventListener('resize', coverScale); coverScale();
-  function menuSel(menu, btn) { menu.querySelectorAll('button').forEach(b => b.classList.toggle('on', b === btn)); }
-  function menuFirst(menu) { const b = [...menu.querySelectorAll('button')].find(x => !x.classList.contains('hidden')); menuSel(menu, b); }
-  for (const id of ['tmenu', 'olist']) $('#' + id).addEventListener('pointerdown', e => { const b = e.target.closest('button'); if (b) menuSel($('#' + id), b); });
-  $('#tok').onclick = () => { const b = $('#tmenu button.on') || $('#tmenu button:not(.hidden)'); if (b) b.click(); };
-  $('#ook').onclick = () => { if (!$('#ologin').classList.contains('hidden')) return doLogin(false); const b = $('#olist button.on') || $('#olist button'); if (b) b.click(); };
+  // kitap kareleri (UIData_2033 içindeki konumlar): kapalı, yarı açık, açık, sayfa çevirme, yazılı sayfalar
+  const BOOK = { closed: [0, 0, 147, 122], half: [147, 0, 148, 172], open: [0, 342, 236, 130], flipL: [0, 172, 236, 168], flipR: [236, 160, 234, 180],
+    p1: [236, 342, 234, 130], p2: [0, 472, 236, 135], p3: [236, 472, 234, 135], p4: [0, 607, 236, 138], p5: [236, 607, 234, 138] };
+  function bookFrame(k) { const [x, y, w, h] = BOOK[k], b = $('#tbook').style; b.width = w + 'px'; b.height = h + 'px'; b.marginLeft = -w / 2 + 'px'; b.top = 352 - h + 'px'; b.backgroundPosition = `${-x}px ${-y}px`; }
+  let tItems = [], tIdx = 0, tBusy = false, tSave = null, tSure = false;
+  function titleShow() { const it = tItems[tIdx]; $('#tword').textContent = tx(it.label); bookFrame(it.page); $('#tinfo').textContent = it.info ? it.info() : ''; }
+  function titleTurn(d) {
+    if (tBusy || mode === 'play') return; tBusy = true; tSure = false; SFX.play('skill_pageflip');
+    tIdx = (tIdx + d + tItems.length) % tItems.length; $('#tword').textContent = tx(tItems[tIdx].label); $('#tinfo').textContent = '';
+    bookFrame(d > 0 ? 'flipR' : 'flipL'); setTimeout(() => { tBusy = false; titleShow(); }, 170);
+  }
+  function titleGo() { if (!tBusy) tItems[tIdx].go(); }
+  function titleOpen(s) {
+    tSave = s; const T = $('#title');
+    tItems = [
+      s && { label: 'Devam Et', page: 'p1', info: () => `${s.name} · ${tx(TR.cls[s.cls])} · ${tx('Seviye')} ${s.lv}`, go() { T.classList.add('hidden'); Game.P = s; start(); } },
+      { label: 'Yeni Karakter', page: 'p2', info: () => tx('Bu telefona kaydedilir'), go() {
+        if (s && !tSure) { tSure = true; $('#tinfo').textContent = tx('Eski karakter silinecek. Onaylamak için tekrar dokun.'); return; }
+        localStorage.removeItem(SAVE_KEY); T.classList.add('hidden'); onlineCreate = false; showCreate(); } },
+      { label: 'Çevrimiçi', page: 'p3', info: () => tx('Sunucuda diğer oyuncularla'), go() { T.classList.add('hidden'); showOnline(); } },
+      { label: 'Dil', page: 'p4', info: () => LANG === 'tr' ? 'Türkçe → English' : 'English → Türkçe', go() { setLang(LANG === 'tr' ? 'en' : 'tr'); } },
+    ].filter(Boolean);
+    tIdx = 0; T.classList.remove('hidden'); SFX.Music.play('cover.mid');
+    // kitap açılır: kapalı → yarı açık → açık → ilk sayfa
+    tBusy = true; $('#tword').textContent = ''; $('#tinfo').textContent = ''; bookFrame('closed');
+    setTimeout(() => bookFrame('half'), 350); setTimeout(() => bookFrame('open'), 520); setTimeout(() => { tBusy = false; titleShow(); }, 700);
+  }
+  $('#tprev').onclick = () => titleTurn(-1); $('#tnext').onclick = () => titleTurn(1); $('#tbook').onclick = titleGo; $('#tword').onclick = titleGo;
+  addEventListener('keydown', e => { if ($('#title').classList.contains('hidden')) return; if (e.key === 'ArrowLeft') titleTurn(-1); else if (e.key === 'ArrowRight') titleTurn(1); else if (e.key === 'Enter') titleGo(); });
+  { let sx = null; const T = $('#title'); T.addEventListener('pointerdown', e => { sx = e.clientX; }); T.addEventListener('pointerup', e => { if (sx != null && Math.abs(e.clientX - sx) > 50) titleTurn(e.clientX < sx ? 1 : -1); sx = null; }); }
 
-  // ---------- çevrimiçi giriş ve karakter seçimi ----------
-  let onlineCreate = false, ochars = [];
+  // ---------- çevrimiçi giriş (Kullanıcı adı, Şifre, Kaydet, Giriş; altta Kayıt Ol / Değiştir / Geri) ve karakter seçimi ----------
+  let onlineCreate = false, ochars = [], oMode = 'login';
   const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   function omsg(t, ok) { const m = $('#omsg'); m.textContent = t ? tx(t) : ''; m.classList.toggle('ok', !!ok); }
+  const vis = (id, on) => $('#' + id).classList.toggle('hidden', !on);
   function showOnline() {
-    $('#online').classList.remove('hidden'); $('#ourl').value = Net.url; $('#ouser').value = Net.user; $('#opass').value = ''; omsg('');
+    $('#online').classList.remove('hidden'); $('#ourl').value = Net.url; $('#ouser').value = Net.user; $('#opass').value = ''; $('#osave').classList.toggle('on', Net.remember); omsg('');
     if (Net.token) listChars(); else showLogin();
   }
-  function showLogin() { $('#ologin').classList.remove('hidden'); $('#ochars').classList.add('hidden'); $('#otit').textContent = tx('Kullanıcı Girişi'); }
+  // mod: login (giriş) | change (şifre değiştir)
+  function showLogin(m = 'login') {
+    oMode = m; vis('ologin', true); vis('ochars', false); vis('onewrow', m === 'change'); vis('osave', m === 'login'); vis('osavel', m === 'login');
+    $('#opassl').textContent = tx(m === 'change' ? 'Eski şifre' : 'Şifre'); $('#ogo').textContent = tx(m === 'change' ? 'Değiştir' : 'Giriş');
+    vis('oreg', m === 'login'); vis('ochg', m === 'login'); vis('onew', false); vis('oout', false);
+  }
   async function listChars(list) {
     try { ochars = list || await Net.chars(); } catch (e) { omsg(Net.why(e)); showLogin(); return; }
-    $('#ologin').classList.add('hidden'); $('#ochars').classList.remove('hidden'); $('#otit').textContent = tx('Karakter Seç');
+    oMode = 'chars'; vis('ologin', false); vis('ochars', true); vis('oreg', false); vis('ochg', false); vis('onew', ochars.length < 4); vis('oout', true);
     $('#olist').innerHTML = ochars.length ? ochars.map(c => `<button class="ochar" data-c="${c.id}"><img src="${Assets.base}ui/Portrait_${esc(c.face)}.png" alt=""><span><b>${esc(c.name)}</b>` +
-      `<small>${tx(TR.cls[c.cls])} · ${tx(TR.race[c.race])} · ${tx('Seviye')} ${c.lv}</small></span></button>`).join('') : `<p class="hint">${tx('Bu hesapta henüz karakter yok.')}</p>`;
-    $('#onew').classList.toggle('hidden', ochars.length >= 4); menuFirst($('#olist'));
+      `<small>${tx(TR.cls[c.cls])} · ${tx(TR.race[c.race])} · ${tx('Seviye')} ${c.lv}</small></span></button>`).join('') : `<p class="hint" style="grid-column:1/3;text-align:center">${tx('Bu hesapta henüz karakter yok.')}</p>`;
     omsg(Net.user ? tx('Hesap') + ': ' + Net.user : '', true);
   }
   async function doLogin(isNew) {
@@ -476,12 +506,18 @@ const UI = (() => {
     if (!Net.url) return omsg('Önce sunucu adresini yaz.');
     if (!u || !p) return omsg('Kullanıcı adı ve şifreyi yaz.');
     omsg('Bağlanılıyor…', true);
-    try { const list = await Net.login(u, p, isNew); $('#opass').value = ''; await listChars(list); if (isNew) omsg('Hesap açıldı. Şimdi bir karakter oluştur.', true); } catch (e) { omsg(Net.why(e)); }
+    try {
+      if (oMode === 'change') { await Net.changePass(u, p, $('#onewp').value); $('#opass').value = ''; $('#onewp').value = ''; showLogin(); return omsg('Şifre değişti. Yeni şifrenle giriş yap.', true); }
+      Net.remember = $('#osave').classList.contains('on');
+      const list = await Net.login(u, p, isNew); $('#opass').value = ''; await listChars(list); if (isNew) omsg('Hesap açıldı. Şimdi bir karakter oluştur.', true);
+    } catch (e) { omsg(Net.why(e)); }
   }
   $('#ogo').onclick = () => doLogin(false); $('#oreg').onclick = () => doLogin(true);
-  $('#opass').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(false); });
+  $('#ochg').onclick = () => { showLogin('change'); omsg('Kullanıcı adını, eski ve yeni şifreni yaz.', true); };
+  $('#osave').onclick = e => e.currentTarget.classList.toggle('on');
+  for (const id of ['opass', 'onewp']) $('#' + id).addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(false); });
   $('#oout').onclick = async () => { await Net.logout(); showLogin(); omsg('Çıkış yapıldı.', true); };
-  $('#oback').onclick = () => { $('#online').classList.add('hidden'); $('#title').classList.remove('hidden'); omsg(''); };
+  $('#oback').onclick = () => { if (oMode === 'change') { showLogin(); return omsg(''); } $('#online').classList.add('hidden'); omsg(''); titleOpen(tSave); };
   $('#onew').onclick = () => { $('#online').classList.add('hidden'); onlineCreate = true; showCreate(); };
   $('#olist').addEventListener('click', async e => {
     const b = e.target.closest('[data-c]'); if (!b) return; omsg('Yükleniyor…', true);
@@ -521,16 +557,7 @@ const UI = (() => {
     for (const k of ['AnbufenUI_Resource_7005', 'AnbufenUI_Resource_7078', 'icon_res_item_1038', 'AnbufenUI_Resource_7003', 'AnbufenUI_Resource_7002', 'AnbufenUI_Resource_7009', 'UIData_2067']) uiImg(k);
     $('#loading').classList.add('hidden');
     const s = load();
-    // giriş ekranı: devam et, yeni karakter (bu telefonda) ya da çevrimiçi oyna
-    const T = $('#title'); T.classList.remove('hidden'); SFX.Music.play('cover.mid');
-    $('#tcont').classList.toggle('hidden', !s);
-    $('#tinfo').textContent = s ? `${s.name} · ${tx(TR.cls[s.cls])} · ${tx('Seviye')} ${s.lv}` : '';
-    $('#tcont').onclick = () => { T.classList.add('hidden'); Game.P = s; start(); };
-    $('#tnew').onclick = e => { const b = e.currentTarget; if (!s || b.dataset.sure) { localStorage.removeItem(SAVE_KEY); T.classList.add('hidden'); onlineCreate = false; showCreate(); } else { b.dataset.sure = 1; b.textContent = tx('Eminim, sil'); $('#tinfo').textContent = tx('Eski karakter silinecek. Emin misin?'); } };
-    $('#tonline').onclick = () => { T.classList.add('hidden'); showOnline(); };
-    $('#tlang').textContent = LANG === 'tr' ? 'Dil: Türkçe' : 'Language: English';
-    menuFirst($('#tmenu'));
-    $('#tlang').onclick = () => setLang(LANG === 'tr' ? 'en' : 'tr');
+    titleOpen(s);   // giriş ekranı: orijinal ana menü
     requestAnimationFrame(loop);
     window.__G = Game;
   }

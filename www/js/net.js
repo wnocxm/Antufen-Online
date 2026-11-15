@@ -40,10 +40,10 @@ const Net = (() => {
   let st = {}; try { st = JSON.parse(localStorage.getItem(KEY) || '{}'); } catch (e) { }
   // oyun sunucunun kendisinden açıldıysa adres aynıdır; GitHub sayfası ya da uygulamada kullanıcı adresi girer
   const sameOrigin = /^https?:$/.test(location.protocol) && !/github\.io$/.test(location.hostname);
-  let url = st.url || (sameOrigin ? location.origin : ''), token = st.token || null, user = st.user || '';
+  let url = st.url || (sameOrigin ? location.origin : ''), token = st.token || null, user = st.user || '', remember = st.remember !== false;
   let on = false, ws = null, joined = false, retry = 0, closing = false;
   const others = new Map();
-  const keep = () => { try { localStorage.setItem(KEY, JSON.stringify({ url, token, user })); } catch (e) { } };
+  const keep = () => { try { localStorage.setItem(KEY, JSON.stringify({ url, user: remember ? user : '', remember, token: remember ? token : null })); } catch (e) { } };
   const base = () => url.trim().replace(/\/+$/, '');
 
   async function api(m, p, b) {
@@ -67,6 +67,7 @@ const Net = (() => {
     token = j.token; keep();
     return j.characters || (await api('GET', '/api/characters')).characters;
   }
+  async function changePass(u, oldP, newP) { await api('POST', '/api/password', { username: u, oldPassword: oldP, newPassword: newP }); token = null; keep(); }
   async function chars() { return (await api('GET', '/api/characters')).characters; }
   async function logout() { try { await api('POST', '/api/logout', {}); } catch (e) { } token = null; keep(); }
   async function create(P) { const j = await api('POST', '/api/characters', { state: P }); P.id = j.id; return j.id; }
@@ -147,8 +148,8 @@ const Net = (() => {
   function leave() { closing = true; on = false; if (ws) ws.close(); }
 
   return {
-    get on() { return on; }, get url() { return url; }, set url(v) { url = String(v || '').trim(); keep(); }, get user() { return user; }, get token() { return token; },
+    get on() { return on; }, get url() { return url; }, set url(v) { url = String(v || '').trim(); keep(); }, get user() { return user; }, get remember() { return remember; }, set remember(v) { remember = !!v; keep(); }, get token() { return token; },
     get others() { return others; }, get live() { return !!(ws && ws.readyState === 1); },
-    why, now, login, chars, logout, create, play, remove, save, scene, tick, chat, leave,
+    why, now, login, changePass, chars, logout, create, play, remove, save, scene, tick, chat, leave,
   };
 })();

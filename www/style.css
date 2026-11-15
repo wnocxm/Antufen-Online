@@ -81,26 +81,40 @@ button { font: inherit; color: inherit; cursor: pointer; }
 #chat input { flex: 1; min-width: 0; }
 #chat button { padding: 6px 10px; color: #ffe8a0; background: url(assets/ui/AnbufenUI_Resource_7032.png) center/100% 100%; border: 1px solid #8a6a30; }
 
-/* giriş ekranı: orijinal kapak formu (siyah zemin, 320x320 kırmızı doku, krem yazı, seçili satır çerçevesi, alt köşe tuşları) */
-.cover { position: fixed; inset: 0; z-index: 30; background: #000; overflow: hidden; }
-.cv { position: absolute; left: 50%; top: 0; width: 360px; height: 360px; transform-origin: 50% 0; transform: translateX(-50%) scale(var(--ck, 1)); }
-.cbg { position: absolute; left: 20px; top: 0; width: 320px; height: 320px; background: url(assets/ui/AnrufenCoverUI_Resource_7000.png) 0 0/320px 320px no-repeat; image-rendering: pixelated; }
-.ctit { position: absolute; left: 116px; top: 8px; width: 128px; height: 50px; display: grid; place-items: center; color: #f2e4d7; font-size: 15px; font-weight: 700; text-shadow: 1px 1px 0 #000; }
-.cmenu { position: absolute; left: 0; right: 0; top: 103px; display: flex; flex-direction: column; align-items: center; gap: 2px; }
-.cmenu button, .cmenu .ochar { width: 128px; height: 28px; background: none; border: 1px solid transparent; color: #f2e4d7; font-size: 12px; text-shadow: 1px 1px 0 #000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.cmenu button.on, .cmenu button:active { border-color: #f2e4d7; }
-.cmenu.small { position: static; flex-direction: row; justify-content: center; gap: 4px; margin-top: 4px; }
-.cmenu.small button { width: 96px; }
-#olist { top: 64px; } #olist .ochar { width: 200px; height: 34px; display: flex; align-items: center; gap: 6px; text-align: left; padding: 0 4px; }
-.ochar img { width: 28px; height: 28px; border: 1px solid #8d7a5a; } .ochar b { display: block; font-size: 12px; } .ochar small { font-size: 10px; color: #c8b8a0; }
-#ochars .cmenu.small { position: absolute; left: 0; right: 0; top: 248px; }
-.cform { position: absolute; left: 50px; top: 74px; width: 260px; display: flex; flex-direction: column; gap: 6px; }
-.cform label { display: flex; align-items: center; gap: 6px; color: #f2e4d7; font-size: 12px; text-shadow: 1px 1px 0 #000; }
-.cform label span { width: 80px; text-align: right; }
-.cform input, #chat input { width: 140px; height: 26px; padding: 2px 5px; background: rgba(0,0,0,.65); border: 1px solid #8d7a5a; color: #fff; font: inherit; font-size: 13px; user-select: text; -webkit-user-select: text; }
-.cinfo { position: absolute; left: 30px; right: 30px; top: 276px; text-align: center; color: #c8b8a0; font-size: 11px; text-shadow: 1px 1px 0 #000; }
-#omsg { color: #ffb090; } #omsg.ok { color: #c8e8a0; }
-.cbar { position: absolute; left: 0; right: 0; top: 321px; height: 39px; }
-.sk { position: absolute; top: 7px; width: 60px; height: 26px; background: none; border: 0; color: #d8c09a; font-family: "Noto Serif", serif; font-size: 15px; font-weight: 700; text-shadow: 1px 1px 0 #000, -1px -1px 0 #000; }
-.sk.l { left: 2px; } .sk.r { right: 2px; } .sk:active { color: #fff6d0; }
-.cbar .ver { position: absolute; left: 70px; right: 70px; top: 13px; text-align: center; color: #6d6359; font-size: 9px; }
+/* giriş ekranı: orijinal ana menü (logo, kitap, oklar) ve kullanıcı girişi; zemin orijinal kapak dokusu */
+.cover { position: fixed; inset: 0; z-index: 30; background: #0a0403 url(assets/ui/AnrufenCoverUI_Resource_7000.png) center/cover no-repeat; overflow: hidden; }
+.cover::before { content: ""; position: absolute; inset: 0; background: radial-gradient(ellipse at center, rgba(0,0,0,.15) 0%, rgba(0,0,0,.7) 100%); }
+.cv { position: absolute; left: 0; top: 0; width: var(--cw, 640px); height: 360px; transform-origin: 0 0; transform: scale(var(--ck, 1)); }
+.clogo { position: absolute; left: 50%; top: 14px; width: 208px; height: 78px; margin-left: -104px; image-rendering: pixelated; }
+#tword { position: absolute; left: 50%; top: 150px; width: 190px; margin-left: -95px; height: 40px; display: grid; place-items: center; white-space: nowrap; color: #ff8a2a; font-size: 24px; font-weight: 700;
+  text-shadow: -1px -1px 0 #3a0a00, 1px -1px 0 #3a0a00, -1px 1px 0 #3a0a00, 1px 1px 0 #3a0a00, 0 2px 3px #000; }
+.carr { position: absolute; top: 156px; width: 30px; height: 30px; border: 0; background: url(assets/ui/UIData_2033.png) no-repeat; background-size: 1030px 1490px; image-rendering: pixelated; }
+.carr.l { left: 50%; margin-left: -128px; background-position: 7px -248px; clip-path: inset(0 8px 0 0); }
+.carr.r { left: 50%; margin-left: 98px; background-position: -9px -248px; clip-path: inset(0 0 0 8px); }
+.carr:active { filter: brightness(1.5); }
+#tbook { position: absolute; left: 50%; top: 172px; width: 240px; height: 184px; margin-left: -120px; border: 0; background: url(assets/ui/UIData_2033.png) no-repeat; image-rendering: pixelated; }
+#title .cinfo { top: 126px; } #title .ver { position: absolute; right: 6px; bottom: 3px; color: #8a7a6a; font-size: 9px; }
+.cinfo { position: absolute; left: 30px; right: 30px; text-align: center; color: #e8d8b0; font-size: 11px; text-shadow: 1px 1px 0 #000; }
+/* kullanıcı girişi: metal çerçeve (orijinal 2003), sarı etiketler, parşömen giriş kutuları, alt sırada üç düğme */
+.cframe { position: absolute; left: 50%; top: 22px; width: 544px; height: 276px; margin-left: -272px; border: 12px solid transparent; border-image: url(assets/ui/UIData_2003.png) 12 stretch; background: rgba(10,6,4,.45); background-clip: padding-box; image-rendering: pixelated; }
+.cform { position: absolute; left: 70px; top: 14px; width: 330px; display: flex; flex-direction: column; gap: 12px; }
+.cform label, .crow { display: flex; align-items: center; gap: 12px; }
+.cform label span, .clab { width: 96px; text-align: right; color: #f2c24e; font-size: 15px; text-shadow: 1px 1px 0 #000; }
+.clab { width: auto; }
+.cform input { flex: 1; min-width: 0; height: 30px; padding: 2px 10px; border: 2px solid #5d4d33; border-radius: 6px; background: linear-gradient(#c9b894, #b3a07c); color: #1c140a; font: inherit; font-size: 14px; box-shadow: inset 0 1px 3px rgba(0,0,0,.5); user-select: text; -webkit-user-select: text; }
+.cform input::placeholder { color: #6d5d43; }
+.crow { margin-top: 2px; padding-left: 108px; }
+.chk { width: 30px; height: 30px; border: 0; background: url(assets/ui/AnrufenCoverUI_Resource_7008.png) 0 0/160px 80px no-repeat; image-rendering: pixelated; }
+.chk.on { background-position: -30px 0; }
+.cbtn { min-width: 88px; height: 30px; padding: 0 12px; border: 0; background: url(assets/ui/AnbufenUI_Resource_7131.png) center/100% 100% no-repeat; color: #f2ead8; font-size: 13px; text-shadow: 1px 1px 0 #000; image-rendering: pixelated; white-space: nowrap; }
+.cbtn:active { background-image: url(assets/ui/AnbufenUI_Resource_7130.png); }
+.crow .cbtn { margin-left: auto; }
+.cbtns { position: absolute; left: 50%; top: 312px; width: 520px; margin-left: -260px; display: flex; justify-content: space-between; gap: 8px; }
+.cframe .cinfo { left: 10px; right: 10px; bottom: 6px; } #omsg { color: #ffb090; } #omsg.ok { color: #c8e8a0; }
+.ctit2 { position: absolute; left: 0; right: 0; top: 8px; text-align: center; color: #f2c24e; font-size: 15px; text-shadow: 1px 1px 0 #000; }
+#olist { position: absolute; left: 60px; right: 60px; top: 38px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.ochar { display: flex; align-items: center; gap: 8px; height: 48px; padding: 0 8px; text-align: left; background: rgba(0,0,0,.45); border: 1px solid #6b5a3c; color: #f2ead8; }
+.ochar:active, .ochar.on { border-color: #f2c24e; background: rgba(60,30,10,.6); }
+.ochar img { width: 36px; height: 36px; border: 1px solid #8d7a5a; } .ochar b { display: block; font-size: 13px; color: #f2c24e; } .ochar small { font-size: 10px; color: #c8b8a0; }
+.cform input, #chat input { }
+#chat input { padding: 7px 8px; background: #000; border: 1px solid #6a5028; color: #fff; font: inherit; font-size: 15px; user-select: text; -webkit-user-select: text; }

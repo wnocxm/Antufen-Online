@@ -18,6 +18,10 @@ const EN_UI = {
   'Savaşçı': 'Warrior', 'Büyücü': 'Mage', 'Kutsal Elçi': 'Priest', 'İnsan': 'Human', 'Gece Elfi': 'Night Elf',
   'Parmağınla kaydır': 'Drag to scroll', 'Sarı: sen · Yeşil: NPC · Mavi: çıkış': 'Yellow: you · Green: NPC · Blue: exit',
   // çevrimiçi
+  'Çevrimiçi': 'Online', 'Dil': 'Language', 'Bu telefona kaydedilir': 'Saved on this phone', 'Sunucuda diğer oyuncularla': 'With other players on the server',
+  'Eski karakter silinecek. Onaylamak için tekrar dokun.': 'The old character will be deleted. Tap again to confirm.', 'Kaydet': 'Save', 'Kayıt Ol': 'Register', 'Çıkış Yap': 'Log Out',
+  'Eski şifre': 'Old password', 'Yeni şifre': 'New password', 'Şifre değişti. Yeni şifrenle giriş yap.': 'Password changed. Log in with your new password.',
+  'Kullanıcı adını, eski ve yeni şifreni yaz.': 'Enter your username, old password and new password.',
   'Oyuna Gir': 'Enter Game', 'Seç': 'Select', 'Sunucu': 'Server', 'Kullanıcı Girişi': 'User Login', 'Karakter Seç': 'Select Character', 'Dil: Türkçe': 'Language: Turkish', 'Eski karakter silinecek. Emin misin?': 'The old character will be deleted. Are you sure?',
   'Çevrimiçi Oyna': 'Play Online', 'Sunucu adresi': 'Server address', 'Kullanıcı adı': 'Username', 'Şifre': 'Password', 'Giriş': 'Log in', 'Hesap Aç': 'Sign up', 'Çıkış yap': 'Log out',
   'Mesajını yaz…': 'Type your message…', 'Gönder': 'Send', 'Hesap': 'Account', 'Seviye': 'Level', 'Bu hesapta henüz karakter yok.': 'This account has no characters yet.',
