@@ -41,7 +41,7 @@ const Net = (() => {
   // oyun sunucunun kendisinden açıldıysa adres aynıdır; GitHub sayfası ya da uygulamada kullanıcı adresi girer
   const sameOrigin = /^https?:$/.test(location.protocol) && !/github\.io$/.test(location.hostname);
   let url = st.url || (sameOrigin ? location.origin : ''), token = st.token || null, user = st.user || '', remember = st.remember !== false;
-  let on = false, ws = null, joined = false, retry = 0, closing = false;
+  let admin = false, on = false, ws = null, joined = false, retry = 0, closing = false;
   const others = new Map();
   const keep = () => { try { localStorage.setItem(KEY, JSON.stringify({ url, user: remember ? user : '', remember, token: remember ? token : null })); } catch (e) { } };
   const base = () => url.trim().replace(/\/+$/, '');
@@ -58,17 +58,17 @@ const Net = (() => {
   function why(e) {
     return tx({ net: 'Sunucuya ulaşılamadı. Adresi ve internet bağlantını kontrol et.', taken: 'Bu kullanıcı adı alınmış.', bad: 'Kullanıcı adı ya da şifre yanlış.',
       invalid: 'Kullanıcı adı 3-24 harf/rakam, şifre en az 6 karakter olmalı.', slow: 'Çok fazla deneme yaptın, biraz bekle.', banned: 'Bu hesap kapatılmış.',
-      name: 'Bu karakter adı alınmış.', limit: 'Bir hesapta en fazla 4 karakter olabilir.', auth: 'Oturumun sona erdi, yeniden giriş yap.' }[e.message] || 'Bir hata oldu: ' + e.message);
+      name: 'Bu karakter adı alınmış.', gmname: '"GM" ile başlayan adlar yalnızca yöneticiler içindir.', limit: 'Bir hesapta en fazla 4 karakter olabilir.', auth: 'Oturumun sona erdi, yeniden giriş yap.' }[e.message] || 'Bir hata oldu: ' + e.message);
   }
 
   async function login(u, p, isNew) {
     user = u; token = null;
     const j = await api('POST', isNew ? '/api/register' : '/api/login', { username: u, password: p });
-    token = j.token; keep();
+    token = j.token; admin = !!j.admin; keep();
     return j.characters || (await api('GET', '/api/characters')).characters;
   }
   async function changePass(u, oldP, newP) { await api('POST', '/api/password', { username: u, oldPassword: oldP, newPassword: newP }); token = null; keep(); }
-  async function chars() { return (await api('GET', '/api/characters')).characters; }
+  async function chars() { const j = await api('GET', '/api/characters'); admin = !!j.admin; return j.characters; }
   async function logout() { try { await api('POST', '/api/logout', {}); } catch (e) { } token = null; keep(); }
   async function create(P) { const j = await api('POST', '/api/characters', { state: P }); P.id = j.id; return j.id; }
   async function play(id) { const P = (await api('GET', '/api/characters/' + id)).state; on = true; return P; }
@@ -148,7 +148,7 @@ const Net = (() => {
   function leave() { closing = true; on = false; if (ws) ws.close(); }
 
   return {
-    get on() { return on; }, get url() { return url; }, set url(v) { url = String(v || '').trim(); keep(); }, get user() { return user; }, get remember() { return remember; }, set remember(v) { remember = !!v; keep(); }, get token() { return token; },
+    get on() { return on; }, get admin() { return admin; }, get url() { return url; }, set url(v) { url = String(v || '').trim(); keep(); }, get user() { return user; }, get remember() { return remember; }, set remember(v) { remember = !!v; keep(); }, get token() { return token; },
     get others() { return others; }, get live() { return !!(ws && ws.readyState === 1); },
     why, now, login, changePass, chars, logout, create, play, remove, save, scene, tick, chat, leave,
   };

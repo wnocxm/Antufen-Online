@@ -35,6 +35,7 @@ server.listen(0, async () => {
       gear: { weap: 0 }, eq: {}, bag: [{ id: 'hp1', n: 5 }, { id: 'mp1', n: 3 }], quests: {}, done: {}, qitems: {}, scene: '120207', x: 3, y: 13,
       quick: ['s0', null, null, null, null, null, null, null], sk: { 101: 1 }, sp: 1, flags: { tut: 1 } };
     assert.equal((await call('POST', '/api/characters', { state: Object.assign({}, P, { name: '<script>' }) }, TA)).code, 400, 'geçersiz ad reddedilir');
+    assert.equal((await call('POST', '/api/characters', { state: Object.assign({}, P, { name: 'GMdeneme' }) }, TA)).code, 403, 'GM adı yönetici olmayana verilmez');
     const c = await call('POST', '/api/characters', { state: P }, TA); assert.equal(c.code, 200); const CID = c.j.id;
     // oyun ilerledi: seviye, çanta, ekipman, görevler, beceriler, kısayollar
     Object.assign(P, { lv: 7, xp: 1234, gold: 980, x: 18.5, y: 9, bag: [{ id: 'hp1', n: 2 }, { id: '30016', n: 4 }], eq: { weap: '10003', body: '10004' },

@@ -385,6 +385,7 @@ function killMob(m) {
   if (m.deathFx) Game.fx.push(new Fx(m.deathFx, m.x, m.y));
 }
 function hurtPlayer(m) {
+  if (Game.god) return;   // GM: ölümsüzlük
   const p = Game.player; if (p.dead) return;
   const s = stats(); if (Math.random() < s.dodge / 100) { UI.float(p, 'Iska', '#cfcfcf'); return; }
   const r = dmgCalc(m.atk || m.d.atk, s.def, 1); r.d = Math.max(1, Math.round(r.d * (1 - Math.min(60, s.dr) / 100)));
@@ -510,6 +511,22 @@ function completeQuest(q) {
   UI.refresh(); save();
 }
 // Görev hedefine otomatik yürü (orijinaldeki "寻路"): teslim edilecek kişi, toplama noktası ya da en yakın hedef canavar
+// ---------------- GM (oyun yöneticisi) ----------------
+// Çevrimdışı: adı "GM" ile başlayan karakter. Çevrimiçi: sunucuda yönetici yetkisi olan hesap (node make-admin.js <kullanıcı>).
+function isGM() { const P = Game.P; return !!P && (Net.on ? Net.admin : /^GM/i.test(P.name || '')); }
+function gmLevel(lv) {
+  const P = Game.P, n = clamp(Math.round(lv), 1, 120), d = n - P.lv; P.lv = n; P.xp = 0; if (d > 0) P.sp = (P.sp || 0) + d;
+  const s = stats(); Game.player.hp = s.hp; Game.player.mp = s.mp; UI.levelUp(n); UI.refresh(); save();
+}
+// seviyeye uygun en iyi ekipmanı giydirir (dükkân listelerindeki orijinal eşyalar)
+function gmGear() {
+  const P = Game.P;
+  for (const [sl] of SLOTS) { let best = null; for (const [id, it] of Object.entries(ITEMS)) if (it.slot === sl && (!it.cls || it.cls === P.cls) && it.lv <= P.lv && (!best || it.lv > ITEMS[best].lv)) best = id; if (best) P.eq[sl] = best; }
+  refreshLook(); const s = stats(); Game.player.hp = s.hp; Game.player.mp = s.mp;
+}
+function gmHeal() { const s = stats(), p = Game.player; p.hp = s.hp; p.mp = s.mp; if (p.dead) { p.dead = false; p.state = 'idle'; } }
+// bu haritadaki bir NPC'ye yürü (harita penceresindeki NPC listesi)
+function walkToEnt(t) { const p = Game.player; p.path = findPath(Game.map, p.x, p.y, t.x, t.y + 1); Game.goTarget = t; setTarget(null); if (!p.path) UI.toast('Oraya yol bulunamadı.'); }
 function questWalk(q) {
   const p = Game.player, st = Game.P.quests[q.id], near = f => { let b = null, bd = 1e9; for (const e of Game.ents) if (f(e)) { const d = Math.hypot(e.x - p.x, e.y - p.y); if (d < bd) { bd = d; b = e; } } return b; };
   let t = null;
@@ -563,16 +580,16 @@ function update(dt) {
     let moving = false;
     if (J) {
       p.path = null; p.pending = null; Game.goTarget = null;
-      const [cx, cy] = snapScreen4(J.x, J.y), l = 1, sp = RUN * (1 + s.spd) * dt;
+      const [cx, cy] = snapScreen4(J.x, J.y), l = 1, sp = RUN * (1 + s.spd) * (Game.fast ? 2.6 : 1) * dt;
       moveEnt(p, cx / l * sp, cy / l * sp); p.dir = dirOf(cx, cy); moving = true;
     } else if ((lastJoyDir = -1, p.state !== 'attack' && p.state !== 'cast')) {
       const t = Game.target;
       if (p.pending != null && t && !t.dead) {
         const sk = CLS[P.cls].skills[p.pending];
-        if (Math.hypot(t.x - p.x, t.y - p.y) <= sk.range) useSkill(p.pending); else { stepTo(p, t.x, t.y, RUN * (1 + s.spd), dt, true); moving = true; }
+        if (Math.hypot(t.x - p.x, t.y - p.y) <= sk.range) useSkill(p.pending); else { stepTo(p, t.x, t.y, RUN * (1 + s.spd) * (Game.fast ? 2.6 : 1), dt, true); moving = true; }
       } else if (t && t.kind === 'mob' && !t.dead && !p.path) {
         const C = CLS[P.cls], d = Math.hypot(t.x - p.x, t.y - p.y);
-        if (d > C.range) { stepTo(p, t.x, t.y, RUN * (1 + s.spd), dt, true); moving = true; }
+        if (d > C.range) { stepTo(p, t.x, t.y, RUN * (1 + s.spd) * (Game.fast ? 2.6 : 1), dt, true); moving = true; }
         else if (p.atkT <= 0) {
           p.atkT = 1.1; p.combatT = 5; p.dir = dirOf(t.x - p.x, t.y - p.y);
           if (C.melee) { p.state = 'attack'; p.animT = 0; p.stateT = 0.45; later(0.25, () => { if (!t.dead && Math.hypot(t.x - p.x, t.y - p.y) < C.range + 0.6) { hitMob(t, 1); SFX.play(C.snd); Game.fx.push(new Fx('BLOOD', t.x, t.y)); } }); }
@@ -580,7 +597,7 @@ function update(dt) {
         }
       }
       if (p.path && p.path.length) {
-        const [tx, ty] = p.path[0]; if (stepTo(p, tx, ty, RUN * (1 + s.spd), dt, true)) p.path.shift(); moving = true;
+        const [tx, ty] = p.path[0]; if (stepTo(p, tx, ty, RUN * (1 + s.spd) * (Game.fast ? 2.6 : 1), dt, true)) p.path.shift(); moving = true;
         if (!p.path.length) { p.path = null; if (Game.goTarget) { const n = Game.goTarget; Game.goTarget = null; if (Math.hypot(n.x - p.x, n.y - p.y) < 2.2) interact(n); } }
       }
     }

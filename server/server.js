@@ -54,7 +54,7 @@ async function api(req, res, url) {
     const { username, password } = await body(req);
     const s = await db.login(String(username || ''), String(password || ''));
     if (s.err) return send(res, s.err === 'banned' ? 403 : 401, { err: s.err });
-    return send(res, 200, { token: s.token, characters: await db.listCharacters(s.accountId) });
+    return send(res, 200, { token: s.token, admin: !!s.isAdmin, characters: await db.listCharacters(s.accountId) });
   }
   if (p === '/api/password' && m === 'POST') {
     if (limited(req, 'login', 20)) return send(res, 429, { err: 'slow' });
@@ -65,10 +65,11 @@ async function api(req, res, url) {
   const ses = await db.session(bearer(req));
   if (!ses) return send(res, 401, { err: 'auth' });
   if (p === '/api/logout' && m === 'POST') { await db.logout(bearer(req)); return send(res, 200, { ok: true }); }
-  if (p === '/api/characters' && m === 'GET') return send(res, 200, { characters: await db.listCharacters(ses.accountId) });
+  if (p === '/api/characters' && m === 'GET') return send(res, 200, { admin: !!ses.isAdmin, characters: await db.listCharacters(ses.accountId) });
   if (p === '/api/characters' && m === 'POST') {
     const P = (await body(req)).state;
     if (!validState(P)) return send(res, 400, { err: 'invalid' });
+    if (/^GM/i.test(P.name) && !ses.isAdmin) return send(res, 403, { err: 'gmname' });   // GM adları yalnızca yöneticilere
     const r = await db.createCharacter(ses.accountId, P);
     if (r.err) return send(res, 409, { err: r.err });
     return send(res, 200, { id: r.id });

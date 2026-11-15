@@ -279,8 +279,8 @@ const UI = (() => {
     return `<div class="ibox"><img src="${iconSrc(it)}"><div><b>${esc(it.name)}</b>
       <small>${it.slot ? `${SLOTS.find(x => x[0] === it.slot)[1]} · ${it.cls ? TR.cls[it.cls] : 'Tüm sınıflar'} · <i class="${Game.P.lv < it.lv ? 'bad' : ''}">Seviye ${it.lv}</i>` : esc(it.desc || '')}</small>
       <div class="ist">${st}</div>${why ? `<small class="bad">${why}</small>` : ''}</div></div><div class="iact">${act}</div>`; };
-  function panelOpen() { return Win.isOpen() || !panel.classList.contains('hidden') || !$('#dlg').classList.contains('hidden'); }
-  function closeAll() { Win.close(); panel.classList.add('hidden'); $('#dlg').classList.add('hidden'); cur = null; sel = null; shopNpc = null; }
+  function panelOpen() { return Win.isOpen() || !panel.classList.contains('hidden') || !$('#dlg').classList.contains('hidden') || !$('#gm').classList.contains('hidden'); }
+  function closeAll() { Win.close(); $('#gm').classList.add('hidden'); panel.classList.add('hidden'); $('#dlg').classList.add('hidden'); cur = null; sel = null; shopNpc = null; }
   function open(kind) {
     if (mode !== 'play') return;
     if (kind === 'bag') { const sh = shopNpc; closeAll(); Win.open('bag', sh ? { shop: sh } : {}); return; }
@@ -288,6 +288,7 @@ const UI = (() => {
     if (kind === 'quest') { closeAll(); Win.open('task'); return; }
     if (kind === 'skill') { closeAll(); Win.open('skill'); return; }
     if (kind === 'menu') { closeAll(); Win.open('menu'); return; }
+    if (kind === 'gm' || kind === 'npcs') { closeAll(); openList(kind); return; }
     if (kind === 'sys' || kind === 'map' || kind === 'hub') { closeAll(); Win.open(kind); return; }
     if (kind !== cur) sel = null; if (kind !== 'bag' && kind !== 'shop') shopNpc = null;
     cur = kind; panel.classList.remove('hidden'); SFX.play('menu_appear', 0.5); render(); if (kind === 'bag') questFlag('openBag');
@@ -338,7 +339,7 @@ const UI = (() => {
       title = 'Ayarlar';
       h = `<div class="iact"><button class="obtn" data-act="tsfx">Ses efektleri: ${SFX.opt.sfx ? 'Açık' : 'Kapalı'}</button><button class="obtn" data-act="tmus">Müzik: ${SFX.opt.music ? 'Açık' : 'Kapalı'}</button></div>
         <div class="iact"><button class="obtn" data-act="lang">${LANG === 'tr' ? 'Language: English' : 'Dil: Türkçe'}</button></div>
-        <div class="iact"><button class="obtn" data-act="totitle">Giriş ekranına dön</button><button class="obtn" data-act="newchar">Yeni karakter oluştur</button></div><p class="hint">Oyun otomatik kaydedilir. Sürüm 11150032</p>`;
+        <div class="iact"><button class="obtn" data-act="totitle">Giriş ekranına dön</button><button class="obtn" data-act="newchar">Yeni karakter oluştur</button></div><p class="hint">Oyun otomatik kaydedilir. Sürüm 11150043</p>`;
     }
     ptitle.textContent = tx(title); pbody.innerHTML = h; txDom(pbody);
   }
@@ -436,6 +437,40 @@ const UI = (() => {
     const lg = uiImg('UIData_2067'); if (lg.complete) ctx.drawImage(lg, 16, 8, 192 * 0.8, 72 * 0.8);
     if (creDoll) { ctx.save(); ctx.translate(vw * 0.73, 250); ctx.scale(2.2, 2.2); creDoll.draw(ctx, 'comm', 2 + (Math.floor(performance.now() / 2500) % 2), performance.now() / 120, 0, 0); ctx.restore(); }
   }
+
+  // ---------- GM paneli ve NPC listesi (aynı liste penceresi) ----------
+  const KIND = { 1: 'Şehir', 2: 'Kır', 3: 'Başlangıç', 4: 'Zindan' };
+  let listMode = 'gm';
+  function openList(m) {
+    listMode = m; $('#gm').classList.remove('hidden'); $('#gtitle').textContent = tx(m === 'gm' ? 'GM Paneli' : 'NPC Listesi'); $('#gtools').classList.toggle('hidden', m !== 'gm');
+    $('#gq').value = ''; $('#gq').placeholder = tx(m === 'gm' ? 'Harita ara: ad ya da numara…' : 'NPC ara…'); drawList();
+  }
+  function drawList() {
+    const v = $('#gq').value.trim().toLocaleLowerCase('tr'), hx = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    if (listMode === 'gm') {
+      $('#gstate').textContent = `${tx('Seviye')} ${Game.P.lv} · ${Game.P.gold} ${tx('altın')}${Game.god ? ' · ' + tx('ölümsüz') : ''}${Game.fast ? ' · ' + tx('hızlı') : ''}`;
+      const S = Assets.D.scenes, ids = Object.keys(S).filter(id => !v || (id + ' ' + trName(S[id].name) + ' ' + S[id].name).toLocaleLowerCase('tr').includes(v))
+        .sort((a, b) => (S[a].kind[0] === 1 ? 0 : 1) - (S[b].kind[0] === 1 ? 0 : 1) || (S[a].lv || 0) - (S[b].lv || 0) || a - b);
+      $('#glist').innerHTML = ids.slice(0, 200).map(id => `<button data-s="${id}" class="${id === Game.sceneId ? 'on' : ''}"><b>${hx(trName(S[id].name))}</b><small>${tx(KIND[S[id].kind[0]] || 'Özel')}${S[id].lv ? ' · ' + tx('Sv') + ' ' + S[id].lv : ''} · ${id}</small></button>`).join('') +
+        (ids.length > 200 ? `<p class="hint">${ids.length - 200} ${tx('harita daha var; aramayı daralt.')}</p>` : '');
+    } else {
+      const L = Game.ents.map((e, i) => [e, i]).filter(([e]) => e.kind === 'npc' && !e.hidden && !e.pickup && (!e.dummy || e.node) && (!v || (e.name || '').toLocaleLowerCase('tr').includes(v)));
+      $('#glist').innerHTML = L.map(([e, i]) => `<button data-e="${i}"><b>${hx(e.name)}</b><small>(${Math.round(e.x)}, ${Math.round(e.y)})</small></button>`).join('') || `<p class="hint">${tx('Bu haritada NPC yok.')}</p>`;
+    }
+  }
+  $('#gq').oninput = drawList; $('#gclose').onclick = () => closeAll();
+  $('#glist').addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    if (b.dataset.s) { closeAll(); Game.player.path = null; gotoScene(b.dataset.s, null, null, null); }
+    else if (b.dataset.e) { const t = Game.ents[+b.dataset.e]; closeAll(); if (t) walkToEnt(t); }
+  });
+  $('#gtools').addEventListener('click', e => {
+    const a = e.target.closest('button')?.dataset.g, P = Game.P; if (!a || !isGM()) return;
+    if (a === 'lv1') gmLevel(P.lv + 1); else if (a === 'lv10') gmLevel(P.lv + 10); else if (a === 'lvset') { const n = +prompt(tx('Seviye (1-120):'), P.lv); if (n) gmLevel(n); }
+    else if (a === 'gold') { P.gold += 100000; save(); } else if (a === 'heal') gmHeal(); else if (a === 'god') Game.god = !Game.god; else if (a === 'fast') Game.fast = !Game.fast;
+    else if (a === 'gear') gmGear(); else if (a === 'sp') { P.sp = (P.sp || 0) + 20; save(); }
+    drawList();
+  });
 
   // ---------- sohbet ----------
   function openChat() { if (!Net.live) { toast('Sunucuya bağlanılıyor…'); return; } $('#chat').classList.remove('hidden'); const i = $('#ctext'); i.value = ''; setTimeout(() => i.focus(), 30); }

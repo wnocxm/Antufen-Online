@@ -118,3 +118,16 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .ochar img { width: 36px; height: 36px; border: 1px solid #8d7a5a; } .ochar b { display: block; font-size: 13px; color: #f2c24e; } .ochar small { font-size: 10px; color: #c8b8a0; }
 .cform input, #chat input { }
 #chat input { padding: 7px 8px; background: #000; border: 1px solid #6a5028; color: #fff; font: inherit; font-size: 15px; user-select: text; -webkit-user-select: text; }
+
+/* GM paneli ve NPC listesi */
+#gm { position: fixed; inset: 0; z-index: 23; display: grid; place-items: center; background: rgba(0,0,0,.5); padding: 2vh 2vw; }
+.gbox { width: min(640px, 96vw); height: 94vh; display: flex; flex-direction: column; gap: 6px; background: rgba(14,10,6,.96); border: 2px solid #8a6a30; box-shadow: 0 0 0 2px #000; padding: 8px 10px; font-size: 13px; }
+.ghead { display: flex; align-items: center; gap: 10px; color: #ffd870; } .ghead span { flex: 1; color: #c8b890; font-size: 11px; } .ghead button { width: 30px; height: 28px; background: #2a1a10; border: 1px solid #8a6a30; color: #ffd870; }
+#gtools { display: flex; flex-wrap: wrap; gap: 4px; }
+#gtools button { padding: 6px 9px; font-size: 12px; background: url(assets/ui/AnbufenUI_Resource_7032.png) center/100% 100%; border: 1px solid #6a5028; color: #f0e0b0; }
+#gtools button:active { background-image: url(assets/ui/AnbufenUI_Resource_7033.png); color: #000; }
+#gq { padding: 7px 8px; background: #000; border: 1px solid #6a5028; color: #fff; font: inherit; font-size: 15px; user-select: text; -webkit-user-select: text; }
+#glist { flex: 1; overflow-y: auto; touch-action: pan-y; display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 4px; align-content: start; }
+#glist button { text-align: left; padding: 5px 8px; background: #0e0806; border: 1px solid #4a3820; color: #e8dcc0; }
+#glist button.on { border-color: #ffd870; } #glist button:active { background: #3a2410; }
+#glist b { display: block; font-weight: 600; color: #ffe8a0; } #glist small { color: #a89878; font-size: 10.5px; }

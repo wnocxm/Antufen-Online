@@ -62,13 +62,14 @@ const Win = (() => {
     ctx.fillStyle = 'rgba(0,0,0,.5)'; ctx.fillRect(0, 0, vw, VH);
     if (cur === 'bag') drawBag(ctx, vw, VH); else if (cur === 'role') drawRole(ctx, vw, VH); else if (cur === 'npc') drawNpc(ctx, vw, VH); else if (cur === 'task') drawTask(ctx, vw, VH); else if (cur === 'menu') drawMenu(ctx, vw, VH); else if (cur === 'skill') drawSkill(ctx, vw, VH); else if (cur === 'shop') drawShop(ctx, vw, VH); else if (cur === 'dead') drawDead(ctx, vw, VH);
     if (cur === 'sys') drawSys(ctx, vw, VH); else if (cur === 'map') drawMap(ctx, vw, VH);
-    if (HUB.some(h => h[0] === cur) || cur === 'hub') drawHub(ctx, vw, VH);
+    if (HUB0.some(h => h[0] === cur) || cur === 'hub') drawHub(ctx, vw, VH);
     if (modal) drawModal(ctx, vw, VH);
     if (pressed && performance.now() - pressT > 160) pressed = null;
   }
   // ---------------- Karakter menüsü: ekranın solunda sekmeler; pencereler arasında geçiş ----------------
-  const HUB = [['role', 'Karakter'], ['bag', 'Çanta'], ['skill', 'Beceri'], ['task', 'Görev'], ['map', 'Harita'], ['sys', 'Ayarlar']];
+  const HUB0 = [['role', 'Karakter'], ['bag', 'Çanta'], ['skill', 'Beceri'], ['task', 'Görev'], ['map', 'Harita'], ['sys', 'Ayarlar']];
   function drawHub(ctx, vw, VH) {
+    const HUB = isGM() ? HUB0.concat([['gm', 'GM']]) : HUB0;
     const x = 2, w = 72, h = 38, y0 = Math.round((VH - HUB.length * h) / 2);
     ctx.fillStyle = 'rgba(0,0,0,.72)'; ctx.fillRect(x, y0, w, HUB.length * h);
     HUB.forEach(([k, n], i) => { const y = y0 + i * h, on = k === cur, pr = pressed === 'hub:' + k;
@@ -122,6 +123,9 @@ const Win = (() => {
       if (WM.x == null) { WM.x = (tw - W) / 2; WM.y = (th - vh) / 2; }
       WM.x = clamp(WM.x, 0, tw - (W - 4)); WM.y = clamp(WM.y, 0, th - vh);
       const mx = Math.round(ox + 2 - WM.x), my = Math.round(oy + top - WM.y);
+      // mürekkep çizimi koyu zeminde okunmuyor: eski harita gibi parşömen rengi üzerine çizilir
+      const pg = ctx.createRadialGradient(ox + W / 2, oy + top + vh / 2, 40, ox + W / 2, oy + top + vh / 2, W * 0.7); pg.addColorStop(0, '#d9c79c'); pg.addColorStop(1, '#a8926a');
+      ctx.fillStyle = pg; ctx.fillRect(ox + 2, oy + top, W - 4, vh);
       if (parts.every(i => i.complete && i.naturalWidth)) { ctx.drawImage(parts[0], mx, my); ctx.drawImage(parts[1], mx + 400, my); }
     } else {
       // bulunduğun harita: zemin görüntüsü sığacak kadar küçültülür
@@ -137,10 +141,12 @@ const Win = (() => {
     // alt düğmeler: orijinal 70x30 düğmeler (7130/7131)
     const by = oy + H - bh + 3, B = [[52938, ox + 8], [52802, ox + W - 78]];
     for (const [id, x] of B) { Forms.drawCtrl(ctx, Forms.ctrl('worldmap', id), pressed === id ? 1 : 0, x - 1, by - 1); hits.push({ id, x, y: by, w: 70, h: 30 }); }
-    Forms.label(ctx, WM.mode === 'world' ? tx('Parmağınla kaydır') : tx('Sarı: sen · Yeşil: NPC · Mavi: çıkış'), ox + 90, by, W - 180, 30, '#8d8983', 'center', 10);
+    // NPC listesi: bu haritadaki kişiler, seçilene kendiliğinden yürünür
+    { const x = ox + W - 156; Forms.drawCtrl(ctx, Forms.ctrl('worldmap', 52801), pressed === 'npcs' ? 1 : 0, x - 1, by - 1, ''); Forms.label(ctx, tx('NPC Listesi'), x, by, 70, 30, '#ffffff', 'center', 10); hits.push({ id: 'npcs', x, y: by, w: 70, h: 30 }); }
+    Forms.label(ctx, WM.mode === 'world' ? tx('Parmağınla kaydır') : tx('Sarı: sen · Yeşil: NPC · Mavi: çıkış'), ox + 82, by, W - 244, 30, '#8d8983', 'center', 9);
     hits.push({ id: 'frame', x: ox, y: oy, w: W, h: H });
   }
-  function tapMap(id) { if (id === 52802) UI.closeAll(); else if (id === 52938) { WM.mode = WM.mode === 'world' ? 'local' : 'world'; SFX.play('skill_pageflip'); } }
+  function tapMap(id) { if (id === 'npcs') { UI.open('npcs'); return; } if (id === 52802) UI.closeAll(); else if (id === 52938) { WM.mode = WM.mode === 'world' ? 'local' : 'world'; SFX.play('skill_pageflip'); } }
   function drawBag(ctx, vw, VH) {
     const P = Game.P, f = Forms.get('bag'), ox = Math.round((vw - f.w) / 2), oy = Math.round((VH - f.h) / 2);
     const items = bagItems(), slots = slotIds(), quick = quickIds(), per = slots.length, pages = Math.max(1, Math.ceil(items.length / per));
@@ -203,7 +209,7 @@ const Win = (() => {
     let h = null; for (const r of hits) if (x >= r.x && x < r.x + r.w && y >= r.y && y < r.y + r.h) { if (r.id === 'frame') { if (!h) h = r; } else if (!h || h.id === 'frame' || r.w * r.h < h.w * h.h) h = r; }
     if (!h) { if (cur !== 'dead') close(); return true; }
     pressed = h.id; pressT = performance.now();
-    if (typeof h.id === 'string' && h.id.startsWith('hub:')) { const k = h.id.slice(4); SFX.play('skill_pageflip'); if (k !== cur) { close(); open(k); } return true; }
+    if (typeof h.id === 'string' && h.id.startsWith('hub:')) { const k = h.id.slice(4); SFX.play('skill_pageflip'); if (k === 'gm') { UI.open('gm'); return true; } if (k !== cur) { close(); open(k); } return true; }
     if (h.id === 'close') { UI.closeAll(); return true; }
     if (cur === 'sys') { tapSys(h.id); return true; } if (cur === 'map') { tapMap(h.id); return true; } if (cur === 'hub') return true;
     if (cur === 'bag') tapBag(h.id); else if (cur === 'role') tapRole(h.id); else if (cur === 'npc') tapNpc(h.id); else if (cur === 'task') tapTask(h.id); else if (cur === 'menu') tapMenu(h.id); else if (cur === 'skill') tapSkill(h.id); else if (cur === 'shop') tapShop(h.id); else if (cur === 'dead') tapDead(h.id);

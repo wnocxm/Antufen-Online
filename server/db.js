@@ -25,13 +25,13 @@ async function register(username, pass) {
   return r.rows[0] ? r.rows[0].id : null;
 }
 async function login(username, pass) {
-  const r = await pool.query('SELECT id, pass_hash, banned FROM accounts WHERE lower(username) = lower($1)', [username]);
+  const r = await pool.query('SELECT id, pass_hash, banned, is_admin FROM accounts WHERE lower(username) = lower($1)', [username]);
   const a = r.rows[0]; if (!a || !checkPass(pass, a.pass_hash)) return { err: 'bad' };
   if (a.banned) return { err: 'banned' };
   const token = crypto.randomBytes(32).toString('hex');
   await pool.query(`INSERT INTO sessions (token, account_id, expires_at) VALUES ($1, $2, now() + interval '${SESSION_DAYS} days')`, [token, a.id]);
   await pool.query('UPDATE accounts SET last_login = now() WHERE id = $1', [a.id]);
-  return { token, accountId: a.id };
+  return { token, accountId: a.id, isAdmin: a.is_admin };
 }
 async function session(token) {
   if (!token || typeof token !== 'string') return null;
