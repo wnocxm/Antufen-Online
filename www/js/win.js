@@ -59,10 +59,11 @@ const Win = (() => {
 
   function draw(ctx, vw, VH) {
     if (!cur) return; hits = [];
-    ctx.fillStyle = 'rgba(0,0,0,.5)'; ctx.fillRect(0, 0, vw, VH);
-    if (cur === 'bag') drawBag(ctx, vw, VH); else if (cur === 'role') drawRole(ctx, vw, VH); else if (cur === 'npc') drawNpc(ctx, vw, VH); else if (cur === 'task') drawTask(ctx, vw, VH); else if (cur === 'menu') drawMenu(ctx, vw, VH); else if (cur === 'skill') drawSkill(ctx, vw, VH); else if (cur === 'shop') drawShop(ctx, vw, VH); else if (cur === 'dead') drawDead(ctx, vw, VH);
+    const modern = cur === 'bag' || cur === 'role' || cur === 'hub';   // yeni arayüz: oyun ekranı karartılmaz
+    if (!modern) { ctx.fillStyle = 'rgba(0,0,0,.5)'; ctx.fillRect(0, 0, vw, VH); }
+    if (cur === 'bag') drawBag2(ctx, vw, VH); else if (cur === 'role') drawRole2(ctx, vw, VH); else if (cur === 'npc') drawNpc(ctx, vw, VH); else if (cur === 'task') drawTask(ctx, vw, VH); else if (cur === 'menu') drawMenu(ctx, vw, VH); else if (cur === 'skill') drawSkill(ctx, vw, VH); else if (cur === 'shop') drawShop(ctx, vw, VH); else if (cur === 'dead') drawDead(ctx, vw, VH);
     if (cur === 'sys') drawSys(ctx, vw, VH); else if (cur === 'map') drawMap(ctx, vw, VH);
-    if (HUB0.some(h => h[0] === cur) || cur === 'hub') drawHub(ctx, vw, VH);
+    if (cur === 'hub' || (HUB0.some(h => h[0] === cur) && cur !== 'bag' && cur !== 'role')) drawHub2(ctx, vw, VH);
     if (modal) drawModal(ctx, vw, VH);
     if (pressed && performance.now() - pressT > 160) pressed = null;
   }
@@ -88,6 +89,142 @@ const Win = (() => {
     Forms.label(ctx, label, x + 12, y + 3, 190, 20, on || pressed === id ? '#ffffff' : '#e6cf89', 'left', 12); if (value != null) Forms.label(ctx, value, x + 200, y + 3, 90, 20, '#ffffff', 'right', 12);
     hits.push({ id, x, y, w: 300, h: 33 });
   }
+  // ================= Yeni arayüz (Android sürümünün NEW_FORM_* ekranları) =================
+  // Ekranlar 320 yüksekliğinde tasarlanmış; ekran yüksekliğine ölçeklenip sol kenara yaslanır: solda kırmızı sekme sütunu (126),
+  // ortada parşömen (227), sağda yalnızca bir şey seçiliyken açılan işlem paneli (135).
+  let NK = 1, NX = 0;
+  function nBegin(ctx, VH) { NK = VH / 320; NX = UI.safeL || 0; ctx.save(); ctx.translate(NX, 0); ctx.scale(NK, NK); ctx.imageSmoothingEnabled = true; }
+  function nEnd(ctx) { ctx.imageSmoothingEnabled = false; ctx.restore(); }
+  const nHit = (id, x, y, w, h) => hits.push({ id, x: NX + x * NK, y: y * NK, w: w * NK, h: h * NK });
+  const nC = (f, id) => Forms.ctrl(f, id);
+  function nDraw(ctx, f, id, st, txt) { const c = nC(f, id); Forms.drawCtrl(ctx, c, st ? 1 : 0, 0, 0, txt); return c.s[0].r; }
+  // parşömen üstünde gölgesiz yazı
+  function nText(ctx, s, x, y, col, size = 11, align = 'left', w) { ctx.font = `${size}px "Noto Sans", sans-serif`; ctx.textAlign = align; ctx.textBaseline = 'middle'; ctx.fillStyle = col; if (w) ctx.fillText(tx(String(s)), x, y, w); else ctx.fillText(tx(String(s)), x, y); ctx.textBaseline = 'alphabetic'; }
+  // sol sütun: arka plan + sekmeler (seçili olan sarı) + kapatma düğmesi
+  function nTabs(ctx, f, bgId, ids, labels, active, closeId) {
+    nDraw(ctx, f, bgId, 0);
+    ids.forEach((id, i) => { if (labels[i] == null) return; const r = nDraw(ctx, f, id, i === active || pressed === id, tx(labels[i])); nHit(id, r[0], r[1], r[2], r[3]); });
+    if (closeId) { const r = nDraw(ctx, f, closeId, pressed === closeId); nHit(closeId, r[0], r[1], r[2], r[3]); }
+    nHit('frame', 0, 0, 126, 320);
+  }
+  // sağ işlem paneli: [etiket, kimlik] listesi
+  function nActions(ctx, f, bgId, btnIds, acts) {
+    nDraw(ctx, f, bgId, 0); nHit('frame', 353, 0, 135, 320);
+    acts.forEach(([label, key], i) => { const id = btnIds[i]; if (!id) return; const r = nDraw(ctx, f, id, pressed === key, ''); Forms.label(ctx, label, r[0], r[1], r[2], r[3], '#f4ead0', 'center', 11); nHit(key, r[0], r[1], r[2], r[3]); });
+  }
+  // ---------------- Ana menü (NEW_FORM_V5_MENU): sol sütunda kırmızı düğmeler ----------------
+  const HUBB = [50223, 50224, 50225, 50226, 50227, 50228, 50229];
+  function hubItems() { const L = [['role', 'Karakter'], ['skill', 'Beceri'], ['bag', 'Çanta'], ['task', 'Görev'], ['map', 'Harita']]; if (isGM()) L.push(['gm', 'GM']); L.push(['sys', 'Sistem']); return L; }
+  function drawHub2(ctx, vw, VH) {
+    nBegin(ctx, VH); const f = 'n_v5_menu', L = hubItems();
+    nDraw(ctx, f, 50222, 0); nHit('frame', 0, 0, 126, 320);
+    L.forEach(([k, n], i) => { const r = nDraw(ctx, f, HUBB[i], k === cur || pressed === 'hub:' + k, tx(n)); nHit('hub:' + k, r[0], r[1], r[2], r[3]); });
+    const r = nDraw(ctx, f, 50230, pressed === 'close'); nHit('close', r[0] - 4, r[1], r[2] + 4, r[3]);
+    nEnd(ctx);
+  }
+  // ---------------- Çanta (NEW_FORM_BAG_2) ----------------
+  const B2TABS = [50003, 50004, 50005, 50006, 50049], B2ACT = [50035, 50036, 50037, 50038, 50039, 50040, 50041];
+  const B2SLOT = Array.from({ length: 20 }, (_, i) => 50007 + i);
+  function bag2Items() {
+    const P = Game.P;
+    if (B.cat === 3) { const qi = []; for (const q of QUESTS) { const st = P.quests[q.id]; if (st && q.item && st.n) qi.push({ quest: q.item, n: st.n }); } return qi; }
+    if (B.cat === 4) return [];
+    return P.bag.filter(b => { const it = ITEMS[b.id]; if (!it) return false; return (it.slot ? 0 : (it.use || it.growth) ? 1 : 2) === B.cat; });
+  }
+  function itemLines(it) {
+    const P = Game.P, L = [[it.name, '#7a1c08', 12]];
+    if (it.slot) { L.push([`${tx(SLOTS.find(s => s[0] === it.slot)[1])} · ${it.cls ? tx(TR.cls[it.cls]) : tx('Tüm sınıflar')} · ${tx('Sv')} ${it.lv}`, P.lv < it.lv ? '#c02010' : '#3a2a14', 10]); L.push([Object.entries(it.st || {}).map(([k, v]) => `${tx(STATN[k] || k)} +${v}`).join('  '), '#1c5a12', 10]); }
+    else if (it.desc) L.push([it.desc, '#3a2a14', 10]);
+    L.push([`${tx('Satış')}: ${it.sell || 1} ${tx('altın')}`, '#6a4a14', 10]); return L;
+  }
+  function drawBag2(ctx, vw, VH) {
+    nBegin(ctx, VH); const f = 'n_bag_2', P = Game.P, items = bag2Items(), per = 20, pages = Math.max(1, Math.ceil(items.length / per));
+    if (B.page >= pages) B.page = pages - 1;
+    const selIt = B.sel && ITEMS[B.sel] && countItem(B.sel) ? ITEMS[B.sel] : null; if (!selIt) B.sel = null;
+    nDraw(ctx, f, 50042, 0); nHit('frame', 126, 0, 227, 320);
+    nTabs(ctx, f, 50000, B2TABS, ['Ekipman', 'Tüketim', 'Genel', 'Görev', 'Binek'], B.cat, null);
+    B2SLOT.forEach((id, i) => {
+      const e = items[B.page * per + i], r = nDraw(ctx, f, id, e && e.id && e.id === B.sel); nHit(id, r[0] + 3, r[1] + 3, 40, 40);
+      if (!e) return;
+      if (e.quest) { const I = uiImgAny({ icon: Q_ICONS[e.quest] || 1125 }); if (I.complete && I.naturalWidth) ctx.drawImage(I, r[0] + 7, r[1] + 7, 32, 32); }
+      else { const it = ITEMS[e.id]; if (it.slot && canEquip(it)) ctx.globalAlpha = 0.45; drawIcon(ctx, it, r[0] + 7, r[1] + 7, 32); ctx.globalAlpha = 1; }
+      if (e.n > 1) Forms.label(ctx, String(e.n), r[0] + 6, r[1] + 5, 30, 12, '#fff', 'left', 10);
+    });
+    for (const id of [50027, 50028]) { const off = id === 50027 ? B.page === 0 : B.page >= pages - 1; const r = nDraw(ctx, f, id, off); nHit(id, r[0] - 8, r[1] - 4, r[2] + 16, r[3] + 8); }   // gri: gidilecek sayfa yok
+    nText(ctx, `${B.page + 1}/${pages}`, 239, 219, '#3a2a14', 11, 'center');
+    if (selIt) { // seçili eşyanın bilgisi: alt kutu
+      nDraw(ctx, f, 50029, 0); const LC = { '#7a1c08': '#ffd870', '#3a2a14': '#f0e4c8', '#c02010': '#ff8a70', '#1c5a12': '#a8f090', '#6a4a14': '#e0c080' };   // koyu deri zemin: açık renkler
+      itemLines(selIt).forEach(([t, c, s], i) => nText(ctx, t, 140, 250 + i * 15, LC[c] || c, s, 'left', 198));
+    } else {
+      nText(ctx, `${P.bag.length}/100`, 170, 298, '#e8dcc0', 11, 'center'); nDraw(ctx, f, 50045, 0); nText(ctx, String(P.gold), 228, 298, '#ffe070', 11, 'left'); nDraw(ctx, f, 50043, 0);
+    }
+    if (selIt) {
+      const A = [[selIt.slot ? 'Giy' : selIt.growth ? 'Aç' : selIt.use ? 'Kullan' : '—', 'use']];
+      if (selIt.use) A.push(['Kısayol', 'quick']); if (opt.shop) A.push([`${tx('Sat')} (+${selIt.sell || 1})`, 'sell']); A.push(['Yok Et', 'del']);
+      nActions(ctx, f, 50032, B2ACT, A);
+    }
+    { const r = nDraw(ctx, f, 50030, pressed === 50030); nHit(50030, r[0] - 4, r[1], r[2] + 4, r[3]); }
+    nEnd(ctx);
+  }
+  function tapBag2(id) {
+    const items = bag2Items(), per = 20, si = B2SLOT.indexOf(id);
+    if (id === 50030) { close(); open('hub'); return; }
+    if (B2TABS.includes(id)) { B.cat = B2TABS.indexOf(id); B.page = 0; B.sel = null; SFX.play('skill_pageflip'); return; }
+    if (id === 50027) { B.page = Math.max(0, B.page - 1); return; }
+    if (id === 50028) { B.page = Math.min(Math.max(0, Math.ceil(items.length / per) - 1), B.page + 1); return; }
+    if (si >= 0) {
+      const e = items[B.page * per + si]; SFX.play('menusel', 0.6);
+      if (!e || e.quest) { B.sel = null; return; }
+      const now = performance.now();
+      if (B.sel === e.id && lastTap.id === e.id && now - lastTap.t < 450) { useItem(e.id); lastTap.id = null; return; }   // çift dokunuş: kullan / giy
+      B.sel = e.id; lastTap = { id: e.id, t: now }; return;
+    }
+    if (!B.sel) return; const it = ITEMS[B.sel];
+    if (id === 'use') return useItem(B.sel);
+    if (id === 'sell' && opt.shop) return sellItem(B.sel);
+    if (id === 'quick') { if (it.use) UI.startAssign('i:' + B.sel, it.name); return; }
+    if (id === 'del') { const sid = B.sel; ask(`${it.name}: ${tx('yok edilsin mi?')}`, () => { removeItem(sid, countItem(sid)); B.sel = null; UI.log(`${it.name} yok edildi.`); save(); }); }
+  }
+  // ---------------- Karakter (NEW_FORM_PLAYER): Özellik ve Ekipman sayfaları ----------------
+  const R2TABS = [50084, 50085, 50913, 50087, 50912];
+  const R2SLOT = { 50093: 'head', 50095: 'body', 50094: 'weap', 50099: 'shoe', 50096: 'neck', 50098: 'ring', 50100: 'belt', 50097: 'glove' };
+  const porImg = {};
+  function drawRole2(ctx, vw, VH) {
+    nBegin(ctx, VH); const f = 'n_player', P = Game.P, p = Game.player, s = stats(), C = CLS[P.cls];
+    const selId = R.sel && P.eq[R.sel], selIt = selId && ITEMS[selId];
+    if (R.page === 1) nDraw(ctx, f, 50092, 0); else nDraw(ctx, f, 50083, 0);
+    nHit('frame', 126, 0, 227, 320);
+    nTabs(ctx, f, 50082, R2TABS, ['Özellik', 'Ekipman', 'Potansiyel', 'Başarım', 'Diğer'], R.page, null);
+    if (R.page === 0) {
+      const r = nDraw(ctx, f, 50122, 0), k = 'Portrait_' + P.face, I = porImg[k] || (porImg[k] = Object.assign(new Image(), { src: `${Assets.base}ui/${k}.png` }));
+      if (I.complete && I.naturalWidth) ctx.drawImage(I, r[0] + 5, r[1] + 5, 59, 59);
+      nText(ctx, P.name, 280, 22, '#2a1a0a', 13, 'center', 118); nText(ctx, `${tx(TR.race[P.race])} · ${tx(TR.cls[P.cls])}`, 280, 42, '#5a4020', 11, 'center', 118);
+      nText(ctx, `${tx('Seviye')} ${P.lv}`, 280, 62, '#7a1c08', 12, 'center', 118);
+      const rows = [['Tecrübe', `${P.xp}/${xpNeed(P.lv)}`], ['Can', `${Math.ceil(p.hp)}/${s.hp}`], ['Mana', `${Math.floor(p.mp)}/${s.mp}`], [C.melee ? 'Fiz. Saldırı' : 'Büyü Saldırı', String(s.atk)], ['Savunma', String(s.def)],
+        ['Kritik', (8 + s.crit) + '%'], ['Kaçınma', s.dodge + '%'], ['Büyü direnci', String(s.res)], ['Can yenileme', String(s.hpreg)], ['Mana yenileme', String(s.mpreg)], ['Altın', String(P.gold)]];
+      rows.forEach(([k2, v], i) => { const y = 96 + i * 19.5; nText(ctx, tx(k2) + ':', 142, y, '#a83018', 12, 'left'); nText(ctx, v, 240, y, '#2a1a0a', 12, 'left', 104); });
+    } else if (R.page === 1) {
+      for (const [id, sl] of Object.entries(R2SLOT)) {
+        const r = nDraw(ctx, f, +id, sl === R.sel); nHit(+id, r[0] + 3, r[1] + 3, 40, 40);
+        const eid = P.eq[sl], it = eid && ITEMS[eid]; if (it) drawIcon(ctx, it, r[0] + 8, r[1] + 8, 32);
+      }
+      const slotName = R.sel ? tx(SLOTS.find(q => q[0] === R.sel)[1]) : null;
+      if (selIt) itemLines(selIt).slice(0, 4).forEach(([t, c, sz], i) => nText(ctx, i === 0 ? `${slotName}: ${t}` : t, 142, 256 + i * 14.5, c, sz, 'left', 196));
+      else nText(ctx, R.sel ? `${slotName}: ${tx('Boş yuva')}` : tx('Bir ekipman yuvasına dokun.'), 142, 272, '#5a4020', 11, 'left', 196);
+    } else nText(ctx, tx('Yakında'), 239, 150, '#5a4020', 13, 'center');
+    if (R.page === 1 && R.sel) nActions(ctx, f, 50105, [50106, 50107], selIt ? [['Çıkar', 'uneq'], ['Değiştir', 'swap']] : [['Değiştir', 'swap']]);
+    { const r = nDraw(ctx, f, 50104, pressed === 50104); nHit(50104, r[0] - 4, r[1], r[2] + 4, r[3]); }
+    nEnd(ctx);
+  }
+  function tapRole2(id) {
+    const P = Game.P;
+    if (id === 50104) { close(); open('hub'); return; }
+    if (R2TABS.includes(id)) { R.page = R2TABS.indexOf(id); R.sel = null; SFX.play('skill_pageflip'); return; }
+    if (R2SLOT[id]) { R.sel = R2SLOT[id]; SFX.play('menusel', 0.6); return; }
+    if (id === 'uneq' && R.sel && P.eq[R.sel]) return unequip(R.sel);
+    if (id === 'swap') { close(); open('bag', { cat: 0 }); }
+  }
+
   // ---------------- Ayarlar ----------------
   let sysSure = false;
   function drawSys(ctx, vw, VH) {
@@ -232,7 +369,7 @@ const Win = (() => {
     if (typeof h.id === 'string' && h.id.startsWith('hub:')) { const k = h.id.slice(4); SFX.play('skill_pageflip'); if (k === 'gm') { UI.open('gm'); return true; } if (k !== cur) { close(); open(k); } return true; }
     if (h.id === 'close') { UI.closeAll(); return true; }
     if (cur === 'sys') { tapSys(h.id); return true; } if (cur === 'map') { tapMap(h.id); return true; } if (cur === 'hub') return true;
-    if (cur === 'bag') tapBag(h.id); else if (cur === 'role') tapRole(h.id); else if (cur === 'npc') tapNpc(h.id); else if (cur === 'task') tapTask(h.id); else if (cur === 'menu') tapMenu(h.id); else if (cur === 'skill') tapSkill(h.id); else if (cur === 'shop') tapShop(h.id); else if (cur === 'dead') tapDead(h.id);
+    if (cur === 'bag') tapBag2(h.id); else if (cur === 'role') tapRole2(h.id); else if (cur === 'npc') tapNpc(h.id); else if (cur === 'task') tapTask(h.id); else if (cur === 'menu') tapMenu(h.id); else if (cur === 'skill') tapSkill(h.id); else if (cur === 'shop') tapShop(h.id); else if (cur === 'dead') tapDead(h.id);
     return true;
   }
   let lastTap = { id: null, t: 0 };

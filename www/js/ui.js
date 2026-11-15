@@ -339,7 +339,7 @@ const UI = (() => {
       title = 'Ayarlar';
       h = `<div class="iact"><button class="obtn" data-act="tsfx">Ses efektleri: ${SFX.opt.sfx ? 'Açık' : 'Kapalı'}</button><button class="obtn" data-act="tmus">Müzik: ${SFX.opt.music ? 'Açık' : 'Kapalı'}</button></div>
         <div class="iact"><button class="obtn" data-act="lang">${LANG === 'tr' ? 'Language: English' : 'Dil: Türkçe'}</button></div>
-        <div class="iact"><button class="obtn" data-act="totitle">Giriş ekranına dön</button><button class="obtn" data-act="newchar">Yeni karakter oluştur</button></div><p class="hint">Oyun otomatik kaydedilir. Sürüm 11150822</p>`;
+        <div class="iact"><button class="obtn" data-act="totitle">Giriş ekranına dön</button><button class="obtn" data-act="newchar">Yeni karakter oluştur</button></div><p class="hint">Oyun otomatik kaydedilir. Sürüm 11150854</p>`;
     }
     ptitle.textContent = tx(title); pbody.innerHTML = h; txDom(pbody);
   }
@@ -601,7 +601,7 @@ const UI = (() => {
     openShop(cn) { closeAll(); Win.open('shop', { shop: cn }); },
     startAssign, cancelAssign,
     boot, rockerPos, toLogical, toWorld, hudHit, open, closeAll, panelOpen, dialog, say, attack,
-    get vw() { return vw; }, get mode() { return mode; },
+    get vw() { return vw; }, get safeL() { return safeL; }, get mode() { return mode; },
     log, toast, zone(m) { zoneMsg = m; zoneT = 3; }, levelUp(n) { lvlN = n; lvlT = 2.5; }, hurt() { hurtT = 0.4; },
     float(e, txt, c, s = 1) { floats.push({ e, txt: tx(String(txt)), c, s, t: 0 }); }, target() { }, refresh() { if (cur) render(); },
     fade(on) { fadeOn = on; if (on) fadeA = 1; }, death() { closeAll(); setTimeout(() => Win.open('dead'), 1200); },

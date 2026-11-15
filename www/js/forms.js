@@ -15,8 +15,13 @@ const Forms = (() => {
     '寻路': 'Yol Bul', '切换': 'Değiştir', '任务列表': 'Görev Listesi', '常用': 'Sık Kullanılan', '道具': 'Eşya', '系统': 'Sistem', '角色': 'Karakter', '技能': 'Beceri', '地域': 'Harita', '背包': 'Çanta', '设置': 'Ayarlar',
     '接受': 'Kabul', '放弃': 'Bırak', '完成': 'Tamamla', '可接任务': 'Alınabilir', '已接任务': 'Alınmış', '购买': 'Satın Al', '卖出': 'Sat', '修理': 'Onar',
   };
-  async function init(base) { F = await fetch(vq(base + 'forms.json')).then(r => r.json()); }
-  function img(id) { let im = imgs[id]; if (!im) { im = new Image(); im.src = `${Assets.base}ui/AnbufenUI_Resource_${id}.png`; imgs[id] = im; } return im; }
+  // forms.json: Symbian sürümünün ekranları. forms2.json: yeni arayüz (Android sürümünün NEW_FORM_* ekranları); adları "n_" ile başlar,
+  // görselleri assets/ui2 altında kendi kaynak dosyasının adıyla durur.
+  async function init(base) {
+    const [a, b] = await Promise.all([fetch(vq(base + 'forms.json')).then(r => r.json()), fetch(vq(base + 'forms2.json')).then(r => r.json()).catch(() => ({}))]);
+    F = a; for (const [k, f] of Object.entries(b)) { for (const c of f.c) c.res = f.res; F['n_' + k] = f; }
+  }
+  function img(id, res) { const k = res ? res + '_' + id : id; let im = imgs[k]; if (!im) { im = new Image(); im.src = res ? `${Assets.base}ui2/${res}_${id}.png` : `${Assets.base}ui/AnbufenUI_Resource_${id}.png`; imgs[k] = im; } return im; }
   const rgb = c => `rgb(${(c >>> 16) & 255},${(c >>> 8) & 255},${c & 255})`;
   function get(name) { return F[name]; }
   function ctrl(name, id) { return F[name].c.find(c => c.id === id); }
@@ -28,7 +33,7 @@ const Forms = (() => {
     for (let i = s.L.length - 1; i >= 0; i--) {
       const [k, x, y, w, h, a0, a1, a2, col, al, im, t] = s.L[i], X = cx + x, Y = cy + y;
       if (k === 2 && im) {
-        const I = img(im); if (!I.complete || !I.naturalWidth) continue;
+        const I = img(im, c.res); if (!I.complete || !I.naturalWidth) continue;
         ctx.globalAlpha = al < 0 ? 1 : al / 100;
         const sw = Math.min(w, I.naturalWidth - a0), sh = Math.min(h, I.naturalHeight - a1); if (sw <= 0 || sh <= 0) { ctx.globalAlpha = 1; continue; }
         for (let yy = 0; yy < h; yy += sh) for (let xx = 0; xx < w; xx += sw) { const tw = Math.min(sw, w - xx), th = Math.min(sh, h - yy); ctx.drawImage(I, a0, a1, tw, th, X + xx, Y + yy, tw, th); }
