@@ -1,0 +1,1449 @@
+{
+ "toplam": {
+  "form": 171,
+  "data": 20545,
+  "img8": 2552,
+  "text": 118,
+  "utf16": 23,
+  "img16": 3,
+  "pal": 971,
+  "midi": 6,
+  "pcm": 30
+ },
+ "dosyalar": {
+  "AnbufenUI": {
+   "form": 106
+  },
+  "AnbufenUI_176": {
+   "form": 56,
+   "data": 1
+  },
+  "AnbufenUI_176_Resource": {
+   "img8": 4,
+   "data": 1
+  },
+  "AnbufenUI_Resource": {
+   "img8": 147
+  },
+  "AnbufenUI_Script": {
+   "text": 108
+  },
+  "AnrufenCoverUI": {
+   "form": 9,
+   "data": 1
+  },
+  "AnrufenCoverUI_Resource": {
+   "img8": 2,
+   "data": 1
+  },
+  "CommonDat": {
+   "utf16": 14,
+   "data": 1
+  },
+  "CommonDat_public": {
+   "utf16": 8,
+   "data": 3,
+   "text": 1
+  },
+  "Encampment": {
+   "img8": 2,
+   "data": 1
+  },
+  "Portrait": {
+   "img8": 36,
+   "data": 1
+  },
+  "UIData": {
+   "img8": 85,
+   "data": 2,
+   "img16": 1
+  },
+  "UIDataCmcc": {
+   "img8": 5,
+   "data": 2
+  },
+  "UIData_iphone": {
+   "img8": 55,
+   "img16": 2
+  },
+  "all_arena": {
+   "data": 2
+  },
+  "all_armor": {
+   "data": 109
+  },
+  "all_battle": {
+   "data": 49
+  },
+  "all_broadCast": {
+   "data": 36
+  },
+  "all_buff": {
+   "data": 231
+  },
+  "all_business": {
+   "data": 18
+  },
+  "all_character": {
+   "data": 13
+  },
+  "all_citizen": {
+   "data": 801
+  },
+  "all_combine": {
+   "data": 44
+  },
+  "all_equip": {
+   "data": 1476
+  },
+  "all_extprop": {
+   "data": 27
+  },
+  "all_formula": {
+   "data": 354
+  },
+  "all_guarder": {
+   "data": 100
+  },
+  "all_help": {
+   "data": 27
+  },
+  "all_instance": {
+   "data": 39
+  },
+  "all_monster": {
+   "data": 1282
+  },
+  "all_monsterAI": {
+   "data": 40
+  },
+  "all_pet": {
+   "data": 35
+  },
+  "all_petData": {
+   "data": 5
+  },
+  "all_prop": {
+   "data": 3748
+  },
+  "all_property": {
+   "data": 3704
+  },
+  "all_race": {
+   "data": 3
+  },
+  "all_role": {
+   "data": 13
+  },
+  "all_scene": {
+   "data": 531
+  },
+  "all_shop": {
+   "data": 44
+  },
+  "all_skill": {
+   "data": 651
+  },
+  "all_skilltree": {
+   "data": 27
+  },
+  "all_split": {
+   "data": 7
+  },
+  "all_suit": {
+   "data": 44
+  },
+  "all_task": {
+   "data": 3140
+  },
+  "all_test": {
+   "data": 2
+  },
+  "all_title": {
+   "data": 161
+  },
+  "all_union": {
+   "data": 2
+  },
+  "all_unionBattle": {
+   "data": 2
+  },
+  "all_weapon": {
+   "data": 71
+  },
+  "ani_comm_pal": {
+   "pal": 47,
+   "data": 2
+  },
+  "ani_horse_lv0": {
+   "pal": 4,
+   "img8": 1,
+   "data": 2
+  },
+  "ani_horse_lv1": {
+   "pal": 4,
+   "img8": 5,
+   "data": 5
+  },
+  "ani_horse_lv2": {
+   "pal": 4,
+   "img8": 1,
+   "data": 2
+  },
+  "ani_kni_body_lv1": {
+   "img8": 24,
+   "pal": 13,
+   "data": 1
+  },
+  "ani_kni_body_lv2": {
+   "img8": 8,
+   "pal": 12,
+   "data": 1
+  },
+  "ani_kni_body_lv3": {
+   "img8": 8,
+   "pal": 12,
+   "data": 1
+  },
+  "ani_kni_body_lv4": {
+   "img8": 8,
+   "pal": 12,
+   "data": 1
+  },
+  "ani_kni_head_lv1": {
+   "img8": 32,
+   "pal": 7,
+   "data": 1
+  },
+  "ani_kni_head_lv2": {
+   "img8": 16,
+   "pal": 6,
+   "data": 1
+  },
+  "ani_kni_head_lv3": {
+   "img8": 16,
+   "pal": 6,
+   "data": 1
+  },
+  "ani_kni_head_lv4": {
+   "img8": 16,
+   "pal": 6,
+   "data": 1
+  },
+  "ani_kni_weapon_lv1": {
+   "img8": 12,
+   "pal": 12,
+   "data": 1
+  },
+  "ani_kni_weapon_lv2": {
+   "img8": 4,
+   "pal": 12,
+   "data": 1
+  },
+  "ani_kni_weapon_lv3": {
+   "img8": 4,
+   "pal": 12,
+   "data": 1
+  },
+  "ani_kni_weapon_lv4": {
+   "img8": 4,
+   "pal": 12,
+   "data": 1
+  },
+  "ani_kni_weapon_lv5": {
+   "img8": 4,
+   "pal": 12,
+   "data": 1
+  },
+  "ani_kni_weapon_lv6": {
+   "img8": 4,
+   "pal": 12,
+   "data": 1
+  },
+  "ani_kor_body_lv1": {
+   "img8": 24,
+   "pal": 7,
+   "data": 1
+  },
+  "ani_kor_body_lv2": {
+   "img8": 8,
+   "pal": 6,
+   "data": 1
+  },
+  "ani_kor_body_lv3": {
+   "img8": 8,
+   "pal": 6,
+   "data": 1
+  },
+  "ani_kor_body_lv4": {
+   "img8": 8,
+   "pal": 6,
+   "data": 1
+  },
+  "ani_kor_head_lv1": {
+   "img8": 32,
+   "pal": 7,
+   "data": 1
+  },
+  "ani_kor_head_lv2": {
+   "img8": 16,
+   "pal": 6,
+   "data": 1
+  },
+  "ani_kor_head_lv3": {
+   "img8": 16,
+   "pal": 6,
+   "data": 1
+  },
+  "ani_kor_head_lv4": {
+   "img8": 16,
+   "pal": 6,
+   "data": 1
+  },
+  "ani_kor_orn1_lv1": {
+   "img8": 12,
+   "pal": 6
+  },
+  "ani_kor_weapon_lv1": {
+   "img8": 4,
+   "pal": 12,
+   "data": 1
+  },
+  "ani_kor_weapon_lv2": {
+   "img8": 4,
+   "pal": 12,
+   "data": 1
+  },
+  "ani_kor_weapon_lv3": {
+   "img8": 4,
+   "pal": 12,
+   "data": 1
+  },
+  "ani_kor_weapon_lv4": {
+   "img8": 4,
+   "pal": 12,
+   "data": 1
+  },
+  "ani_kor_weapon_lv5": {
+   "img8": 4,
+   "pal": 12,
+   "data": 1
+  },
+  "ani_kor_weapon_lv6": {
+   "img8": 4,
+   "pal": 12,
+   "data": 1
+  },
+  "ani_new_orn1": {
+   "img8": 8,
+   "data": 1
+  },
+  "ani_new_orn2": {
+   "pal": 6,
+   "img8": 1,
+   "data": 1
+  },
+  "ani_pas_body_lv1": {
+   "img8": 32,
+   "pal": 1,
+   "data": 1
+  },
+  "ani_pas_body_lv2": {
+   "img8": 16,
+   "data": 1
+  },
+  "ani_pas_body_lv3": {
+   "img8": 16,
+   "data": 1
+  },
+  "ani_pas_body_lv4": {
+   "img8": 16,
+   "data": 1
+  },
+  "ani_pas_head_lv1": {
+   "img8": 32,
+   "pal": 1,
+   "data": 1
+  },
+  "ani_pas_head_lv2": {
+   "img8": 16,
+   "data": 1
+  },
+  "ani_pas_head_lv3": {
+   "img8": 16,
+   "data": 1
+  },
+  "ani_pas_head_lv4": {
+   "img8": 16,
+   "data": 1
+  },
+  "ani_pas_weapon_lv1": {
+   "img8": 16,
+   "data": 1
+  },
+  "ani_pas_weapon_lv2": {
+   "img8": 8,
+   "data": 1
+  },
+  "ani_pas_weapon_lv3": {
+   "img8": 8,
+   "data": 1
+  },
+  "ani_pas_weapon_lv4": {
+   "img8": 8,
+   "data": 1
+  },
+  "ani_pas_weapon_lv5": {
+   "img8": 16,
+   "data": 1
+  },
+  "ani_pas_weapon_lv6": {
+   "img8": 8,
+   "data": 1
+  },
+  "ani_pas_weapon_lv7": {
+   "img8": 8,
+   "data": 1
+  },
+  "ani_pas_weapon_lv8": {
+   "img8": 8,
+   "data": 1
+  },
+  "channel_res": {
+   "data": 2
+  },
+  "clt_script": {
+   "text": 9,
+   "data": 1
+  },
+  "edition": {
+   "data": 3,
+   "utf16": 1
+  },
+  "effect_res": {
+   "img8": 7,
+   "data": 8
+  },
+  "effect_res2": {
+   "img8": 13,
+   "data": 17,
+   "pal": 1
+  },
+  "effect_res3": {
+   "img8": 16,
+   "data": 19,
+   "pal": 8
+  },
+  "effect_res4": {
+   "img8": 8,
+   "data": 9,
+   "pal": 1
+  },
+  "effect_res5": {
+   "img8": 9,
+   "data": 10
+  },
+  "effect_res6": {
+   "img8": 9,
+   "data": 10
+  },
+  "frame_ani": {
+   "data": 37
+  },
+  "icon_res_buff": {
+   "data": 2,
+   "img8": 144
+  },
+  "icon_res_equip": {
+   "data": 2,
+   "img8": 265
+  },
+  "icon_res_item": {
+   "data": 2,
+   "img8": 271
+  },
+  "icon_res_monster": {
+   "data": 2,
+   "img8": 95
+  },
+  "icon_res_npc": {
+   "data": 2,
+   "img8": 148
+  },
+  "icon_res_skill": {
+   "data": 2,
+   "img8": 152
+  },
+  "map_act_object_ashes": {
+   "img8": 2,
+   "data": 3
+  },
+  "map_act_object_cocoon": {
+   "img8": 3,
+   "data": 4
+  },
+  "map_act_object_grass": {
+   "img8": 3,
+   "data": 4
+  },
+  "map_act_object_ore": {
+   "img8": 4,
+   "data": 5
+  },
+  "map_ground_axecity": {
+   "img8": 1,
+   "pal": 1,
+   "data": 1
+  },
+  "map_ground_benmahaian": {
+   "img8": 1,
+   "data": 1
+  },
+  "map_ground_capital_floor": {
+   "img8": 1,
+   "data": 1
+  },
+  "map_ground_capital_square": {
+   "img8": 1,
+   "data": 2
+  },
+  "map_ground_carpet": {
+   "img8": 1,
+   "data": 2
+  },
+  "map_ground_church": {
+   "img8": 2,
+   "data": 1
+  },
+  "map_ground_diduzhoubian": {
+   "img8": 1,
+   "data": 1
+  },
+  "map_ground_dreamhill": {
+   "img8": 1,
+   "pal": 1,
+   "data": 1
+  },
+  "map_ground_dreamsun": {
+   "img8": 6,
+   "data": 1
+  },
+  "map_ground_floor": {
+   "img8": 1,
+   "data": 1
+  },
+  "map_ground_floor_city": {
+   "img8": 3,
+   "pal": 1,
+   "data": 1
+  },
+  "map_ground_fogcity": {
+   "img8": 1,
+   "data": 1
+  },
+  "map_ground_forest": {
+   "pal": 9,
+   "img8": 3,
+   "data": 1
+  },
+  "map_ground_ghostforest": {
+   "img8": 2,
+   "data": 1
+  },
+  "map_ground_grass": {
+   "img8": 1,
+   "data": 1
+  },
+  "map_ground_hill": {
+   "img8": 1,
+   "pal": 1,
+   "data": 1
+  },
+  "map_ground_hole": {
+   "img8": 1,
+   "pal": 1,
+   "data": 1
+  },
+  "map_ground_horserun_floor": {
+   "img8": 5,
+   "data": 1
+  },
+  "map_ground_leadarrow": {
+   "img8": 3,
+   "data": 1
+  },
+  "map_ground_odorplain": {
+   "img8": 1,
+   "data": 1
+  },
+  "map_ground_palace": {
+   "img8": 1,
+   "data": 2
+  },
+  "map_ground_pebble": {
+   "img8": 1,
+   "data": 1
+  },
+  "map_ground_plain": {
+   "img8": 3,
+   "data": 1
+  },
+  "map_ground_prophets": {
+   "img8": 1,
+   "data": 1
+  },
+  "map_ground_sewer": {
+   "img8": 2,
+   "data": 1
+  },
+  "map_ground_soil": {
+   "img8": 1,
+   "data": 1
+  },
+  "map_ground_steppe": {
+   "img8": 1,
+   "pal": 1,
+   "data": 1
+  },
+  "map_ground_towerman": {
+   "img8": 1,
+   "data": 1
+  },
+  "map_ground_volcano": {
+   "img8": 2,
+   "data": 1
+  },
+  "map_ground_wharf": {
+   "img8": 3,
+   "data": 2
+  },
+  "map_ground_wilderness": {
+   "img8": 3,
+   "data": 1
+  },
+  "map_ground_yinanhaian": {
+   "img8": 1,
+   "data": 1
+  },
+  "map_object_altar": {
+   "img8": 2,
+   "data": 3
+  },
+  "map_object_bar": {
+   "img8": 1,
+   "data": 2
+  },
+  "map_object_battalion": {
+   "img8": 2,
+   "data": 3,
+   "pal": 1
+  },
+  "map_object_box": {
+   "data": 13,
+   "img8": 1
+  },
+  "map_object_cage": {
+   "data": 3,
+   "img8": 1
+  },
+  "map_object_camp": {
+   "img8": 6,
+   "data": 7
+  },
+  "map_object_capital_church": {
+   "img8": 1,
+   "data": 2
+  },
+  "map_object_capital_fair": {
+   "img8": 8,
+   "data": 9
+  },
+  "map_object_capital_otherbuilding": {
+   "img8": 4,
+   "data": 5
+  },
+  "map_object_capital_otherbuilding2": {
+   "img8": 3,
+   "data": 4
+  },
+  "map_object_capital_palace": {
+   "img8": 1,
+   "data": 2
+  },
+  "map_object_capital_shop": {
+   "img8": 4,
+   "data": 5
+  },
+  "map_object_capital_square": {
+   "img8": 1,
+   "data": 2
+  },
+  "map_object_capital_statue": {
+   "data": 10,
+   "img8": 8
+  },
+  "map_object_capital_tree": {
+   "img8": 2,
+   "data": 3
+  },
+  "map_object_capital_wall": {
+   "img8": 1,
+   "data": 2
+  },
+  "map_object_dreamforest_house": {
+   "img8": 2,
+   "data": 3
+  },
+  "map_object_dreamforest_other": {
+   "img8": 3,
+   "data": 4
+  },
+  "map_object_dreamforest_otherbuilding": {
+   "img8": 2,
+   "data": 3
+  },
+  "map_object_dreamforest_shed": {
+   "img8": 3,
+   "data": 4
+  },
+  "map_object_dreamforest_shop": {
+   "img8": 2,
+   "data": 3
+  },
+  "map_object_dreamhill_house": {
+   "img8": 2,
+   "data": 3,
+   "pal": 2
+  },
+  "map_object_dreamhill_other": {
+   "data": 12,
+   "img8": 3,
+   "pal": 3
+  },
+  "map_object_dreamhill_otherbuilding": {
+   "img8": 4,
+   "data": 5,
+   "pal": 4
+  },
+  "map_object_dreamhill_shop": {
+   "img8": 2,
+   "data": 3,
+   "pal": 2
+  },
+  "map_object_evilhall": {
+   "img8": 2,
+   "data": 3
+  },
+  "map_object_evilplain": {
+   "data": 19,
+   "img8": 3,
+   "pal": 1
+  },
+  "map_object_fittings": {
+   "data": 20,
+   "img8": 8
+  },
+  "map_object_fittings2": {
+   "img8": 3,
+   "data": 4
+  },
+  "map_object_fittings3": {
+   "img8": 2,
+   "data": 3
+  },
+  "map_object_fittings4": {
+   "data": 9,
+   "img8": 4
+  },
+  "map_object_flag": {
+   "data": 5,
+   "img8": 2
+  },
+  "map_object_fogcity_house": {
+   "img8": 3,
+   "data": 4
+  },
+  "map_object_fogcity_other": {
+   "img8": 3,
+   "data": 4
+  },
+  "map_object_fogcity_wall": {
+   "img8": 3,
+   "data": 4
+  },
+  "map_object_forest_tree_1": {
+   "pal": 3,
+   "img8": 1,
+   "data": 2
+  },
+  "map_object_forest_tree_2": {
+   "pal": 3,
+   "img8": 1,
+   "data": 2
+  },
+  "map_object_gate": {
+   "img8": 1,
+   "data": 2
+  },
+  "map_object_hill_other_1": {
+   "img8": 2,
+   "data": 3
+  },
+  "map_object_hill_other_2": {
+   "img8": 2,
+   "data": 3
+  },
+  "map_object_hill_other_3": {
+   "img8": 2,
+   "data": 3
+  },
+  "map_object_hill_other_4": {
+   "img8": 1,
+   "data": 2
+  },
+  "map_object_hill_wall": {
+   "pal": 2,
+   "img8": 1,
+   "data": 2
+  },
+  "map_object_hole_other": {
+   "img8": 2,
+   "data": 3,
+   "pal": 1
+  },
+  "map_object_hole_wall": {
+   "img8": 1,
+   "data": 2,
+   "pal": 1
+  },
+  "map_object_horserun_house": {
+   "img8": 3,
+   "data": 4
+  },
+  "map_object_horserun_other": {
+   "img8": 2,
+   "data": 3
+  },
+  "map_object_horserun_otherbuilding": {
+   "img8": 3,
+   "data": 4
+  },
+  "map_object_horserun_shop": {
+   "img8": 2,
+   "data": 3
+  },
+  "map_object_horserun_wall": {
+   "img8": 2,
+   "data": 3
+  },
+  "map_object_jar": {
+   "data": 12,
+   "img8": 3
+  },
+  "map_object_ladder": {
+   "img8": 1,
+   "data": 2
+  },
+  "map_object_magic_array": {
+   "data": 11,
+   "img8": 1
+  },
+  "map_object_new_ornament1": {
+   "img8": 3,
+   "data": 4
+  },
+  "map_object_new_ornament2": {
+   "data": 10,
+   "img8": 8
+  },
+  "map_object_new_ornament3": {
+   "img8": 6,
+   "data": 7
+  },
+  "map_object_other": {
+   "img8": 4,
+   "data": 5
+  },
+  "map_object_plant": {
+   "img8": 1,
+   "data": 2
+  },
+  "map_object_pool": {
+   "img8": 1,
+   "data": 2
+  },
+  "map_object_pumpkin": {
+   "data": 14,
+   "img8": 1
+  },
+  "map_object_sewer": {
+   "img8": 3,
+   "data": 4
+  },
+  "map_object_statue": {
+   "img8": 3,
+   "data": 4,
+   "pal": 1
+  },
+  "map_object_steppe_other": {
+   "img8": 3,
+   "data": 4,
+   "pal": 3
+  },
+  "map_object_stone": {
+   "img8": 2,
+   "data": 3
+  },
+  "map_object_sun_other": {
+   "img8": 4,
+   "data": 5
+  },
+  "map_object_temple": {
+   "img8": 3,
+   "data": 4
+  },
+  "map_object_tree_city": {
+   "pal": 2,
+   "img8": 1,
+   "data": 2
+  },
+  "map_object_vehicles": {
+   "data": 3,
+   "img8": 1
+  },
+  "map_object_wall": {
+   "img8": 3,
+   "data": 4
+  },
+  "map_object_weapon": {
+   "data": 8,
+   "img8": 6
+  },
+  "map_object_well": {
+   "data": 3,
+   "img8": 1
+  },
+  "map_object_wreck": {
+   "data": 12,
+   "img8": 2
+  },
+  "mapfile_benmacaoyuan": {
+   "data": 7
+  },
+  "mapfile_boss": {
+   "data": 24
+  },
+  "mapfile_caoyuan": {
+   "data": 2
+  },
+  "mapfile_chengzhan": {
+   "data": 6
+  },
+  "mapfile_city": {
+   "data": 43
+  },
+  "mapfile_didu": {
+   "data": 7
+  },
+  "mapfile_emengpingyuan": {
+   "data": 7
+  },
+  "mapfile_fuben": {
+   "data": 153
+  },
+  "mapfile_guihuosenlin": {
+   "data": 19
+  },
+  "mapfile_heiansenlin": {
+   "data": 7
+  },
+  "mapfile_huangye": {
+   "data": 6
+  },
+  "mapfile_jingjichang": {
+   "data": 8
+  },
+  "mapfile_kuangdong": {
+   "data": 11
+  },
+  "mapfile_kuyeshanlu": {
+   "data": 14
+  },
+  "mapfile_liqingzhaoze": {
+   "data": 3
+  },
+  "mapfile_liutiefeixu": {
+   "data": 9
+  },
+  "mapfile_mengyanzhijing": {
+   "data": 33
+  },
+  "mapfile_mofahuayuan": {
+   "data": 2
+  },
+  "mapfile_mofaxueyuan": {
+   "data": 4
+  },
+  "mapfile_nuyanshan": {
+   "data": 17
+  },
+  "mapfile_rongyanzhidi": {
+   "data": 8
+  },
+  "mapfile_senlin": {
+   "data": 6
+  },
+  "mapfile_wangrichengzhoubian": {
+   "data": 5
+  },
+  "mapfile_xiachengqu": {
+   "data": 9
+  },
+  "mapfile_xiashuidao": {
+   "data": 12
+  },
+  "mapfile_xiejiaojidi": {
+   "data": 11
+  },
+  "mapfile_xueshan": {
+   "data": 13
+  },
+  "mapfile_xueyuan": {
+   "data": 9
+  },
+  "mapfile_yingxionglingqin": {
+   "data": 9
+  },
+  "mapfile_yinyingcheng": {
+   "data": 15
+  },
+  "mapfile_yinyingzhanchang": {
+   "data": 7
+  },
+  "mapfile_yishujiagonghui": {
+   "data": 11
+  },
+  "mapfile_zhanchang": {
+   "data": 20
+  },
+  "monster1": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster10": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster11": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster12": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster13": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster14": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster15": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster16": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster17": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster18": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster19": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster2": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster20": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster21": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster22": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster23": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster24": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster25": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster26": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster27": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster28": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster29": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster3": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster30": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster31": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster32": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster33": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster34": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster35": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster36": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster37": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster38": {
+   "pal": 9,
+   "img8": 1,
+   "data": 2
+  },
+  "monster39": {
+   "img8": 1,
+   "data": 2
+  },
+  "monster4": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster40": {
+   "img8": 1,
+   "data": 2
+  },
+  "monster41": {
+   "img8": 1,
+   "data": 2
+  },
+  "monster42": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster43": {
+   "pal": 7,
+   "img8": 1,
+   "data": 2
+  },
+  "monster44": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster45": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster46": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster47": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster48": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster49": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster5": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster50": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster51": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster52": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster53": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster54": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster55": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster56": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster57": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster58": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster59": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster6": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster60": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster61": {
+   "img8": 2,
+   "pal": 8,
+   "data": 2
+  },
+  "monster62": {
+   "img8": 2,
+   "data": 3
+  },
+  "monster63": {
+   "img8": 1,
+   "data": 2
+  },
+  "monster64": {
+   "pal": 8,
+   "img8": 2,
+   "data": 3
+  },
+  "monster65": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster66": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster67": {
+   "pal": 8,
+   "img8": 2,
+   "data": 2
+  },
+  "monster68": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster69": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster7": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster70": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster71": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster72": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster73": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster74": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster75": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster76": {
+   "img8": 1,
+   "data": 2
+  },
+  "monster77": {
+   "img8": 1,
+   "data": 2
+  },
+  "monster8": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "monster9": {
+   "pal": 8,
+   "img8": 1,
+   "data": 2
+  },
+  "music_res": {
+   "data": 2,
+   "midi": 6
+  },
+  "npc_res": {
+   "img8": 33,
+   "pal": 5,
+   "data": 2
+  },
+  "npc_res_2": {
+   "img8": 49,
+   "pal": 5,
+   "data": 2
+  },
+  "npc_res_3": {
+   "img8": 53,
+   "pal": 6,
+   "data": 16
+  },
+  "npc_sign": {
+   "img8": 24,
+   "data": 22
+  },
+  "pet_res": {
+   "img8": 1,
+   "data": 2
+  },
+  "platform_info": {
+   "data": 2
+  },
+  "snd_res": {
+   "data": 2,
+   "pcm": 30
+  },
+  "string_res": {
+   "data": 1570
+  },
+  "svr_string_res": {
+   "data": 807
+  }
+ },
+ "hatalar": []
+}

@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Anrufen Kaynak Kataloğu</title>
+<style>
+  :root { --bg: #14100c; --panel: #1f1812; --line: #4a3c2a; --gold: #e6cf89; --text: #ece4d4; --dim: #9a8f7c; --ok: #9cd98a; --bad: #ff9a70; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.45 system-ui, sans-serif; }
+  header { position: sticky; top: 0; z-index: 5; background: #0c0906; border-bottom: 1px solid var(--line); padding: 8px 12px; }
+  h1 { margin: 0 0 6px; font-size: 16px; color: var(--gold); }
+  nav { display: flex; gap: 6px; flex-wrap: wrap; }
+  nav button, .btn { background: var(--panel); color: var(--text); border: 1px solid var(--line); padding: 6px 10px; font: inherit; cursor: pointer; }
+  nav button.on { border-color: var(--gold); color: var(--gold); }
+  main { padding: 12px; max-width: 1200px; margin: 0 auto; }
+  .note { color: var(--dim); margin: 0 0 12px; }
+  .card { background: var(--panel); border: 1px solid var(--line); padding: 10px 12px; margin-bottom: 10px; min-width: 0; }
+  .card h3 { margin: 0 0 6px; font-size: 14px; color: var(--gold); }
+  .tag { display: inline-block; padding: 1px 7px; border: 1px solid var(--line); margin: 2px 4px 2px 0; font-size: 12px; color: var(--dim); }
+  .ok { color: var(--ok); } .bad { color: var(--bad); }
+  audio { width: 100%; max-width: 420px; height: 34px; margin: 4px 0; }
+  input[type=search] { width: 100%; max-width: 420px; padding: 7px 9px; background: #0c0906; border: 1px solid var(--line); color: var(--text); font: inherit; margin-bottom: 10px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 10px; }
+  .scene img { width: 100%; height: 150px; object-fit: contain; background: #0a0a0a; display: block; margin-bottom: 6px; }
+  .imgs { display: flex; flex-wrap: wrap; gap: 6px; align-items: flex-end; }
+  .imgs a { display: block; background: #2a2a44; border: 1px solid var(--line); line-height: 0; }
+  .imgs img { max-width: 100%; max-height: 220px; image-rendering: pixelated; }
+  details { background: var(--panel); border: 1px solid var(--line); margin-bottom: 6px; } summary { padding: 7px 10px; cursor: pointer; } details > div { padding: 8px 10px; }
+  table { border-collapse: collapse; width: 100%; font-size: 13px; } td, th { text-align: left; padding: 3px 6px; border-bottom: 1px solid #2c241a; vertical-align: top; } th { color: var(--dim); font-weight: 500; }
+  .wrap { overflow-x: auto; } a { color: var(--gold); } small { color: var(--dim); }
+</style></head>
+<body>
+<header><h1>Anrufen Online · Kaynak Kataloğu</h1><nav id="nav"></nav></header>
+<main id="main"><p class="note">Yükleniyor…</p></main>
+<script>var LANG = "tr", EN = {}, EN_Q = {}; function tx(s) { return s; }</script>
+<script src="../www/js/tr.js"></script>
+<script>
+const C = 'cikti/', $ = s => document.querySelector(s), esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+let K = null, tab = location.hash.slice(1) || 'ozet';
+const TABS = [['ozet', 'Özet'], ['muzik', 'Müzik'], ['ses', 'Sesler'], ['sahne', 'Haritalar'], ['gorsel', 'Görseller'], ['tablo', 'Tablolar ve betikler']];
+const trn = cn => { try { return (TR.scene && TR.scene[cn]) || (TR.name && TR.name[cn]) || ''; } catch (e) { return ''; } };
+const mapId = m => m;
+function sceneName(id) { const s = K.sahne[id]; if (!s) return id; const t = trn(s[0]); return (t ? t + ' · ' : '') + s[0]; }
+function sceneCard(id) {
+  const s = K.sahne[id], has = K.harita.includes(s[1]);
+  return `<div class="card scene">${has ? `<img loading="lazy" src="${C}onizleme/${encodeURIComponent(s[1])}.jpg" alt="">` : ''}<h3>${esc(sceneName(id))}</h3>
+    <small>Sahne ${id} · harita dosyası: ${esc(s[1])}<br>Müzik: <b class="${K.muzik.find(m => m.ad === s[2])?.var ? 'ok' : s[2] ? 'bad' : ''}">${esc(s[2] || 'yok')}</b> · ${s[3]} varlık${s[4].length ? '<br>Çıkışlar: ' + s[4].map(esc).join(', ') : ''}</small></div>`;
+}
+const V = {
+  ozet() {
+    const d = K.dokum, n = Object.values(K.gorsel).reduce((a, b) => a + b.length, 0);
+    return `<p class="note">Orijinal oyun paketindeki <b>her şey</b> çıkarıldı. Ham dosyalar <code>kaynak/orijinal/</code>, çıkarılmış halleri <code>kaynak/cikti/</code> klasöründe. Aracı yeniden çalıştırmak için: <code>python3 tools/extract_all.py</code></p>
+    <div class="grid">
+      <div class="card"><h3>Görseller</h3>${n} görsel (${Object.keys(K.gorsel).length} dosyadan): karakterler, canavarlar, NPC'ler, efektler, harita parçaları, arayüz, simgeler</div>
+      <div class="card"><h3>Haritalar</h3>${K.harita.length} harita dosyası, ${Object.keys(K.sahne).length} sahne (NPC, canavar ve geçit yerleşimleriyle)</div>
+      <div class="card"><h3>Müzik</h3>${K.muzik.filter(m => m.var).length} parça pakette var; sahne tablosu ${K.muzik.length} parça adı kullanıyor</div>
+      <div class="card"><h3>Sesler</h3>${K.ses.length} ses efekti</div>
+      <div class="card"><h3>Paletler</h3>${d.pal} renk paleti (canavar ve ekipman renk çeşitleri)</div>
+      <div class="card"><h3>Ekranlar ve betikler</h3>${d.form} ekran tanımı, ${K.betik.length} betik (Lua)</div>
+      <div class="card"><h3>Tablolar</h3>${d.data} kayıt: eşya, ekipman, canavar, NPC, görev, beceri, dükkân, lonca, zindan…</div>
+    </div>`;
+  },
+  muzik() {
+    return `<p class="note">Oyun paketinde yalnızca yeşil işaretli 6 parça var. Kırmızı olanları sahne tablosu istiyor ama dosyaları pakette yok (orijinalde sonradan indiriliyordu). Her parçanın altında, orijinal tabloya göre o parçayı çalan haritalar listelenir.</p>` +
+      K.muzik.map(m => `<div class="card"><h3>${esc(m.ad)} <span class="${m.var ? 'ok' : 'bad'}">${m.var ? '● pakette var' : '● pakette yok'}</span></h3>
+        ${m.var ? `<audio controls preload="none" src="../www/assets/music/${m.ad.replace('.mid', '.mp3')}"></audio> <a href="${C}muzik/${m.ad}" download>MIDI dosyası</a>` : ''}
+        <div>${m.sahneler.length} sahne: ${m.sahneler.slice(0, 60).map(id => `<span class="tag">${esc(sceneName(id))}</span>`).join('')}${m.sahneler.length > 60 ? ' …' : ''}</div></div>`).join('');
+  },
+  ses() { return `<p class="note">Orijinal ses efektleri (8 kHz, tek kanal).</p><div class="grid">` + K.ses.map(s => `<div class="card"><h3>${esc(s.replace('snd_effect_', '').replace('.wav', ''))}</h3><audio controls preload="none" src="${C}ses/${s}"></audio></div>`).join('') + '</div>'; },
+  sahne() {
+    return `<p class="note">${Object.keys(K.sahne).length} sahnenin tamamı. Ada, numaraya, harita dosyasına ya da müziğe göre ara. Resimler haritanın zemin ve nesneleriyle çizilmiş küçük halidir.</p>
+      <input type="search" id="q" placeholder="Ara: ad, numara, müzik…"><div class="grid" id="list"></div>`;
+  },
+  gorsel() {
+    return `<p class="note">Kaynak dosyasına göre gruplu. Bir gruba dokununca görselleri açılır; görsele dokununca tam boyu açılır.</p><input type="search" id="q" placeholder="Ara: monster, effect, UIData, npc…">` +
+      Object.entries(K.gorsel).map(([g, L]) => `<details data-g="${esc(g)}"><summary>${esc(g)} <small>· ${L.length} görsel</small></summary><div class="imgs"></div></details>`).join('');
+  },
+  tablo() {
+    const big = Object.entries(K.tablo).filter(([k]) => k.startsWith('all_') || /string|CommonDat|platform/.test(k));
+    return `<p class="note">Her tablo, kayıt numarası ve içindeki metinlerle JSON olarak çıkarıldı. Sayısal alanların tam çözümü için ham dosyalar <code>kaynak/orijinal/</code> içinde.</p>
+      <div class="card"><h3>Oyun tabloları</h3><div class="wrap"><table><tr><th>Tablo</th><th>Kayıt</th><th></th></tr>${big.map(([k, n]) => `<tr><td>${esc(k)}</td><td>${n}</td><td><a href="${C}tablo/${k}.json">aç</a></td></tr>`).join('')}</table></div></div>
+      <div class="card"><h3>Betikler (${K.betik.length})</h3>${K.betik.map(b => `<a class="tag" href="${C}${b}">${esc(b.split('/').pop())}</a>`).join('')}</div>`;
+  },
+};
+function after() {
+  const q = $('#q');
+  if (tab === 'sahne') {
+    const ids = Object.keys(K.sahne), draw = () => { const v = q.value.trim().toLowerCase(); const hit = ids.filter(id => !v || (id + ' ' + sceneName(id) + ' ' + K.sahne[id][1] + ' ' + K.sahne[id][2]).toLowerCase().includes(v)); $('#list').innerHTML = hit.slice(0, 120).map(sceneCard).join('') + (hit.length > 120 ? `<p class="note">${hit.length - 120} sonuç daha var; aramayı daralt.</p>` : ''); };
+    q.oninput = draw; draw();
+  }
+  if (tab === 'gorsel') {
+    document.querySelectorAll('details').forEach(d => d.addEventListener('toggle', () => { const box = d.querySelector('.imgs'); if (d.open && !box.innerHTML) { const g = d.dataset.g; box.innerHTML = K.gorsel[g].map(([id, w, h]) => `<a href="${C}gorsel/${g}/${id}.png" target="_blank" title="${id} · ${w}x${h}"><img loading="lazy" src="${C}gorsel/${g}/${id}.png" width="${Math.min(w, 320)}" alt="${id}"></a>`).join(''); } }));
+    q.oninput = () => { const v = q.value.trim().toLowerCase(); document.querySelectorAll('details').forEach(d => d.hidden = v && !d.dataset.g.toLowerCase().includes(v)); };
+  }
+}
+function show(t) { tab = V[t] ? t : 'ozet'; location.hash = tab; $('#nav').innerHTML = TABS.map(([k, n]) => `<button class="${k === tab ? 'on' : ''}" data-t="${k}">${n}</button>`).join(''); $('#main').innerHTML = V[tab](); after(); scrollTo(0, 0); }
+$('#nav').onclick = e => { const b = e.target.closest('[data-t]'); if (b) show(b.dataset.t); };
+fetch(C + 'katalog.json').then(r => r.json()).then(k => { K = k; show(tab); }).catch(e => { $('#main').innerHTML = '<p class="bad">Katalog yüklenemedi: ' + esc(e.message) + '</p>'; });
+</script>
+</body></html>

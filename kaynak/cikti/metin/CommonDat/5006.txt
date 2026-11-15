@@ -1,0 +1,78 @@
+index	en_string	zh_string
+1	HP	体力
+2	MP	法力
+3	Happiness	快乐度
+4	Hunger	饱食度
+11	Strength	力量
+12	Agility	敏捷
+13	Vitality	体质
+14	Intelligence	智慧
+20	Attack	物理攻击
+21	Defense	物理防御
+22	Magic Attack	魔法攻击
+23	Magic Defense	魔法防御
+30	Max HP	体力上限
+31	Min MP	法力上限
+32	HP Regenaration	体力回复
+33	Mana Regenaration	法力回复
+40	Speed	移动速度
+41	Physical Critical Strike	暴击率
+42	Magic Critical Strike	魔法致命
+43	Chance to Hit	命中
+44	Dodge	闪避
+45	Luck	减免被暴击率
+50	Absorb	减免伤害比率
+51	Damage Bonus	释放伤害比率
+60	Earth Resistance	地抗性
+61	Fire Resistance	火抗性
+62	Air Resistance	风抗性
+63	Water Resistance	冰抗性
+64	Holy Resistance	圣抗性
+65	Dark Resistance	暗抗性
+66	Block Rate	格挡率
+100	???	地伤害
+101	???	火伤害
+102	???	风伤害
+103	???	冰伤害
+104	???	偏斜率
+105	???	必中
+106	???	忽略对方防御
+107	???	伤害豁免
+108	???	命中率
+109	???	闪避率
+110	???	降低对方火抗
+111	???	降低对方冰抗
+112	???	经验值
+113	???	金钱
+114	???	掉落物品几率
+115	???	减免寒冰伤害
+116	???	减免烈焰伤害
+117	???	减免毒气伤害
+120		暗伤害
+121		圣伤害
+122		暴击
+124		释放
+129		韧性
+1000	Level	等级
+1001	SN	编号
+1002	Sex	性别
+1003	Generation	辈分
+1004	Character	性格
+1005	???	物理攻击天赋
+1006	???	魔法攻击天赋
+1007	???	体力天赋
+1008	???	法力天赋
+1009	???	防御天赋
+1010	???	抗性天赋
+1011	???	命中天赋
+1012	???	闪避天赋
+1020	???	物理攻击天赋上限
+1021	???	魔法攻击天赋上限
+1022	???	体力天赋上限
+1023	???	法力天赋上限
+1024	???	防御天赋上限
+1025	???	抗性天赋上限
+1026	???	命中天赋上限
+1027	???	闪避天赋上限
+1028	Race	种族
+2000		全部抗性

@@ -1,0 +1,72 @@
+﻿index	en_string	zh_string
+0	Player Tag	玩家标识
+1	Familiar Tag	魔法兽标识
+2	NPC Tag	NPC标识
+3	MiniMap	小地图
+4	Health Bar	血量显示
+5	World Message	世界频道消息
+6	Team Message	组队频道消息
+7	Surround Message	周围频道消息
+8	Area Message	区域频道消息
+9	Chatroom Message	聊天室消息
+10	Name and ID	全部显示
+11	Name	显示昵称
+12	ID	显示ID
+13	Don't Display	不显示
+14	Display	显示
+15	Save Messages	保存聊天记录
+16	Message Window Height	消息框高度
+17	Message Scroll Control	消息滚动控制
+18	Special Effect Display	特效播放模式
+19	Equipment Change Display	玩家换装显示
+20	Familiar Display	魔法兽显示模式
+21	20	20
+22	40	40
+23	60	60
+24	Low	低
+25	Medium	中
+26	High	高
+27	Fast	快
+28	Slow	慢
+29	Display All	全部显示
+30	View Myself Only	只看自己
+31	View My Team Only	只看队伍
+32	Select Controls	选择方向键组合
+33	Setup OK	设置OK键
+34	Nav Key	导航键
+35	"Key 2, 8, 4, 6"	"2,8,4,6键"
+36	"Key 1, 4, 5, 7"	"1,7,4,5键"
+37	"Key 4, 5, 7, 8"	"5,7,4,8键"
+38	Center Key	中心键
+39	key 5	5键
+40	"key 1, 2, 3, 4, 5, 6, 7, 8"	1，2，3，4，5，6，7，8
+41	"key 1, 3, 5, 7, Nav Key"	1，3，5，7，导航键
+42	"key 2, 3, 6, 8, Nav Key"	2，3，6，8，导航键
+43	"1,2,3,6 Nav Key"	1，2，3，6，导航键
+44	"key 1, 2, 3, 4, Center key, key 6,7,8"	1，2，3，4，中心键，6，7，8
+45	"key 1, 3, 7, Center key, Nav Key"	1，3，7，中心键，导航键 
+46	on	开
+47	off	关
+48	yes	是
+49	no	否
+50	Pet Bubble	宠物语言开关
+51	Internet Access Point	接入点
+52	Clear Temp-Memory	清除临时文件
+53	User Select	手动选择
+54	???	玩家换装形象显示
+55	???	宠物形象显示
+56	???	技能特效显示
+57	???	全部显示
+58	???	只看自己
+59	???	只看队伍
+60	???	不显示
+61		玩家称号
+62		玩家公会
+63		画面质量
+64		音乐
+65		高级模式
+66		简洁模式
+67		退出保存
+68		音效
+69		自定义
+70		其他玩家形象

@@ -1,0 +1,7 @@
+﻿index	zh_string	en_string
+1	剑	
+2	刀	
+3	杖	
+4	镰	
+5	魔典	
+6	圣器	

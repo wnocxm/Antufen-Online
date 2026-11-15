@@ -1,0 +1,111 @@
+﻿[system]
+BUSY_STATUS_WAITING_TIME = 10	//秒
+QUERY_NICKNAME_TIMEOUT = 15 //秒，等待服务器返回玩家名字的超时临界
+
+[game]
+MEDIC_USE_COOLDOWN = 100	//药品使用冷却时间
+
+PET_FULL_CRITICAL = 100		//宠物吃饱了的临界
+PET_FULL_EXCESSIVE = 130	//吃过量了
+PET_BREED_HAPPY = 100		//繁殖要求快乐度
+PET_BREED_FULL = 100		//繁殖要求饱食度
+PET_BREED_LV = 25		//繁殖要求等级
+
+PET_AGE_1 = 25			//宠物年龄阶段
+PET_AGE_2 = 50			//
+PET_AGE_3 = 75			//
+PET_AGE_4 = 100			//
+
+CFS_ITEM = 0 //30077		//寄售需要道具
+CUSTOM_TASK_ITEM = 30080	//自建任务需要道具
+BREED_INFO_ITEM = 30018		//发布繁殖信息需要道具
+CLEAR_SKILL_ITEM = 30092	//洗点道具
+CLEAR_SKILL_ITEM = 30788	//洗点道具
+MAIL_ITEM = 30076		//邮寄道具
+SMS_ITEM = 0			//发短信道具
+LOCK_ITEM = 30062			//加锁道具
+LOCK_ITEM = 31093			//加锁道具
+UNLOCK_ITEM = 30063			//解锁道具
+UNLOCK_ITEM = 30592			//解锁道具
+
+DEFAULT_ANI_PET = "NPC-默认魔法兽"	//默认动画形象
+DEFAULT_ANI_NPC = "NPC-默认NPC"
+DEFAULT_ANI_MONSTER = "NPC-默认怪物"
+DEFAULT_ANI_HORSE = "HORSE-ANI-1"
+
+SHORTCUT_GROUP = 4	//快捷栏组数
+
+METER_LIMIT_TIMES = 150	//距离限制倍数(百分比)
+
+WAITBAR_TIME_ITEM_OPERTATION = 3 //装备升级镶嵌等，读条时间
+WAITBAR_TIME_PET_FANTASIZE = 3 //宠物幻化，技能转移 读条时间
+WAITBAR_TIME_LIVESKILL_RPODUCTION = 10 //生产读条时间
+
+[pet_ai]
+ai=110404
+ai=110405
+ai=110406
+ai=110407
+ai=110008
+
+[weapon_avatar]
+cnt = 11
+weapon_lv_orn2=""	//0级
+weapon_lv_orn2=""	//1级
+weapon_lv_orn2=""	//2
+weapon_lv_orn2=""	//3
+weapon_lv_orn2="group1_orn2"	//4
+weapon_lv_orn2="group1_橙_orn2"	//5
+weapon_lv_orn2="group1_红_orn2"	//6
+weapon_lv_orn2="group1_绿_orn2"	//7
+weapon_lv_orn2="group1_蓝_orn2"	//8
+weapon_lv_orn2="group1_紫_orn2"	//9
+weapon_lv_orn2="group1_白_orn2"	//10
+
+[v8]
+COMBINE_GROUP = 280002		//v8社区道具兑换组的sn
+
+[deposit]
+item = 30
+item = 50
+item = 100
+
+[deposit_qb_count]
+item = 100
+item = 200
+item = 300
+item = 500
+item = 1000
+
+[exchange_139_count]
+item = 10
+item = 100
+item = 200
+item = 300
+item = 500
+item = 1000
+
+[color]
+world = "135,198,15"
+zoom = "43,183,235"
+around =	"43,183,235"
+team = "206,137,255"
+task_accept = "255,198,0"
+task_process = "255,198,0"
+task_ready = "255,198,0"
+task_finish = "255,198,0"
+task_prize = "255,198,0"
+lv_up = "255,236,204"
+item_get = "255,85,0"
+item_lost = "255,236,204"
+exp_get = "255,236,204"
+money_get = "255,236,204"
+money_lost = "255,236,204"
+skill_notice = "255,236,204"
+die_lost = "255,236,204"
+mini_map = "132,144,162"
+
+[performance_param]
+frames = 40	//每秒帧数
+net = 100	//网络延时(ms)
+memory = 40	//内存占用率(%)
