@@ -1,0 +1,679 @@
+{
+ "_not": "Şehirlerdeki ve açık alanlardaki (55 altı) NPC, canavar ve nesne adları. Çince: [Türkçe, İngilizce]",
+ "营地军官": [
+  "Kamp Subayı",
+  "Camp Officer"
+ ],
+ "传送法阵": [
+  "Işınlanma Çemberi",
+  "Teleport Circle"
+ ],
+ "远征军队长": [
+  "Sefer Ordusu Yüzbaşısı",
+  "Expedition Captain"
+ ],
+ "芙蕾雅牧师": [
+  "Freya Rahibi",
+  "Priest of Freya"
+ ],
+ "伤兵": [
+  "Yaralı Asker",
+  "Wounded Soldier"
+ ],
+ "远征军士兵": [
+  "Sefer Ordusu Askeri",
+  "Expedition Soldier"
+ ],
+ "商会使节": [
+  "Ticaret Loncası Elçisi",
+  "Guild of Commerce Envoy"
+ ],
+ "侏儒宣慰使": [
+  "Cüce Gönül Elçisi",
+  "Gnome Goodwill Envoy"
+ ],
+ "铁匠": [
+  "Demirci",
+  "Blacksmith"
+ ],
+ "道具商人": [
+  "Eşya Tüccarı",
+  "Item Merchant"
+ ],
+ "凌乱的杂物": [
+  "Dağınık Eşyalar",
+  "Messy Clutter"
+ ],
+ "办事员克里斯": [
+  "Memur Chris",
+  "Clerk Chris"
+ ],
+ "珍奇宝石寄售商人": [
+  "Nadir Mücevher Komisyoncusu",
+  "Rare Gem Consignment Dealer"
+ ],
+ "武器寄售商人": [
+  "Silah Komisyoncusu",
+  "Weapon Consignment Dealer"
+ ],
+ "防具寄售商人": [
+  "Zırh Komisyoncusu",
+  "Armor Consignment Dealer"
+ ],
+ "饰品寄售商人": [
+  "Takı Komisyoncusu",
+  "Accessory Consignment Dealer"
+ ],
+ "魔法兽寄售商人": [
+  "Büyülü Hayvan Komisyoncusu",
+  "Magic Beast Consignment Dealer"
+ ],
+ "杂货寄售商人": [
+  "Çerçöp Komisyoncusu",
+  "Sundries Consignment Dealer"
+ ],
+ "寄售商人": [
+  "Komisyoncu",
+  "Consignment Dealer"
+ ],
+ "兽人村民": [
+  "Ork Köylü",
+  "Orc Villager"
+ ],
+ "侏儒村民": [
+  "Cüce Köylü",
+  "Gnome Villager"
+ ],
+ "人类村民": [
+  "İnsan Köylü",
+  "Human Villager"
+ ],
+ "冒烟的裂口": [
+  "Duman Tüten Yarık",
+  "Smoking Crack"
+ ],
+ "☆杰克队长": [
+  "☆Yüzbaşı Jack",
+  "☆Captain Jack"
+ ],
+ "试炼森林(20级)": [
+  "Sınav Ormanı (Sv 20)",
+  "Trial Forest (Lv 20)"
+ ],
+ "迪加的财宝": [
+  "Diga'nın Hazinesi",
+  "Diga's Treasure"
+ ],
+ "浓雾尖兵": [
+  "Yoğunsis Öncüsü",
+  "Thickfog Vanguard"
+ ],
+ "侏儒市民": [
+  "Cüce Kasabalı",
+  "Gnome Citizen"
+ ],
+ "散落的军备": [
+  "Dağılmış Askerî Teçhizat",
+  "Scattered Munitions"
+ ],
+ "普通副本-月夜林地(30级)": [
+  "Normal Zindan · Mehtap Korusu (Sv 30)",
+  "Normal Dungeon · Moonlit Woodland (Lv 30)"
+ ],
+ "奇怪的草丛": [
+  "Tuhaf Çalılık",
+  "Strange Bushes"
+ ],
+ "猎头者": [
+  "Kelle Avcısı",
+  "Headhunter"
+ ],
+ "抄写者大使": [
+  "Yazıcılar Elçisi",
+  "Scribe Ambassador"
+ ],
+ "贫民窟守卫": [
+  "Kenar Mahalle Muhafızı",
+  "Slum Guard"
+ ],
+ "侏儒信使": [
+  "Cüce Ulak",
+  "Gnome Courier"
+ ],
+ "城市守卫": [
+  "Şehir Muhafızı",
+  "City Guard"
+ ],
+ "精英战士": [
+  "Seçkin Savaşçı",
+  "Elite Warrior"
+ ],
+ "高阶法师": [
+  "Yüksek Büyücü",
+  "High Mage"
+ ],
+ "市民瓦里亚": [
+  "Kasabalı Varia",
+  "Citizen Varia"
+ ],
+ "市民诺瓦": [
+  "Kasabalı Nova",
+  "Citizen Nova"
+ ],
+ "市民艾欧斯": [
+  "Kasabalı Eos",
+  "Citizen Eos"
+ ],
+ "食物锅": [
+  "Yemek Kazanı",
+  "Food Pot"
+ ],
+ "带洞的石头": [
+  "Delikli Taş",
+  "Holed Stone"
+ ],
+ "水井": [
+  "Kuyu",
+  "Well"
+ ],
+ "杂乱的草丛": [
+  "Karmakarışık Çalılık",
+  "Tangled Bushes"
+ ],
+ "隐藏的暗探": [
+  "Gizlenmiş Casus",
+  "Hidden Spy"
+ ],
+ "被破坏的马车": [
+  "Parçalanmış Araba",
+  "Wrecked Carriage"
+ ],
+ "大破木制箱子": [
+  "Paramparça Tahta Sandık",
+  "Smashed Wooden Crate"
+ ],
+ "失落的书信": [
+  "Kayıp Mektup",
+  "Lost Letter"
+ ],
+ "普通矿": [
+  "Sıradan Maden",
+  "Common Ore"
+ ],
+ "患病的夜精灵": [
+  "Hasta Gece Elfi",
+  "Sick Night Elf"
+ ],
+ "目击者": [
+  "Görgü Tanığı",
+  "Witness"
+ ],
+ "贵族长老": [
+  "Soylu İhtiyar",
+  "Noble Elder"
+ ],
+ "弗雷皇家卫士": [
+  "Frey Kraliyet Muhafızı",
+  "Frey Royal Guard"
+ ],
+ "中央雕像": [
+  "Orta Heykel",
+  "Central Statue"
+ ],
+ "铁锤将军": [
+  "Demirçekiç General",
+  "General Ironhammer"
+ ],
+ "矿工队长": [
+  "Madenci Ustabaşı",
+  "Miner Foreman"
+ ],
+ "矮人酿酒师": [
+  "Dağ Cücesi Biracı",
+  "Dwarf Brewer"
+ ],
+ "青铜卫队幸存者": [
+  "Tunç Muhafız Sağ Kalanı",
+  "Bronze Guard Survivor"
+ ],
+ "白雪": [
+  "Akkar",
+  "Snow White"
+ ],
+ "矮人孤儿": [
+  "Dağ Cücesi Yetim",
+  "Dwarf Orphan"
+ ],
+ "市民波多": [
+  "Kasabalı Bodo",
+  "Citizen Bodo"
+ ],
+ "矮人守卫": [
+  "Dağ Cücesi Muhafız",
+  "Dwarf Guard"
+ ],
+ "普通副本-大斗技场(60级)": [
+  "Normal Zindan · Büyük Dövüş Arenası (Sv 60)",
+  "Normal Dungeon · Grand Arena (Lv 60)"
+ ],
+ "英雄副本-大斗技场(60级)": [
+  "Kahraman Zindanı · Büyük Dövüş Arenası (Sv 60)",
+  "Heroic Dungeon · Grand Arena (Lv 60)"
+ ],
+ "时空管理员": [
+  "Zaman-Mekân Yöneticisi",
+  "Space-Time Keeper"
+ ],
+ "青铜联军军士长": [
+  "Tunç Birlik Başçavuşu",
+  "Bronze Alliance Sergeant Major"
+ ],
+ "五星上将詹姆斯下士": [
+  "Beş Yıldızlı Mareşal Onbaşı James",
+  "Five-Star Marshal Corporal James"
+ ],
+ "【驭兽者】萨诺卡兹": [
+  "【Hayvan Terbiyecisi】Sanokaz",
+  "【Beastmaster】Sanokaz"
+ ],
+ "米莎": [
+  "Misha",
+  "Misha"
+ ],
+ "☆魔法蝙蝠": [
+  "☆Büyülü Yarasa",
+  "☆Magic Bat"
+ ],
+ "下水道清洁工": [
+  "Lağım Temizlikçisi",
+  "Sewer Cleaner"
+ ],
+ "燕尾草": [
+  "Kırlangıç Otu",
+  "Swallowtail Grass"
+ ],
+ "小铁片": [
+  "Küçük Demir Parçası",
+  "Small Iron Scrap"
+ ],
+ "☆腐蚀史莱姆": [
+  "☆Aşındırıcı Slime",
+  "☆Corrosive Slime"
+ ],
+ "☆被饲养的突袭者": [
+  "☆Beslenmiş Akıncı",
+  "☆Bred Raider"
+ ],
+ "★黑色收割者": [
+  "★Kara Hasatçı",
+  "★Black Reaper"
+ ],
+ "☆晶化蠕虫": [
+  "☆Kristalleşmiş Solucan",
+  "☆Crystallized Worm"
+ ],
+ "☆巨魔狂暴者": [
+  "☆Trol Çılgını",
+  "☆Troll Berserker"
+ ],
+ "☆游荡食人魔": [
+  "☆Başıboş Ogre",
+  "☆Wandering Ogre"
+ ],
+ "☆黑夜": [
+  "☆Karagece",
+  "☆Blacknight"
+ ],
+ "舰队特使": [
+  "Donanma Elçisi",
+  "Fleet Envoy"
+ ],
+ "图书管理员": [
+  "Kütüphaneci",
+  "Librarian"
+ ],
+ "乞丐": [
+  "Dilenci",
+  "Beggar"
+ ],
+ "☆冻尔": [
+  "☆Dondur",
+  "☆Frost"
+ ],
+ "幻影菇": [
+  "Hayalet Mantar",
+  "Phantom Mushroom"
+ ],
+ "☆焦耳": [
+  "☆Joule",
+  "☆Joule"
+ ],
+ "侏儒寻林客": [
+  "Cüce Orman Kâşifi",
+  "Gnome Woodseeker"
+ ],
+ "魔树": [
+  "İblis Ağacı",
+  "Demon Tree"
+ ],
+ "☆嗜血杀手": [
+  "☆Kana Susamış Katil",
+  "☆Bloodthirsty Killer"
+ ],
+ "夜精灵少女": [
+  "Gece Elfi Kız",
+  "Night Elf Maiden"
+ ],
+ "小妖精看守": [
+  "Cinci Bekçi",
+  "Imp Warden"
+ ],
+ "【指挥官】罗德列": [
+  "【Komutan】Rodrell",
+  "【Commander】Rodrell"
+ ],
+ "【武者】凯恩": [
+  "【Dövüşçü】Kane",
+  "【Martial Artist】Kane"
+ ],
+ "碎灵贤者": [
+  "Ruhkıran Bilge",
+  "Soulbreaker Sage"
+ ],
+ "尸体研究员": [
+  "Ceset Araştırmacısı",
+  "Corpse Researcher"
+ ],
+ "受伤的侏儒": [
+  "Yaralı Cüce",
+  "Injured Gnome"
+ ],
+ "黑魔道大师": [
+  "Kara Büyü Üstadı",
+  "Dark Arts Master"
+ ],
+ "宝石兑换商": [
+  "Mücevher Takasçısı",
+  "Gem Exchanger"
+ ],
+ "商会会长": [
+  "Ticaret Loncası Başkanı",
+  "Guild of Commerce President"
+ ],
+ "公会看板": [
+  "Lonca Panosu",
+  "Guild Board"
+ ],
+ "走私客": [
+  "Kaçakçı",
+  "Smuggler"
+ ],
+ "善良的老头": [
+  "İyi Kalpli İhtiyar",
+  "Kind Old Man"
+ ],
+ "衰老的角斗士": [
+  "Yaşlı Gladyatör",
+  "Aging Gladiator"
+ ],
+ "吟游诗人": [
+  "Ozan",
+  "Bard"
+ ],
+ "卖花姑娘叶子": [
+  "Çiçekçi Kız Yaprak",
+  "Flower Girl Leaf"
+ ],
+ "洛奇的傻儿子": [
+  "Rocky'nin Saf Oğlu",
+  "Rocky's Simple Son"
+ ],
+ "公会争霸赛公告牌": [
+  "Lonca Turnuvası Duyuru Panosu",
+  "Guild Tournament Notice Board"
+ ],
+ "噬魂远征军军需官": [
+  "Ruhyiyen Seferi Levazımcısı",
+  "Soul Eater Expedition Quartermaster"
+ ],
+ "噬魂远征军军官": [
+  "Ruhyiyen Seferi Subayı",
+  "Soul Eater Expedition Officer"
+ ],
+ "夜精灵偷渡者": [
+  "Gece Elfi Kaçak Yolcu",
+  "Night Elf Stowaway"
+ ],
+ "仙子土堆": [
+  "Peri Tümseği",
+  "Fairy Mound"
+ ],
+ "不一样的仙子土堆": [
+  "Farklı Bir Peri Tümseği",
+  "Unusual Fairy Mound"
+ ],
+ "【山脉领主】拉尔夫": [
+  "【Dağların Efendisi】Ralph",
+  "【Mountain Lord】Ralph"
+ ],
+ "【野兽之灵】奥萨克": [
+  "【Hayvan Ruhu】Osak",
+  "【Beast Spirit】Osak"
+ ],
+ "咕噜": [
+  "Gulu",
+  "Gulu"
+ ],
+ "法术书柜": [
+  "Büyü Kitaplığı",
+  "Spell Bookcase"
+ ],
+ "☆冰地狱犬骑士": [
+  "☆Buz Cehennem Köpeği Süvarisi",
+  "☆Ice Hellhound Rider"
+ ],
+ "传送法球": [
+  "Işınlanma Küresi",
+  "Teleport Orb"
+ ],
+ "染血的书籍": [
+  "Kana Bulanmış Kitap",
+  "Bloodstained Book"
+ ],
+ "☆【大恶魔】富兰克林": [
+  "☆【Büyük İblis】Franklin",
+  "☆【Archdemon】Franklin"
+ ],
+ "大恶魔": [
+  "Büyük İblis",
+  "Archdemon"
+ ],
+ "烈焰导师": [
+  "Alev Hocası",
+  "Flame Mentor"
+ ],
+ "魔宠大师": [
+  "Büyülü Hayvan Ustası",
+  "Familiar Master"
+ ],
+ "机关大师": [
+  "Düzenek Ustası",
+  "Mechanism Master"
+ ],
+ "雪山草堆": [
+  "Karlı Dağ Ot Yığını",
+  "Snowy Haystack"
+ ],
+ "猎人向导（人类）": [
+  "Avcı Rehber",
+  "Hunter Guide"
+ ],
+ "猎人向导（夜精灵）": [
+  "Avcı Rehber",
+  "Hunter Guide"
+ ],
+ "奇异的草堆": [
+  "Tuhaf Ot Yığını",
+  "Odd Haystack"
+ ],
+ "血刃贷剑客": [
+  "Kanbıçak Kiralık Kılıççı",
+  "Bloodblade Sellsword"
+ ],
+ "兽人": [
+  "Ork",
+  "Orc"
+ ],
+ "奇怪的土堆": [
+  "Tuhaf Toprak Yığını",
+  "Strange Dirt Mound"
+ ],
+ "灵魂之灯": [
+  "Ruh Lambası",
+  "Soul Lamp"
+ ],
+ "水渍": [
+  "Su Lekesi",
+  "Water Stain"
+ ],
+ "弄蛆人": [
+  "Kurtçu",
+  "Maggot Keeper"
+ ],
+ "尼古拉爵士": [
+  "Sir Nikolai",
+  "Sir Nikolai"
+ ],
+ "菲拉斯·银叶": [
+  "Feras Gümüşyaprak",
+  "Feras Silverleaf"
+ ],
+ "皇家魔箭手": [
+  "Kraliyet Büyülü Okçusu",
+  "Royal Arcane Archer"
+ ],
+ "人类狙击手": [
+  "İnsan Keskin Nişancı",
+  "Human Sniper"
+ ],
+ "精灵战法师": [
+  "Elf Savaş Büyücüsü",
+  "Elf Battlemage"
+ ],
+ "夜精灵术士": [
+  "Gece Elfi Büyücü",
+  "Night Elf Warlock"
+ ],
+ "皇家补给官": [
+  "Kraliyet İkmal Subayı",
+  "Royal Supply Officer"
+ ],
+ "精灵特派员": [
+  "Elf Özel Temsilcisi",
+  "Elf Commissioner"
+ ],
+ "弗洛丝希德": [
+  "Frostheed",
+  "Frostheed"
+ ],
+ "齐格弗里德": [
+  "Siegfried",
+  "Siegfried"
+ ],
+ "精灵魔剑士": [
+  "Elf Büyülü Kılıççı",
+  "Elf Spellblade"
+ ],
+ "精灵击剑手": [
+  "Elf Eskrimci",
+  "Elf Fencer"
+ ],
+ "敢死队": [
+  "Fedai Birliği",
+  "Suicide Squad"
+ ],
+ "帝国水兵": [
+  "İmparatorluk Denizcisi",
+  "Imperial Marine"
+ ],
+ "斯拉里": [
+  "Slari",
+  "Slari"
+ ],
+ "克克莉": [
+  "Kekeli",
+  "Kekeli"
+ ],
+ "仙子剑客": [
+  "Peri Kılıççı",
+  "Fairy Swordsman"
+ ],
+ "仙子法术师": [
+  "Peri Büyücü",
+  "Fairy Spellcaster"
+ ],
+ "巨魔狂战士": [
+  "Trol Berserker",
+  "Troll Berserker"
+ ],
+ "吃人巨魔": [
+  "Yamyam Trol",
+  "Man-eating Troll"
+ ],
+ "生命收集者": [
+  "Can Toplayıcı",
+  "Life Collector"
+ ],
+ "魔导祭司": [
+  "Büyü Rahibi",
+  "Arcane Priest"
+ ],
+ "远古战魂": [
+  "Kadim Savaş Ruhu",
+  "Ancient War Spirit"
+ ],
+ "精灵武士": [
+  "Elf Savaşçı",
+  "Elf Warrior"
+ ],
+ "☆无形刽子手": [
+  "☆Görünmez Cellat",
+  "☆Invisible Executioner"
+ ],
+ "尸体艺术家": [
+  "Ceset Sanatçısı",
+  "Corpse Artist"
+ ],
+ "☆黑蜘蛛": [
+  "☆Kara Örümcek",
+  "☆Black Spider"
+ ],
+ "☆☆【小胖】拉斯": [
+  "☆☆【Tombiş】Lars",
+  "☆☆【Chubby】Lars"
+ ],
+ "☆恐怖缠绕者": [
+  "☆Dehşet Sarmaşığı",
+  "☆Terror Strangler"
+ ],
+ "变异野猪": [
+  "Mutant Yaban Domuzu",
+  "Mutant Boar"
+ ],
+ "淤血虫": [
+  "Pıhtı Böceği",
+  "Clotblood Bug"
+ ],
+ "暗林潜伏者": [
+  "Kara Orman Sinsisi",
+  "Darkwood Lurker"
+ ],
+ "竞技魔法阵": [
+  "Arena Büyü Çemberi",
+  "Arena Magic Circle"
+ ],
+ "毒气陷阱": [
+  "Zehirli Gaz Tuzağı",
+  "Poison Gas Trap"
+ ]
+}

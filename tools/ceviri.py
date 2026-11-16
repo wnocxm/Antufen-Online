@@ -95,6 +95,10 @@ import glob as _glob
 for _f in sorted(_glob.glob('kaynak/ceviri/gorevler/*.json')):
     if _f.endswith('_kaynak.json'): continue
     for _k, _v in json.load(open(_f, encoding='utf-8')).get('adlar', {}).items(): N.setdefault(_k, tuple(_v))
+# genel ad dosyaları (görevsiz): kaynak/ceviri/adlar/*.json  {Çince: [Türkçe, İngilizce]}
+for _f in sorted(_glob.glob('kaynak/ceviri/adlar/*.json')):
+    for _k, _v in json.load(open(_f, encoding='utf-8')).items():
+        if not _k.startswith('_'): N.setdefault(_k, tuple(_v))
 NUM={'一':1,'二':2,'三':3,'四':4,'五':5,'六':6,'七':7,'八':8,'九':9}
 def tr(n):
     if n in B: return B[n]

@@ -29,3 +29,5 @@ Oyun hazır: `window.__G && window.__G.player`. Konsoldan: `gmLevel(n)`, `loadSc
 - `ECONNREFUSED 5432`: PostgreSQL kapalı → `service postgresql start`.
 - Komut onayı geçici "no verdict" hatası verirse aynı komutu bir kez daha dene; olmazsa salt okunur işlerle devam et.
 - Yeni görsel/efekt görünmüyorsa: sürüm (`?v=`) artırıldı mı, ad `preload` listesinde mi (`loadScene` içindeki `names`).
+
+- `tools/test/adlar.js`: bütün haritalardaki adların TR/EN'de Çince kalmadığını denetler (beklenen: `cn: []`).

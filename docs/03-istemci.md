@@ -17,7 +17,7 @@ Mantıksal ekran yüksekliği `VH = 360` (genişlik orana göre). Hata ayıklama
 | `audio.js` | `SFX`: 12 APK müziği (`assets/music/*.mp3`, döngü uzunlukları `LOOP`), ses efektleri, sentez yedeği |
 | `i18n.js`, `i18n_data.js` | `LANG` ('tr'/'en'), `tx(metin)` Türkçe → İngilizce (`EN_UI`), `EN_ITEM`, `EN_SKILL`, `EN_Q` (elle görevlerin İngilizcesi) |
 | `tr.js` | `TR.name` / `TR.scene` ad çevirileri, `trName(cn)`, NPC selamları, **elle yazılmış ilk görevler** (`QUESTS`) |
-| `tr_scenes.js` | Üretilmiş ad çevirileri (`tools/ceviri.py`) |
+| `tr_scenes.js` | Üretilmiş ad çevirileri (`tools/ceviri.py`): harita adları + `N` sözlüğü + görev dosyalarındaki `adlar` + `kaynak/ceviri/adlar/*.json` (görevsiz genel adlar: `sehir_alan`, `zindan`, `ust_60_77`, `ust_80_120`). Yeni ad eklerken bu dosyalara yaz; denetim: `node tools/test/adlar.js` |
 | `quests_gen.js` | Üretilmiş görevler (`tools/gorevler.py`) — bkz. 04 |
 
 ## Zaman, hareket

@@ -30,7 +30,7 @@ Tamam:
 - Görevler (oyunda 801, SQL'de 832 satır): Acemi kampları, Guanlin, Koşanat Şehri, Kâhin Tapınağı, Gözcü Kampı, Güneşgören Şehri (+Dinlenme Bölgesi, lonca terasları), İstihbarat Karakolu, İmparatorluk Başkenti çevresi, Dağgören Şehri, Yoğunsis Kasabası, Sanatçılar Loncası, Altındalga Limanı, Büyü Akademisi. **55'e kadar bütün bölgelerin hikâye görevleri alındı.**
 
 Sırada (bölge sırası seviyeye göre):
-1. 55'e kadar baştan sona oynanış testi, denge, eşyalar (bölgelere göre), kalan ~1100 NPC/canavar adının çevirisi.
+1. 55'e kadar baştan sona oynanış testi, denge, eşyalar (bölgelere göre). (Harita adları ve sahnelerdeki 1519 NPC/canavar/nesne adı çevrildi.)
 
 Ertelenenler / bilinenler:
 - 6 ileri beceri ağacı, ırk becerileri, 40. seviye sınıf yükselmesi, mücevher/tarif/unvan/evcil hayvan yok.
