@@ -208,7 +208,7 @@ function stats() {
   for (const sk of C.skills) { const r = (P.sk && P.sk[sk.id]) || 0; if (!sk.pas || !r) continue; const m = 0.6 + 0.4 * r; for (const k in sk.pas) { const v = Math.round(sk.pas[k] * m); if (k === 'hpPct') hpPct += v; else if (k === 'mpPct') mpPct += v; else s[k] = (s[k] || 0) + v; } }
   s.hp *= 1 + hpPct / 100; s.mp *= 1 + mpPct / 100;
   if (P.race === '精灵') { s.mp += 150; s.hp -= 50; } else { s.def += 20; }
-  for (const b of Game.player?.buffs || []) { if (b.buff.atk) s.atk *= 1 + b.buff.atk; if (b.buff.def) s.def *= 1 + b.buff.def; if (b.buff.spd) s.spd += b.buff.spd; if (b.buff.crit) s.crit += b.buff.crit; if (b.buff.dr) s.dr += b.buff.dr; }
+  for (const b of Game.player?.buffs || []) { if (b.buff.atk) s.atk *= 1 + b.buff.atk; if (b.buff.def) s.def *= 1 + b.buff.def; if (b.buff.spd) s.spd += b.buff.spd; if (b.buff.crit) s.crit += b.buff.crit; if (b.buff.dr) s.dr += b.buff.dr; if (b.buff.hpP) s.hp *= 1 + b.buff.hpP; if (b.buff.dodge) s.dodge += b.buff.dodge; if (b.buff.res) s.res += b.buff.res; }   // hpP/dodge/res: evcil hayvan haleleri
   for (const k in s) s[k] = Math.round(s[k]);
   return s;
 }

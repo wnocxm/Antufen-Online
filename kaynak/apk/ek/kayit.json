@@ -1,0 +1,6 @@
+{
+  "_not": "APK (sonraki resmî sürüm) görsel ekleri: Symbian dosyalarında olmayan renk paletleri ve canavarlar. Dosyalar bu klasördeki .godat kopyalarıdır; tools/pack_all.py eksik kayıtları buradan tamamlar.",
+  "怪物-火巨灵-桔": ["monster39", 2074, 5074, 6001, 0, 0, 0],
+  "怪物-火巨灵-紫": ["monster39", 2074, 5074, 6002, 0, 0, 0],
+  "怪物-暗影女王": ["monster78", 2116, 5115, 0, 0, 0, 0]
+}

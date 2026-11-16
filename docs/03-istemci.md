@@ -61,8 +61,11 @@ Panel nasıl açılır: menü → Sistem → "⚙ GM" (menüde Evcil sekmesi yer
 Sekmeler (`#gtools` `v:maps|dg|pet`, `drawGmSys`, `gmX` in `ui.js`):
 - **Haritalar**: haritaya ışınlan (arama), NPC listesi.
 - **Zindanlar** (`Dungeon.GM`): her zindan/kopya için "Kapıya git", "İçeri gir" (seviye, ön görev, günlük sınır yok; sayaç artmaz); bu harita için "Boss'u öldür", "Canavarları öldür", "Son kata / başa", "Zindandan çık", "Günlük hakları sıfırla".
-- **Evcil** (`Pet.GM`): her tür için "Hayvanı ver" (doğrudan kuluçka, hak doluysa hak artar), "Yumurta + kutu"; üstte "Pencereyi aç", "Seviyeme çek", "Dirilt + doyur + iyileştir", "Evcil eşyaları ver" (mama, iksir, diriltme, Sözleşme Taşı, İç Öz, kutular), "Acıktır" (aç hayvan savaşmaz testi), "Hepsini sil".
-Test: `tools/test/gm.js` panel düğmelerine gerçekten basar (görüntüler `OUT_zindan.png`, `OUT_evcil.png`, `OUT_panda.png`).
+- **Evcil** (`Pet.GM`):
+  - Her tür için "Hayvanı ver" (doğrudan kuluçka, hak doluysa hak artar) ve "Yumurta + kutu".
+  - Üstte "Pencereyi aç", "Seviyeme çek", "Dirilt + doyur + iyileştir", "Evcil eşyaları ver" (mama, iksir, diriltme, Sözleşme Taşı, İç Öz, kutular), "Acıktır" (aç hayvan savaşmaz testi), "Hepsini sil".
+  - **Dönüşüm ağacı** satırı: "Sonraki biçim" / "Temel biçim" (`stage`), "3 rastgele beceri" (`skills`), "Dönüşüm malzemesi" (`tf`: yardımcı eşyalar, aynı türden 2 yardımcı hayvan, 20000 altın), "Dönüşüm penceresi" / "Beceri aktarma" (`petf` / `petfs`).
+Test: `tools/test/gm.js` panel düğmelerine gerçekten basar (görüntüler `OUT_zindan.png`, `OUT_evcil.png`, `OUT_panda.png`, `OUT_atesdevi.png`, `OUT_aktarma.png`; Ateş Devi'nin 8 biçimini sırayla geçer).
 
 ## Arayüz notları
 - Başlık ekranı orijinal ana menü (logo, kitap çerçevesi UIData_2033, sarı oklar): Devam Et / Yeni Karakter / Çevrimiçi / Dil.

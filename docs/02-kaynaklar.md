@@ -6,6 +6,7 @@
 | `kaynak/orijinal/` | Symbian paketinin ham dosyaları (`.godat` arşivleri). Dokunma. |
 | `kaynak/cikti/` | Çıkarılmış her şey: `gorsel/` (2555 PNG), `palet/`, `ses/`, `muzik/`, `form/`, `betik/`, `tablo/` (her tablonun kayıtları JSON), `metin/`, `cozulmus/` (sahneler, haritalar, animasyonlar, `kayit.json` görsel kayıt tablosu, `tablolar/anireg.json`, `tablolar/tasks.json` = Symbian görev metinleri) |
 | `kaynak/apk/cikti/` | APK (`apk-test / 1028.apk`, Releases) çıkarımı: 3518 görsel, `metin/config/1000-1029.txt` tabloları |
+| `kaynak/apk/ek/` | APK'dan alınan **resmî** görsel ekleri: `monster39.godat` (Ateş Devi turuncu/mor paletleri 6001/6002), `monster78.godat` (Gölge Kraliçe), `kayit.json` (kayıt adları). `tools/pack_all.py` Symbian'da eksik kayıtları buradan tamamlar. APK ekibinin değişiklikleri (`*.bak_*` yedeği olanlar, ör. `pet_res` paletleri, `monster81`) alınmaz. |
 | `kaynak/apk/seviyeler.json` | Sahne → gerçek seviye aralığı (APK dünya haritası adlarından "(27-29级)") |
 | `kaynak/apk/gecitler.json` | `sahne:kapı` → hedef sahne (APK geçit tablosu) |
 | `kaynak/apk/efekt_beceriler.json` | APK `effect_data.godat` içindeki `skills.json`: her becerinin kendi/uçan/hedef efektleri |

@@ -44,7 +44,7 @@ const Win = (() => {
     else if (h.id === 'm50761') m.n = m.n === m.max ? 1 : Math.min(m.max, m.n < 10 ? 10 : m.max);   // sayıya dokun: 10, sonra en fazla
     else if (h.id === 'm52791') { modal = null; m.onOk(m.n); }
   }
-  function open(name, o = {}) { cur = name; opt = o; if (name === 'map') { WM.mode = 'world'; WM.sel = null; wmData(); } if (name === 'npc') { D.q = null; SFX.play('request', 0.6); } if (name === 'task') { K.sel = null; K.sure = false; } if (name === 'menu') M.page = 0; if (name === 'shop') { H.tab = 0; H.sel = null; H.off = 0; } B.sel = null; B.sure = false; B.assign = false; B.page = 0; if (o.cat != null) B.cat = o.cat; SFX.play('menu_appear', 0.5); if (name === 'bag') questFlag('openBag'); }
+  function open(name, o = {}) { cur = name; opt = o; if (name === 'map') { WM.mode = 'world'; WM.sel = null; wmData(); } if (name === 'npc') { D.q = null; SFX.play('request', 0.6); } if (name === 'task') { K.sel = null; K.sure = false; } if (name === 'menu') M.page = 0; if (name === 'shop') { H.tab = 0; H.sel = null; H.off = 0; } if (name === 'pet') { const L = Pet.list(), i = L.findIndex(x => x.uid === Game.P.petOn); if (i >= 0) PW.i = i; } if (name === 'petf') { TF.mode = o.mode || 'tf'; TF.main = o.main && Pet.resting(Pet.list().find(x => x.uid === o.main)) ? o.main : null; TF.mat = null; TF.a = [null, null]; } B.sel = null; B.sure = false; B.assign = false; B.page = 0; if (o.cat != null) B.cat = o.cat; SFX.play('menu_appear', 0.5); if (name === 'bag') questFlag('openBag'); }
   function close() { cur = null; opt = {}; modal = null; }
   const isOpen = () => !!cur || !!modal;   // tek başına onay kutusu da (ör. zindan girişi) pencere sayılır
 
@@ -62,7 +62,7 @@ const Win = (() => {
     const modern = cur !== 'menu';   // yeni arayüz: oyun ekranı karartılmaz
     if (!modern) { ctx.fillStyle = 'rgba(0,0,0,.5)'; ctx.fillRect(0, 0, vw, VH); }
     if (cur === 'bag') drawBag2(ctx, vw, VH); else if (cur === 'role') drawRole2(ctx, vw, VH); else if (cur === 'npc') drawNpc2(ctx, vw, VH); else if (cur === 'task') drawTask2(ctx, vw, VH); else if (cur === 'menu') drawMenu(ctx, vw, VH); else if (cur === 'skill') drawSkill2(ctx, vw, VH); else if (cur === 'shop') drawShop2(ctx, vw, VH); else if (cur === 'dead') drawDead2(ctx, vw, VH);
-    if (cur === 'sys') { drawHub2(ctx, vw, VH); drawSys2(ctx, vw, VH); } else if (cur === 'pet') { drawHub2(ctx, vw, VH); drawPet2(ctx, vw, VH); } else if (cur === 'map') { drawMap(ctx, vw, VH); drawHub2(ctx, vw, VH); }
+    if (cur === 'sys') { drawHub2(ctx, vw, VH); drawSys2(ctx, vw, VH); } else if (cur === 'pet') { drawHub2(ctx, vw, VH); drawPet2(ctx, vw, VH); } else if (cur === 'petf') drawPetF(ctx, vw, VH); else if (cur === 'map') { drawMap(ctx, vw, VH); drawHub2(ctx, vw, VH); }
     if (cur === 'hub') drawHub2(ctx, vw, VH);
     if (modal) drawModal2(ctx, vw, VH);
     if (pressed && performance.now() - pressT > 160) pressed = null;
@@ -253,6 +253,8 @@ const Win = (() => {
     if (e.a === 'bye') return UI.closeAll();
     if (e.a === 'q') { D.q = e.q; return; }
     if (e.a === 'back') { D.q = null; return; }
+    if (e.a === 'petf') { open('petf', { mode: e.m }); return; }
+    if (e.a === 'say') { opt.say = e.s; return; }
     if (e.a === 'shop') { UI.openShop(n.cn); return; }
     if (e.a === 'tp') { UI.closeAll(); setTimeout(() => questTeleport(e.q), 300); return; }
     if (e.a === 'dtp') { UI.closeAll(); setTimeout(() => e.d.go(), 300); return; }
@@ -417,9 +419,15 @@ const Win = (() => {
   }
 
   // ---------------- Evcil hayvan (NEW_FORM petcomplex + taktik newpetai) ----------------
-  const PW = { i: 0, ai: false };
-  const PCLS = { 1: ['Destek', 'Support'], 2: ['Fiziksel', 'Physical'], 3: ['Savunma', 'Defense'], 4: ['Büyü', 'Magic'] };
+  // bilgi alanı üç sekme: Bilgi · Beceriler (doğuştan + rastgele, simgeli) · Ağaç (8 biçim: temel + 7 dönüşüm aşaması)
+  const PW = { i: 0, ai: false, tab: 0, skd: 0, tree: null, pre: {} };
   const T2 = (a, b) => LANG === 'en' ? b : a;
+  const SKIND = { active: ['Saldırı', 'Attack'], support: ['Destek', 'Support'], passive: ['Kalıcı', 'Passive'], aura: ['Hale', 'Aura'] };
+  // hayvan görselini küçültüp kutuya sığdır
+  function petSprite(ctx, L, x, y, w, h, sc, alpha = 1) {
+    const sp = Game.map.sprite(L); if (!sp.ok) { if (!PW.pre[L]) { PW.pre[L] = 1; Assets.preload([L]); } return; }
+    ctx.save(); ctx.globalAlpha = alpha; ctx.beginPath(); ctx.rect(x, y, w, h); ctx.clip(); ctx.translate(x + w / 2, y + h - 3); ctx.scale(sc, sc); sp.draw(ctx, 2, Game.time * TICK, 0, 0); ctx.restore();
+  }
   function drawPet2(ctx, vw, VH) {
     const k = VH / 290, f = 'n_petcomplex', L = Pet.list(); if (PW.i >= L.length) PW.i = 0; const p = L[PW.i];
     nBegin(ctx, VH, { k, x: (UI.safeL || 0) + 126 * VH / 320, y: Math.round((VH - 259 * k) / 2) });
@@ -431,27 +439,51 @@ const Win = (() => {
       wrap(ctx, T2('Şehirlerdeki Hayvan Terbiyecisi\'nden bilgi al. Yumurtayı kuluçka kutusuyla çıkar; yumurtalar canavarlardan da düşer.', 'Ask a Beast Tamer in town. Hatch an egg with an incubator; eggs also drop from monsters.'), 196, 11).slice(0, 8).forEach((l, i) => nText(ctx, l, 14, 140 + i * 14, '#2a1a0a', 10.5, 'left', 198));
       nEnd(ctx); return;
     }
-    const st = Pet.stats(p), S = Pet.sp(p), on = Game.P.petOn === p.uid;
-    // portre: hayvanın kendisi
+    const st = Pet.stats(p), S = Pet.sp(p), on = Game.P.petOn === p.uid, D0 = Pet.D, tp = Pet.tpl(p);
+    // portre: hayvanın şimdiki biçimi
     { const sp = Game.map.sprite(Pet.look(p)); if (!sp.ok && !PW.loading) { PW.loading = true; Assets.preload([Pet.look(p)]).then(() => PW.loading = false); }
       if (sp.ok) { ctx.save(); ctx.beginPath(); ctx.rect(box[0] + 2, box[1] + 2, box[2] - 4, box[3] - 4); ctx.clip(); sp.draw(ctx, 2, Game.time * TICK, box[0] + box[2] / 2, box[1] + box[3] - 8); ctx.restore(); } }
     { const r = nDraw(ctx, f, 50126, 0); nText(ctx, `${Pet.nm(p)}  ${tx('Sv')} ${p.lv}`, r[0] + r[2] / 2, r[1] + r[3] / 2, p.dead ? '#a02010' : '#ffe9a8', 11, 'center', r[2] - 6); }
     { const r = nDraw(ctx, f, 50127, pressed === 'p:on'), lab = p.dead ? T2('Ölü', 'Dead') : on ? T2('Geri çağır', 'Dismiss') : T2('Çağır', 'Summon'); nText(ctx, lab, r[0] + r[2] / 2, r[1] + r[3] / 2, '#f4ead0', 11, 'center'); nHit('p:on', r[0], r[1], r[2], r[3]); }
-    // yuvalar: besle, taktik, bırak; küçük yuva: sıradaki hayvan
-    [[50756, 'feed', T2('Besle', 'Feed')], [50757, 'ai', T2('Taktik', 'Tactics')], [50758, 'rel', T2('Bırak', 'Release')]].forEach(([id, key, lab]) => { const r = nDraw(ctx, f, id, pressed === 'p:' + key || (key === 'ai' && PW.ai)); nText(ctx, lab, r[0] + r[2] / 2, r[1] + r[3] / 2, '#2a1a0a', 9.5, 'center', r[2] - 2); nHit('p:' + key, r[0], r[1], r[2], r[3]); });
+    // yuvalar: besle, taktik, dönüşüm; küçük yuva: sıradaki hayvan
+    [[50756, 'feed', T2('Besle', 'Feed')], [50757, 'ai', T2('Taktik', 'Tactics')], [50758, 'tf', T2('Dönüşüm', 'Transform')]].forEach(([id, key, lab]) => { const r = nDraw(ctx, f, id, pressed === 'p:' + key || (key === 'ai' && PW.ai)); nText(ctx, lab, r[0] + r[2] / 2, r[1] + r[3] / 2, '#2a1a0a', 9, 'center', r[2] - 2); nHit('p:' + key, r[0], r[1], r[2], r[3]); });
     { const r = nDraw(ctx, f, 50128, pressed === 'p:next'); nText(ctx, `${PW.i + 1}/${L.length}`, r[0] + r[2] / 2, r[1] + r[3] / 2, '#2a1a0a', 9.5, 'center'); if (L.length > 1) nHit('p:next', r[0], r[1], r[2], r[3]); }
-    const sk = Pet.D.skills[S.skill], md = Pet.MODEN[Game.P.petMode || 'attack'], cls = PCLS[S.cls];
-    const lines = [
-      `${T2(S.tr, S.en)} · ${T2(cls[0], cls[1])} · ${T2('Yetenek', 'Talent')} ×${p.tal}`,
-      `${T2('Can', 'HP')} ${Math.round(p.hp)}/${st.hp} · ${T2('Mana', 'MP')} ${Math.round(p.mp)}/${st.mp}`,
-      `${T2('Saldırı', 'Attack')} ${S.cls === 4 ? st.matk : st.patk} · ${T2('Savunma', 'Defense')} ${st.def}`,
-      `${T2('Deneyim', 'XP')} ${p.xp}/${Pet.needXp(p.lv)}${p.lv >= Game.P.lv ? T2(' (sınır: senin seviyen)', ' (cap: your level)') : ''}`,
-      `${T2('Tokluk', 'Satiety')} ${p.sat} · ${T2('Mutluluk', 'Happiness')} ${p.joy}${p.sat <= 0 || p.joy <= 20 ? T2(' · savaşmıyor!', ' · won\'t fight!') : ''}`,
-      `${T2('Beceri', 'Skill')}: ${sk ? T2(sk.tr[0], sk.en[0]) : '-'}`,
-      ...(sk ? wrap(ctx, T2(sk.tr[1], sk.en[1]), 194, 10).slice(0, 2) : []),
-      `${T2('Taktik', 'Tactics')}: ${T2(md[0], md[1])}`,
-    ];
-    lines.forEach((l, i) => nText(ctx, l, 14, 140 + i * 13.5, i === 0 ? '#7a1c08' : '#2a1a0a', 10.5, 'left', 198));
+    // sekmeler
+    [T2('Bilgi', 'Info'), T2('Beceriler', 'Skills'), T2('Ağaç', 'Tree')].forEach((l, i) => { const x = 14 + i * 66, a = PW.tab === i; nText(ctx, l, x + 31, 140, a ? '#7a1c08' : '#5a4a30', 11, 'center'); if (a) { ctx.fillStyle = '#7a1c08'; ctx.fillRect(x + 8, 147, 46, 1.5); } nHit('p:tab:' + i, x, 131, 62, 18); });
+    const Y = 160, LH = 13;
+    if (PW.tab === 0) {
+      const nx = D0.stages[(p.st || 0) + 1];
+      const lines = [
+        [`${T2(S.tr, S.en)} · ${T2(tp.tr, tp.en)} · ${T2('Yetenek', 'Talent')} ×${p.tal}`, '#7a1c08'],
+        [`${T2('Can', 'HP')} ${Math.round(p.hp)}/${st.hp} · ${T2('Mana', 'MP')} ${Math.round(p.mp)}/${st.mp}`],
+        [`${T2('Saldırı', 'Attack')} ${st.mag ? st.matk : st.patk} · ${T2('Savunma', 'Defense')} ${st.def} · ${T2('Kaçınma', 'Dodge')} %${st.dodge.toFixed(0)}`],
+        [`${T2('Deneyim', 'XP')} ${p.xp}/${Pet.needXp(p.lv)}${p.lv >= Game.P.lv ? T2(' (sınır: senin seviyen)', ' (cap: your level)') : ''}`],
+        [`${T2('Tokluk', 'Satiety')} ${p.sat} · ${T2('Mutluluk', 'Happiness')} ${p.joy}${p.sat <= 0 || p.joy <= 20 ? T2(' · savaşmıyor!', ' · won\'t fight!') : ''}`, p.sat <= 0 || p.joy <= 20 ? '#a02010' : null],
+        [`${T2('Dönüşüm', 'Transform')} ${p.st || 0}/7${nx ? ` · ${T2('sonraki', 'next')}: ${tx('Sv')} ${nx.lv}` : ''}`],
+        [`${T2('Taktik', 'Tactics')}: ${T2(Pet.MODEN[Game.P.petMode || 'attack'][0], Pet.MODEN[Game.P.petMode || 'attack'][1])}`],
+      ];
+      lines.forEach(([l, c], i) => nText(ctx, l, 14, Y + i * LH, c || '#2a1a0a', 10, 'left', 198));
+      nText(ctx, T2('Bırak', 'Release'), 210, Y + 6 * LH, pressed === 'p:rel' ? '#ff4020' : '#a02010', 10, 'right'); nHit('p:rel', 172, Y + 6 * LH - 8, 42, 16);
+    } else if (PW.tab === 1) {
+      const ks = Pet.skills(p); if (PW.skd >= ks.length) PW.skd = 0;
+      ks.forEach((kk, i) => { const d = D0.skills[kk], y = 151 + i * 19, sel = PW.skd === i; if (!d) return;
+        if (sel) { ctx.fillStyle = 'rgba(122,28,8,.12)'; ctx.fillRect(12, y - 1, 202, 19); }
+        if (d.icon) drawIcon(ctx, { ik: 'skill', icon: d.icon }, 14, y, 17);
+        nText(ctx, T2(d.tr[0], d.en[0]), 36, y + 8.5, sel ? '#7a1c08' : '#2a1a0a', 10.5, 'left', 110);
+        nText(ctx, `${i ? T2('rastgele', 'random') : T2('doğuştan', 'innate')} · ${T2(...(SKIND[d.kind] || SKIND.active))}`, 212, y + 8.5, '#7a6a50', 8.5, 'right', 64); nHit('p:sk:' + i, 12, y - 1, 202, 19); });
+      if (ks.length < 4) nText(ctx, T2(`Rastgele beceri yuvası: ${ks.length - 1}/3`, `Random skill slots: ${ks.length - 1}/3`), 14, 151 + ks.length * 19 + 8, '#5a4a30', 9, 'left', 198);
+      const d = D0.skills[ks[PW.skd]]; if (d) wrap(ctx, T2(d.tr[1], d.en[1]), 198, 9).slice(0, 2).forEach((l, i) => nText(ctx, l, 14, 232 + i * 11, '#3a2a10', 9, 'left', 200));
+    } else {
+      const F = S.forms, cw = 50, ch = 44;
+      F.forEach((fm, i) => { const x = 13 + (i % 4) * cw, y = 150 + Math.floor(i / 4) * (ch + 1), got = i <= (p.st || 0), cur0 = i === (p.st || 0), sel = PW.tree === i;
+        ctx.fillStyle = cur0 ? 'rgba(255,208,64,.35)' : sel ? 'rgba(122,28,8,.15)' : 'rgba(0,0,0,.06)'; ctx.fillRect(x, y, cw - 2, ch);
+        if (cur0 || sel) { ctx.strokeStyle = cur0 ? '#c08a10' : '#7a1c08'; ctx.lineWidth = 1; ctx.strokeRect(x + 0.5, y + 0.5, cw - 3, ch - 1); }
+        petSprite(ctx, fm.look, x, y, cw - 2, ch, 0.36, got ? 1 : 0.45);
+        nText(ctx, i ? String(i) : '0', x + 3, y + 6, '#7a1c08', 8, 'left'); if (i) nText(ctx, `${tx('Sv')}${D0.stages[i].lv}`, x + cw - 4, y + 6, '#5a4a30', 7.5, 'right');
+        nHit('p:tr:' + i, x, y, cw - 2, ch); });
+      const si = PW.tree != null ? PW.tree : (p.st || 0), fm = F[si];
+      nText(ctx, `${si}: ${T2(fm.tr, fm.en)}${si ? ` · ${tx('Sv')} ${D0.stages[si].lv} · ${D0.stages[si].cost} ${tx('altın')}` : ''}`, 113, 246, '#3a2a10', 9, 'center', 200);
+    }
     nEnd(ctx);
     if (PW.ai) {   // taktik: 5 orijinal mod
       const f2 = 'n_newpetai', rows = [50145, 50146, 50147, 50148, 50149, 50150];
@@ -466,14 +498,83 @@ const Win = (() => {
   function tapPet2(id) {
     if (typeof id !== 'string') return; const L = Pet.list(), p = L[PW.i];
     if (id === 'p:x') return close();
-    if (id === 'p:next') { PW.i = (PW.i + 1) % L.length; return; }
+    if (id === 'p:next') { PW.i = (PW.i + 1) % L.length; PW.tree = null; PW.skd = 0; return; }
     if (id === 'p:aix') { PW.ai = false; return; }
     if (id.startsWith('p:m:')) { Pet.setMode(id.slice(4)); PW.ai = false; return; }
+    if (id.startsWith('p:tab:')) { PW.tab = +id.slice(6); PW.tree = null; SFX.play('skill_pageflip', 0.5); return; }
+    if (id.startsWith('p:sk:')) { PW.skd = +id.slice(5); return; }
+    if (id.startsWith('p:tr:')) { const i = +id.slice(5); PW.tree = PW.tree === i ? null : i; return; }
     if (!p) return;
     if (id === 'p:on') { if (Game.P.petOn === p.uid) Pet.dismiss(); else Pet.summon(p.uid); return; }
     if (id === 'p:ai') { PW.ai = !PW.ai; return; }
+    if (id === 'p:tf') { open('petf', { mode: 'tf', main: p.uid }); return; }
     if (id === 'p:feed') { const f = ['30022'].find(x => countItem(x)); if (!f) return UI.toast(T2('Biluo Meyven yok (Hayvan Terbiyecisi satar).', 'No Biluo Fruit (Beast Tamers sell it).')); if (Game.P.petOn !== p.uid) return UI.toast(T2('Beslemek için önce çağır.', 'Summon it first to feed it.')); useItem(f); return; }
     if (id === 'p:rel') { ask(T2(`${Pet.nm(p)} serbest bırakılsın mı? Geri dönmez.`, `Release ${Pet.nm(p)}? It won't come back.`), () => { Pet.release(p.uid); PW.i = 0; }); return; }
+  }
+  // ---------------- Dönüşüm (幻化) ve beceri aktarma (技能转移): orijinal NEW_FORM fantasize_pet ----------------
+  // solda: ana hayvan, yardımcı hayvan, iki yardımcı eşya → sağda sonuç; sağ balonda açıklama; altta bedel ve onay düğmesi
+  const TF = { mode: 'tf', main: null, mat: null, a: [null, null] };
+  const TFS = { main: 50697, mat: 50698, a0: 50700, a1: 50699, res: 50701 };
+  function tfPets() { const L = Pet.list(), m = L.find(x => x.uid === TF.main) || null, s = L.find(x => x.uid === TF.mat) || null; return { m, s }; }
+  function tfAids() { return Pet.AIDS.filter(id => { const u = ITEMS[id] && ITEMS[id].pet; return u && (TF.mode === 'tf' ? u.tf : u.sk) && countItem(id) > 0; }); }
+  function drawPetF(ctx, vw, VH) {
+    const f = 'n_fantasize_pet', k = Math.min(VH / 330, vw / 495), { m, s } = tfPets(), sk = TF.mode === 'sk';
+    TF.a = TF.a.map(id => id && countItem(id) > 0 ? id : null);
+    nBegin(ctx, VH, { k, x: Math.round((vw - 481 * k) / 2), y: Math.round((VH - 320 * k) / 2) });
+    nDraw(ctx, f, 50696, 0); nHit('frame', 0, 0, 481, 320); nDraw(ctx, f, 50869, 0); nDraw(ctx, f, 50721, 0);
+    { const r = nDraw(ctx, f, 50720, pressed === 'f:x'); nHit('f:x', r[0] + 10, r[1], 40, 40); }
+    // yuvalar
+    const slot = (key, id, fill) => { const r = nDraw(ctx, f, id, pressed === 'f:' + key); if (fill) { ctx.fillStyle = '#d9c59c'; ctx.fillRect(r[0] + 5, r[1] + 5, r[2] - 10, r[3] - 10); fill(r); } nHit('f:' + key, r[0], r[1], r[2], r[3]); return r; };
+    slot('main', TFS.main, m && (r => petSprite(ctx, Pet.look(m), r[0] + 5, r[1] + 5, r[2] - 10, r[3] - 10, 0.34)));
+    slot('mat', TFS.mat, s && (r => petSprite(ctx, Pet.look(s), r[0] + 5, r[1] + 5, r[2] - 10, r[3] - 10, 0.34)));
+    ['a0', 'a1'].forEach((key, i) => slot(key, TFS[key], TF.a[i] && (r => drawIcon(ctx, ITEMS[TF.a[i]], r[0] + 5, r[1] + 5, r[2] - 10))));
+    const info = sk ? Pet.skInfo(m, s, TF.a.filter(Boolean)) : Pet.tfInfo(m, s, TF.a.filter(Boolean));
+    { const r = nC(f, TFS.res).s[0].r; nDraw(ctx, f, TFS.res, 0);
+      if (!sk && m && info.next) { ctx.fillStyle = '#d9c59c'; ctx.fillRect(r[0] + 5, r[1] + 5, r[2] - 10, r[3] - 10); petSprite(ctx, Pet.sp(m).forms[info.next].look, r[0] + 5, r[1] + 5, r[2] - 10, r[3] - 10, 0.3); }
+      else if (sk && info.ok && info.gs != null) { ctx.fillStyle = '#d9c59c'; ctx.fillRect(r[0] + 5, r[1] + 5, r[2] - 10, r[3] - 10); const d = Pet.D.skills[s.sk[info.gs]]; if (d && d.icon) drawIcon(ctx, { ik: 'skill', icon: d.icon }, r[0] + 5, r[1] + 5, r[2] - 10); } }
+    // etiketler
+    const lab = (id, t, col = '#3a1c08') => { const r = nC(f, id).s[0].r; nText(ctx, t, r[0], r[1] + r[3] / 2, col, 9.5, 'left', 110); };
+    lab(50712, m ? `${Pet.nm(m)} ${tx('Sv')}${m.lv} · ${m.st || 0}/7` : T2('Ana hayvan', 'Main pet'));
+    lab(50713, s ? `${Pet.nm(s)} ${tx('Sv')}${s.lv} · ${s.st || 0}/7` : T2('Yardımcı hayvan', 'Helper pet'));
+    lab(50715, TF.a[0] ? T2(ITEMS[TF.a[0]].name, ITEMS[TF.a[0]].en) : T2('Yardımcı eşya', 'Aid item'), '#5a3a18');
+    lab(50714, TF.a[1] ? T2(ITEMS[TF.a[1]].name, ITEMS[TF.a[1]].en) : T2('Yardımcı eşya', 'Aid item'), '#5a3a18');
+    if (!sk && info.next) { const r = nC(f, 50737).s[0].r; nText(ctx, `${T2('Düzey', 'Level')} ${(m && m.st) || 0} → ${info.next}`, r[0] + 30, r[1] + 3, '#7a1c08', 9.5, 'center', 90); }
+    // bedel + onay
+    { const r = nDraw(ctx, f, 50716, 0); nText(ctx, info.cost != null ? `${info.cost} ${tx('altın')}` : '-', r[0] + 22, r[1] + 9, Game.P.gold >= (info.cost || 0) ? '#ffe9a8' : '#ff6040', 10, 'left', 92); }
+    { const r = nDraw(ctx, f, 50719, pressed === 'f:go'); nText(ctx, sk ? T2('Aktar', 'Transfer') : T2('Dönüştür', 'Transform'), r[0] + r[2] / 2, r[1] + r[3] / 2, info.ok ? '#f4ead0' : '#a09080', 11, 'center'); nHit('f:go', r[0], r[1], r[2], r[3]); }
+    { const r = nDraw(ctx, f, 50736, pressed === 'f:shop'); nHit('f:shop', r[0], r[1], r[2], r[3]); }
+    // sağ balon: kip sekmeleri + açıklama
+    [T2('Dönüşüm', 'Transform'), T2('Beceri Aktarma', 'Skill Transfer')].forEach((t, i) => { const x = 250 + i * 104, a = (i === 1) === sk; nText(ctx, t, x + 50, 34, a ? '#7a1c08' : '#8a6a40', 11.5, 'center', 100); if (a) { ctx.fillStyle = '#7a1c08'; ctx.fillRect(x + 12, 42, 76, 1.5); } nHit('f:mode:' + (i ? 'sk' : 'tf'), x, 24, 100, 22); });
+    const T = [];
+    if (!sk) {
+      if (m && info.next) { const fm = Pet.sp(m).forms[info.next]; T.push(`${T2('Sonraki biçim', 'Next form')}: ${T2(fm.tr, fm.en)} (${tx('Sv')} ${info.need})`); }
+      T.push(info.ok ? `${T2('Başarı şansı', 'Success chance')}: %${info.chance}${info.keep ? T2(' · başarısızlıkta düzey korunur', ' · level kept on failure') : ''}` : info.why);
+      T.push(T2('Başarıda düzey +1, görünüş ve nitelikler değişir; başarısızlıkta düzey −1. Yardımcı hayvan her durumda kaybolur.', 'On success level +1 and the form and stats change; on failure level −1. The helper pet is always lost.'));
+    } else {
+      if (m) T.push(`${T2('Ana', 'Main')}: ${Pet.skills(m).slice(1).map(Pet.skName).join(', ') || T2('rastgele becerisi yok', 'no random skills')}`);
+      if (s) T.push(`${T2('Yardımcı', 'Helper')}: ${(s.sk || []).map(Pet.skName).join(', ') || T2('rastgele becerisi yok', 'no random skills')}`);
+      T.push(info.ok ? T2(`Yardımcının ${info.gs != null ? 'seçilen' : 'rastgele bir'} becerisi ana hayvanın ${info.ls != null ? 'seçilen' : 'rastgele bir'} becerisinin yerine geçer.`, `The helper's ${info.gs != null ? 'chosen' : 'random'} skill replaces the main pet's ${info.ls != null ? 'chosen' : 'random'} skill.`) : info.why);
+      T.push(T2('Yalnız aynı türden hayvanlar. Yardımcı hayvan kaybolur.', 'Same pet type only. The helper pet is lost.'));
+    }
+    let y = 56; for (const t of T) for (const l of wrap(ctx, t, 206, 9.5).slice(0, 4)) { if (y > 168) break; nText(ctx, l, 252, y, '#3a2a10', 9.5, 'left', 210); y += 12; }
+    nEnd(ctx);
+  }
+  function tapPetF(id) {
+    if (typeof id !== 'string') return; const L = Pet.list(), { m } = tfPets();
+    const cyc = (cands, curv) => { if (!cands.length) return null; const i = cands.indexOf(curv); return i < 0 ? cands[0] : i + 1 < cands.length ? cands[i + 1] : null; };
+    if (id === 'f:x') return close();
+    if (id.startsWith('f:mode:')) { TF.mode = id.slice(7); TF.a = [null, null]; SFX.play('skill_pageflip', 0.5); return; }
+    if (id === 'f:main') { const c = L.filter(Pet.resting).map(x => x.uid); if (!c.length) return UI.toast(T2('Dinlenen hayvanın yok (çağrılmış hayvanı geri çağır).', 'No resting pets (dismiss the summoned one).')); TF.main = cyc(c, TF.main) || c[0]; if (TF.mat === TF.main) TF.mat = null; return; }
+    if (id === 'f:mat') { const c = L.filter(x => Pet.resting(x) && x.uid !== TF.main).map(x => x.uid); if (!c.length) return UI.toast(T2('Yardımcı olabilecek başka dinlenen hayvanın yok.', 'No other resting pet to use as helper.')); TF.mat = cyc(c, TF.mat); return; }
+    if (id === 'f:a0' || id === 'f:a1') { const i = +id.slice(3), c = tfAids().filter(x => x !== TF.a[1 - i] || countItem(x) > 1); if (!c.length) return UI.toast(T2('Yardımcı eşyan yok (Büyülü Canavar Ustası satar).', 'No aid items (the Magic Beast Master sells them).')); TF.a[i] = cyc(c, TF.a[i]); return; }
+    if (id === 'f:shop') { UI.openShop('魔法兽强化大师'); return; }
+    if (id === 'f:go') {
+      const { s } = tfPets(), sk = TF.mode === 'sk', info = sk ? Pet.skInfo(m, s, TF.a.filter(Boolean)) : Pet.tfInfo(m, s, TF.a.filter(Boolean));
+      if (!info.ok) return UI.toast(info.why);
+      ask(sk ? T2(`${Pet.nm(s)} kaybolacak ve becerisi ${Pet.nm(m)}'e geçecek. Emin misin?`, `${Pet.nm(s)} will be lost and its skill passed to ${Pet.nm(m)}. Are you sure?`)
+        : T2(`${Pet.nm(s)} kaybolacak. Başarı şansı %${info.chance}. Dönüştürülsün mü?`, `${Pet.nm(s)} will be lost. Success chance ${info.chance}%. Transform?`),
+      () => { if (sk) Pet.transferSkill(TF.main, TF.mat, TF.a.filter(Boolean)); else Pet.transform(TF.main, TF.mat, TF.a.filter(Boolean)); TF.mat = null; });
+    }
   }
 
   // ---------------- Ayarlar ----------------
@@ -620,7 +721,7 @@ const Win = (() => {
     pressed = h.id; pressT = performance.now();
     if (typeof h.id === 'string' && h.id.startsWith('hub:')) { const k = h.id.slice(4); SFX.play('skill_pageflip'); if (k === 'gm') { UI.open('gm'); return true; } if (k !== cur) { close(); open(k); } return true; }
     if (h.id === 'close') { UI.closeAll(); return true; }
-    if (cur === 'sys') { if (typeof h.id === 'string' && h.id.startsWith('s:')) tapSys(h.id.slice(2)); return true; } if (cur === 'pet') { tapPet2(h.id); return true; } if (cur === 'map') { tapMap(h.id); return true; } if (cur === 'hub') return true;
+    if (cur === 'sys') { if (typeof h.id === 'string' && h.id.startsWith('s:')) tapSys(h.id.slice(2)); return true; } if (cur === 'pet') { tapPet2(h.id); return true; } if (cur === 'petf') { tapPetF(h.id); return true; } if (cur === 'map') { tapMap(h.id); return true; } if (cur === 'hub') return true;
     if (cur === 'bag') tapBag2(h.id); else if (cur === 'role') tapRole2(h.id); else if (cur === 'npc') tapNpc2(h.id); else if (cur === 'task') tapTask2(h.id); else if (cur === 'menu') tapMenu(h.id); else if (cur === 'skill') tapSkill2(h.id); else if (cur === 'shop') tapShop2(h.id); else if (cur === 'dead') { if (h.id === 'revive') { close(); revive(); } }
     return true;
   }
@@ -708,6 +809,9 @@ const Win = (() => {
   // ---------------- NPC konuşması (FORM_NPC_DIALOGUE): üstte söz, altta seçenek satırları ----------------
   const D = { q: null };
   const NROWS = [50734, 50735, 50736, 50737, 50738, 50739];
+  // Büyülü Canavar Ustası'nın açıklaması (orijinal NPC metninden, kısaltılmış)
+  const PETHELP = ['Dönüşüm, bir evcil hayvanın özünü alıp başka birini evrimleştiren özel bir törendir. İki hayvan da dinleniyor olmalı. Evcil hayvan penceresinde Dönüşüm\'ü seç, evrimleşecek hayvanı ana yuvaya, malzeme hayvanı yardımcı yuvaya koy. Başarılı olursa ana hayvanın dönüşüm düzeyi artar, gücü de artar; başarısız olursa düzeyi bir düşer. Yardımcı eşyalar başarı şansını artırır ya da düşüşü önler. Yardımcı hayvan her durumda kaybolur. Beceri aktarma da buna benzer: ana hayvan, yardımcı hayvanın bir becerisini öğrenir. Yalnız aynı türden (fiziksel, savunma, büyü, destek) hayvanlar beceri aktarabilir ve hangi becerinin geçeceği şansa bağlıdır.',
+    'Transformation is a special rite that draws the essence of one pet to evolve another. Both pets must be resting. In the pet window choose Transform, put the pet to evolve in the main slot and the material pet in the helper slot. On success the main pet\'s transformation level and power rise; on failure the level drops by one. Aid items raise the chance or prevent the drop. The helper pet is always lost. Skill transfer is similar: the main pet learns one of the helper\'s skills. Only pets of the same type (physical, defense, magic, support) can transfer skills, and which skill passes is up to luck.'];
   function npcOptions() {
     const n = opt.npc, P = Game.P, o = [];
     if (opt.say) return { txt: opt.say, o: [{ t: 'Tamam', a: 'bye' }] };
@@ -719,6 +823,8 @@ const Win = (() => {
       else { txt = q.wait || q.goal; o.push({ t: 'Tamam', a: 'back' }); }
     } else {
       if (SHOPS[n.cn]) o.push({ t: 'Alışveriş', a: 'shop', c: '#ffe070' });
+      if (n.cn === '魔法兽强化大师') o.push({ t: '✦ ' + T2('Dönüşüm', 'Transformation'), a: 'petf', m: 'tf' }, { t: '✦ ' + T2('Beceri aktarma', 'Skill transfer'), a: 'petf', m: 'sk' },
+        { t: T2('Dönüşüm ve beceri aktarma nedir?', 'What are transformation and skill transfer?'), a: 'say', s: T2(PETHELP[0], PETHELP[1]) });   // orijinal: 幻化 / 技能转移 düğmeleri
       for (const q of questsFor(n.cn)) { const st = questState(q); o.push({ t: (st === 'ready' ? '? ' : st === 'new' ? '! ' : '… ') + q.title, a: 'q', q, c: st === 'active' ? '#c8c0b0' : '#ffe070' }); }
       const tq = tpQuestOf(n.cn); if (tq) o.push({ t: '✦ Işınlan: ' + trName(Assets.D.scenes[tq.tp[0]].name), a: 'tp', q: tq });
       for (const d of Dungeon.npcTp(n.cn)) o.push({ t: '✦ ' + d.label, a: 'dtp', d });   // zindan merkezine/merkezden ışınlanma
@@ -747,6 +853,8 @@ const Win = (() => {
     if (e.a === 'bye') return UI.closeAll();
     if (e.a === 'q') { D.q = e.q; return; }
     if (e.a === 'back') { D.q = null; return; }
+    if (e.a === 'petf') { open('petf', { mode: e.m }); return; }
+    if (e.a === 'say') { opt.say = e.s; return; }
     if (e.a === 'shop') { UI.openShop(n.cn); return; }
     if (e.a === 'tp') { UI.closeAll(); setTimeout(() => questTeleport(e.q), 300); return; }
     if (e.a === 'dtp') { UI.closeAll(); setTimeout(() => e.d.go(), 300); return; }
@@ -913,5 +1021,7 @@ const Win = (() => {
     hits.push({ id: 'frame', x: ox, y: oy, w: f.w, h: 226 });
   }
   function tapDead(id) { if (id === 52040) { close(); revive(); } }
-  return { ask, askNum, open, close, isOpen, draw, tap, drag, get cur() { return cur; }, PW };
+  // testler için: açık penceredeki bir düğmeye kimliğiyle bas
+  function tapId(id) { if (cur === 'petf') tapPetF(id); else if (cur === 'pet') tapPet2(id); }
+  return { ask, askNum, open, close, isOpen, draw, tap, tapId, drag, get cur() { return cur; }, PW, TF };
 })();

@@ -11,6 +11,10 @@ from extract_all import decode8
 
 SRC, COZ, OUT = 'kaynak/orijinal', 'kaynak/cikti/cozulmus', 'www/assets'
 reg = json.load(open(f'{COZ}/kayit.json', encoding='utf-8'))
+# APK ekleri (sonraki resmî sürümün görselleri: Symbian'da olmayan paletler ve canavarlar): kaynak/apk/ek/kayit.json + .godat kopyaları
+EK = 'kaynak/apk/ek'
+EKREG = {k: v for k, v in json.load(open(f'{EK}/kayit.json', encoding='utf-8')).items() if not k.startswith('_')} if os.path.exists(f'{EK}/kayit.json') else {}
+reg.update({k: v for k, v in EKREG.items() if k not in reg})
 scenes = json.load(open(f'{COZ}/sahneler.json', encoding='utf-8'))
 rows = json.load(open(f'{COZ}/tablolar/anireg.json', encoding='utf-8'))
 import struct
@@ -91,7 +95,10 @@ sub = dict(reg)   # kayıt tablosunun tamamı (evcil hayvanlar, binekler, efektl
 os.makedirs(f'{OUT}/sheets', exist_ok=True); os.makedirs(f'{OUT}/maps', exist_ok=True)
 CACHE = {}
 def recs(f):
-    if f not in CACHE: CACHE[f] = {i: d for i, n, d in godat.named(f'{SRC}/{f}.godat')}
+    if f not in CACHE:
+        CACHE[f] = {i: d for i, n, d in godat.named(f'{SRC}/{f}.godat')} if os.path.exists(f'{SRC}/{f}.godat') else {}
+        if os.path.exists(f'{EK}/{f}.godat'):   # eksik kayıtlar (ör. APK'daki ek paletler) APK kopyasından
+            for i, n, d in godat.named(f'{EK}/{f}.godat'): CACHE[f].setdefault(i, d)
     return CACHE[f]
 palidx = {}; blob = bytearray(); anis = set(); bad = []
 def add_pal(key, P):
@@ -113,6 +120,14 @@ for k, r in sorted(sub.items()):
 frames = {r[0]: int(r[3]) for r in rows if r[0].startswith('frame_')}
 for v in frames.values(): anis.add(f'frame_ani_{v}')
 anij = {a: json.load(open(f'{COZ}/animasyon/{a}.json')) for a in sorted(anis) if os.path.exists(f'{COZ}/animasyon/{a}.json')}
+# çözülmüş animasyonu olmayan APK ekleri: kayıttan çözülür (export.py ex_ani ile aynı biçim)
+from spr import parse as spr_parse
+from res import parse_anims
+for a in sorted({f'{v[0]}_{v[2]}' for v in EKREG.values() if v[2]} - set(anij)):
+    f, i = a.rsplit('_', 1); d = recs(f).get(int(i))
+    if not d: continue
+    pa = spr_parse(d); an, _ = parse_anims(pa['rest'])
+    anij[a] = dict(m=[list(m) for m in pa['mods']], f=[[list(x) for x in parts] for rect, parts in pa['frames']], a=[[list(x) for x in q] for q in an])
 json.dump(anij, open(f'{OUT}/ani.json', 'w'), separators=(',', ':'))
 open(f'{OUT}/pal.bin', 'wb').write(blob)
 for mid in {s['map'] for s in scenes.values()}: shutil.copy(f'{COZ}/harita/{mid}.json', f'{OUT}/maps/{mid}.json')

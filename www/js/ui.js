@@ -357,7 +357,7 @@ const UI = (() => {
       title = 'Ayarlar';
       h = `<div class="iact"><button class="obtn" data-act="tsfx">Ses efektleri: ${SFX.opt.sfx ? 'Açık' : 'Kapalı'}</button><button class="obtn" data-act="tmus">Müzik: ${SFX.opt.music ? 'Açık' : 'Kapalı'}</button></div>
         <div class="iact"><button class="obtn" data-act="lang">${LANG === 'tr' ? 'Language: English' : 'Dil: Türkçe'}</button></div>
-        <div class="iact"><button class="obtn" data-act="totitle">Giriş ekranına dön</button><button class="obtn" data-act="newchar">Yeni karakter oluştur</button></div><p class="hint">Oyun otomatik kaydedilir. Sürüm 11161506</p>`;
+        <div class="iact"><button class="obtn" data-act="totitle">Giriş ekranına dön</button><button class="obtn" data-act="newchar">Yeni karakter oluştur</button></div><p class="hint">Oyun otomatik kaydedilir. Sürüm 11161755</p>`;
     }
     ptitle.textContent = tx(title); pbody.innerHTML = h; txDom(pbody);
   }
@@ -494,16 +494,22 @@ const UI = (() => {
       const p = Pet.active();
       h += row(GT('Evcil hayvan', 'Pet'), p ? `${Pet.nm(p)} · ${GT('Sv', 'Lv')} ${p.lv} · ${GT('tokluk', 'satiety')} ${p.sat} · ${Pet.list().length}/${Pet.slots()}` : GT('çağrılmış hayvan yok', 'no pet summoned'),
         [['pet:win', GT('Pencereyi aç', 'Open window')], ['pet:level', GT('Seviyeme çek', 'To my level')], ['pet:care', GT('Dirilt + doyur + iyileştir', 'Revive + feed + heal')], ['pet:items', GT('Evcil eşyaları ver', 'Give pet items')], ['pet:hungry', GT('Acıktır', 'Make hungry')], ['pet:clear', GT('Hepsini sil', 'Remove all')]]);
-      const BX = { wood: GT('tahta', 'wood'), metal: 'metal', magic: GT('büyülü', 'magic') }, CL = { 1: GT('destek', 'support'), 2: GT('fiziksel', 'physical'), 3: GT('savunma', 'defense'), 4: GT('büyü', 'magic') };
-      for (const s of Pet.D.species) if (!v || (s.tr + s.en + s.cn).toLocaleLowerCase('tr').includes(v))
-        h += row(GT(s.tr, s.en), `${CL[s.cls]} · ${BX[s.box]} ${GT('kutu', 'box')} · ${GT(Pet.D.skills[s.skill].tr[0], Pet.D.skills[s.skill].en[0])}`, [[`pet:give:${s.cn}`, GT('Hayvanı ver', 'Give pet')], [`pet:egg:${s.cn}`, GT('Yumurta + kutu', 'Egg + box')]]);
+      const q = Pet.active() || Pet.list()[0];
+      h += row(GT('Dönüşüm ağacı', 'Transform tree'), q ? `${Pet.nm(q)} · ${GT('düzey', 'level')} ${q.st || 0}/7 · ${GT('beceriler', 'skills')}: ${Pet.skills(q).map(Pet.skName).join(', ')}` : GT('hayvan yok', 'no pet'),
+        [['pet:stage', GT('Sonraki biçim', 'Next form')], ['pet:stage0', GT('Temel biçim', 'Base form')], ['pet:skills', GT('3 rastgele beceri', '3 random skills')], ['pet:tf', GT('Dönüşüm malzemesi', 'Transform materials')], ['pet:petf', GT('Dönüşüm penceresi', 'Transform window')], ['pet:petfs', GT('Beceri aktarma', 'Skill transfer')]]);
+      const BX = { wood: GT('tahta', 'wood'), metal: 'metal', magic: GT('büyülü', 'magic') };
+      for (const s of Pet.D.species) if (!v || (s.tr + s.en + s.cn + s.forms.map(f => f.tr + f.en + f.cn).join('')).toLocaleLowerCase('tr').includes(v)) {
+        const t = Pet.D.templates[s.tpl], f7 = s.forms[7];
+        h += row(GT(s.tr, s.en) + (s.apk ? ' · APK' : ''), `${GT(t.tr, t.en)} · ${BX[s.box]} ${GT('kutu', 'box')} · ${GT(Pet.D.skills[s.skill].tr[0], Pet.D.skills[s.skill].en[0])} · 7: ${GT(f7.tr, f7.en)}`, [[`pet:give:${s.cn}`, GT('Hayvanı ver', 'Give pet')], [`pet:egg:${s.cn}`, GT('Yumurta + kutu', 'Egg + box')]]);
+      }
     }
     $('#glist').innerHTML = h;
   }
   function gmX(k) {
     const [a, b, c, d] = k.split(':');
     if (a === 'dg') { const G = Dungeon.GM; if (b === 'in' || b === 'door') { closeAll(); setTimeout(() => G[b === 'in' ? 'enter' : 'door'](c, +d), 200); return; } if (b === 'last') { closeAll(); G.lastFloor(); return; } if (b === 'leave') { closeAll(); G.leave(); return; } G[b](); }
-    if (a === 'pet') { const G = Pet.GM; if (b === 'win') { closeAll(); Win.open('pet'); return; } if (b === 'give' || b === 'egg') G[b](c); else G[b](); }
+    if (a === 'pet') { const G = Pet.GM; if (b === 'win') { closeAll(); Win.open('pet'); return; } if (b === 'petf' || b === 'petfs') { closeAll(); Win.open('petf', { mode: b === 'petf' ? 'tf' : 'sk' }); return; }
+      if (b === 'give' || b === 'egg') G[b](c); else if (b === 'stage0') G.stage(0); else G[b](); }
     drawList();
   }
   $('#gq').oninput = drawList; $('#gclose').onclick = () => closeAll();

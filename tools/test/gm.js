@@ -22,5 +22,14 @@ const { chromium } = require('playwright');
   await p.click('[data-x="pet:items"]'); await p.click('[data-x="pet:hungry"]'); await p.click('[data-x="pet:care"]'); await p.waitForTimeout(300);
   console.log('eşya/bakım      ', JSON.stringify(await p.evaluate(() => ({ biluo: countItem('30022'), tokluk: Pet.active() && Pet.active().sat }))));
   await p.click('[data-x="pet:win"]'); await p.waitForTimeout(1000); await p.screenshot({ path: O + '_panda.png' });
+  // dönüşüm ağacı: Ateş Devi ver, çağır, biçimleri sırayla geç (7. biçim mor Kıyıcı Ateş Tanrısı), rastgele beceri, dönüşüm malzemesi, dönüşüm penceresi
+  await open(); await p.click('[data-g="v:pet"]'); await p.waitForTimeout(300); await x('pet:give:火巨灵');
+  await p.evaluate(() => { const f = Pet.list().find(q => q.sp === '火巨灵'); Pet.summon(f.uid); });
+  const ag = []; for (let i = 0; i < 7; i++) { await p.click('[data-x="pet:stage"]'); await p.waitForTimeout(150); ag.push(await p.evaluate(() => { const a = Pet.active(); return `${a.st}:${Pet.nm(a)}:${Pet.look(a)}`; })); }
+  console.log('ağaç            ', ag.join(' | '));
+  await p.click('[data-x="pet:skills"]'); await p.waitForTimeout(200); await p.click('[data-x="pet:tf"]'); await p.waitForTimeout(200);
+  console.log('beceri+malzeme  ', JSON.stringify(await p.evaluate(() => ({ beceriler: Pet.skills(Pet.active()).map(Pet.skName), hayvan: Pet.list().length, lütuf: countItem('30164'), altın: Game.P.gold }))));
+  await p.evaluate(() => { UI.closeAll(); Win.open('pet'); }); await p.waitForTimeout(1200); await p.screenshot({ path: O + '_atesdevi.png' });
+  await open(); await p.click('[data-g="v:pet"]'); await p.waitForTimeout(300); await p.click('[data-x="pet:petfs"]'); await p.waitForTimeout(1000); await p.screenshot({ path: O + '_aktarma.png' });
   console.log('HATA', errs); await b.close();
 })();
