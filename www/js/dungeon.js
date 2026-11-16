@@ -163,5 +163,16 @@ const Dungeon = (() => {
     return [{ label: T(...t.label), go() { if (t.lv && Game.P.lv < t.lv) return UI.toast(T(`${t.lv}. seviye gerekir.`, `Requires level ${t.lv}.`)); gotoScene(t.to[0], null, t.to[1] != null ? [t.to[1], t.to[2]] : null); } }];
   }
   const exitFix = (sid, region) => DUNGEON_EXIT[sid + ':' + region] || null;
-  return { exitFix, npcTp, init, door, exitTo, leave, onLoad, skip, key, tune, onKill, onRevive, of, list: DUNGEONS, usedToday };
+  // ---------- GM komutları (her sistemde GM komutu: CLAUDE.md kuralı) ----------
+  const GM = {
+    // seviye/ön görev/günlük sınır olmadan doğrudan içeri (sayaç artmaz)
+    enter(id, copy = 0) { init(); const d = DUNGEONS.find(x => x.id === id); if (!d) return; const c = d.copies[Math.min(copy, d.copies.length - 1)]; Game.P.dun = { id: d.id, copy: d.copies.indexOf(c), cleared: {}, boss: false, t: Date.now() }; gotoScene(c.scenes[0], null, null, null); },
+    door(id, copy = 0) { const d = DUNGEONS.find(x => x.id === id); if (!d) return; const c = d.copies[Math.min(copy, d.copies.length - 1)]; outside(c).then(at => gotoScene(c.door[0], null, at)); },
+    boss() { const m = Game.ents.find(e => e.kind === 'mob' && !e.dead && e.boss); if (!m) return UI.toast(T('Bu haritada boss yok.', 'No boss on this map.')); killMob(m); },
+    lastFloor() { const h = of(Game.sceneId); if (!h) return UI.toast(T('Zindanda değilsin.', 'Not in a dungeon.')); const L = h[1].scenes; gotoScene(L[L.length - 1 === L.indexOf(Game.sceneId) ? 0 : L.length - 1], null, null, null); },
+    clear() { for (const m of Game.ents.filter(e => e.kind === 'mob' && !e.dead && !e.boss)) killMob(m); },
+    reset() { Game.P.dg = null; UI.toast(T('Günlük zindan hakları sıfırlandı.', 'Daily dungeon entries reset.')); save(); },
+    leave() { if (of(Game.sceneId)) leave(true); },
+  };
+  return { GM, exitFix, npcTp, init, door, exitTo, leave, onLoad, skip, key, tune, onKill, onRevive, of, list: DUNGEONS, usedToday };
 })();

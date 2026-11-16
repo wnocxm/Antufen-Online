@@ -357,7 +357,7 @@ const UI = (() => {
       title = 'Ayarlar';
       h = `<div class="iact"><button class="obtn" data-act="tsfx">Ses efektleri: ${SFX.opt.sfx ? 'Açık' : 'Kapalı'}</button><button class="obtn" data-act="tmus">Müzik: ${SFX.opt.music ? 'Açık' : 'Kapalı'}</button></div>
         <div class="iact"><button class="obtn" data-act="lang">${LANG === 'tr' ? 'Language: English' : 'Dil: Türkçe'}</button></div>
-        <div class="iact"><button class="obtn" data-act="totitle">Giriş ekranına dön</button><button class="obtn" data-act="newchar">Yeni karakter oluştur</button></div><p class="hint">Oyun otomatik kaydedilir. Sürüm 11161453</p>`;
+        <div class="iact"><button class="obtn" data-act="totitle">Giriş ekranına dön</button><button class="obtn" data-act="newchar">Yeni karakter oluştur</button></div><p class="hint">Oyun otomatik kaydedilir. Sürüm 11161506</p>`;
     }
     ptitle.textContent = tx(title); pbody.innerHTML = h; txDom(pbody);
   }
@@ -465,6 +465,7 @@ const UI = (() => {
   }
   function drawList() {
     const v = $('#gq').value.trim().toLocaleLowerCase('tr'), hx = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    if (listMode === 'gm' && gmView !== 'maps') { drawGmSys(v, hx); return; }
     if (listMode === 'gm') {
       $('#gstate').textContent = `${tx('Seviye')} ${Game.P.lv} · ${Game.P.gold} ${tx('altın')}${Game.god ? ' · ' + tx('ölümsüz') : ''}${Game.fast ? ' · ' + tx('hızlı') : ''}`;
       const S = Assets.D.scenes, ids = Object.keys(S).filter(id => !v || (id + ' ' + trName(S[id].name) + ' ' + S[id].name).toLocaleLowerCase('tr').includes(v))
@@ -476,9 +477,39 @@ const UI = (() => {
       $('#glist').innerHTML = L.map(([e, i]) => `<button data-e="${i}"><b>${hx(e.name)}</b><small>(${Math.round(e.x)}, ${Math.round(e.y)})</small></button>`).join('') || `<p class="hint">${tx('Bu haritada NPC yok.')}</p>`;
     }
   }
+  // GM: zindan ve evcil hayvan komutları (her yeni sistemin GM komutu olur; docs/03-istemci.md › GM)
+  let gmView = 'maps';
+  const GT = (a, b) => LANG === 'en' ? b : a;
+  function drawGmSys(v, hx) {
+    const row = (title, sub, btns) => `<div class="grow"><b>${hx(title)}</b><small>${hx(sub)}</small><span>${btns.map(([k, l]) => `<button data-x="${k}">${hx(l)}</button>`).join('')}</span></div>`;
+    let h = '';
+    if (gmView === 'dg') {
+      const run = Game.P.dun, here = Dungeon.of(Game.sceneId);
+      h += row(GT('Bu harita', 'This map'), here ? `${trName(here[0].cn)} · ${GT('koşu', 'run')}: ${run ? Object.keys(run.cleared).length + GT(' kesilen', ' killed') : '-'}` : GT('zindan dışı', 'outside dungeons'),
+        [['dg:boss', GT("Boss'u öldür", 'Kill boss')], ['dg:clear', GT('Canavarları öldür', 'Kill monsters')], ['dg:last', GT('Son kata / başa', 'Last floor / first')], ['dg:leave', GT('Zindandan çık', 'Leave')], ['dg:reset', GT('Günlük hakları sıfırla', 'Reset daily entries')]]);
+      for (const d of Dungeon.list) if (!v || (trName(d.cn) + d.cn).toLocaleLowerCase('tr').includes(v))
+        d.copies.forEach((c, i) => { h += row(`${trName(d.cn)}${d.copies.length > 1 ? (i ? GT(' (elf)', ' (elf)') : GT(' (insan)', ' (human)')) : ''}`, `${GT('Sv', 'Lv')} ${d.lv}+ · ${d.train ? GT('sınav', 'training') : GT('günde ', '') + d.daily + GT('', '/day')} · ${trName(Assets.D.scenes[c.door[0]].name)} ${GT('kapı', 'gate')} ${c.door[1]}`,
+          [[`dg:door:${d.id}:${i}`, GT('Kapıya git', 'Go to gate')], [`dg:in:${d.id}:${i}`, GT('İçeri gir', 'Enter')]]); });
+    } else {
+      const p = Pet.active();
+      h += row(GT('Evcil hayvan', 'Pet'), p ? `${Pet.nm(p)} · ${GT('Sv', 'Lv')} ${p.lv} · ${GT('tokluk', 'satiety')} ${p.sat} · ${Pet.list().length}/${Pet.slots()}` : GT('çağrılmış hayvan yok', 'no pet summoned'),
+        [['pet:win', GT('Pencereyi aç', 'Open window')], ['pet:level', GT('Seviyeme çek', 'To my level')], ['pet:care', GT('Dirilt + doyur + iyileştir', 'Revive + feed + heal')], ['pet:items', GT('Evcil eşyaları ver', 'Give pet items')], ['pet:hungry', GT('Acıktır', 'Make hungry')], ['pet:clear', GT('Hepsini sil', 'Remove all')]]);
+      const BX = { wood: GT('tahta', 'wood'), metal: 'metal', magic: GT('büyülü', 'magic') }, CL = { 1: GT('destek', 'support'), 2: GT('fiziksel', 'physical'), 3: GT('savunma', 'defense'), 4: GT('büyü', 'magic') };
+      for (const s of Pet.D.species) if (!v || (s.tr + s.en + s.cn).toLocaleLowerCase('tr').includes(v))
+        h += row(GT(s.tr, s.en), `${CL[s.cls]} · ${BX[s.box]} ${GT('kutu', 'box')} · ${GT(Pet.D.skills[s.skill].tr[0], Pet.D.skills[s.skill].en[0])}`, [[`pet:give:${s.cn}`, GT('Hayvanı ver', 'Give pet')], [`pet:egg:${s.cn}`, GT('Yumurta + kutu', 'Egg + box')]]);
+    }
+    $('#glist').innerHTML = h;
+  }
+  function gmX(k) {
+    const [a, b, c, d] = k.split(':');
+    if (a === 'dg') { const G = Dungeon.GM; if (b === 'in' || b === 'door') { closeAll(); setTimeout(() => G[b === 'in' ? 'enter' : 'door'](c, +d), 200); return; } if (b === 'last') { closeAll(); G.lastFloor(); return; } if (b === 'leave') { closeAll(); G.leave(); return; } G[b](); }
+    if (a === 'pet') { const G = Pet.GM; if (b === 'win') { closeAll(); Win.open('pet'); return; } if (b === 'give' || b === 'egg') G[b](c); else G[b](); }
+    drawList();
+  }
   $('#gq').oninput = drawList; $('#gclose').onclick = () => closeAll();
   $('#glist').addEventListener('click', e => {
     const b = e.target.closest('button'); if (!b) return;
+    if (b.dataset.x) { gmX(b.dataset.x); return; }
     if (b.dataset.s) { closeAll(); Game.player.path = null; gotoScene(b.dataset.s, null, null, null); }
     else if (b.dataset.e) { const t = Game.ents[+b.dataset.e]; closeAll(); if (t) walkToEnt(t); }
   });
@@ -487,6 +518,7 @@ const UI = (() => {
     if (a === 'lv1') gmLevel(P.lv + 1); else if (a === 'lv10') gmLevel(P.lv + 10); else if (a === 'lvset') { const n = +prompt(tx('Seviye (1-120):'), P.lv); if (n) gmLevel(n); }
     else if (a === 'gold') { P.gold += 100000; save(); } else if (a === 'heal') gmHeal(); else if (a === 'god') Game.god = !Game.god; else if (a === 'fast') Game.fast = !Game.fast;
     else if (a === 'gear') gmGear(); else if (a === 'sp') { P.sp = (P.sp || 0) + 20; save(); }
+    else if (a.startsWith('v:')) { gmView = a.slice(2); $('#gq').value = ''; $('#gq').placeholder = tx(gmView === 'maps' ? 'Harita ara: ad ya da numara…' : gmView === 'dg' ? 'Zindan ara…' : 'Tür ara…'); document.querySelectorAll('#gtools .gv').forEach(x => x.classList.toggle('on', x.dataset.g === a)); $('#glist').scrollTop = 0; }
     drawList();
   });
 

@@ -131,3 +131,8 @@ button { font: inherit; color: inherit; cursor: pointer; }
 #glist button { text-align: left; padding: 5px 8px; background: #0e0806; border: 1px solid #4a3820; color: #e8dcc0; }
 #glist button.on { border-color: #ffd870; } #glist button:active { background: #3a2410; }
 #glist b { display: block; font-weight: 600; color: #ffe8a0; } #glist small { color: #a89878; font-size: 10.5px; }
+/* GM: zindan / evcil satırları */
+#glist .grow { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; padding: 5px 8px; background: #0e0806; border: 1px solid #4a3820; }
+#glist .grow b { display: inline; min-width: 130px; } #glist .grow small { flex: 1; min-width: 140px; }
+#glist .grow span { display: flex; flex-wrap: wrap; gap: 4px; } #glist .grow button { padding: 4px 8px; font-size: 11px; }
+#gtools .gv.on { border-color: #ffd870; color: #fff; }

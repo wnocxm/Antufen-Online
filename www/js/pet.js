@@ -198,7 +198,17 @@ const Pet = (() => {
     const s = D.species.find(x => x.look && (x.look === info[1] || x.look.replace(/-[^-]+$/, '') === fam || x.look === fam)); if (!s) return;
     const ch = m.d.rank === 2 ? 0.25 : m.d.rank ? 0.03 : 0.004; if (Math.random() < ch) { addItem(s.egg, 1, true); UI.toast(T(`Ganimet: ${ITEMS[s.egg].name}!`, `Loot: ${ITEMS[s.egg].name}!`)); UI.log(T(`Ganimet: ${ITEMS[s.egg].name}`, `Loot: ${ITEMS[s.egg].name}`), 'q'); }
   }
+  // ---------- GM komutları ----------
+  const GM = {
+    egg(cn) { const s = BY[cn]; if (!s) return; addItem(s.egg, 1, true); addItem({ wood: '30166', metal: '31147', magic: '31149' }[s.box], 1, true); UI.toast(T(`${ITEMS[s.egg].name} + kutu verildi; çantadan kullan.`, `${ITEMS[s.egg].name} + incubator given; use it from your bag.`)); },
+    give(cn) { const s = BY[cn]; if (!s) return; if (list().length >= slots()) P().petSlots = list().length + 1; addItem(s.egg, 1, true); addItem('31149', 1, true); hatch(s.egg); },
+    level() { const p = active() || list()[0]; if (!p) return UI.toast(T('Evcil hayvanın yok.', 'No pet.')); p.lv = P().lv; p.xp = 0; const st = stats(p); p.hp = st.hp; p.mp = st.mp; p.dead = false; save(); UI.toast(`${nm(p)} ${T('Sv', 'Lv')} ${p.lv}`); },
+    care() { for (const p of list()) { const st = stats(p); p.dead = false; p.hp = st.hp; p.mp = st.mp; p.sat = 100; p.joy = 100; } if (!active() && list()[0]) summon(list()[0].uid); save(); UI.toast(T('Bütün hayvanlar dirildi, doydu, iyileşti.', 'All pets revived, fed and healed.')); },
+    items() { for (const [id, n] of [['30022', 20], ['30021', 10], ['30755', 10], ['30025', 5], ['30595', 2], ['30006', 3], ['30166', 3], ['31147', 3], ['31149', 3]]) addItem(id, n, true); UI.toast(T('Evcil hayvan eşyaları verildi.', 'Pet items given.')); },
+    hungry() { const p = active(); if (p) { p.sat = 0; p.joy = 15; UI.toast(T('Hayvan acıktı (savaşmaz).', 'Pet is hungry (won\'t fight).')); } },
+    clear() { P().pets = []; P().petOn = null; despawn(); save(); UI.toast(T('Bütün hayvanlar silindi.', 'All pets removed.')); },
+  };
   function setMode(md) { P().petMode = md; save(); }
   function release(uid) { const L = list(), i = L.findIndex(x => x.uid === uid); if (i < 0) return; if (P().petOn === uid) dismiss(); L.splice(i, 1); save(); UI.refresh(); }
-  return { init, hatch, summon, dismiss, spawn, update, hurt, onKill, useItem, dropEgg, setMode, release, stats, nm, look, sp, list, active, get ent() { return ent; }, MODES, MODEN, slots, needXp, revived, get D() { return D; } };
+  return { GM, init, hatch, summon, dismiss, spawn, update, hurt, onKill, useItem, dropEgg, setMode, release, stats, nm, look, sp, list, active, get ent() { return ent; }, MODES, MODEN, slots, needXp, revived, get D() { return D; } };
 })();

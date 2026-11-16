@@ -56,6 +56,13 @@ Otomatik yol: `routeTo(sid)` sahneler arası (`scenePath`), `routeToNpc(cn)`, `w
 ## GM
 `isGM()`: çevrimdışı adı "GM" ile başlayan karakter; çevrimiçi `Net.admin` (sunucuda `node make-admin.js <kullanıcı>`).
 `gmLevel(lv)`, `gmGear()`, `gmHeal()`, `Game.god` (ölümsüz), `Game.fast` (×2,6 hız); GM paneli + NPC listesi (`#gm`), dünya haritasından ışınlanma. Sunucu "GM" önekli adı yönetici olmayana vermez.
+**Kural: her yeni sistem kendi GM komutlarıyla gelir** (modülde `GM` nesnesi + panelde sekme/düğme + `tools/test/gm.js`'e adım).
+Panel nasıl açılır: menü → Sistem → "⚙ GM" (menüde Evcil sekmesi yer aldığı için GM düğmesi oraya taşındı).
+Sekmeler (`#gtools` `v:maps|dg|pet`, `drawGmSys`, `gmX` in `ui.js`):
+- **Haritalar**: haritaya ışınlan (arama), NPC listesi.
+- **Zindanlar** (`Dungeon.GM`): her zindan/kopya için "Kapıya git", "İçeri gir" (seviye, ön görev, günlük sınır yok; sayaç artmaz); bu harita için "Boss'u öldür", "Canavarları öldür", "Son kata / başa", "Zindandan çık", "Günlük hakları sıfırla".
+- **Evcil** (`Pet.GM`): her tür için "Hayvanı ver" (doğrudan kuluçka, hak doluysa hak artar), "Yumurta + kutu"; üstte "Pencereyi aç", "Seviyeme çek", "Dirilt + doyur + iyileştir", "Evcil eşyaları ver" (mama, iksir, diriltme, Sözleşme Taşı, İç Öz, kutular), "Acıktır" (aç hayvan savaşmaz testi), "Hepsini sil".
+Test: `tools/test/gm.js` panel düğmelerine gerçekten basar (görüntüler `OUT_zindan.png`, `OUT_evcil.png`, `OUT_panda.png`).
 
 ## Arayüz notları
 - Başlık ekranı orijinal ana menü (logo, kitap çerçevesi UIData_2033, sarı oklar): Devam Et / Yeni Karakter / Çevrimiçi / Dil.
