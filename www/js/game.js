@@ -544,7 +544,7 @@ function questMinLv(q) {
     const seen = new Set(); let front = [q];
     for (let d = 0; d < 6 && lv == null && front.length; d++) { const nx = []; for (const x of front) for (const y of QNEXT[x.id] || []) if (!seen.has(y.id)) { seen.add(y.id); const o = questOwnLv(y); if (o != null) lv = lv == null ? o : Math.min(lv, o); nx.push(y); } front = nx; }
   }
-  if (lv == null) { sceneIndex(); const z = zoneMin(NPC_SC[q.giver]); lv = z != null ? Math.max(1, z - 1) : hubLv(q.giver); }
+  if (lv == null) { sceneIndex(); const z = zoneMin(NPC_SC[q.giver]); lv = q.lv0 || (z != null ? Math.max(1, z - 1) : hubLv(q.giver)); }
   // önceki görev: tek kimlikse onun seviyesi; "herhangi biri" listesiyse (ırklara göre ayrı yollar) en düşüğü
   if (preLv != null) lv = Math.max(lv, preLv);
   return q._lv = lv;

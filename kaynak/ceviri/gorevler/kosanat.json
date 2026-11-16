@@ -48,6 +48,7 @@
   "蝴蝶草": ["Kelebek Otu", "Butterfly Grass"],
   "阳光果": ["Güneş Meyvesi", "Sun Fruit"]
  },
+ "seviye": 17,
  "gorevler": {
   "80020": {"tr": ["Asıl Suçlu", "Onların bir başı var, doğru duydun. Belki bir zamanlar subaymış, kim bilir. Ama şimdi bu kargaşanın kaynağı o; onu ortadan kaldırırsak iş kolaylaşır.", "Bana bakma; bu sopayla onu döverek öldürmemi mi bekliyorsun?", "Başları mı var? Bu iş ilginçleşti."],
             "en": ["The Ringleader", "They have a leader, you heard right. Maybe he was once an officer, who knows. But now he is the root of this unrest; take him out and things get simple.", "Don't look at me. Do you expect me to beat him to death with this stick?", "A leader? Now this is getting interesting."]},

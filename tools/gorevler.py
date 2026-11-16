@@ -90,16 +90,21 @@ for i, v in Q.items():
 # bölge çeviri dosyalarından otomatik aktarılan görevler (tools/gorev_aktar.py + kaynak/ceviri/gorevler/<ad>.json)
 import glob, os
 have = {q['id'] for q in out} | HAND
+# görev yapıları: bütün bölge kaynak dosyalarından (bir çeviri dosyası birden çok bölgenin görevini içerebilir)
+YAPI = {}
+for K in sorted(glob.glob('kaynak/ceviri/gorevler/*_kaynak.json')):
+    for s0 in json.load(open(K, encoding='utf-8')): YAPI.setdefault(s0['id'], s0)
 for f in sorted(glob.glob('kaynak/ceviri/gorevler/*.json')):
     if f.endswith('_kaynak.json'): continue
-    C = json.load(open(f, encoding='utf-8')); K = f[:-5] + '_kaynak.json'
-    if not os.path.exists(K): continue
+    C = json.load(open(f, encoding='utf-8'))
     skip = set(C.get('atla', [])); n0 = len(out)
-    for s0 in json.load(open(K, encoding='utf-8')):
-        i = s0['id']; c = C['gorevler'].get(str(i))
+    for i in sorted(map(int, C['gorevler'])):
+        s0 = YAPI.get(i); c = C['gorevler'][str(i)]
+        if not s0: print('  yapı yok:', i); continue
         if i in have or i in skip or not c: continue
         q = {k: s0[k] for k in ('id', 'giver', 'to', 'type', 'target', 'node', 'count', 'sc', 'chance', 'req', 'rw') if k in s0}
         if str(i) in C.get('zincir', {}): q['req'] = C['zincir'][str(i)]   # elle verilen zincir bağı
+        if C.get('seviye') and q['type'] not in ('kill', 'collect', 'pickup'): q['lv0'] = C['seviye']   # şehirde verilen konuşma görevinin en düşük seviyesi
         if q['type'] in ('kill', 'collect', 'pickup'):
             nm = s0.get('sc'); r = next((x.get('lvr') for x in S.values() if x['name'] == nm and x.get('lvr')), None)
             q['lv'] = r[1] if r else 10

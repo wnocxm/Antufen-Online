@@ -38,6 +38,7 @@
   "黑斑野猪": ["Kara Benekli Domuz", "Black-Spotted Boar"],
   "黑秃鹫": ["Kara Akbaba", "Black Vulture"]
  },
+ "seviye": 19,
  "gorevler": {
   "80553": {"tr": ["Kampın Güvenliği", "Buranın güvenliğinden İlahi Göz Yüzbaşı sorumlu. Keskin gözlü biridir ama en keskin göz bile karanlığın her köşesini göremez. Git, ona yardım et dostum; kâbuslarla çevrili bu yer dikkatle yönetilmeli.", "İlahi Göz Yüzbaşı ile konuş.", "Yardım mı edeceksin? Güzel."],
             "en": ["The Camp's Safety", "The Godeye Captain is in charge of our safety here. He has sharp eyes, but even the sharpest eyes can't see every corner of the dark. Go and help him, my friend; this nightmare-ringed place must be run with care.", "Talk to the Godeye Captain.", "You'll help? Good."]},
