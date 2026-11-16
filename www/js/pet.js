@@ -73,7 +73,8 @@ const Pet = (() => {
   function aura(p) { const a = {}; for (const k of skills(p)) { const d = SK[k]; if (d && d.aura) for (const x in d.aura) a[x] = (a[x] || 0) + d.aura[x]; } return a; }
   // nitelikler: şablon oranları APK 1024'ten, dönüşüm çarpanı pets.json stages'ten, seviye ölçeği bizim (oyuncudan zayıf)
   function stats(p) {
-    const t = tpl(p), L = p.lv, k = (p.tal || 1) * D.stages[p.st || 0].mult, b = bonus(p);
+    const t = tpl(p), L = p.lv, k = (p.tal || 1) * D.stages[p.st || 0].mult, b = bonus(p), g = p.gift || {};
+    b.patk += (g.patk || 0) / 1000; b.matk += (g.matk || 0) / 1000; b.hp += (g.hp || 0) / 1000;   // yetenek meyveleri (orijinal: "yeteneği 10 artırır")
     return { hp: Math.round((400 + 170 * L) * t.hp_growth / 6400 * k * (1 + b.hp + b.hpP)), mp: Math.round((200 + 60 * L) * t.mp_growth / 6400 * k),
       patk: Math.round((22 + 9 * L) * t.base_phys_atk / 1040 * k * (1 + b.patk + b.atk)), matk: Math.round((22 + 9 * L) * t.base_mag_atk / 1040 * k * (1 + b.matk + b.atk)),
       def: Math.round((20 + 10 * L) * t.base_def / 550 * k * (1 + b.def)), dodge: (t.dodge || 120) / 40 + b.dodge, crit: b.crit, mag: t.cls === 'mag', range: t.cls === 'mag' ? 5 : 1.9 };   // yakın dövüş menzili canavarlarınki gibi (4 yönlü yürüyüşte engelli karelerde takılmasın)
@@ -339,6 +340,7 @@ const Pet = (() => {
     else if (u.food) { if (p.sat >= 100) { UI.toast(T(`${nm(p)} tok.`, `${nm(p)} is full.`)); return true; } p.sat = Math.min(100, p.sat + u.food); p.joy = Math.min(100, p.joy + 10); if (ent) UI.float(ent, T('Hım hım!', 'Yum!'), '#7bff8a'); }
     else if (u.petHp) { if (p.hp >= st.hp) { UI.toast(T('Canı dolu.', 'HP is full.')); return true; } p.hp = Math.min(st.hp, p.hp + u.petHp); if (ent) UI.float(ent, '+' + u.petHp, '#7bff8a'); }
     else if (u.petMp) { p.mp = Math.min(st.mp, p.mp + u.petMp); }
+    else if (u.petGift) { const [k, v] = u.petGift; p.gift = p.gift || {}; p.gift[k] = (p.gift[k] || 0) + v; UI.toast(T(`${nm(p)}: yetenek +${v}`, `${nm(p)}: talent +${v}`)); }   // 天然比罗果: yetenek puanı (binde bir artış)
     else if (u.petXp) { if (p.lv >= P().lv) { UI.toast(T('Evcil hayvanın seviyesi senin seviyeni geçemez.', "Your pet's level can't exceed yours.")); return true; } p.xp += u.petXp; gainLv(p); }
     removeItem(id, 1); save(); UI.refresh(); return true;
   }

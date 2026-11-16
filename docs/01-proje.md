@@ -34,6 +34,12 @@ Tamam:
 - Sunucu: hesap, karakter, kayıt, WebSocket'te aynı haritadaki oyuncular ve sohbet; görevler de SQL'de.
 - Görevler (oyunda 801, SQL'de 832 satır): Acemi kampları, Guanlin, Koşanat Şehri, Kâhin Tapınağı, Gözcü Kampı, Güneşgören Şehri (+Dinlenme Bölgesi, lonca terasları), İstihbarat Karakolu, İmparatorluk Başkenti çevresi, Dağgören Şehri, Yoğunsis Kasabası, Sanatçılar Loncası, Altındalga Limanı, Büyü Akademisi. **55'e kadar bütün bölgelerin hikâye görevleri alındı.**
 
+**Görev denetimi (16.11):** ödül, zincir ve adet orijinale çekildi (docs/04 › Orijinal kaynak).
+- Karar bekliyor: deneyim sistemi.
+  - Orijinal görev deneyimi elde, ama seviye tablosu ve canavar deneyimi orijinal veride yok.
+  - Görev deneyimi orijinale geçerse seviye tablosu ve canavar deneyimi ona göre yeniden kurulmalı.
+- Görevlerin açılma seviyesi orijinal veride yok; tahmin olarak kalıyor.
+
 Sırada (kullanıcı onayladı):
 0. **Zindan sistemi** ✔ (tek kişi; grup girişi çevrimiçi grup sistemiyle sonra): 20 Sınav Ormanı, 30 Mehtap Korusu, 40 Ruhyiyen'in 4 zindanı, 50 dört Kule + Akankum Limanı; 28 zindan görevi. Kalan: kahraman (zor) modları, Tozçamur Madeni (60 bölgesiyle). Ajan Hans (代理人汉斯, 831xx) görevleri APK eklemesi, alınmaz.
 0b. **Evcil hayvanlar (魔法兽)** (bkz. `docs/07-evcil.md`):

@@ -35,6 +35,9 @@ Oyun hazır: `window.__G && window.__G.player`. Konsoldan: `gmLevel(n)`, `loadSc
 - `tools/test/zindan.js`: zindan giriş/çıkış, kesilenlerin geri gelmemesi, boss sandığı, günlük sınır, ölüm. `BOSS=… node tools/test/savas.js`: boss dövüşleri.
 - `tools/test/zindan40.js`, `tools/test/zindan50.js`: 40 ve 50. seviye zindan grupları (ışınlanma, kapılar, ön görev, çok hedefli görev, boss'lar).
 - `tools/test/evcil.js`: kuluçka, savaş katkısı, besleme, ölüm/diriltme, yumurta düşmesi, rastgele beceri dağılımı, ağaç (8 biçim), dönüşüm, beceri aktarma, hale. Pencere görüntüleri: `_pencere`, `_taktik`, `_beceri`, `_agac`, `_donusum`.
+- `tools/test/gorev_denetim.js` (tarayıcısız): oyundaki her görevi orijinal ham kayıtla alan alan karşılaştırır (zincir, adet, hedef, altın, deneyim, eşya). Görev işinden sonra ilk çalıştırılacak test.
+- `tools/test/gorev_seviye.js`: her ırk için seviye başına açılan görev sayısı, orijinal ve bizim görev deneyimi, gereken deneyim.
+- `tools/test/odul.js`: orijinal altın + sınıfa göre ödül eşyası (her sınıf yalnız kendi eşyası), görev penceresinde ödül satırı.
 - `tools/test/yolbul.js`: görev yol bulma (alınmamış → veren, alınmış → canavarın haritası, varınca yanına yürür ama saldırmaz, hazır → ödülü veren).
 - `tools/test/hedef.js`: hedef seçme saldırı başlatmaz; ikinci dokunuş ve saldırı düğmesi saldırır; yön tuşu bırakır.
 - `tools/test/evcilgorev.js`: RACE=人类|精灵 Terbiyeci zinciri.

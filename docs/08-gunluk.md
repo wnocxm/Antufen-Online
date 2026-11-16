@@ -39,3 +39,4 @@ Her commit'te buraya bir satır eklenir (tarih başlığı altında). Ayrıntı 
 - Hedef alma saldırıdan ayrıldı: ilk dokunuş seçer, ikinci dokunuş / saldırı düğmesi / beceri saldırır, yön tuşu saldırıyı bırakır; engelli karede takılan oyuncu yakınsa olduğu yerden vurur.
 - Görev yol bulma akıllandı: alınan görevde hedef canavarın/nesnenin haritasına gider ve varınca saldırır, hazır görevde ödülü veren kişiye gider (önceden hep görevi veren NPC'ye dönüyordu).
 - Görev yol bulma canavarın yanına götürür ve seçer, kendiliğinden saldırmaz.
+- Görev denetimi (orijinal ham kayıt): APK görev tablosunun seviye/deneyim/zincir verisinin yanlış okunduğu bulundu; zincir 67 görevde, adet ve çok hedef 5 görevde düzeltildi; bütün görevlerde orijinal altın ve sınıfa göre ödül eşyası (77 eşya eklendi); görev penceresinde ödül satırı; denetim araçları (gorev_ham.py, gorev_denetim.js, gorev_seviye.js, odul.js).

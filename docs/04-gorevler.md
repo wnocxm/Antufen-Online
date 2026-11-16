@@ -6,7 +6,37 @@
 - Türler: `talk` (kabul edince hazır; `to` ile konuşunca biter; `item` varsa "eşyayı götür"), `kill` (`target` × `count`),
   `collect` (`target` canavardan `chance` olasılıkla `item`), `pickup` (`node` toplama noktası), `deliver`, `special` (`flag`).
 - `req`: önceki görev (dizi = "herhangi biri", ırk yolları için). `race`: yalnızca o ırk.
-- Ödül: TP seviyeden hesaplanır (`q.reward`), altın/eşya `rw`'den.
+- Ödül: altın ve eşya orijinal (`q.rw` ← `QRW`, ham kayıt); TP şimdilik seviyeden hesaplanır (`q.reward`), orijinali `q.rw.xp`.
+
+## Orijinal kaynak: ne var, ne yok (16.11.2026 denetimi)
+**Kaynak hiyerarşisi:** Symbian `all_task.godat` HAM kaydı (`tools/gorev_ham.py` → `kaynak/cikti/cozulmus/tablolar/gorev_ham.json`) esastır.
+- **APK 1025 / TaskBot tablosu güvenilmez:** Symbian kaydını yanlış okumuş. `level` = hedef adedi, `exp` = bir metin bloğunun bayt boyu. Ödül eşyalarının sınıf bilgisi kayıp, zincir bağları eksik ya da değiştirilmiş (APK ekibinin `task_server.json.bak_*` yedekleri). APK'dan yalnız yapı ipuçları alınır, sayı alınmaz.
+- **Ham kayıtta olan (orijinal, birebir):** başlık, metinler, veren ve teslim alan (NPC + sahne), sonraki görev (zincir), hedef adetleri (çok hedefte her biri), altın, deneyim, ödül eşyaları (sınıfa göre: `[eşya, adet, sınıf]`), görev türü `b` ve hedef başvuruları.
+  - `b` görev türleri: 1 ana hikâye, 2 yan görev, 3 ayak işi (yalnız altın), 4 sınıf yükseltme, 5 zindan, 6 ödül avı, 7 bitki/tabela, 8 etkinlik/hediye.
+  - Ana ve yan görevlerin yaklaşık dörtte biri orijinalde 0 deneyim verir.
+  - Ek alanlarda unvan (180xxx), evcil (140xxx) ve sınıf yükseltme (13000x) ödülleri var. Bu sistemler henüz yok.
+- **Hiçbir dosyada OLMAYAN (orijinalde sunucudaydı):** görevlerin açılma seviyesi, seviye atlama deneyim tablosu, canavarların seviyesi, canı, deneyimi ve altını.
+  - Metinlerde de seviye yok; yalnız 40/80 sınıf yükseltme, 20 arena, 75/80/85 hediyeleri geçiyor.
+  - Bunlar bizim tahminimiz: açılma seviyesi aşağıda, canavarlar `game.js monDef`.
+- **Üretim:** `tools/gorevler.py` sonunda "orijinal ham kayıt geçişi" var:
+  - Zincir orijinalden kurulur. Oyunda olmayan ara görevlerin üstünden atlanır. Orijinalde önceki görev varsa elle bağın da üstündedir.
+  - Orijinalde öncesi olmayan görevlerde yalnız elle bağlar kalır: `zincir` alanı ve `tr.js` eğitim sırası.
+  - Adet ve çok hedef ilerleme metninden okunur.
+  - Bütün görevlerin (`tr.js` dahil) ödülü `quests_gen.js` içindeki `QRW`'den gelir (`{gold, xp, items}`).
+  - Ödül eşyası yalnız kendi sınıfına verilir (`rewardItems`). Görev penceresinde ödül satırı gösterilir.
+- **Ödül eşyaları:** `tools/odul_esyalari.py` ödül listesinde olup `items.json`'da olmayan eşyaları ekler (77 eşya). Değerleri mevcut merdivenden seviyeye göre ara değerle verilir. `30676` 成长大礼包 = oyundaki `growthBox`.
+- **Denetim:** `node tools/test/gorev_denetim.js` (`OUT=rapor`, `AYRINTI=1`). Bütün görevleri alan alan orijinalle karşılaştırır. Her görev değişikliğinden sonra çalıştır; `zincir:yanlış`, `zincir:eksik`, `adet`, `hedef`, `eşya`, `altın` sıfır olmalı.
+- **Deneyim:** görevlerin orijinal deneyimi `q.rw.xp`'de duruyor. Oyun henüz bizim formülü kullanıyor (`game.js` `q.reward.xp`), çünkü seviye tablosu orijinal görev deneyimine göre yeniden kurulmadı (karar bekliyor, docs/01).
+
+### Orijinalden bilinçli sapmalar (istisnalar, denetim aracında `ISTISNA`)
+- 81063 / 81396 Obur Ormanı: orijinal 15 食人鬼 + 15 恶咒食人鬼 + 15 鬼骑士. İlk ikisi orijinal harita verisinde de yok; yalnız 15 Hayalet Şövalye kaldı.
+- 80597 Hedef Seçme: orijinalde vereni boş bir eğitim görevi; bizde 初级战斗导师 → 教练员.
+- 81993 / 81998 zindan: "啃食者" başvuru listesinde yok, ilerleme metninde var (haritada ☆啃食者).
+- 81786 "Hızlı Öldürme": Symbian'da yok, APK eklemesi; atlandı.
+- `zincir:bizim` (59): orijinalde öncesi olmayan ama bizde bağlanan görevler.
+  - `tr.js` eğitim sırası (kamp ve Guanlin girişi).
+  - Evcil hayvan görevleri (hayvan şartı orijinalde sunucudaydı).
+  - Birkaç bölge bağı.
 
 ## Seviye kilidi (`game.js`)
 `questState(q)` → `done | ready | active | new | soon | locked`. `soon` = `P.lv < questMinLv(q)` (5 seviye içindeyse "Alınabilir"de gri görünür).
@@ -35,8 +65,8 @@
    ```
    `seviye`: o şehirde verilen hedefsiz konuşma görevlerinin en düşük seviyesi (aynı adlı NPC başka şehirde de durunca seviye yanlış çıkmasın).
    Bekleme/bitiş metni "结束/完成/离开" gibi düğme yazısıysa anlamlı kısa bir cümle yaz. Bir görevin yapısı bütün `_kaynak` dosyalarında aranır; bir çeviri dosyası birden çok bölgeyi kapsayabilir.
-4. **Üret**: `python3 tools/ceviri.py && python3 tools/gorevler.py`.
-5. **Denetle** (`docs/06-test.md`): `tools/test/qtest.js` (statik: veren/teslim/canavar/nokta haritada var mı + örnek zincir oynatma), `tools/test/qlv.js` (açılma seviyeleri). Seviyesi tuhaf çıkanları `seviyeler`/`zincir`/`atla` ile düzelt.
+4. **Üret**: `python3 tools/gorev_ham.py && python3 tools/ceviri.py && python3 tools/gorevler.py && python3 tools/odul_esyalari.py`.
+5. **Denetle** (`docs/06-test.md`): önce `node tools/test/gorev_denetim.js` (orijinalle alan alan), sonra `tools/test/qtest.js` (statik: veren/teslim/canavar/nokta haritada var mı + örnek zincir oynatma), `tools/test/qlv.js` (açılma seviyeleri). Seviyesi tuhaf çıkanları `seviyeler`/`zincir`/`atla` ile düzelt.
 6. **SQL**: `cd server && node import.js` (quests tablosu). Sonra sürüm + commit + push.
 
 ## Bilinen tuzaklar

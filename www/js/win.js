@@ -296,7 +296,10 @@ const Win = (() => {
       const L = [];
       if (avail) { const sid = npcSceneNear(selQ.giver); L.push([`${tx('Veren')}: ${trName(selQ.giver)}${sid ? ' · ' + trName(S[sid].name) : ''}`, '#2a1608']); L.push([`${tx('Seviye')}: ${questMinLv(selQ)}${st === 'soon' ? ' · ' + tx('henüz açılmadı') : ''}`, st === 'soon' ? '#b01808' : '#0c4208']); }
       else L.push([`${tx('Teslim')}: ${trName(selQ.to)}`, '#2a1608']);
-      wrap(ctx, selQ.goal, 190, 10).forEach(l => L.push([l, '#0c4208'])); L.push(['', '']);
+      wrap(ctx, selQ.goal, 190, 10).forEach(l => L.push([l, '#0c4208']));
+      { const r = selQ.reward, it = rewardItems(selQ).map(([id, n]) => `${ITEMS[id].name}${n > 1 ? ' ×' + n : ''}`);   // orijinaldeki gibi ödül satırı
+        wrap(ctx, `${tx('Ödül')}: ${r.xp} ${tx('TP')} · ${r.gold} ${tx('altın')}${it.length ? ' · ' + it.join(', ') : ''}`, 190, 10).forEach(l => L.push([l, '#6a3a00'])); }
+      L.push(['', '']);
       wrap(ctx, selQ.text || '', 190, 10).forEach(l => L.push([l, '#1a0f05']));
       L.slice(0, 12).forEach(([l, c], i) => nText(ctx, l, 18, 54 + i * 12.5, c, 10, 'left', 192));
       const B = avail ? [[50423, 'Yol Bul', 'walk']] : [[50423, 'Yol Bul', 'walk'], [50424, 'Bırak', 'drop']];

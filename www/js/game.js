@@ -505,8 +505,8 @@ function useItem(id) {
   if (it.use) {
     if (it.use.hp) { if (p.hp >= s.hp) return UI.log('Canın dolu.'); p.hp = Math.min(s.hp, p.hp + it.use.hp); UI.float(p, '+' + it.use.hp, '#7bff8a'); }
     if (it.use.mp) { if (p.mp >= s.mp) return UI.log('Manan dolu.'); p.mp = Math.min(s.mp, p.mp + it.use.mp); UI.float(p, '+' + it.use.mp, '#6fb7ff'); }
-    if (it.use.hot) { // yiyecek: süre boyunca yavaş yavaş yeniler (aynı türden yenisi eskisinin yerine geçer)
-      const [res, amt, sec] = it.use.hot, k = res === 'hp' ? 'hotT' : 'motT'; p.buffs = p.buffs.filter(b => !b.buff[k]);
+    for (const h of [it.use.hot, it.use.hot2]) if (h) { // yiyecek: süre boyunca yavaş yavaş yeniler (aynı türden yenisi eskisinin yerine geçer); hot2: can + mana birlikte
+      const [res, amt, sec] = h, k = res === 'hp' ? 'hotT' : 'motT'; p.buffs = p.buffs.filter(b => !b.buff[k]);
       p.buffs.push({ id: 'food_' + res, buff: { [k]: amt / sec }, t: sec }); UI.float(p, it.name, res === 'hp' ? '#7bff8a' : '#6fb7ff', 0.8);
     }
     removeItem(id);
@@ -609,7 +609,9 @@ const QXP_F = L => clamp(1.2 - L / 40, 0.3, 1);
 for (const q of QUESTS) if (!q.reward) { const L = q.lv || (MON[q.target] && MON[q.target].lv) || 3, mx = (MON[q.target] && MON[q.target].xp) || 20;
   q.reward = q.type === 'kill' || q.type === 'collect' ? { xp: Math.round(((q.count || 1) * mx * 1.6 + 60 * L) * QXP_F(L)), gold: 10 + L * 6 } : { xp: Math.round((80 + 50 * L) * QXP_F(L)), gold: 8 + L * 4 }; }
 // orijinal tablodaki altın ve eşya ödülü (tools/gorevler.py)
-for (const q of QUESTS) if (q.rw) { if (q.rw.gold) q.reward.gold = q.rw.gold; if (q.rw.items && q.rw.items.length) q.reward.items = q.rw.items; }
+// orijinal altın ve eşya ödülü (Symbian ham kaydı, tools/gorev_ham.py → quests_gen.js QRW); eşyanın 3. öğesi sınıf: yalnız o sınıfa verilir
+for (const q of QUESTS) if (q.rw) { q.reward.gold = q.rw.gold; q.reward.items = q.rw.items || []; }
+const rewardItems = q => (q.reward.items || []).filter(([id, , c]) => ITEMS[id] && (!c || [].concat(c).includes(Game.P.cls)));
 function acceptQuest(q) { const P = Game.P; P.quests[q.id] = { n: 0, ready: q.type === 'talk' }; if (q.type === 'special' && Game.flags[q.flag]) P.quests[q.id].ready = true; UI.log(`Görev alındı: ${q.title}`, 'q'); SFX.play('accept_task'); UI.refresh(); save(); }
 function questKill(name) {
   const P = Game.P;
@@ -629,7 +631,7 @@ function readyQuest(q) { Game.P.quests[q.id].ready = true; SFX.play('message'); 
 function completeQuest(q) {
   if (q.type === 'deliver') { if (giveCount(q) < q.count) return UI.toast(`${q.item}: ${giveCount(q)}/${q.count}`); takeGive(q); }
   const P = Game.P, r = q.reward; delete P.quests[q.id]; P.done[q.id] = true; SFX.play('finish_task');
-  if (r.gold) P.gold += r.gold; if (r.items) r.items.forEach(([id, n]) => { if (ITEMS[id]) addItem(id, n); });
+  if (r.gold) P.gold += r.gold; for (const [id, n] of rewardItems(q)) addItem(id, n);
   gainXp(r.xp || 0); UI.log(`Ödül: ${r.xp} TP${r.gold ? ', ' + r.gold + ' altın' : ''}`, 'q');
   UI.refresh(); save();
 }

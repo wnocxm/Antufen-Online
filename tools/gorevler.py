@@ -138,6 +138,62 @@ for f in sorted(glob.glob('kaynak/ceviri/gorevler/*.json')):
 ids = {q['id'] for q in out} | HAND
 for q in out:
     if q.get('req') and q['req'] not in ids: q.pop('req')
+
+# ===== ORİJİNAL HAM KAYIT GEÇİŞİ (tools/gorev_ham.py → gorev_ham.json; denetim: tools/test/gorev_denetim.js) =====
+# APK 1025 tablosu Symbian kaydını yanlış okumuş (seviye = hedef adedi, deneyim = metin bloğu boyu, sınıf bilgisi kayıp, zincir bağları eksik).
+# Bu yüzden zincir, adet, çok hedef ve ödüller (altın, deneyim, sınıfa göre eşya) Symbian ham kaydından alınır.
+HAM = json.load(open('kaynak/cikti/cozulmus/tablolar/gorev_ham.json', encoding='utf-8'))
+TXT = json.load(open('kaynak/cikti/cozulmus/tablolar/tasks.json', encoding='utf-8'))
+MANUAL = set()
+for f in glob.glob('kaynak/ceviri/gorevler/*.json'):
+    if not f.endswith('_kaynak.json'): MANUAL |= set(map(int, json.load(open(f, encoding='utf-8')).get('zincir', {})))
+PREV = {}
+for r in HAM.values():
+    if r.get('next'): PREV.setdefault(r['next'], []).append(r['id'])
+def orig_prev(i, seen=None):
+    """orijinal önceki görev(ler); oyunda olmayan ara görevlerin üstünden atlanır"""
+    seen = seen or set(); o = []
+    for p in PREV.get(i, []):
+        if p in seen: continue
+        seen.add(p); o += [p] if p in ids else orig_prev(p, seen)
+    return o
+_D = json.load(open('www/assets/data.json')); MOBS = {e[1] for s in _D['scenes'].values() for e in s['ents'] if str(e[0]) in _D['mon']}
+def mobname(n):
+    for c in (n, '☆' + n, '☆☆' + n, '★' + n):
+        if c in MOBS: return c
+    return None
+nfix = {'zincir': 0, 'adet': 0, 'çokhedef': 0}
+for q in out:
+    r = HAM.get(str(q['id']))
+    if not r or r.get('err'): continue
+    # zincir: orijinalde önceki görev varsa o (elle bağ dahil her şeyin üstünde); yoksa elle bağ kalır, APK bağı silinir
+    op = orig_prev(q['id'])
+    if op:
+        v = op[0] if len(op) == 1 else op
+        if q.get('req') != v: q['req'] = v; nfix['zincir'] += 1
+    elif q.get('req') and q['id'] not in MANUAL: q.pop('req'); nfix['zincir'] += 1
+    # adet ve çok hedef
+    cs = r.get('counts') or []
+    if q['type'] == 'kill' and len(cs) > 1 and not q.get('targets'):
+        prog = (TXT.get(str(q['id'])) or [''] * 10)[9] if len(TXT.get(str(q['id'])) or []) > 9 else ''
+        tg = []
+        for seg in re.split(r'；|\s{2,}', re.sub(r'\\C\(\d+,\d+,\d+\)', '', prog)):   # "已杀死X：%d/10；Y：%d/10" ya da boşlukla ayrılmış
+            m = re.search(r'(?:已(?:经)?(?:杀死|击杀))?\s*([^：:；\s]+)[：:]\s*%d/(\d+)', seg)
+            if m: tg.append((mobname(m.group(1)), int(m.group(2))))
+        if len(tg) == len(cs) and all(n for n, _ in tg):
+            q['targets'] = [[n, c] for n, c in tg]; q['target'] = tg[0][0]; q['count'] = sum(c for _, c in tg); nfix['çokhedef'] += 1
+        else: print('  çok hedef çözülemedi (tek hedef kalır; istisna, docs/04):', q['id'], tg)
+    elif len(cs) == 1 and q['type'] in ('kill', 'collect', 'pickup') and q.get('count') and q['count'] != cs[0] and not q.get('targets'):
+        q['count'] = cs[0]; nfix['adet'] += 1
+print('orijinal ham kayıt düzeltmeleri', nfix)
+# ödüller: oyundaki BÜTÜN görevler için (tr.js elle yazılanlar dahil) orijinal altın, deneyim, eşya; eşyanın 3. öğesi sınıf (yalnız o sınıfa verilir)
+ITEMALIAS = {'30676': 'growthBox'}   # 成长大礼包 = oyundaki Gelişim Paketi
+QRW = {}
+for i in sorted(ids):
+    r = HAM.get(str(i))
+    if not r or r.get('err'): continue
+    QRW[i] = {'gold': r['gold'], 'xp': r['xp'], 'items': [[ITEMALIAS.get(x[0], x[0])] + x[1:] for x in r['items']]}
+for q in out: q.pop('rw', None)
 # konuşma görevlerinin seviyesi: zincirdeki ya da aynı kişideki savaş görevinden
 byg = {}
 for q in out:
@@ -151,7 +207,7 @@ for q in out:
 js = """// Görevler: tools/gorevler.py üretir; elle değiştirme. Yapı Android sürümünün görev tablosundan, metinler çevrildi.
 'use strict';
 (function () {
-  const E = LANG === 'en', Q = %s;
+  const E = LANG === 'en', Q = %s, QRW = %s;
   for (const q of Q) {
     const s = E ? q.en : q.tr, to = trName(q.to), sc = q.sc ? trName(q.sc) : '', mon = q.target ? trName(q.target) : '';
     q.title = s[0]; q.text = s[1]; q.ok = s[2]; q.wait = s[3]; q.done = s[4]; if (s[5]) q.item = s[5];
@@ -164,7 +220,9 @@ js = """// Görevler: tools/gorevler.py üretir; elle değiştirme. Yapı Androi
       : (E ? `Talk to ${to}.` : `${to} ile konuş.`);
     delete q.tr; delete q.en; QUESTS.push(q);
   }
+  // orijinal ödüller (Symbian ham kaydı): {gold, xp, items: [[id, adet, sınıf?]]} — elle yazılan görevler (tr.js) dahil
+  for (const q of QUESTS) if (QRW[q.id]) q.rw = QRW[q.id];
 })();
-""" % json.dumps(out, ensure_ascii=False, separators=(',', ':'))
+""" % (json.dumps(out, ensure_ascii=False, separators=(',', ':')), json.dumps(QRW, ensure_ascii=False, separators=(',', ':')))
 open('www/js/quests_gen.js', 'w', encoding='utf-8').write(js)
 print('görev', len(out))
