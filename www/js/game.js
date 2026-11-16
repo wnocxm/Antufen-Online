@@ -547,6 +547,7 @@ function questMinLv(q) {
   if (lv == null) { sceneIndex(); const z = zoneMin(NPC_SC[q.giver]); lv = q.lv0 || (z != null ? Math.max(1, z - 1) : hubLv(q.giver)); }
   // önceki görev: tek kimlikse onun seviyesi; "herhangi biri" listesiyse (ırklara göre ayrı yollar) en düşüğü
   if (preLv != null) lv = Math.max(lv, preLv);
+  if (q.lvMin) lv = Math.max(lv, q.lvMin);   // bölge dosyasında elle verilen en düşük seviye
   return q._lv = lv;
 }
 // seviye atlayınca açılan görevler

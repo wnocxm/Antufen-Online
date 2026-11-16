@@ -104,6 +104,7 @@ for f in sorted(glob.glob('kaynak/ceviri/gorevler/*.json')):
         if i in have or i in skip or not c: continue
         q = {k: s0[k] for k in ('id', 'giver', 'to', 'type', 'target', 'node', 'count', 'sc', 'chance', 'req', 'rw') if k in s0}
         if str(i) in C.get('zincir', {}): q['req'] = C['zincir'][str(i)]   # elle verilen zincir bağı
+        if str(i) in C.get('seviyeler', {}): q['lvMin'] = C['seviyeler'][str(i)]
         if C.get('seviye') and q['type'] not in ('kill', 'collect', 'pickup'): q['lv0'] = C['seviye']   # şehirde verilen konuşma görevinin en düşük seviyesi
         if q['type'] in ('kill', 'collect', 'pickup'):
             nm = s0.get('sc'); r = next((x.get('lvr') for x in S.values() if x['name'] == nm and x.get('lvr')), None)
