@@ -789,9 +789,7 @@ function tapWorld(sx, sy) {
     if (best.kind === 'npc' && Game.target !== best) { setTarget(best); p.path = null; SFX.play('menusel', 0.5); return; }
     return talkTo(best);
   }
-  const c = Game.map.toCell(W.x, W.y);
-  const path = findPath(Game.map, p.x, p.y, c.x, c.y);
-  if (path) { Game.route = null; p.path = path; setTarget(null); Game.goTarget = null; Game.fx.push(Object.assign(new Fx('路标-左上', Math.round(c.x), Math.round(c.y), { anim: 0 }), { len: 6 })); }
+  // boş yere dokunmak karakteri yürütmez (orijinalde de yoktu): yürüme yalnızca sol alttaki ejderhayla
 }
 // hedef alınmış NPC ile konuş: yakınsa hemen, uzaksa yanına yürüyüp konuşur (hedef korunur)
 function talkTo(n) {

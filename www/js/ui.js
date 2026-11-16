@@ -583,7 +583,7 @@ const UI = (() => {
     mode = 'loading'; $('#loading').classList.remove('hidden');
     await loadScene(Game.P.scene || (Game.P.race === '精灵' ? '120205' : '120207'));
     $('#loading').classList.add('hidden'); mode = 'play';
-    if (!Object.keys(Game.P.done).length && !Object.keys(Game.P.quests).length) { toast('Rehber seni bekliyor: başında ! olan kişiye dokun'); log('Sol alttaki ejderhayı parmağınla kaydırarak yürü ya da haritada bir yere dokun.', '#ffd23a'); log('Canavara dokunursan saldırırsın; sağ alttaki büyük düğme de en yakın canavara saldırır.', '#ffd23a'); }
+    if (!Object.keys(Game.P.done).length && !Object.keys(Game.P.quests).length) { toast('Rehber seni bekliyor: başında ! olan kişiye dokun'); log('Sol alttaki ejderhayı parmağınla kaydırarak yürü.', '#ffd23a'); log('Canavara dokunursan saldırırsın; sağ alttaki büyük düğme de en yakın canavara saldırır.', '#ffd23a'); }
   }
   let last = performance.now();
   function loop(now) {

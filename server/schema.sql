@@ -128,3 +128,23 @@ CREATE TABLE IF NOT EXISTS scenes (
   map    TEXT NOT NULL,
   music  TEXT
 );
+-- görev tanımları (oyunun görev listesinden aktarılır; NPC/canavar/harita adları orijinal Çince ad)
+CREATE TABLE IF NOT EXISTS quests (
+  id           INT PRIMARY KEY,
+  type         TEXT NOT NULL,                 -- talk | kill | collect | pickup | deliver | special
+  giver        TEXT NOT NULL,                 -- görevi veren NPC
+  deliver_to   TEXT NOT NULL,                 -- teslim alan NPC
+  target       TEXT,                          -- öldürülecek / eşyayı düşüren canavar
+  node         TEXT,                          -- toplama noktası
+  count        INT,
+  scene        TEXT,                          -- hedefin bulunduğu harita adı
+  prev_quests  INT[],                         -- önce bitmesi gereken görev(ler)
+  race         TEXT,
+  reward_xp    INT,
+  reward_gold  INT,
+  reward_items JSONB,                         -- [["10047",1],...]
+  title_tr TEXT, goal_tr TEXT, text_tr TEXT, wait_tr TEXT, done_tr TEXT, item_tr TEXT,
+  title_en TEXT, goal_en TEXT, text_en TEXT, wait_en TEXT, done_en TEXT, item_en TEXT
+);
+-- bir karakterin bitirdiği görev de character_quests'te 'done' olarak durur; görev tanımına bağlanabilir
+CREATE INDEX IF NOT EXISTS character_quests_quest ON character_quests (quest_id);
