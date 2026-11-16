@@ -83,7 +83,7 @@ const CLS = {
       { id: 'wp5', pas: { hpreg: 60 }, name: 'Hızlı İyileşme', icon: 1135, lv: 14, desc: 'Can yenilenmesi artar.' },
       { id: 'wp6', pas: { dr: 8 }, name: 'Dayanıklılık Halesi', icon: 1110, lv: 18, desc: 'Alınan hasar −%8.' },
     ] },
-  '法师': { hp: 850, mp: 800, atk: 70, def: 20, ghp: 130, gmp: 90, gatk: 14, gdef: 5, range: 6, color: '蓝', bolt: '特效-火球', snd: 'skill_fire2',
+  '法师': { hp: 850, mp: 800, atk: 70, def: 20, ghp: 130, gmp: 90, gatk: 14, gdef: 5, range: 6, color: '蓝', bolt: '特效-火球', boltHit: '特效-火爆炸', snd: 'skill_fire2',
     skills: [
       { id: 'm1', name: 'Ateş Topu', icon: 1137, mp: 20, cd: 1.2, mult: 1.5, range: 7, proj: '特效-火球', hit: '特效-火爆炸', snd: 'skill_fireball', snd2: 'skill_bomb', add: [60, 65, 70, 75, 80, 90, 100, 110, 120, 130], lv: 1, desc: 'Uzaktan ateş büyüsü.' },
       { id: 'm2', name: 'Dondurma', icon: 1132, mp: 30, cd: 0.9, mult: 1.5, crit: 15, range: 7, proj: '特效-冰球', hit: 'WATER_ATTACK', slow: 4, snd: 'skill_wind', snd2: 'skill_bubble', add: [80, 90, 100, 110, 120, 135, 150, 165, 180, 195], lv: 3, desc: 'Buz büyüsü; hedefi yavaşlatır.' },
@@ -98,7 +98,7 @@ const CLS = {
       { id: 'mp5', pas: { mpreg: 60 }, name: 'Mana Yenilenmesi', icon: 1104, lv: 14, desc: 'Mana yenilenmesi artar.' },
       { id: 'mp6', pas: { mpPct: 10 }, name: 'Mana Halesi', icon: 1111, lv: 19, desc: 'Mana sınırı +%10 daha.' },
     ] },
-  '牧师': { hp: 900, mp: 700, atk: 60, def: 30, ghp: 140, gmp: 80, gatk: 12, gdef: 6, range: 5.5, color: '金', bolt: '特效-黑暗火球', snd: 'skill_wind',
+  '牧师': { hp: 900, mp: 700, atk: 60, def: 30, ghp: 140, gmp: 80, gatk: 12, gdef: 6, range: 5.5, color: '金', bolt: '特效-黑暗火球', boltHit: '特效-火爆炸', snd: 'skill_wind',
     skills: [
       { id: 'p1', name: 'Gölge Darbesi', icon: 1062, mp: 18, cd: 1.0, mult: 1.5, range: 7, proj: '特效-暗影冲击_红', hit: '特效-冲击爆炸', snd: 'skill_wind', snd2: 'skill_bomb', add: [25, 28, 31, 35, 40, 46, 55, 65, 72, 80], lv: 1, desc: 'Uzaktan gölge saldırısı.' },
       { id: 'p2', name: 'Çürüme', icon: 1066, mp: 30, cd: 6, mult: 0.3, dot: { n: 5 }, range: 7, fx: '特效-死亡标记', snd: 'skill_deathtag', dotT: [50, 60, 70, 80, 90, 100, 125, 150, 175, 200], lv: 3, desc: 'Hedefe lanet: 2 saniyede bir hasar verir.' },
@@ -312,6 +312,7 @@ async function loadScene(sid, arrive) {
   for (const [id, nm] of sc.ents) { const info = D.cit[id] || D.mon[id]; if (info) { names.add(info[1]); if (info[2]) names.add(info[2]); } }
   for (const n of ['特效-血爆死亡', '特效-刀光', 'LEVELUP', '特效-火球', '特效-火爆炸', '特效-冰球', '特效-冰块碎裂', '特效-黑暗火球', '特效-蓝火球', '特效-大喷血', '特效-治疗buff', 'NPC-新手引导－1', 'NPC-新手引导－2']) names.add(n);
   for (const s of CLS[Game.P.cls].skills) for (const k of ['fx', 'proj', 'hit', 'self', 'fx2']) if (s[k]) names.add(s[k]);
+  for (const k of ['bolt', 'boltHit']) if (CLS[Game.P.cls][k]) names.add(CLS[Game.P.cls][k]);
   await Assets.preload([...names]);
   Game.player && (Game.player = null);
   Game.map = map; Game.scene = sc; Game.sceneId = sid; Game.target = null; Game.ents = []; Game.fx = []; Game.floats = [];
@@ -703,7 +704,7 @@ function update(dt) {
         else if (p.atkT <= 0) {
           p.atkT = 1.1; p.combatT = 5; p.dir = dirOf(t.x - p.x, t.y - p.y);
           if (C.melee) { p.state = 'attack'; p.animT = 0; p.stateT = 0.45; later(0.25, () => { if (!t.dead && Math.hypot(t.x - p.x, t.y - p.y) < C.range + 0.6) { hitMob(t, 1); SFX.play(C.snd); Game.fx.push(new Fx('BLOOD', t.x, t.y)); } }); }
-          else { p.state = 'cast'; p.animT = 0; p.stateT = 0.45; SFX.play(C.snd, 0.6); later(0.2, () => shoot(C.bolt, p, t, () => hitMob(t, 0.9))); }
+          else { p.state = 'cast'; p.animT = 0; p.stateT = 0.45; SFX.play(C.snd, 0.6); later(0.2, () => shoot(C.bolt, p, t, () => { hitMob(t, 0.9); if (C.boltHit) Game.fx.push(new Fx(C.boltHit, t.x, t.y)); SFX.play('skill_bomb', 0.4); }, true)); }
         }
       }
       if (p.path && p.path.length) {
