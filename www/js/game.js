@@ -580,15 +580,15 @@ function npcSceneNear(cn) {
   sceneIndex(); const L = NPC_SC[cn] || []; if (L.includes(Game.sceneId)) return Game.sceneId;
   let best = null, bl = 1e9; for (const sid of L) { const p = scenePath(Game.sceneId, sid); if (p && p.length < bl) { bl = p.length; best = sid; } } return best || L[0] || null;
 }
-function monSceneNear(name) {
-  sceneIndex(); const L = MON_SC[name] || []; if (L.includes(Game.sceneId)) return Game.sceneId;
+function monSceneNear(name, scName) {   // scName: görevde yazan harita adı (q.sc) varsa o adlı haritalar öncelikli
+  sceneIndex(); let L = MON_SC[name] || []; if (scName) { const F = L.filter(sid => Assets.D.scenes[sid].name === scName); if (F.length) L = F; } if (L.includes(Game.sceneId)) return Game.sceneId;
   let best = null, bl = 1e9; for (const sid of L) { const p = scenePath(Game.sceneId, sid); if (p && p.length < bl) { bl = p.length; best = sid; } } return best || L[0] || null;
 }
 // bir kişiye git: başka haritadaysa geçitlerden yürür, varınca kişiye yürür
 function routeToNpc(cn) {
   const sid = npcSceneNear(cn); if (!sid) return UI.toast('Bu kişinin yeri bilinmiyor.');
   if (sid === Game.sceneId) { const e = Game.ents.find(e => e.cn === cn); if (e) return walkToEnt(e); return; }
-  Game.routeNpc = cn; routeTo(sid);
+  Game.routeNpc = cn; Game.routeQuest = null; routeTo(sid);
 }
 // ışınlanma görevi: q.tp = [sahne, x, y]; gidilen yer "ev" olur (ölünce orada doğulur)
 function questTeleport(q) { const P = Game.P; P.home = q.tp.slice(); save(); gotoScene(q.tp[0], null, q.tp[1] != null ? [q.tp[1], q.tp[2]] : null); }
@@ -663,7 +663,7 @@ function scenePath(from, to) {
 }
 function routeStep() {
   const to = Game.route; if (!to || !Game.player) return;
-  if (to === Game.sceneId) { Game.route = null; const cn = Game.routeNpc; Game.routeNpc = null; if (cn) { const e = Game.ents.find(e => e.cn === cn); if (e) return walkToEnt(e); } return UI.toast('Hedefe vardın.'); }
+  if (to === Game.sceneId) { Game.route = null; const rq = Game.routeQuest && QUESTS.find(x => x.id === Game.routeQuest); Game.routeQuest = null; if (rq && Game.P.quests[rq.id]) return questWalk(rq); const cn = Game.routeNpc; Game.routeNpc = null; if (cn) { const e = Game.ents.find(e => e.cn === cn); if (e) return walkToEnt(e); } return UI.toast('Hedefe vardın.'); }
   const path = scenePath(Game.sceneId, to), ex = path && Game.scene.exits.find(e => e[2] === path[1]), r = ex && Game.map.regionsOf(1).find(g => g[0] === ex[0]);
   if (!r) { Game.route = null; return UI.toast('Yol bulunamadı.'); }
   const p = Game.player; let best = null;
@@ -674,17 +674,31 @@ function routeStep() {
 }
 // bu haritadaki bir NPC'ye yürü (harita penceresindeki NPC listesi)
 function walkToEnt(t) { const p = Game.player; p.path = findPath(Game.map, p.x, p.y, t.x, t.y + 1); Game.goTarget = t; setTarget(null); if (!p.path) UI.toast('Oraya yol bulunamadı.'); }
+// Görev yol bulma (orijinaldeki "寻路"), görevin durumuna göre:
+//  alınmamış → görevi veren; hazır (ya da konuş/teslim/özel görev) → ödülü veren kişi (q.to);
+//  öldür/topla → hedef canavar (bu haritada yaşayan varsa saldırır, hepsi ölüyse doğdukları yere yürür, yoksa canavarın haritasına — q.sc öncelikli);
+//  nesne toplama → nesne (bu haritada yoksa nesnenin haritasına). Başka haritaya gidilince varışta görev yürüyüşü kendiliğinden sürer (Game.routeQuest).
 function questWalk(q) {
   const p = Game.player, st = Game.P.quests[q.id], near = f => { let b = null, bd = 1e9; for (const e of Game.ents) if (f(e)) { const d = Math.hypot(e.x - p.x, e.y - p.y); if (d < bd) { bd = d; b = e; } } return b; };
-  let t = null;
-  if (st && !st.ready) { if (q.type === 'kill' || q.type === 'collect') t = near(e => e.kind === 'mob' && !e.dead && (q.targets ? q.targets.some(x => x[0] === e.name && ((st.c || {})[x[0]] || 0) < x[1]) : e.name === q.target)); else if (q.type === 'pickup') t = near(e => e.kind === 'npc' && e.cn === q.node && !e.hidden); }
-  if (!t) t = near(e => e.kind === 'npc' && e.cn === q.to);
-  if (!t) {
-    if (st && !st.ready && (q.type === 'kill' || q.type === 'collect')) { const sid = monSceneNear(q.target); if (sid && sid !== Game.sceneId) { Game.routeNpc = null; return routeTo(sid); } }
-    return routeToNpc(st ? q.to : q.giver);
+  const goNpc = cn => { const e = near(e => e.kind === 'npc' && e.cn === cn && !e.hidden); if (e) return walkToEnt(e); return routeToNpc(cn); };
+  const away = sid => { Game.routeNpc = null; Game.routeQuest = q.id; routeTo(sid); };
+  if (!st) return goNpc(q.giver);
+  if (st.ready || !['kill', 'collect', 'pickup'].includes(q.type)) return goNpc(q.to);
+  if (q.type === 'pickup') {
+    const n = near(e => e.kind === 'npc' && e.cn === q.node && !e.hidden) || near(e => e.kind === 'npc' && e.cn === q.node);
+    if (n) return walkToEnt(n);
+    const sid = npcSceneNear(q.node); if (sid && sid !== Game.sceneId) return away(sid);
+    UI.toast('Toplanacak yer bilinmiyor.'); return goNpc(q.to);
   }
-  if (t.kind === 'mob') { setTarget(t, true); p.path = null; return; }   // görev yürüyüşü: göreve yazılı canavara saldırır
-  p.path = findPath(Game.map, p.x, p.y, t.x, t.y + 1); Game.goTarget = t; setTarget(null);
+  const names = q.targets ? q.targets.filter(x => ((st.c || {})[x[0]] || 0) < x[1]).map(x => x[0]) : [q.target];
+  const t = near(e => e.kind === 'mob' && !e.dead && names.includes(e.name));
+  if (t) { setTarget(t, true); p.path = null; return; }   // göreve yazılı canavara saldırır
+  const spot = near(e => e.kind === 'mob' && names.includes(e.name));   // hepsi ölü: yeniden doğdukları yere yürü
+  if (spot) { p.path = findPath(Game.map, p.x, p.y, spot.x, spot.y + 1); Game.goTarget = null; setTarget(null); UI.toast('Canavarlar yeniden doğuyor; doğdukları yere gidiliyor.'); return; }
+  let best = null, bl = 1e9;
+  for (const n of names) { const sid = monSceneNear(n, q.sc); const L = sid && scenePath(Game.sceneId, sid); const l = L ? L.length : 1e8; if (sid && l < bl) { bl = l; best = sid; } }
+  if (best && best !== Game.sceneId) return away(best);
+  UI.toast('Hedef canavarın yeri bilinmiyor.');
 }
 function pickupNode(n) {
   const P = Game.P;
@@ -729,7 +743,7 @@ function update(dt) {
     const J = Input.joy();
     let moving = false;
     if (J) {
-      p.path = null; p.pending = null; Game.goTarget = null; Game.route = null; Game.routeNpc = null; Game.engage = false;
+      p.path = null; p.pending = null; Game.goTarget = null; Game.route = null; Game.routeNpc = null; Game.routeQuest = null; Game.engage = false;
       const [cx, cy] = snapScreen4(J.x, J.y), l = 1, sp = RUN * (1 + s.spd) * (Game.fast ? 2.6 : 1) * dt;
       moveEnt(p, cx / l * sp, cy / l * sp); p.dir = dirOf(cx, cy); moving = true;
     } else if ((lastJoyDir = -1, p.state !== 'attack' && p.state !== 'cast')) {

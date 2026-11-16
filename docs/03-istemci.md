@@ -29,6 +29,16 @@ Boş yere dokunmak **yürütmez** (`tapWorld`); NPC'ye ilk dokunuş hedef alır,
 - Yaklaşırken engelli karede takılırsa (`p.chaseD` ilerlemiyorsa) ve menzil +0,6 içindeyse olduğu yerden vurur.
 - Test: `tools/test/hedef.js`. Test betikleri saldırı için `setTarget(m, true)` kullanır.
 Otomatik yol: `routeTo(sid)` sahneler arası (`scenePath`), `routeToNpc(cn)`, `walkToEnt`; görev penceresindeki "Yol Bul".
+**Görev yol bulma (`questWalk`)** görevin durumuna göre gider:
+- Alınmamış görev → görevi veren.
+- Hazır görev (ya da konuş / teslim / özel görev) → ödülü veren kişi (`q.to`).
+- Öldür/topla görevi:
+  - Bu haritada yaşayan hedef varsa ona saldırır (çok hedefli görevde bitmemiş hedefler).
+  - Hepsi ölüyse doğdukları yere yürür.
+  - Yoksa canavarın en yakın haritasına gider; görevdeki harita adı `q.sc` önceliklidir (`monSceneNear(ad, sc)`).
+- Nesne toplama → nesne ya da nesnenin haritası.
+- Başka haritaya gidince varışta görev yürüyüşü kendiliğinden sürer (`Game.routeQuest`); yön tuşu bunu iptal eder.
+- Test: `tools/test/yolbul.js`.
 
 ## Veri ve kayıt
 - `data.json`: `scenes[sid] = {name, map, lv, lvr:[min,max], exits:[[bölge, ad, hedefSid]], ents:[[id, ad, konum]], music, kind}`, `cit` (NPC), `mon` (canavar), `reg` (görsel kayıt), `palidx`.

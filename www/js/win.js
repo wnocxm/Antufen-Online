@@ -653,7 +653,7 @@ const Win = (() => {
   function tapMap(id) {
     if (id === 'npcs') return UI.open('npcs');
     if (id === 'sw') { SFX.play('skill_pageflip'); WM.sel = null; WM.mode = WM.mode === 'area' ? 'world' : WM.mode === 'world' ? 'local' : 'world'; return; }
-    if (id === 'go') { if (!WM.sel) return UI.toast('Önce haritadan bir yer seç.'); const t = WM.sel; UI.closeAll(); routeTo(t); return; }
+    if (id === 'go') { if (!WM.sel) return UI.toast('Önce haritadan bir yer seç.'); const t = WM.sel; UI.closeAll(); Game.routeQuest = null; Game.routeNpc = null; routeTo(t); return; }
     if (typeof id === 'string' && id.startsWith('area:')) { WM.area = WM.data.areas.find(a => a.i === +id.slice(5)); WM.mode = 'area'; WM.sel = null; SFX.play('skill_pageflip'); return; }
     if (typeof id === 'string' && id.startsWith('sc:')) { WM.sel = id.slice(3); SFX.play('menusel', 0.6); }
   }
