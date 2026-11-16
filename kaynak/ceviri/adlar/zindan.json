@@ -1,323 +1,1303 @@
 {
  "_not": "Zindan, rüya, arena, kule ve gizli oda haritalarındaki (55 altı) adlar. Çince: [Türkçe, İngilizce]",
- "☆狼王侍卫": ["☆Kurt Kralı Muhafızı", "☆Wolf King Guard"],
- "☆森林主宰": ["☆Ormanın Hâkimi", "☆Forest Overlord"],
- "☆啃食者": ["☆Kemirici", "☆Gnawer"],
- "饥饿的苍狼": ["Aç Boz Kurt", "Hungry Grey Wolf"],
- "七彩蝮蛇": ["Yedi Renkli Engerek", "Rainbow Viper"],
- "林地豪猪": ["Koru Kirpisi", "Woodland Porcupine"],
- "暴躁的豪猪": ["Huysuz Kirpi", "Grumpy Porcupine"],
- "幽爪奔跑者": ["Hayaletpençe Koşucu", "Ghostclaw Runner"],
- "双生游蛇": ["İkiz Yılan", "Twin Serpent"],
- "☆獠牙击碎者": ["☆Azıdiş Kıran", "☆Tuskbreaker"],
- "★月夜狼王": ["★Mehtap Kurt Kralı", "★Moonlit Wolf King"],
- "普通副本-失落沼泽(40级)": ["Normal Zindan · Kayıp Bataklık (Sv 40)", "Normal Dungeon · Lost Swamp (Lv 40)"],
- "普通副本-噬魂高地(40级)": ["Normal Zindan · Ruhyiyen Yaylası (Sv 40)", "Normal Dungeon · Soul Eater Highlands (Lv 40)"],
- "普通副本-薄暮山谷(40级)": ["Normal Zindan · Alacakaranlık Vadisi (Sv 40)", "Normal Dungeon · Dusk Valley (Lv 40)"],
- "普通副本-死亡荒野(40级)": ["Normal Zindan · Ölüm Yabanı (Sv 40)", "Normal Dungeon · Death Wilds (Lv 40)"],
- "★失落的邓肯": ["★Kayıp Duncan", "★Lost Duncan"],
- "噬魂远征军祭祀队长": ["Ruhyiyen Seferi Ayin Yüzbaşısı", "Soul Eater Expedition Ritual Captain"],
- "失心烈焰祭祀": ["Akılsız Alev Rahibi", "Mindless Flame Priest"],
- "嗜血守卫": ["Kana Susamış Muhafız", "Bloodthirsty Guard"],
- "失心寒冰祭祀": ["Akılsız Buz Rahibi", "Mindless Frost Priest"],
- "荒野幽魂": ["Yaban Hayaleti", "Wilds Phantom"],
- "失心魔魂祭祀": ["Akılsız İblis Ruhu Rahibi", "Mindless Demon-Soul Priest"],
- "尸虫": ["Ceset Kurdu", "Corpse Worm"],
- "墓地爬行者": ["Mezarlık Sürüngeni", "Graveyard Crawler"],
- "★狂心者": ["★Çılgın Yürek", "★Madheart"],
- "悲痛的战士": ["Yaslı Savaşçı", "Grieving Warrior"],
- "战士的遗体": ["Savaşçının Naaşı", "Warrior's Remains"],
- "破碎骸骨": ["Kırık İskelet", "Shattered Skeleton"],
- "暴躁的嗜血傀儡": ["Huysuz Kana Susamış Kukla", "Irate Bloodthirsty Golem"],
- "灵魂终结者": ["Ruh Sonlandırıcı", "Soul Terminator"],
- "厄运警示者": ["Kara Haberci", "Doom Herald"],
- "荒野尖啸者": ["Yaban Çığırtkanı", "Wilds Screamer"],
- "★嗜血暴徒首领": ["★Kana Susamış Zorba Lideri", "★Bloodthirsty Thug Leader"],
- "厌战的学者": ["Savaştan Bıkmış Bilgin", "War-Weary Scholar"],
- "高地战熊": ["Yayla Savaş Ayısı", "Highland War Bear"],
- "噬魂斩杀者": ["Ruhyiyen Kesici", "Soul Eater Slayer"],
- "☆噬魂驭熊者": ["☆Ruhyiyen Ayı Binicisi", "☆Soul Eater Bear Rider"],
- "噬魂守卫": ["Ruhyiyen Muhafız", "Soul Eater Guard"],
- "噬魂百夫长": ["Ruhyiyen Yüzbaşı", "Soul Eater Centurion"],
- "高地座狼": ["Yayla Binek Kurdu", "Highland Warg"],
- "★血守卫莱曼": ["★Kan Muhafızı Lehman", "★Blood Guard Lehman"],
- "☆血齿战狼": ["☆Kandiş Savaş Kurdu", "☆Bloodfang War Wolf"],
- "前线医师": ["Cephe Hekimi", "Frontline Medic"],
- "噬魂草": ["Ruhyiyen Otu", "Soul Eater Weed"],
- "噬魂审判者": ["Ruhyiyen Yargıç", "Soul Eater Judicator"],
- "噬魂影法师": ["Ruhyiyen Gölge Büyücüsü", "Soul Eater Shadow Mage"],
- "噬魂制裁者": ["Ruhyiyen Cezalandırıcı", "Soul Eater Punisher"],
- "被奴役的亡魂": ["Köleleştirilmiş Hayalet", "Enslaved Spirit"],
- "☆噬魂傀儡师": ["☆Ruhyiyen Kuklacı", "☆Soul Eater Puppeteer"],
- "高地戈隆": ["Yayla Golonu", "Highland Golon"],
- "高地狂战士": ["Yayla Berserkeri", "Highland Berserker"],
- "噬魂大祭司": ["Ruhyiyen Başrahibi", "Soul Eater High Priest"],
- "★刽子手康德": ["★Cellat Kant", "★Executioner Kant"],
- "噬魂先遣队队长": ["Ruhyiyen Öncü Yüzbaşısı", "Soul Eater Vanguard Captain"],
- "噬魂先遣队前锋": ["Ruhyiyen Öncü Akıncısı", "Soul Eater Vanguard Striker"],
- "☆噬魂之刃": ["☆Ruhyiyen Kılıcı", "☆Soul Eater Blade"],
- "☆碎心者": ["☆Yürekkıran", "☆Heartbreaker"],
- "☆恩托尔之影": ["☆Entor'un Gölgesi", "☆Shadow of Entor"],
- "☆塞莫之影": ["☆Semo'nun Gölgesi", "☆Shadow of Semo"],
- "☆庭院镇守者莫比克": ["☆Avlu Bekçisi Mobik", "☆Courtyard Warden Mobik"],
- "☆庭院镇守者甘迪斯": ["☆Avlu Bekçisi Gandis", "☆Courtyard Warden Gandis"],
- "☆庭院镇守者桑托斯": ["☆Avlu Bekçisi Santos", "☆Courtyard Warden Santos"],
- "☆庭院镇守者恩托斯": ["☆Avlu Bekçisi Entos", "☆Courtyard Warden Entos"],
- "☆庭院镇守者赫尔墨": ["☆Avlu Bekçisi Hermes", "☆Courtyard Warden Hermes"],
- "★噬魂男爵卡加斯": ["★Ruhyiyen Baron Kargas", "★Soul Eater Baron Kargas"],
- "英勇反抗的矿工": ["Yiğitçe Direnen Madenci", "Valiant Resisting Miner"],
- "巨魔战士": ["Trol Savaşçı", "Troll Warrior"],
- "巨魔破坏者": ["Trol Yıkıcı", "Troll Wrecker"],
- "山谷侏儒": ["Vadi Cücesi", "Valley Gnome"],
- "☆钱德尔·林奇": ["☆Chandler Lynch", "☆Chandler Lynch"],
- "惊恐的矿工": ["Korkmuş Madenci", "Terrified Miner"],
- "☆山谷震击者": ["☆Vadi Sarsıcısı", "☆Valley Shaker"],
- "☆比约克·林奇": ["☆Björk Lynch", "☆Björk Lynch"],
- "☆死灵巨魔": ["☆Ölü Trol", "☆Necro Troll"],
- "山谷群居蝎": ["Vadi Sürü Akrebi", "Valley Swarm Scorpion"],
- "☆毒刺": ["☆Zehirdiken", "☆Venomsting"],
- "☆德里克·林奇": ["☆Derek Lynch", "☆Derek Lynch"],
- "★红眼丁克": ["★Kızılgöz Dink", "★Redeye Dink"],
- "受伤的阻击手": ["Yaralı Keskin Nişancı", "Wounded Sharpshooter"],
- "呆滞的苦工": ["Sersem Amele", "Dazed Laborer"],
- "薄暮工匠": ["Alacakaranlık Zanaatkârı", "Dusk Artisan"],
- "失心追猎者": ["Akılsız Avcı", "Mindless Stalker"],
- "山谷猎手": ["Vadi Avcısı", "Valley Hunter"],
- "☆狙击手威尔逊": ["☆Keskin Nişancı Wilson", "☆Sniper Wilson"],
- "★野蛮人维多": ["★Barbar Vido", "★Vido the Barbarian"],
- "薄暮山谷追击者 ": ["Alacakaranlık Vadisi Takipçisi", "Dusk Valley Pursuer"],
- "山谷食腐兽": ["Vadi Leşçili", "Valley Scavenger"],
- "☆巨魔之魂": ["☆Trol Ruhu", "☆Troll Spirit"],
- "☆墓地潜猎兽": ["☆Mezarlık Sinsi Avcısı", "☆Graveyard Prowler"],
- "☆薄暮谷血虫": ["☆Alacakaranlık Kan Kurdu", "☆Dusk Valley Bloodworm"],
- "☆巨魔之影": ["☆Trol Gölgesi", "☆Troll Shade"],
- "★山谷之眼恩托尔": ["★Vadinin Gözü Entor", "★Entor, Eye of the Valley"],
- "陷入泥泞的战士": ["Çamura Saplanmış Savaşçı", "Mired Warrior"],
- "泥潭清道夫": ["Bataklık Çöpçüsü", "Mire Scavenger"],
- "沼泽食人魔": ["Bataklık Ogresi", "Swamp Ogre"],
- "迷路的沼泽矮人": ["Yolunu Kaybetmiş Bataklık Cücesi", "Lost Swamp Dwarf"],
- "疲惫的沼泽领主": ["Yorgun Bataklık Beyi", "Weary Swamp Lord"],
- "泥潭戈隆": ["Bataklık Golonu", "Mire Golon"],
- "痛苦的死者": ["Acı Çeken Ölü", "Tormented Dead"],
- "☆哈里斯博士": ["☆Doktor Harris", "☆Doctor Harris"],
- "泥潭傀儡": ["Bataklık Kuklası", "Mire Golem"],
- "被诅咒的复生者": ["Lanetli Dirilmiş", "Cursed Revenant"],
- "沼泽寻宝人": ["Bataklık Define Avcısı", "Swamp Treasure Hunter"],
- "☆沼泽领主杜恩": ["☆Bataklık Beyi Dunn", "☆Swamp Lord Dunn"],
- "★碎脊者戈尔": ["★Belkıran Gor", "★Gor the Spinebreaker"],
- "随军学者": ["Ordu Bilgini", "Army Scholar"],
- "毒化格诺姆": ["Zehirlenmiş Gnom", "Poisoned Gnome"],
- "泥潭流窜者": ["Bataklık Serserisi", "Mire Prowler"],
- "☆衰弱的伊万": ["☆Bitkin Ivan", "☆Feeble Ivan"],
- "沼泽之子": ["Bataklığın Çocuğu", "Child of the Swamp"],
- "食腐突袭者": ["Leşçil Akıncı", "Carrion Raider"],
- "剧毒啄食者": ["Zehirli Gagalayıcı", "Toxic Pecker"],
- "腐化沼泽兽": ["Yozlaşmış Bataklık Canavarı", "Corrupted Swamp Beast"],
- "★泥泞行者罗卡": ["★Çamuryürüyen Roka", "★Roka the Mudwalker"],
- "愤怒的考古学家": ["Öfkeli Arkeolog", "Angry Archaeologist"],
- "☆塞莫之手": ["☆Semo'nun Eli", "☆Hand of Semo"],
- "☆塞莫之拳": ["☆Semo'nun Yumruğu", "☆Fist of Semo"],
- "★沼泽之喉塞莫": ["★Bataklığın Gırtlağı Semo", "★Semo, Throat of the Swamp"],
- "好奇的旅行者": ["Meraklı Gezgin", "Curious Traveler"],
- "禁魔囚笼": ["Büyü Yasaklayan Kafes", "Anti-Magic Cage"],
- "嘎嘎": ["Vakvak", "Quack"],
- "呱呱": ["Vırvır", "Croak"],
- "★古风大魔王": ["★Kadim Rüzgâr İblis Kralı", "★Ancient Wind Demon King"],
- "★尼洛斯": ["★Nilos", "★Nilos"],
- "★多洛克": ["★Dorok", "★Dorok"],
- "★流窜咆哮者": ["★Başıboş Kükreyen", "★Roving Roarer"],
- "鸿沟守护者": ["Uçurum Koruyucusu", "Chasm Guardian"],
- "脆弱的鸭蛋": ["Kırılgan Ördek Yumurtası", "Fragile Duck Egg"],
- "流沙港镇长": ["Akankum Limanı Muhtarı", "Quicksand Port Mayor"],
- "英雄副本-流沙港(50级)": ["Kahraman Zindanı · Akankum Limanı (Sv 50)", "Heroic Dungeon · Quicksand Port (Lv 50)"],
- "普通副本-流沙港(50级)": ["Normal Zindan · Akankum Limanı (Sv 50)", "Normal Dungeon · Quicksand Port (Lv 50)"],
- "港口巡逻员": ["Liman Devriyesi", "Harbor Patrol"],
- "流沙港佣兵": ["Akankum Paralı Askeri", "Quicksand Mercenary"],
- "流沙港苦工": ["Akankum Amelesi", "Quicksand Laborer"],
- "流沙刺虫": ["Akankum Dikenböceği", "Quicksand Spikebug"],
- "流沙潜伏者": ["Akankum Sinsisi", "Quicksand Lurker"],
- "☆军团之眼凯恩": ["☆Lejyonun Gözü Kane", "☆Kane, Eye of the Legion"],
- "瑟瑟发抖的勘察员": ["Titreyen Kaşif", "Shivering Surveyor"],
- "☆工头达米安": ["☆Ustabaşı Damian", "☆Foreman Damian"],
- "★管理员梅林": ["★Yönetici Merlin", "★Administrator Merlin"],
- "流沙海盗": ["Akankum Korsanı", "Quicksand Pirate"],
- "流沙港镇压者": ["Akankum Bastırıcısı", "Quicksand Suppressor"],
- "碎砂蝙蝠": ["Kumkıran Yarasa", "Sandshatter Bat"],
- "流沙软泥怪": ["Akankum Balçık Canavarı", "Quicksand Ooze"],
- "淤泥吞噬者": ["Balçık Yutan", "Silt Devourer"],
- "☆海潮之翼": ["☆Gelgit Kanadı", "☆Tidewing"],
- "★守财奴比尔": ["★Cimri Bill", "★Bill the Miser"],
- "新月潜伏者": ["Hilal Sinsisi", "Crescent Lurker"],
- "新月湾特使": ["Hilal Koyu Elçisi", "Crescent Bay Envoy"],
- "新月侍僧": ["Hilal Rahip Yardımcısı", "Crescent Acolyte"],
- "新月祭祀": ["Hilal Rahibi", "Crescent Priest"],
- "新月踏潮者": ["Hilal Dalgayürüyeni", "Crescent Tidestrider"],
- "☆传令官赫米特": ["☆Haberci Hermit", "☆Herald Hermit"],
- "新月游侠": ["Hilal Korucusu", "Crescent Ranger"],
- "★大投机者图拉杨": ["★Büyük Vurguncu Turayan", "★Grand Speculator Turayan"],
- "★死亡弯钩": ["★Ölüm Kancası", "★Death Hook"],
- "矿坑苦工": ["Maden Amelesi", "Mine Laborer"],
- "石肤吸血蝠": ["Taşderi Vampir Yarasa", "Stoneskin Vampire Bat"],
- "末日军团监工": ["Kıyamet Lejyonu Gözcüsü", "Doom Legion Overseer"],
- "☆矿坑主宰弗洛狄": ["☆Madenin Hâkimi Frodi", "☆Frodi, Lord of the Mine"],
- "末日流亡者": ["Kıyamet Sürgünü", "Doom Exile"],
- "飘渺的微光": ["Uçuşan Pırıltı", "Drifting Glimmer"],
- "末日劫掠者": ["Kıyamet Yağmacısı", "Doom Marauder"],
- "☆矿工领袖加弗洛": ["☆Madenci Önderi Gafro", "☆Miner Leader Gafro"],
- "★冤魂聚合体": ["★Mazlum Ruhlar Yığını", "★Wronged Souls Amalgam"],
- "末日召唤者": ["Kıyamet Çağırıcısı", "Doom Summoner"],
- "碎骨骷髅": ["Kemikkıran İskelet", "Bonebreaker Skeleton"],
- "末日行者": ["Kıyamet Yürüyeni", "Doomwalker"],
- "末日骸骨士兵": ["Kıyamet İskelet Askeri", "Doom Skeleton Soldier"],
- "末日祭祀": ["Kıyamet Rahibi", "Doom Priest"],
- "末日血法师": ["Kıyamet Kan Büyücüsü", "Doom Blood Mage"],
- "亡魂吞噬者": ["Ruh Yutan", "Spirit Devourer"],
- "☆痛苦之云": ["☆Acı Bulutu", "☆Cloud of Pain"],
- "濒死的矿工": ["Can Çekişen Madenci", "Dying Miner"],
- "★毁灭者克拉图": ["★Yok Edici Kratu", "★Kratu the Destroyer"],
- "矿工的冤魂": ["Madencinin Mazlum Ruhu", "Miner's Wronged Soul"],
- "末日傀儡": ["Kıyamet Kuklası", "Doom Golem"],
- "残破的躯壳": ["Harap Beden", "Broken Husk"],
- "☆军团之眼托尔": ["☆Lejyonun Gözü Thor", "☆Thor, Eye of the Legion"],
- "★大魔导师尼尔森": ["★Büyük Büyü Üstadı Nelson", "★Grand Magister Nelson"],
- "★末日断头台": ["★Kıyamet Giyotini", "★Doom Guillotine"],
- "迪杰·铁铲": ["Dije Demirkürek", "Dije Ironshovel"],
- "泰隆·铁棍": ["Talon Demirsopa", "Talon Ironrod"],
- "普通副本-骑士塔(50级)": ["Normal Zindan · Şövalye Kulesi (Sv 50)", "Normal Dungeon · Knight Tower (Lv 50)"],
- "普通副本-巫师塔(50级)": ["Normal Zindan · Sihirbaz Kulesi (Sv 50)", "Normal Dungeon · Wizard Tower (Lv 50)"],
- "普通副本-术士塔(50级)": ["Normal Zindan · Büyücü Kulesi (Sv 50)", "Normal Dungeon · Warlock Tower (Lv 50)"],
- "普通副本-英雄塔(50级)": ["Normal Zindan · Kahraman Kulesi (Sv 50)", "Normal Dungeon · Hero Tower (Lv 50)"],
- "装备修理商帕克": ["Teçhizat Tamircisi Parker", "Gear Repairer Parker"],
- "战狼之魂": ["Savaş Kurdu Ruhu", "War Wolf Spirit"],
- "上古镇守者": ["Kadim Bekçi", "Ancient Warden"],
- "荣耀之剑": ["Şan Kılıcı", "Sword of Glory"],
- "炮塔": ["Top Kulesi", "Turret"],
- "骑士塔亡魂主宰": ["Şövalye Kulesi Ruh Hâkimi", "Knight Tower Spirit Lord"],
- "★上古骑士之魂": ["★Kadim Şövalye Ruhu", "★Ancient Knight Spirit"],
- "战熊之魂": ["Savaş Ayısı Ruhu", "War Bear Spirit"],
- "上古突击者": ["Kadim Akıncı", "Ancient Striker"],
- "斩杀之剑": ["Kesim Kılıcı", "Executing Sword"],
- "英雄塔亡魂主宰": ["Kahraman Kulesi Ruh Hâkimi", "Hero Tower Spirit Lord"],
- "★上古英雄之魂": ["★Kadim Kahraman Ruhu", "★Ancient Hero Spirit"],
- "魔能骸骨": ["Büyü Gücüyle Dolu İskelet", "Arcane Skeleton"],
- "上古祭祀": ["Kadim Rahip", "Ancient Priest"],
- "灵魂之火": ["Ruh Ateşi", "Soul Fire"],
- "魔法塔": ["Büyü Kulesi", "Magic Tower"],
- "巫师塔亡魂主宰": ["Sihirbaz Kulesi Ruh Hâkimi", "Wizard Tower Spirit Lord"],
- "★上古巫师之魂": ["★Kadim Sihirbaz Ruhu", "★Ancient Wizard Spirit"],
- "上古召唤师": ["Kadim Çağırıcı", "Ancient Summoner"],
- "血肉傀儡": ["Et Kukla", "Flesh Golem"],
- "术士塔亡魂主宰": ["Büyücü Kulesi Ruh Hâkimi", "Warlock Tower Spirit Lord"],
- "★上古术士之魂": ["★Kadim Büyücü Ruhu", "★Ancient Warlock Spirit"],
- "★卡尔": ["★Karl", "★Karl"],
- "矮人劫掠者": ["Dağ Cücesi Yağmacı", "Dwarf Raider"],
- "疯猎人": ["Deli Avcı", "Mad Hunter"],
- "猎狼": ["Av Kurdu", "Hunting Wolf"],
- "梦魇之影": ["Kâbus Gölgesi", "Nightmare Shade"],
- "不洁修女": ["Murdar Rahibe", "Unclean Nun"],
- "★乌燃": ["★Kara Yalım", "★Darkblaze"],
- "守卫炮塔": ["Muhafız Top Kulesi", "Guard Turret"],
- "能量炮塔": ["Enerji Top Kulesi", "Energy Turret"],
- "发条矮人": ["Kurmalı Dağ Cücesi", "Clockwork Dwarf"],
- "炎之守护者": ["Alev Koruyucusu", "Flame Guardian"],
- "石之守护者": ["Taş Koruyucusu", "Stone Guardian"],
- "李斯特爵士": ["Sir Lister", "Sir Lister"],
- "★李斯特爵士": ["★Sir Lister", "★Sir Lister"],
- "☆格诺姆之子": ["☆Gnom'un Oğlu", "☆Son of Gnome"],
- "☆巨石怪": ["☆Kaya Canavarı", "☆Boulder Beast"],
- "☆石精灵": ["☆Taş Elfi", "☆Stone Sprite"],
- "☆闪电": ["☆Şimşek", "☆Lightning"],
- "☆阴影": ["☆Gölge", "☆Shadow"],
- "☆☆肮脏的达普尼": ["☆☆Pis Dapni", "☆☆Filthy Dapni"],
- "☆哥布林建筑家": ["☆Goblin Mimar", "☆Goblin Architect"],
- "☆矮人僵尸": ["☆Dağ Cücesi Zombisi", "☆Dwarf Zombie"],
- "☆噩梦编织者": ["☆Kâbus Dokuyucu", "☆Nightmare Weaver"],
- "灰斧四侠": ["Bozbalta Dört Yiğit", "Greyaxe Four Heroes"],
- "☆地狱狼": ["☆Cehennem Kurdu", "☆Hell Wolf"],
- "☆炼狱恶魔": ["☆Araf İblisi", "☆Purgatory Demon"],
- "☆深渊美杜莎": ["☆Uçurum Medusası", "☆Abyssal Medusa"],
- "商会幸存者": ["Ticaret Loncası Sağ Kalanı", "Guild of Commerce Survivor"],
- "奴隶工匠": ["Köle Zanaatkâr", "Slave Artisan"],
- "走私货物": ["Kaçak Mal", "Smuggled Goods"],
- "死里逃生的学者": ["Ölümden Dönen Bilgin", "Narrowly Escaped Scholar"],
- "满是尘土的卷轴": ["Toz İçinde Bir Tomar", "Dusty Scroll"],
- "浸满海水的地洞": ["Deniz Suyu Dolmuş Oyuk", "Seawater-Flooded Hole"],
- "沙滩刺虫": ["Kumsal Dikenböceği", "Beach Spikebug"],
- "佣兵法师": ["Paralı Büyücü", "Mercenary Mage"],
- "走私者苦工": ["Kaçakçı Amelesi", "Smuggler Laborer"],
- "☆夜精灵大副": ["☆Gece Elfi İkinci Kaptan", "☆Night Elf First Mate"],
- "灰刃贷剑客": ["Bozbıçak Kiralık Kılıççı", "Greyblade Sellsword"],
- "走私者邪术师": ["Kaçakçı Kara Büyücü", "Smuggler Sorcerer"],
- "石肤变异者": ["Taşderi Mutant", "Stoneskin Mutant"],
- "黏皮变异者": ["Yapışkanderi Mutant", "Slimeskin Mutant"],
- "☆发狂的潜水员": ["☆Çıldırmış Dalgıç", "☆Crazed Diver"],
- "夜精灵黏巫": ["Gece Elfi Balçık Cadısı", "Night Elf Slime Witch"],
- "走私者战法师": ["Kaçakçı Savaş Büyücüsü", "Smuggler Battlemage"],
- "狂暴变异者": ["Azgın Mutant", "Raging Mutant"],
- "石肤队长": ["Taşderi Yüzbaşı", "Stoneskin Captain"],
- "深海牧师": ["Derin Deniz Rahibi", "Deep Sea Priest"],
- "☆吸髓妖": ["☆İlik Emici", "☆Marrow Sucker"],
- "★噩梦深潜者": ["★Kâbus Dalgıcı", "★Nightmare Deep Diver"],
- "骑士之魂": ["Şövalye Ruhu", "Knight Spirit"],
- "成熟的蘑菇": ["Olgun Mantar", "Ripe Mushroom"],
- "成熟的蘑菇堆": ["Olgun Mantar Yığını", "Ripe Mushroom Patch"],
- "臭烘烘的地洞": ["Kokuşmuş Oyuk", "Stinking Hole"],
- "骑士的遗物": ["Şövalyenin Yadigârı", "Knight's Relic"],
- "吸髓怪": ["İlik Emen Canavar", "Marrow Fiend"],
- "惊惧兽": ["Dehşet Canavarı", "Dread Beast"],
- "噩梦猎手": ["Kâbus Avcısı", "Nightmare Hunter"],
- "噩梦行者": ["Kâbus Yürüyeni", "Nightmare Walker"],
- "☆深蓝": ["☆Derin Mavi", "☆Deep Blue"],
- "☆暗红": ["☆Koyu Kızıl", "☆Dark Crimson"],
- "灾变惊惧兽": ["Felaket Dehşet Canavarı", "Cataclysm Dread Beast"],
- "☆吸髓妖长老": ["☆İlik Emici Yaşlısı", "☆Marrow Sucker Elder"],
- "噩梦化身": ["Kâbusun Vücut Bulmuşu", "Nightmare Incarnate"],
- "☆织梦者": ["☆Rüya Dokuyucu", "☆Dreamweaver"],
- "骸骨骑士": ["İskelet Şövalye", "Skeletal Knight"],
- "锻风者": ["Rüzgâr Döven", "Windforger"],
- "纯净风暴": ["Saf Fırtına", "Pure Storm"],
- "元素圣殿祭司": ["Element Tapınağı Rahibi", "Elemental Temple Priest"],
- "万神殿观察者": ["Panteon Gözlemcisi", "Pantheon Observer"],
- "弗雷的观察者": ["Frey'in Gözlemcisi", "Observer of Frey"],
- "芙蕾雅的观察者": ["Freya'nın Gözlemcisi", "Observer of Freya"],
- "琼的观察者": ["Joan'ın Gözlemcisi", "Observer of Joan"],
- "古兰恩的观察者": ["Gulaen'in Gözlemcisi", "Observer of Gulaen"],
- "★伊里奇·蓝天": ["★Ilyich Mavigök", "★Ilyich Bluesky"],
- "风暴侍奉者": ["Fırtına Hizmetkârı", "Storm Servant"],
- "呼号龙卷": ["Uluyan Hortum", "Howling Tornado"],
- "乌云元素": ["Kara Bulut Elementali", "Dark Cloud Elemental"],
- "碎片龙卷": ["Parça Hortumu", "Shard Tornado"],
- "风暴追随者": ["Fırtına Müridi", "Storm Follower"],
- "★风暴祭祀": ["★Fırtına Rahibi", "★Storm Priest"],
- "★热带低气压": ["★Tropik Alçak Basınç", "★Tropical Depression"],
- "暖湿气团": ["Ilık Nem Kütlesi", "Warm Moist Air Mass"],
- "雷云龙卷": ["Gök Gürültülü Hortum", "Thundercloud Tornado"],
- "★雷云正极": ["★Şimşek Bulutu Artı Kutup", "★Thundercloud Positive Pole"],
- "雷云负极": ["Şimşek Bulutu Eksi Kutup", "Thundercloud Negative Pole"],
- "蓝龙战士": ["Mavi Ejder Savaşçısı", "Blue Dragon Warrior"],
- "远古之风": ["Yuangu Zhi Feng", "Yuangu Zhi Feng"],
- "断雁西风": ["Duanyan Xifeng", "Duanyan Xifeng"],
- "酒仙·君德": ["Jiuxian Junde", "Jiuxian Junde"],
- "绫野": ["Lingye", "Lingye"],
- "王科": ["Wang Ke", "Wang Ke"],
- "张宁": ["Zhang Ning", "Zhang Ning"],
- "公主": ["Prenses", "Princess"],
- "徐海": ["Xu Hai", "Xu Hai"],
- "罗石": ["Luo Shi", "Luo Shi"],
- "刘爽": ["Liu Shuang", "Liu Shuang"],
- "宋雨": ["Song Yu", "Song Yu"],
- "杜飞龙": ["Du Feilong", "Du Feilong"],
- "李丹": ["Li Dan", "Li Dan"],
- "胡艳华": ["Hu Yanhua", "Hu Yanhua"],
- "吴健": ["Wu Jian", "Wu Jian"],
- "唐宜科": ["Tang Yike", "Tang Yike"],
- "张珂": ["Zhang Ke", "Zhang Ke"],
- "顽石": ["Wanshi", "Wanshi"],
- "盛炯": ["Sheng Jiong", "Sheng Jiong"],
- "奥特曼": ["Ultraman", "Ultraman"],
- "陈文": ["Chen Wen", "Chen Wen"],
- "王磊": ["Wang Lei", "Wang Lei"],
- "测试沉默": ["Test: Susturma", "Test: Silence"],
- "测试定身": ["Test: Sabitleme", "Test: Root"],
- "测试昏迷": ["Test: Sersemletme", "Test: Stun"]
+ "☆狼王侍卫": [
+  "☆Kurt Kralı Muhafızı",
+  "☆Wolf King Guard"
+ ],
+ "☆森林主宰": [
+  "☆Ormanın Hâkimi",
+  "☆Forest Overlord"
+ ],
+ "☆啃食者": [
+  "☆Kemirici",
+  "☆Gnawer"
+ ],
+ "饥饿的苍狼": [
+  "Aç Boz Kurt",
+  "Hungry Grey Wolf"
+ ],
+ "七彩蝮蛇": [
+  "Yedi Renkli Engerek",
+  "Rainbow Viper"
+ ],
+ "林地豪猪": [
+  "Koru Kirpisi",
+  "Woodland Porcupine"
+ ],
+ "暴躁的豪猪": [
+  "Huysuz Kirpi",
+  "Grumpy Porcupine"
+ ],
+ "幽爪奔跑者": [
+  "Hayaletpençe Koşucu",
+  "Ghostclaw Runner"
+ ],
+ "双生游蛇": [
+  "İkiz Yılan",
+  "Twin Serpent"
+ ],
+ "☆獠牙击碎者": [
+  "☆Azıdiş Kıran",
+  "☆Tuskbreaker"
+ ],
+ "★月夜狼王": [
+  "★Mehtap Kurt Kralı",
+  "★Moonlit Wolf King"
+ ],
+ "普通副本-失落沼泽(40级)": [
+  "Normal Zindan · Kayıp Bataklık (Sv 40)",
+  "Normal Dungeon · Lost Swamp (Lv 40)"
+ ],
+ "普通副本-噬魂高地(40级)": [
+  "Normal Zindan · Ruhyiyen Yaylası (Sv 40)",
+  "Normal Dungeon · Soul Eater Highlands (Lv 40)"
+ ],
+ "普通副本-薄暮山谷(40级)": [
+  "Normal Zindan · Alacakaranlık Vadisi (Sv 40)",
+  "Normal Dungeon · Dusk Valley (Lv 40)"
+ ],
+ "普通副本-死亡荒野(40级)": [
+  "Normal Zindan · Ölüm Yabanı (Sv 40)",
+  "Normal Dungeon · Death Wilds (Lv 40)"
+ ],
+ "★失落的邓肯": [
+  "★Kayıp Duncan",
+  "★Lost Duncan"
+ ],
+ "噬魂远征军祭祀队长": [
+  "Ruhyiyen Seferi Ayin Yüzbaşısı",
+  "Soul Eater Expedition Ritual Captain"
+ ],
+ "失心烈焰祭祀": [
+  "Akılsız Alev Rahibi",
+  "Mindless Flame Priest"
+ ],
+ "嗜血守卫": [
+  "Kana Susamış Muhafız",
+  "Bloodthirsty Guard"
+ ],
+ "失心寒冰祭祀": [
+  "Akılsız Buz Rahibi",
+  "Mindless Frost Priest"
+ ],
+ "荒野幽魂": [
+  "Yaban Hayaleti",
+  "Wilds Phantom"
+ ],
+ "失心魔魂祭祀": [
+  "Akılsız İblis Ruhu Rahibi",
+  "Mindless Demon-Soul Priest"
+ ],
+ "尸虫": [
+  "Ceset Kurdu",
+  "Corpse Worm"
+ ],
+ "墓地爬行者": [
+  "Mezarlık Sürüngeni",
+  "Graveyard Crawler"
+ ],
+ "★狂心者": [
+  "★Çılgın Yürek",
+  "★Madheart"
+ ],
+ "悲痛的战士": [
+  "Yaslı Savaşçı",
+  "Grieving Warrior"
+ ],
+ "战士的遗体": [
+  "Savaşçının Naaşı",
+  "Warrior's Remains"
+ ],
+ "破碎骸骨": [
+  "Kırık İskelet",
+  "Shattered Skeleton"
+ ],
+ "暴躁的嗜血傀儡": [
+  "Huysuz Kana Susamış Kukla",
+  "Irate Bloodthirsty Golem"
+ ],
+ "灵魂终结者": [
+  "Ruh Sonlandırıcı",
+  "Soul Terminator"
+ ],
+ "厄运警示者": [
+  "Kara Haberci",
+  "Doom Herald"
+ ],
+ "荒野尖啸者": [
+  "Yaban Çığırtkanı",
+  "Wilds Screamer"
+ ],
+ "★嗜血暴徒首领": [
+  "★Kana Susamış Zorba Lideri",
+  "★Bloodthirsty Thug Leader"
+ ],
+ "厌战的学者": [
+  "Savaştan Bıkmış Bilgin",
+  "War-Weary Scholar"
+ ],
+ "高地战熊": [
+  "Yayla Savaş Ayısı",
+  "Highland War Bear"
+ ],
+ "噬魂斩杀者": [
+  "Ruhyiyen Kesici",
+  "Soul Eater Slayer"
+ ],
+ "☆噬魂驭熊者": [
+  "☆Ruhyiyen Ayı Binicisi",
+  "☆Soul Eater Bear Rider"
+ ],
+ "噬魂守卫": [
+  "Ruhyiyen Muhafız",
+  "Soul Eater Guard"
+ ],
+ "噬魂百夫长": [
+  "Ruhyiyen Yüzbaşı",
+  "Soul Eater Centurion"
+ ],
+ "高地座狼": [
+  "Yayla Binek Kurdu",
+  "Highland Warg"
+ ],
+ "★血守卫莱曼": [
+  "★Kan Muhafızı Lehman",
+  "★Blood Guard Lehman"
+ ],
+ "☆血齿战狼": [
+  "☆Kandiş Savaş Kurdu",
+  "☆Bloodfang War Wolf"
+ ],
+ "前线医师": [
+  "Cephe Hekimi",
+  "Frontline Medic"
+ ],
+ "噬魂草": [
+  "Ruhyiyen Otu",
+  "Soul Eater Weed"
+ ],
+ "噬魂审判者": [
+  "Ruhyiyen Yargıç",
+  "Soul Eater Judicator"
+ ],
+ "噬魂影法师": [
+  "Ruhyiyen Gölge Büyücüsü",
+  "Soul Eater Shadow Mage"
+ ],
+ "噬魂制裁者": [
+  "Ruhyiyen Cezalandırıcı",
+  "Soul Eater Punisher"
+ ],
+ "被奴役的亡魂": [
+  "Köleleştirilmiş Hayalet",
+  "Enslaved Spirit"
+ ],
+ "☆噬魂傀儡师": [
+  "☆Ruhyiyen Kuklacı",
+  "☆Soul Eater Puppeteer"
+ ],
+ "高地戈隆": [
+  "Yayla Golonu",
+  "Highland Golon"
+ ],
+ "高地狂战士": [
+  "Yayla Berserkeri",
+  "Highland Berserker"
+ ],
+ "噬魂大祭司": [
+  "Ruhyiyen Başrahibi",
+  "Soul Eater High Priest"
+ ],
+ "★刽子手康德": [
+  "★Cellat Kant",
+  "★Executioner Kant"
+ ],
+ "噬魂先遣队队长": [
+  "Ruhyiyen Öncü Yüzbaşısı",
+  "Soul Eater Vanguard Captain"
+ ],
+ "噬魂先遣队前锋": [
+  "Ruhyiyen Öncü Akıncısı",
+  "Soul Eater Vanguard Striker"
+ ],
+ "☆噬魂之刃": [
+  "☆Ruhyiyen Kılıcı",
+  "☆Soul Eater Blade"
+ ],
+ "☆碎心者": [
+  "☆Yürekkıran",
+  "☆Heartbreaker"
+ ],
+ "☆恩托尔之影": [
+  "☆Entor'un Gölgesi",
+  "☆Shadow of Entor"
+ ],
+ "☆塞莫之影": [
+  "☆Semo'nun Gölgesi",
+  "☆Shadow of Semo"
+ ],
+ "☆庭院镇守者莫比克": [
+  "☆Avlu Bekçisi Mobik",
+  "☆Courtyard Warden Mobik"
+ ],
+ "☆庭院镇守者甘迪斯": [
+  "☆Avlu Bekçisi Gandis",
+  "☆Courtyard Warden Gandis"
+ ],
+ "☆庭院镇守者桑托斯": [
+  "☆Avlu Bekçisi Santos",
+  "☆Courtyard Warden Santos"
+ ],
+ "☆庭院镇守者恩托斯": [
+  "☆Avlu Bekçisi Entos",
+  "☆Courtyard Warden Entos"
+ ],
+ "☆庭院镇守者赫尔墨": [
+  "☆Avlu Bekçisi Hermes",
+  "☆Courtyard Warden Hermes"
+ ],
+ "★噬魂男爵卡加斯": [
+  "★Ruhyiyen Baron Kargas",
+  "★Soul Eater Baron Kargas"
+ ],
+ "英勇反抗的矿工": [
+  "Yiğitçe Direnen Madenci",
+  "Valiant Resisting Miner"
+ ],
+ "巨魔战士": [
+  "Trol Savaşçı",
+  "Troll Warrior"
+ ],
+ "巨魔破坏者": [
+  "Trol Yıkıcı",
+  "Troll Wrecker"
+ ],
+ "山谷侏儒": [
+  "Vadi Cücesi",
+  "Valley Gnome"
+ ],
+ "☆钱德尔·林奇": [
+  "☆Chandler Lynch",
+  "☆Chandler Lynch"
+ ],
+ "惊恐的矿工": [
+  "Korkmuş Madenci",
+  "Terrified Miner"
+ ],
+ "☆山谷震击者": [
+  "☆Vadi Sarsıcısı",
+  "☆Valley Shaker"
+ ],
+ "☆比约克·林奇": [
+  "☆Björk Lynch",
+  "☆Björk Lynch"
+ ],
+ "☆死灵巨魔": [
+  "☆Ölü Trol",
+  "☆Necro Troll"
+ ],
+ "山谷群居蝎": [
+  "Vadi Sürü Akrebi",
+  "Valley Swarm Scorpion"
+ ],
+ "☆毒刺": [
+  "☆Zehirdiken",
+  "☆Venomsting"
+ ],
+ "☆德里克·林奇": [
+  "☆Derek Lynch",
+  "☆Derek Lynch"
+ ],
+ "★红眼丁克": [
+  "★Kızılgöz Dink",
+  "★Redeye Dink"
+ ],
+ "受伤的阻击手": [
+  "Yaralı Keskin Nişancı",
+  "Wounded Sharpshooter"
+ ],
+ "呆滞的苦工": [
+  "Sersem Amele",
+  "Dazed Laborer"
+ ],
+ "薄暮工匠": [
+  "Alacakaranlık Zanaatkârı",
+  "Dusk Artisan"
+ ],
+ "失心追猎者": [
+  "Akılsız Avcı",
+  "Mindless Stalker"
+ ],
+ "山谷猎手": [
+  "Vadi Avcısı",
+  "Valley Hunter"
+ ],
+ "☆狙击手威尔逊": [
+  "☆Keskin Nişancı Wilson",
+  "☆Sniper Wilson"
+ ],
+ "★野蛮人维多": [
+  "★Barbar Vido",
+  "★Vido the Barbarian"
+ ],
+ "薄暮山谷追击者 ": [
+  "Alacakaranlık Vadisi Takipçisi",
+  "Dusk Valley Pursuer"
+ ],
+ "山谷食腐兽": [
+  "Vadi Leşçili",
+  "Valley Scavenger"
+ ],
+ "☆巨魔之魂": [
+  "☆Trol Ruhu",
+  "☆Troll Spirit"
+ ],
+ "☆墓地潜猎兽": [
+  "☆Mezarlık Sinsi Avcısı",
+  "☆Graveyard Prowler"
+ ],
+ "☆薄暮谷血虫": [
+  "☆Alacakaranlık Kan Kurdu",
+  "☆Dusk Valley Bloodworm"
+ ],
+ "☆巨魔之影": [
+  "☆Trol Gölgesi",
+  "☆Troll Shade"
+ ],
+ "★山谷之眼恩托尔": [
+  "★Vadinin Gözü Entor",
+  "★Entor, Eye of the Valley"
+ ],
+ "陷入泥泞的战士": [
+  "Çamura Saplanmış Savaşçı",
+  "Mired Warrior"
+ ],
+ "泥潭清道夫": [
+  "Bataklık Çöpçüsü",
+  "Mire Scavenger"
+ ],
+ "沼泽食人魔": [
+  "Bataklık Ogresi",
+  "Swamp Ogre"
+ ],
+ "迷路的沼泽矮人": [
+  "Yolunu Kaybetmiş Bataklık Cücesi",
+  "Lost Swamp Dwarf"
+ ],
+ "疲惫的沼泽领主": [
+  "Yorgun Bataklık Beyi",
+  "Weary Swamp Lord"
+ ],
+ "泥潭戈隆": [
+  "Bataklık Golonu",
+  "Mire Golon"
+ ],
+ "痛苦的死者": [
+  "Acı Çeken Ölü",
+  "Tormented Dead"
+ ],
+ "☆哈里斯博士": [
+  "☆Doktor Harris",
+  "☆Doctor Harris"
+ ],
+ "泥潭傀儡": [
+  "Bataklık Kuklası",
+  "Mire Golem"
+ ],
+ "被诅咒的复生者": [
+  "Lanetli Dirilmiş",
+  "Cursed Revenant"
+ ],
+ "沼泽寻宝人": [
+  "Bataklık Define Avcısı",
+  "Swamp Treasure Hunter"
+ ],
+ "☆沼泽领主杜恩": [
+  "☆Bataklık Beyi Dunn",
+  "☆Swamp Lord Dunn"
+ ],
+ "★碎脊者戈尔": [
+  "★Belkıran Gor",
+  "★Gor the Spinebreaker"
+ ],
+ "随军学者": [
+  "Ordu Bilgini",
+  "Army Scholar"
+ ],
+ "毒化格诺姆": [
+  "Zehirlenmiş Gnom",
+  "Poisoned Gnome"
+ ],
+ "泥潭流窜者": [
+  "Bataklık Serserisi",
+  "Mire Prowler"
+ ],
+ "☆衰弱的伊万": [
+  "☆Bitkin Ivan",
+  "☆Feeble Ivan"
+ ],
+ "沼泽之子": [
+  "Bataklığın Çocuğu",
+  "Child of the Swamp"
+ ],
+ "食腐突袭者": [
+  "Leşçil Akıncı",
+  "Carrion Raider"
+ ],
+ "剧毒啄食者": [
+  "Zehirli Gagalayıcı",
+  "Toxic Pecker"
+ ],
+ "腐化沼泽兽": [
+  "Yozlaşmış Bataklık Canavarı",
+  "Corrupted Swamp Beast"
+ ],
+ "★泥泞行者罗卡": [
+  "★Çamuryürüyen Roka",
+  "★Roka the Mudwalker"
+ ],
+ "愤怒的考古学家": [
+  "Öfkeli Arkeolog",
+  "Angry Archaeologist"
+ ],
+ "☆塞莫之手": [
+  "☆Semo'nun Eli",
+  "☆Hand of Semo"
+ ],
+ "☆塞莫之拳": [
+  "☆Semo'nun Yumruğu",
+  "☆Fist of Semo"
+ ],
+ "★沼泽之喉塞莫": [
+  "★Bataklığın Gırtlağı Semo",
+  "★Semo, Throat of the Swamp"
+ ],
+ "好奇的旅行者": [
+  "Meraklı Gezgin",
+  "Curious Traveler"
+ ],
+ "禁魔囚笼": [
+  "Büyü Yasaklayan Kafes",
+  "Anti-Magic Cage"
+ ],
+ "嘎嘎": [
+  "Vakvak",
+  "Quack"
+ ],
+ "呱呱": [
+  "Vırvır",
+  "Croak"
+ ],
+ "★古风大魔王": [
+  "★Kadim Rüzgâr İblis Kralı",
+  "★Ancient Wind Demon King"
+ ],
+ "★尼洛斯": [
+  "★Nilos",
+  "★Nilos"
+ ],
+ "★多洛克": [
+  "★Dorok",
+  "★Dorok"
+ ],
+ "★流窜咆哮者": [
+  "★Başıboş Kükreyen",
+  "★Roving Roarer"
+ ],
+ "鸿沟守护者": [
+  "Uçurum Koruyucusu",
+  "Chasm Guardian"
+ ],
+ "脆弱的鸭蛋": [
+  "Kırılgan Ördek Yumurtası",
+  "Fragile Duck Egg"
+ ],
+ "流沙港镇长": [
+  "Akankum Limanı Muhtarı",
+  "Quicksand Port Mayor"
+ ],
+ "英雄副本-流沙港(50级)": [
+  "Kahraman Zindanı · Akankum Limanı (Sv 50)",
+  "Heroic Dungeon · Quicksand Port (Lv 50)"
+ ],
+ "普通副本-流沙港(50级)": [
+  "Normal Zindan · Akankum Limanı (Sv 50)",
+  "Normal Dungeon · Quicksand Port (Lv 50)"
+ ],
+ "港口巡逻员": [
+  "Liman Devriyesi",
+  "Harbor Patrol"
+ ],
+ "流沙港佣兵": [
+  "Akankum Paralı Askeri",
+  "Quicksand Mercenary"
+ ],
+ "流沙港苦工": [
+  "Akankum Amelesi",
+  "Quicksand Laborer"
+ ],
+ "流沙刺虫": [
+  "Akankum Dikenböceği",
+  "Quicksand Spikebug"
+ ],
+ "流沙潜伏者": [
+  "Akankum Sinsisi",
+  "Quicksand Lurker"
+ ],
+ "☆军团之眼凯恩": [
+  "☆Lejyonun Gözü Kane",
+  "☆Kane, Eye of the Legion"
+ ],
+ "瑟瑟发抖的勘察员": [
+  "Titreyen Kaşif",
+  "Shivering Surveyor"
+ ],
+ "☆工头达米安": [
+  "☆Ustabaşı Damian",
+  "☆Foreman Damian"
+ ],
+ "★管理员梅林": [
+  "★Yönetici Merlin",
+  "★Administrator Merlin"
+ ],
+ "流沙海盗": [
+  "Akankum Korsanı",
+  "Quicksand Pirate"
+ ],
+ "流沙港镇压者": [
+  "Akankum Bastırıcısı",
+  "Quicksand Suppressor"
+ ],
+ "碎砂蝙蝠": [
+  "Kumkıran Yarasa",
+  "Sandshatter Bat"
+ ],
+ "流沙软泥怪": [
+  "Akankum Balçık Canavarı",
+  "Quicksand Ooze"
+ ],
+ "淤泥吞噬者": [
+  "Balçık Yutan",
+  "Silt Devourer"
+ ],
+ "☆海潮之翼": [
+  "☆Gelgit Kanadı",
+  "☆Tidewing"
+ ],
+ "★守财奴比尔": [
+  "★Cimri Bill",
+  "★Bill the Miser"
+ ],
+ "新月潜伏者": [
+  "Hilal Sinsisi",
+  "Crescent Lurker"
+ ],
+ "新月湾特使": [
+  "Hilal Koyu Elçisi",
+  "Crescent Bay Envoy"
+ ],
+ "新月侍僧": [
+  "Hilal Rahip Yardımcısı",
+  "Crescent Acolyte"
+ ],
+ "新月祭祀": [
+  "Hilal Rahibi",
+  "Crescent Priest"
+ ],
+ "新月踏潮者": [
+  "Hilal Dalgayürüyeni",
+  "Crescent Tidestrider"
+ ],
+ "☆传令官赫米特": [
+  "☆Haberci Hermit",
+  "☆Herald Hermit"
+ ],
+ "新月游侠": [
+  "Hilal Korucusu",
+  "Crescent Ranger"
+ ],
+ "★大投机者图拉杨": [
+  "★Büyük Vurguncu Turayan",
+  "★Grand Speculator Turayan"
+ ],
+ "★死亡弯钩": [
+  "★Ölüm Kancası",
+  "★Death Hook"
+ ],
+ "矿坑苦工": [
+  "Maden Amelesi",
+  "Mine Laborer"
+ ],
+ "石肤吸血蝠": [
+  "Taşderi Vampir Yarasa",
+  "Stoneskin Vampire Bat"
+ ],
+ "末日军团监工": [
+  "Kıyamet Lejyonu Gözcüsü",
+  "Doom Legion Overseer"
+ ],
+ "☆矿坑主宰弗洛狄": [
+  "☆Madenin Hâkimi Frodi",
+  "☆Frodi, Lord of the Mine"
+ ],
+ "末日流亡者": [
+  "Kıyamet Sürgünü",
+  "Doom Exile"
+ ],
+ "飘渺的微光": [
+  "Uçuşan Pırıltı",
+  "Drifting Glimmer"
+ ],
+ "末日劫掠者": [
+  "Kıyamet Yağmacısı",
+  "Doom Marauder"
+ ],
+ "☆矿工领袖加弗洛": [
+  "☆Madenci Önderi Gafro",
+  "☆Miner Leader Gafro"
+ ],
+ "★冤魂聚合体": [
+  "★Mazlum Ruhlar Yığını",
+  "★Wronged Souls Amalgam"
+ ],
+ "末日召唤者": [
+  "Kıyamet Çağırıcısı",
+  "Doom Summoner"
+ ],
+ "碎骨骷髅": [
+  "Kemikkıran İskelet",
+  "Bonebreaker Skeleton"
+ ],
+ "末日行者": [
+  "Kıyamet Yürüyeni",
+  "Doomwalker"
+ ],
+ "末日骸骨士兵": [
+  "Kıyamet İskelet Askeri",
+  "Doom Skeleton Soldier"
+ ],
+ "末日祭祀": [
+  "Kıyamet Rahibi",
+  "Doom Priest"
+ ],
+ "末日血法师": [
+  "Kıyamet Kan Büyücüsü",
+  "Doom Blood Mage"
+ ],
+ "亡魂吞噬者": [
+  "Ruh Yutan",
+  "Spirit Devourer"
+ ],
+ "☆痛苦之云": [
+  "☆Acı Bulutu",
+  "☆Cloud of Pain"
+ ],
+ "濒死的矿工": [
+  "Can Çekişen Madenci",
+  "Dying Miner"
+ ],
+ "★毁灭者克拉图": [
+  "★Yok Edici Kratu",
+  "★Kratu the Destroyer"
+ ],
+ "矿工的冤魂": [
+  "Madencinin Mazlum Ruhu",
+  "Miner's Wronged Soul"
+ ],
+ "末日傀儡": [
+  "Kıyamet Kuklası",
+  "Doom Golem"
+ ],
+ "残破的躯壳": [
+  "Harap Beden",
+  "Broken Husk"
+ ],
+ "☆军团之眼托尔": [
+  "☆Lejyonun Gözü Thor",
+  "☆Thor, Eye of the Legion"
+ ],
+ "★大魔导师尼尔森": [
+  "★Büyük Büyü Üstadı Nelson",
+  "★Grand Magister Nelson"
+ ],
+ "★末日断头台": [
+  "★Kıyamet Giyotini",
+  "★Doom Guillotine"
+ ],
+ "迪杰·铁铲": [
+  "Dije Demirkürek",
+  "Dije Ironshovel"
+ ],
+ "泰隆·铁棍": [
+  "Talon Demirsopa",
+  "Talon Ironrod"
+ ],
+ "普通副本-骑士塔(50级)": [
+  "Normal Zindan · Şövalye Kulesi (Sv 50)",
+  "Normal Dungeon · Knight Tower (Lv 50)"
+ ],
+ "普通副本-巫师塔(50级)": [
+  "Normal Zindan · Sihirbaz Kulesi (Sv 50)",
+  "Normal Dungeon · Wizard Tower (Lv 50)"
+ ],
+ "普通副本-术士塔(50级)": [
+  "Normal Zindan · Büyücü Kulesi (Sv 50)",
+  "Normal Dungeon · Warlock Tower (Lv 50)"
+ ],
+ "普通副本-英雄塔(50级)": [
+  "Normal Zindan · Kahraman Kulesi (Sv 50)",
+  "Normal Dungeon · Hero Tower (Lv 50)"
+ ],
+ "装备修理商帕克": [
+  "Teçhizat Tamircisi Parker",
+  "Gear Repairer Parker"
+ ],
+ "战狼之魂": [
+  "Savaş Kurdu Ruhu",
+  "War Wolf Spirit"
+ ],
+ "上古镇守者": [
+  "Kadim Bekçi",
+  "Ancient Warden"
+ ],
+ "荣耀之剑": [
+  "Şan Kılıcı",
+  "Sword of Glory"
+ ],
+ "炮塔": [
+  "Top Kulesi",
+  "Turret"
+ ],
+ "骑士塔亡魂主宰": [
+  "Şövalye Kulesi Ruh Hâkimi",
+  "Knight Tower Spirit Lord"
+ ],
+ "★上古骑士之魂": [
+  "★Kadim Şövalye Ruhu",
+  "★Ancient Knight Spirit"
+ ],
+ "战熊之魂": [
+  "Savaş Ayısı Ruhu",
+  "War Bear Spirit"
+ ],
+ "上古突击者": [
+  "Kadim Akıncı",
+  "Ancient Striker"
+ ],
+ "斩杀之剑": [
+  "Kesim Kılıcı",
+  "Executing Sword"
+ ],
+ "英雄塔亡魂主宰": [
+  "Kahraman Kulesi Ruh Hâkimi",
+  "Hero Tower Spirit Lord"
+ ],
+ "★上古英雄之魂": [
+  "★Kadim Kahraman Ruhu",
+  "★Ancient Hero Spirit"
+ ],
+ "魔能骸骨": [
+  "Büyü Gücüyle Dolu İskelet",
+  "Arcane Skeleton"
+ ],
+ "上古祭祀": [
+  "Kadim Rahip",
+  "Ancient Priest"
+ ],
+ "灵魂之火": [
+  "Ruh Ateşi",
+  "Soul Fire"
+ ],
+ "魔法塔": [
+  "Büyü Kulesi",
+  "Magic Tower"
+ ],
+ "巫师塔亡魂主宰": [
+  "Sihirbaz Kulesi Ruh Hâkimi",
+  "Wizard Tower Spirit Lord"
+ ],
+ "★上古巫师之魂": [
+  "★Kadim Sihirbaz Ruhu",
+  "★Ancient Wizard Spirit"
+ ],
+ "上古召唤师": [
+  "Kadim Çağırıcı",
+  "Ancient Summoner"
+ ],
+ "血肉傀儡": [
+  "Et Kukla",
+  "Flesh Golem"
+ ],
+ "术士塔亡魂主宰": [
+  "Büyücü Kulesi Ruh Hâkimi",
+  "Warlock Tower Spirit Lord"
+ ],
+ "★上古术士之魂": [
+  "★Kadim Büyücü Ruhu",
+  "★Ancient Warlock Spirit"
+ ],
+ "★卡尔": [
+  "★Karl",
+  "★Karl"
+ ],
+ "矮人劫掠者": [
+  "Dağ Cücesi Yağmacı",
+  "Dwarf Raider"
+ ],
+ "疯猎人": [
+  "Deli Avcı",
+  "Mad Hunter"
+ ],
+ "猎狼": [
+  "Av Kurdu",
+  "Hunting Wolf"
+ ],
+ "梦魇之影": [
+  "Kâbus Gölgesi",
+  "Nightmare Shade"
+ ],
+ "不洁修女": [
+  "Murdar Rahibe",
+  "Unclean Nun"
+ ],
+ "★乌燃": [
+  "★Kara Yalım",
+  "★Darkblaze"
+ ],
+ "守卫炮塔": [
+  "Muhafız Top Kulesi",
+  "Guard Turret"
+ ],
+ "能量炮塔": [
+  "Enerji Top Kulesi",
+  "Energy Turret"
+ ],
+ "发条矮人": [
+  "Kurmalı Dağ Cücesi",
+  "Clockwork Dwarf"
+ ],
+ "炎之守护者": [
+  "Alev Koruyucusu",
+  "Flame Guardian"
+ ],
+ "石之守护者": [
+  "Taş Koruyucusu",
+  "Stone Guardian"
+ ],
+ "李斯特爵士": [
+  "Sir Lister",
+  "Sir Lister"
+ ],
+ "★李斯特爵士": [
+  "★Sir Lister",
+  "★Sir Lister"
+ ],
+ "☆格诺姆之子": [
+  "☆Gnom'un Oğlu",
+  "☆Son of Gnome"
+ ],
+ "☆巨石怪": [
+  "☆Kaya Canavarı",
+  "☆Boulder Beast"
+ ],
+ "☆石精灵": [
+  "☆Taş Elfi",
+  "☆Stone Sprite"
+ ],
+ "☆闪电": [
+  "☆Şimşek",
+  "☆Lightning"
+ ],
+ "☆阴影": [
+  "☆Gölge",
+  "☆Shadow"
+ ],
+ "☆☆肮脏的达普尼": [
+  "☆☆Pis Dapni",
+  "☆☆Filthy Dapni"
+ ],
+ "☆哥布林建筑家": [
+  "☆Goblin Mimar",
+  "☆Goblin Architect"
+ ],
+ "☆矮人僵尸": [
+  "☆Dağ Cücesi Zombisi",
+  "☆Dwarf Zombie"
+ ],
+ "☆噩梦编织者": [
+  "☆Kâbus Dokuyucu",
+  "☆Nightmare Weaver"
+ ],
+ "灰斧四侠": [
+  "Bozbalta Dört Yiğit",
+  "Greyaxe Four Heroes"
+ ],
+ "☆地狱狼": [
+  "☆Cehennem Kurdu",
+  "☆Hell Wolf"
+ ],
+ "☆炼狱恶魔": [
+  "☆Araf İblisi",
+  "☆Purgatory Demon"
+ ],
+ "☆深渊美杜莎": [
+  "☆Uçurum Medusası",
+  "☆Abyssal Medusa"
+ ],
+ "商会幸存者": [
+  "Ticaret Loncası Sağ Kalanı",
+  "Guild of Commerce Survivor"
+ ],
+ "奴隶工匠": [
+  "Köle Zanaatkâr",
+  "Slave Artisan"
+ ],
+ "走私货物": [
+  "Kaçak Mal",
+  "Smuggled Goods"
+ ],
+ "死里逃生的学者": [
+  "Ölümden Dönen Bilgin",
+  "Narrowly Escaped Scholar"
+ ],
+ "满是尘土的卷轴": [
+  "Toz İçinde Bir Tomar",
+  "Dusty Scroll"
+ ],
+ "浸满海水的地洞": [
+  "Deniz Suyu Dolmuş Oyuk",
+  "Seawater-Flooded Hole"
+ ],
+ "沙滩刺虫": [
+  "Kumsal Dikenböceği",
+  "Beach Spikebug"
+ ],
+ "佣兵法师": [
+  "Paralı Büyücü",
+  "Mercenary Mage"
+ ],
+ "走私者苦工": [
+  "Kaçakçı Amelesi",
+  "Smuggler Laborer"
+ ],
+ "☆夜精灵大副": [
+  "☆Gece Elfi İkinci Kaptan",
+  "☆Night Elf First Mate"
+ ],
+ "灰刃贷剑客": [
+  "Bozbıçak Kiralık Kılıççı",
+  "Greyblade Sellsword"
+ ],
+ "走私者邪术师": [
+  "Kaçakçı Kara Büyücü",
+  "Smuggler Sorcerer"
+ ],
+ "石肤变异者": [
+  "Taşderi Mutant",
+  "Stoneskin Mutant"
+ ],
+ "黏皮变异者": [
+  "Yapışkanderi Mutant",
+  "Slimeskin Mutant"
+ ],
+ "☆发狂的潜水员": [
+  "☆Çıldırmış Dalgıç",
+  "☆Crazed Diver"
+ ],
+ "夜精灵黏巫": [
+  "Gece Elfi Balçık Cadısı",
+  "Night Elf Slime Witch"
+ ],
+ "走私者战法师": [
+  "Kaçakçı Savaş Büyücüsü",
+  "Smuggler Battlemage"
+ ],
+ "狂暴变异者": [
+  "Azgın Mutant",
+  "Raging Mutant"
+ ],
+ "石肤队长": [
+  "Taşderi Yüzbaşı",
+  "Stoneskin Captain"
+ ],
+ "深海牧师": [
+  "Derin Deniz Rahibi",
+  "Deep Sea Priest"
+ ],
+ "☆吸髓妖": [
+  "☆İlik Emici",
+  "☆Marrow Sucker"
+ ],
+ "★噩梦深潜者": [
+  "★Kâbus Dalgıcı",
+  "★Nightmare Deep Diver"
+ ],
+ "骑士之魂": [
+  "Şövalye Ruhu",
+  "Knight Spirit"
+ ],
+ "成熟的蘑菇": [
+  "Olgun Mantar",
+  "Ripe Mushroom"
+ ],
+ "成熟的蘑菇堆": [
+  "Olgun Mantar Yığını",
+  "Ripe Mushroom Patch"
+ ],
+ "臭烘烘的地洞": [
+  "Kokuşmuş Oyuk",
+  "Stinking Hole"
+ ],
+ "骑士的遗物": [
+  "Şövalyenin Yadigârı",
+  "Knight's Relic"
+ ],
+ "吸髓怪": [
+  "İlik Emen Canavar",
+  "Marrow Fiend"
+ ],
+ "惊惧兽": [
+  "Dehşet Canavarı",
+  "Dread Beast"
+ ],
+ "噩梦猎手": [
+  "Kâbus Avcısı",
+  "Nightmare Hunter"
+ ],
+ "噩梦行者": [
+  "Kâbus Yürüyeni",
+  "Nightmare Walker"
+ ],
+ "☆深蓝": [
+  "☆Derin Mavi",
+  "☆Deep Blue"
+ ],
+ "☆暗红": [
+  "☆Koyu Kızıl",
+  "☆Dark Crimson"
+ ],
+ "灾变惊惧兽": [
+  "Felaket Dehşet Canavarı",
+  "Cataclysm Dread Beast"
+ ],
+ "☆吸髓妖长老": [
+  "☆İlik Emici Yaşlısı",
+  "☆Marrow Sucker Elder"
+ ],
+ "噩梦化身": [
+  "Kâbusun Vücut Bulmuşu",
+  "Nightmare Incarnate"
+ ],
+ "☆织梦者": [
+  "☆Rüya Dokuyucu",
+  "☆Dreamweaver"
+ ],
+ "骸骨骑士": [
+  "İskelet Şövalye",
+  "Skeletal Knight"
+ ],
+ "锻风者": [
+  "Rüzgâr Döven",
+  "Windforger"
+ ],
+ "纯净风暴": [
+  "Saf Fırtına",
+  "Pure Storm"
+ ],
+ "元素圣殿祭司": [
+  "Element Tapınağı Rahibi",
+  "Elemental Temple Priest"
+ ],
+ "万神殿观察者": [
+  "Panteon Gözlemcisi",
+  "Pantheon Observer"
+ ],
+ "弗雷的观察者": [
+  "Frey'in Gözlemcisi",
+  "Observer of Frey"
+ ],
+ "芙蕾雅的观察者": [
+  "Freya'nın Gözlemcisi",
+  "Observer of Freya"
+ ],
+ "琼的观察者": [
+  "Joan'ın Gözlemcisi",
+  "Observer of Joan"
+ ],
+ "古兰恩的观察者": [
+  "Gulaen'in Gözlemcisi",
+  "Observer of Gulaen"
+ ],
+ "★伊里奇·蓝天": [
+  "★Ilyich Mavigök",
+  "★Ilyich Bluesky"
+ ],
+ "风暴侍奉者": [
+  "Fırtına Hizmetkârı",
+  "Storm Servant"
+ ],
+ "呼号龙卷": [
+  "Uluyan Hortum",
+  "Howling Tornado"
+ ],
+ "乌云元素": [
+  "Kara Bulut Elementali",
+  "Dark Cloud Elemental"
+ ],
+ "碎片龙卷": [
+  "Parça Hortumu",
+  "Shard Tornado"
+ ],
+ "风暴追随者": [
+  "Fırtına Müridi",
+  "Storm Follower"
+ ],
+ "★风暴祭祀": [
+  "★Fırtına Rahibi",
+  "★Storm Priest"
+ ],
+ "★热带低气压": [
+  "★Tropik Alçak Basınç",
+  "★Tropical Depression"
+ ],
+ "暖湿气团": [
+  "Ilık Nem Kütlesi",
+  "Warm Moist Air Mass"
+ ],
+ "雷云龙卷": [
+  "Gök Gürültülü Hortum",
+  "Thundercloud Tornado"
+ ],
+ "★雷云正极": [
+  "★Şimşek Bulutu Artı Kutup",
+  "★Thundercloud Positive Pole"
+ ],
+ "雷云负极": [
+  "Şimşek Bulutu Eksi Kutup",
+  "Thundercloud Negative Pole"
+ ],
+ "蓝龙战士": [
+  "Mavi Ejder Savaşçısı",
+  "Blue Dragon Warrior"
+ ],
+ "远古之风": [
+  "Yuangu Zhi Feng",
+  "Yuangu Zhi Feng"
+ ],
+ "断雁西风": [
+  "Duanyan Xifeng",
+  "Duanyan Xifeng"
+ ],
+ "酒仙·君德": [
+  "Jiuxian Junde",
+  "Jiuxian Junde"
+ ],
+ "绫野": [
+  "Lingye",
+  "Lingye"
+ ],
+ "王科": [
+  "Wang Ke",
+  "Wang Ke"
+ ],
+ "张宁": [
+  "Zhang Ning",
+  "Zhang Ning"
+ ],
+ "公主": [
+  "Prenses",
+  "Princess"
+ ],
+ "徐海": [
+  "Xu Hai",
+  "Xu Hai"
+ ],
+ "罗石": [
+  "Luo Shi",
+  "Luo Shi"
+ ],
+ "刘爽": [
+  "Liu Shuang",
+  "Liu Shuang"
+ ],
+ "宋雨": [
+  "Song Yu",
+  "Song Yu"
+ ],
+ "杜飞龙": [
+  "Du Feilong",
+  "Du Feilong"
+ ],
+ "李丹": [
+  "Li Dan",
+  "Li Dan"
+ ],
+ "胡艳华": [
+  "Hu Yanhua",
+  "Hu Yanhua"
+ ],
+ "吴健": [
+  "Wu Jian",
+  "Wu Jian"
+ ],
+ "唐宜科": [
+  "Tang Yike",
+  "Tang Yike"
+ ],
+ "张珂": [
+  "Zhang Ke",
+  "Zhang Ke"
+ ],
+ "顽石": [
+  "Wanshi",
+  "Wanshi"
+ ],
+ "盛炯": [
+  "Sheng Jiong",
+  "Sheng Jiong"
+ ],
+ "奥特曼": [
+  "Ultraman",
+  "Ultraman"
+ ],
+ "陈文": [
+  "Chen Wen",
+  "Chen Wen"
+ ],
+ "王磊": [
+  "Wang Lei",
+  "Wang Lei"
+ ],
+ "测试沉默": [
+  "Test: Susturma",
+  "Test: Silence"
+ ],
+ "测试定身": [
+  "Test: Sabitleme",
+  "Test: Root"
+ ],
+ "测试昏迷": [
+  "Test: Sersemletme",
+  "Test: Stun"
+ ],
+ "死亡荒野": [
+  "Ölüm Yabanı",
+  "Death Wilds"
+ ],
+ "薄暮山谷": [
+  "Alacakaranlık Vadisi",
+  "Dusk Valley"
+ ],
+ "失落沼泽": [
+  "Kayıp Bataklık",
+  "Lost Swamp"
+ ],
+ "噬魂高地": [
+  "Ruhyiyen Yaylası",
+  "Soul Eater Highlands"
+ ],
+ "噬魂平原": [
+  "Ruhyiyen Ovası",
+  "Soul Eater Plains"
+ ]
 }

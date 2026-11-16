@@ -255,6 +255,7 @@ const Win = (() => {
     if (e.a === 'back') { D.q = null; return; }
     if (e.a === 'shop') { UI.openShop(n.cn); return; }
     if (e.a === 'tp') { UI.closeAll(); setTimeout(() => questTeleport(e.q), 300); return; }
+    if (e.a === 'dtp') { UI.closeAll(); setTimeout(() => e.d.go(), 300); return; }
     if (e.a === 'accept') { const q = D.q; acceptQuest(q); D.q = null; UI.closeAll(); if (q.tp) { setTimeout(() => questTeleport(q), 400); return; } if (q.type === 'talk' && q.to === n.cn) Game.P.quests[q.id].ready = true; return; }
     if (e.a === 'complete') { const q = D.q; completeQuest(q); D.q = null; return; }
   }
@@ -658,6 +659,7 @@ const Win = (() => {
       if (SHOPS[n.cn]) o.push({ t: 'Alışveriş', a: 'shop', c: '#ffe070' });
       for (const q of questsFor(n.cn)) { const st = questState(q); o.push({ t: (st === 'ready' ? '? ' : st === 'new' ? '! ' : '… ') + q.title, a: 'q', q, c: st === 'active' ? '#c8c0b0' : '#ffe070' }); }
       const tq = tpQuestOf(n.cn); if (tq) o.push({ t: '✦ Işınlan: ' + trName(Assets.D.scenes[tq.tp[0]].name), a: 'tp', q: tq });
+      for (const d of Dungeon.npcTp(n.cn)) o.push({ t: '✦ ' + d.label, a: 'dtp', d });   // zindan merkezine/merkezden ışınlanma
       o.push({ t: 'Hoşça kal', a: 'bye' });
     }
     return { txt, o: o.slice(0, 6) };
@@ -685,6 +687,7 @@ const Win = (() => {
     if (e.a === 'back') { D.q = null; return; }
     if (e.a === 'shop') { UI.openShop(n.cn); return; }
     if (e.a === 'tp') { UI.closeAll(); setTimeout(() => questTeleport(e.q), 300); return; }
+    if (e.a === 'dtp') { UI.closeAll(); setTimeout(() => e.d.go(), 300); return; }
     if (e.a === 'accept') { const q = D.q; acceptQuest(q); D.q = null; UI.closeAll(); if (q.tp) { setTimeout(() => questTeleport(q), 400); return; } if (q.type === 'talk' && q.to === n.cn) Game.P.quests[q.id].ready = true; return; }   // görev alınınca pencere kapanır
     if (e.a === 'complete') { const q = D.q; completeQuest(q); D.q = null; return; }
   }

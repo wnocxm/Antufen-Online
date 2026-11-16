@@ -28,7 +28,8 @@
    {"bolge": "…", "seviye": 33, "atla": [id…], "zincir": {"id": oncekiId}, "seviyeler": {"id": enDüşükSeviye},
     "adlar": {"Çince": ["Türkçe", "English"]},
     "irk": "人类" | "精灵",        // yedek ırk: veren NPC farklı taraflarda birden çok yerdeyse (asıl kural: NPC'nin haritasının tarafı, tools/taraf.py)
-    "irklar": {"id": "精灵"},       // göreve özel ırk (ortak bölgedeki ırk zincirleri)
+    "irklar": {"id": "精灵"},
+    "lv": 40,                       // zindan görevleri: haritaların seviye aralığı yok; ödül ve en düşük seviye buradan       // göreve özel ırk (ortak bölgedeki ırk zincirleri)
     "gorevler": {"id": {"tr": [başlık, metin, bekleme, bitiş, (eşya)], "en": [...]}}}
    ```
    `seviye`: o şehirde verilen hedefsiz konuşma görevlerinin en düşük seviyesi (aynı adlı NPC başka şehirde de durunca seviye yanlış çıkmasın).
@@ -59,6 +60,8 @@
 | `sanatci.json` | Sanatçılar Loncası 艺术家工会前厅 (Resim/Heykel koridorları 90, elendi). Loş Kamp 幽暗营地: hepsi 60+, alınmadı | 49-51 | 22 |
 | `liman.json` | Altındalga Limanı 金波港 + lağım, Gece Elfi Mahallesi→Yoğunsis zinciri (81883→81884→81885→81914→81915). İtibar/unvan, zindan, tabela görevleri alınmadı. Dağ Eteği Kampı 60+ | 38-40 | 12 |
 | `akademi.json` | Büyü Akademisi 魔法学院: Büyü Bahçesi, Peri Ormanı (sınıf yükseltme zincirleri alınmadı) | 49-52 | 10 |
+| `zindan30.json` | Mehtap Korusu zindanı (insan Cromwell, elf Gecekanat) | 30 | 2 |
+| `zindan40.json` | Ruhyiyen Ovası zindan grubu + merkezi (ortak) | 40 | 13 |
 
 İnsan yolu: kamp → Guanlin (3-11) → korucu → Koşanat (17-34) → simyacı kolu → Kral'ın fermanı → Karakol (27-39) → Başkent (33-49).
 Elf yolu: kamp → Kâhin Tapınağı (6-20) → Gözcü Kampı (19-27) → Güneşgören (29-49).
@@ -71,3 +74,5 @@ Elf yolu: kamp → Kâhin Tapınağı (6-20) → Gözcü Kampı (19-27) → Gün
 İtibar / iyilik-kötülük değeri / unvan ödüllü görevler (ozan çırağı), zindan (副本) görevleri, lonca panosu tabelaları,
 40. seviye sınıf yükseltme zincirleri (纹章法师, 烈焰导师 …), deniz mağarası. Bu sistemler gelince ayrı ele alınacak.
 `gecemah_kaynak.json`, `insanmah_kaynak.json`, `adalet_kaynak.json` yalnızca başka bölgelerin zincir halkaları için yapı sağlar.
+
+Araç: `python3 tools/gorev_aktar.py 'bölge1,bölge2,#görevId' ad` — virgülle birden çok bölge, `#id` ile tek görev.

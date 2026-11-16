@@ -25,6 +25,10 @@ def parse(i):
     """Bir görevi oyunun görev biçimine çevirir. Desteklenmeyen ya da hedefi oyunda olmayan görevde (None, sebep) döner."""
     t, o = APK.get(i), SYM.get(str(i))
     if not t or not o: return None, 'kayıt yok'
+    o = list(o)
+    # zindan görevlerinde (副本) "reddet" alanı yok: ilerleme satırı 9. değil 8. alanda; konuşma görevinde bekleme alanı da yok
+    if len(o) > 8 and '%d' in o[8] and not (len(o) > 9 and '%d' in o[9]): o.insert(4, '')
+    elif len(o) > 6 and o[3] == '愿意为您效劳' and o[4] in ('结束', '离开'): o[4:4] = ['', '']
     if len(o) < 13: return None, 'kısa kayıt'
     g, d = t['acceptNpcId'], t['deliverNpcId']
     if g not in CIT or d not in CIT or g not in NPC_SC or d not in NPC_SC: return None, 'NPC oyunda yok'
@@ -37,8 +41,20 @@ def parse(i):
         m = re.search(r'/(\d+)', prog); n = int(m.group(1)) if m else 1
         red = RED.findall(prog); name = red[0] if red else re.sub(r'^(已经|已)(获得|收集|取得|找到|拿到|得到|击杀|杀死|消灭)?', '', prog.split('：')[0].split(':')[0])
         name = clean(name)
-        if '；' in prog or ';' in prog: return None, 'çok hedefli'
-        if re.search(r'杀|击败|消灭|打败|干掉', prog):
+        if '；' in prog or ';' in prog:   # çok hedefli: yalnız öldürme destekli ("…击杀A %d/10；B %d/5")
+            if not re.search(r'杀|击败|消灭|打败|干掉', prog): return None, 'çok hedefli toplama'
+            tg = []
+            for part in re.split(r'[；;]', prog):
+                if not part.strip(): continue
+                m2 = re.search(r'/(\d+)', part); r2 = RED.findall(part)
+                nm = clean(r2[0] if r2 else re.sub(r'^(已经|已)?(击杀|杀死|消灭|击败|打败|干掉)?', '', part.split('%')[0].split('：')[0].split(':')[0]).strip())
+                nm = next((x for x in (nm, '☆' + nm, '☆☆' + nm, '★' + nm) if x in ENT_SC and x in MON), nm)   # ilerleme satırında yıldız yazılmamış olabilir
+                if nm not in ENT_SC or nm not in MON: return None, f'canavar yok: {nm}'
+                tg.append([nm, int(m2.group(1)) if m2 else 1])
+            q.update(type='kill', target=tg[0][0], count=sum(c for _, c in tg), targets=tg)
+            name = tg[0][0]
+        elif re.search(r'杀|击败|消灭|打败|干掉', prog):
+            name = next((x for x in (name, '☆' + name, '☆☆' + name, '★' + name) if x in ENT_SC and x in MON), name)
             if name not in ENT_SC or name not in MON: return None, f'canavar yok: {name}'
             q.update(type='kill', target=name, count=n)
         else:
@@ -68,7 +84,9 @@ def parse(i):
 
 def region(hubname):
     """Bir bölgedeki görevler: veren NPC o bölgede ya da zincirle o bölgeye bağlı."""
-    ids = sorted(i for i, t in APK.items() if hub(t['acceptNpcId']) == hubname)
+    # birden çok bölge virgülle; "#82836" biçiminde tek görev de eklenebilir (ör. zindan merkezine giden görev)
+    hubs = set(x for x in hubname.split(',') if not x.startswith('#')); extra = {int(x[1:]) for x in hubname.split(',') if x.startswith('#')}
+    ids = sorted(i for i, t in APK.items() if hub(t['acceptNpcId']) in hubs or i in extra)
     out, bad = [], collections.Counter()
     for i in ids:
         q, why = parse(i)

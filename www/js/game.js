@@ -610,6 +610,11 @@ function questKill(name) {
   const P = Game.P;
   for (const q of QUESTS) {
     const st = P.quests[q.id]; if (!st || st.ready) continue;
+    if (q.type === 'kill' && q.targets) {   // çok hedefli: her hedefin kendi sayacı, toplam st.n
+      const tg = q.targets.find(x => x[0] === name); if (!tg) continue; st.c = st.c || {};
+      if ((st.c[name] || 0) < tg[1]) { st.c[name] = (st.c[name] || 0) + 1; st.n = (st.n || 0) + 1; UI.log(`${trName(name)} ${st.c[name]}/${tg[1]}`, 'loot'); }
+      if (q.targets.every(x => (st.c[x[0]] || 0) >= x[1])) readyQuest(q); UI.refresh(); continue;
+    }
     if (q.type === 'kill' && q.target === name) { st.n++; if (st.n >= q.count) readyQuest(q); UI.refresh(); }
     if (q.type === 'collect' && q.target === name && Math.random() < q.chance) { st.n++; UI.log(`${q.item} ${st.n}/${q.count}`, 'loot'); if (st.n >= q.count) readyQuest(q); UI.refresh(); }
   }
@@ -667,7 +672,7 @@ function walkToEnt(t) { const p = Game.player; p.path = findPath(Game.map, p.x, 
 function questWalk(q) {
   const p = Game.player, st = Game.P.quests[q.id], near = f => { let b = null, bd = 1e9; for (const e of Game.ents) if (f(e)) { const d = Math.hypot(e.x - p.x, e.y - p.y); if (d < bd) { bd = d; b = e; } } return b; };
   let t = null;
-  if (st && !st.ready) { if (q.type === 'kill' || q.type === 'collect') t = near(e => e.kind === 'mob' && !e.dead && e.name === q.target); else if (q.type === 'pickup') t = near(e => e.kind === 'npc' && e.cn === q.node && !e.hidden); }
+  if (st && !st.ready) { if (q.type === 'kill' || q.type === 'collect') t = near(e => e.kind === 'mob' && !e.dead && (q.targets ? q.targets.some(x => x[0] === e.name && ((st.c || {})[x[0]] || 0) < x[1]) : e.name === q.target)); else if (q.type === 'pickup') t = near(e => e.kind === 'npc' && e.cn === q.node && !e.hidden); }
   if (!t) t = near(e => e.kind === 'npc' && e.cn === q.to);
   if (!t) {
     if (st && !st.ready && (q.type === 'kill' || q.type === 'collect')) { const sid = monSceneNear(q.target); if (sid && sid !== Game.sceneId) { Game.routeNpc = null; return routeTo(sid); } }

@@ -114,7 +114,7 @@ for f in sorted(glob.glob('kaynak/ceviri/gorevler/*.json')):
         s0 = YAPI.get(i); c = C['gorevler'][str(i)]
         if not s0: print('  yapı yok:', i); continue
         if i in have or i in skip or not c: continue
-        q = {k: s0[k] for k in ('id', 'giver', 'to', 'type', 'target', 'node', 'count', 'sc', 'chance', 'req', 'rw') if k in s0}
+        q = {k: s0[k] for k in ('id', 'giver', 'to', 'type', 'target', 'targets', 'node', 'count', 'sc', 'chance', 'req', 'rw') if k in s0}
         if str(i) in C.get('zincir', {}): q['req'] = C['zincir'][str(i)]   # elle verilen zincir bağı
         if str(i) in C.get('seviyeler', {}): q['lvMin'] = C['seviyeler'][str(i)]
         rc = C.get('irklar', {}).get(str(i)) or taraf(q['giver'], C.get('irk'))   # ırk: göreve özel > veren NPC'nin haritasının tarafı > bölge dosyası
@@ -123,6 +123,7 @@ for f in sorted(glob.glob('kaynak/ceviri/gorevler/*.json')):
         if q['type'] in ('kill', 'collect', 'pickup'):
             nm = s0.get('sc'); r = next((x.get('lvr') for x in S.values() if x['name'] == nm and x.get('lvr')), None)
             q['lv'] = r[1] if r else 10
+        if C.get('lv'): q['lvMin'] = max(q.get('lvMin', 0), C['lv']); q['lv'] = C['lv'] + 2   # zindan görevleri: haritanın seviye aralığı yok, dosyadaki seviye
         def arr(a):
             a = list(a); item = a[4] if len(a) > 4 else ''
             return [a[0], a[1], OK[0] if a is c['tr'] else OK[1], a[2], a[3]] + ([item] if item else [])
@@ -150,7 +151,8 @@ js = """// Görevler: tools/gorevler.py üretir; elle değiştirme. Yapı Androi
   for (const q of Q) {
     const s = E ? q.en : q.tr, to = trName(q.to), sc = q.sc ? trName(q.sc) : '', mon = q.target ? trName(q.target) : '';
     q.title = s[0]; q.text = s[1]; q.ok = s[2]; q.wait = s[3]; q.done = s[4]; if (s[5]) q.item = s[5];
-    q.goal = q.type === 'kill' ? (E ? `Kill ${q.count} ${mon} in ${sc}, then talk to ${to}.` : `${sc}: ${q.count} ${mon} öldür, sonra ${to} ile konuş.`)
+    const many = q.targets && q.targets.map(x => `${x[1]} ${trName(x[0])}`).join(', ');   // çok hedefli
+    q.goal = q.type === 'kill' ? (E ? `Kill ${many || q.count + ' ' + mon} in ${sc}, then talk to ${to}.` : `${sc}: ${many || q.count + ' ' + mon} öldür, sonra ${to} ile konuş.`)
       : q.type === 'collect' ? (E ? `Collect ${q.count} ${q.item} from ${mon} in ${sc}, then talk to ${to}.` : `${sc}: ${mon} canavarlarından ${q.count} ${q.item} topla, sonra ${to} ile konuş.`)
       : q.use ? (E ? `Use the ${q.item} on ${trName(q.node)}, then talk to ${to}.` : `${q.item} eşyasını ${trName(q.node)} üzerinde kullan, sonra ${to} ile konuş.`)
       : q.type === 'pickup' ? (E ? `Gather ${q.count} ${q.item} in ${sc}, then talk to ${to}.` : `${sc}: ${q.count} ${q.item} topla, sonra ${to} ile konuş.`)
