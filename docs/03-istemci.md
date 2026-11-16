@@ -23,6 +23,11 @@ Mantıksal ekran yüksekliği `VH = 360` (genişlik orana göre). Hata ayıklama
 ## Zaman, hareket
 `TICK = 14` kare/sn animasyon zamanı, `STRIDE = 66`, `RUN = 4.2` kare/sn. Hareket yalnızca 4 yön (`snapScreen4`).
 Boş yere dokunmak **yürütmez** (`tapWorld`); NPC'ye ilk dokunuş hedef alır, ikinci dokunuş/konuşma düğmesi `talkTo` (yanına yürüyüp konuşur).
+**Hedef ve saldırı ayrı** (kullanıcı isteği):
+- Canavara ilk dokunuş yalnız seçer (`setTarget(e)`). Seçili canavara ikinci dokunuş, saldırı düğmesi (`UI.attack`), bir beceri ya da görev yürüyüşü saldırıyı başlatır (`setTarget(e, true)` → `Game.engage`).
+- Yön tuşu/joystick `Game.engage`'i kapatır; hedef seçili kalır, oyuncu kendiliğinden geri dönmez.
+- Yaklaşırken engelli karede takılırsa (`p.chaseD` ilerlemiyorsa) ve menzil +0,6 içindeyse olduğu yerden vurur.
+- Test: `tools/test/hedef.js`. Test betikleri saldırı için `setTarget(m, true)` kullanır.
 Otomatik yol: `routeTo(sid)` sahneler arası (`scenePath`), `routeToNpc(cn)`, `walkToEnt`; görev penceresindeki "Yol Bul".
 
 ## Veri ve kayıt

@@ -28,7 +28,7 @@ const BOSS = (process.env.BOSS || '').split(';').filter(Boolean).map(x => x.spli
         for (const sk of C.skills) if (sk.lv <= L) P.sk[sk.id] = clamp(Math.floor((L - sk.lv) / 4) + 1, 1, 10);
         gmGear(); const st = stats(); const pl = __G.player; pl.buffs = []; pl.cds = {}; pl.hp = st.hp; pl.mp = st.mp; pl.dead = false; pl.state = 'idle';
         Game.ents = Game.ents.filter(e => e.kind !== 'mob'); Game.fx = [];
-        const m = new Mob(sp[1], pl.x + 1.2, pl.y); m.home = { x: m.x, y: m.y }; m.aggro = true; Game.ents.push(m); setTarget(m);
+        const m = new Mob(sp[1], pl.x + 1.2, pl.y); m.home = { x: m.x, y: m.y }; m.aggro = true; Game.ents.push(m); setTarget(m, true);
         let t = 0, casts = 0, pots = 0; const dt = 0.05; const pot = P.lv > 10 ? 'hp2' : 'hp1'; if (fixed) addItem(pot, 20, true);
         while (t < 240 && !m.dead && !pl.dead) {
           if (pl.state !== 'attack' && pl.state !== 'cast') {

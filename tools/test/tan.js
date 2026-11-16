@@ -18,7 +18,7 @@ const O = process.argv[2] || 'tanitim/';
   // savaş: büyücü ateş topu + kar fırtınası
   await go('120018');
   const cast = async (k, waits) => { await p.evaluate(k => { const C = CLS[__G.P.cls], act = C.skills.filter(s => !s.pas), i = C.skills.indexOf(act[k]), pl = __G.player;
-      const ms = __G.ents.filter(e => e.kind === 'mob' && !e.dead); const m = ms[0]; m.x = pl.x + 3; m.y = pl.y + 0.5; if (ms[1]) { ms[1].x = pl.x + 3.6; ms[1].y = pl.y - 0.6; } m.hp = m.maxHp = 99999; setTarget(m); pl.cds = {}; pl.mp = 99999; useSkill(i); }, k); for (const w of waits) await p.waitForTimeout(w); };
+      const ms = __G.ents.filter(e => e.kind === 'mob' && !e.dead); const m = ms[0]; m.x = pl.x + 3; m.y = pl.y + 0.5; if (ms[1]) { ms[1].x = pl.x + 3.6; ms[1].y = pl.y - 0.6; } m.hp = m.maxHp = 99999; setTarget(m, true); pl.cds = {}; pl.mp = 99999; useSkill(i); }, k); for (const w of waits) await p.waitForTimeout(w); };
   await p.waitForTimeout(1500); await cast(0, [380]); await p.screenshot({ path: O + '04_savas_ates_topu.png' }); console.log('04');
   await p.waitForTimeout(1500);
   await cast(5, [700]); await p.screenshot({ path: O + '05_savas_kar_firtinasi.png' }); console.log('05');

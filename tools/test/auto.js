@@ -8,7 +8,7 @@ const cls = process.argv[2];
   await p.waitForFunction(() => window.__G && window.__G.player, null, { timeout: 30000 });
   await p.evaluate(async () => { await loadScene('120018'); });
   await p.waitForTimeout(1500);
-  await p.evaluate(() => { const pl = __G.player, m = __G.ents.filter(e => e.kind === 'mob' && !e.dead)[0]; m.x = pl.x + 3; m.y = pl.y; m.hp = m.maxHp = 99999; m.aggro = false; setTarget(m); pl.atkT = 0; __G.auto = true; });
+  await p.evaluate(() => { const pl = __G.player, m = __G.ents.filter(e => e.kind === 'mob' && !e.dead)[0]; m.x = pl.x + 3; m.y = pl.y; m.hp = m.maxHp = 99999; m.aggro = false; setTarget(m, true); pl.atkT = 0; __G.auto = true; });
   const box = await p.evaluate(() => { const c = document.querySelector('canvas').getBoundingClientRect(); return c; });
   // büyük saldırı tuşuna bas (oyunun kendi tuşu)
   await p.evaluate(() => { UI.attack ? UI.attack() : 0; });

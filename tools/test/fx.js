@@ -12,7 +12,7 @@ const cls = process.argv[2];
   for (let k = 0; k < n; k++) {
     const name = await p.evaluate(k => { const C = CLS[__G.P.cls], act = C.skills.filter(s => !s.pas), sk = act[k], i = C.skills.indexOf(sk), pl = __G.player;
       // en yakın canavarı oyuncunun 3 kare önüne getir, bekleme sürelerini sıfırla
-      const m = __G.ents.filter(e => e.kind === 'mob' && !e.dead)[0]; m.x = pl.x + 3; m.y = pl.y; m.hp = m.maxHp; m.aggro = false; setTarget(m);
+      const m = __G.ents.filter(e => e.kind === 'mob' && !e.dead)[0]; m.x = pl.x + 3; m.y = pl.y; m.hp = m.maxHp; m.aggro = false; setTarget(m, true);
       pl.cds = {}; pl.mp = 99999; pl.atkT = 0; useSkill(i); return sk.name; }, k);
     for (const [j, ms] of [[0, 330], [1, 300], [2, 350]]) { await p.waitForTimeout(ms); await p.screenshot({ path: (process.env.OUT || '/tmp') + `/${cls}_${k}_${j}.png`, clip: { x: 190, y: 40, width: 400, height: 260 } }); }
     console.log(k, name);

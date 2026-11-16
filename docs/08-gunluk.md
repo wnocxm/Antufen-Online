@@ -36,3 +36,4 @@ Her commit'te buraya bir satır eklenir (tarih başlığı altında). Ayrıntı 
 - Evcil hayvanlar 1. aşama: 26 tür, kuluçka, savaş ve taktikler, bakım, Terbiyeci görevleri (14).
 - GM paneline Zindanlar ve Evcil sekmeleri; kural: her yeni sistem GM komutuyla gelir; bu günlük açıldı.
 - Evcil hayvanlar kaynak denetimi (ham kayıttan): 8 biçimli dönüşüm ağacı (renkler aslında 幻化 aşamaları), doğru doğuştan beceriler ve şablonlar, 1-3 rastgele beceri (kalıcı/hale/destek), dönüşüm ve beceri aktarma (orijinal `n_fantasize_pet` penceresi, Büyülü Canavar Ustası), sonraki resmî sürümün türleri (Kan Meleği, Gölge Kraliçe, Şan/Yemin Kılıcı, Ölü Feneri), mor Kıyıcı Ateş Tanrısı, Yeti görselleri düzeltildi; evcil yakın dövüş menzili 1,9.
+- Hedef alma saldırıdan ayrıldı: ilk dokunuş seçer, ikinci dokunuş / saldırı düğmesi / beceri saldırır, yön tuşu saldırıyı bırakır; engelli karede takılan oyuncu yakınsa olduğu yerden vurur.

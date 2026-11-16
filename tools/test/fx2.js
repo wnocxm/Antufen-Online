@@ -8,7 +8,7 @@ const { chromium } = require('playwright');
   await p.waitForTimeout(1500);
   for (const k of [0, 3]) {
     await p.evaluate(k => { const C = CLS[__G.P.cls], act = C.skills.filter(s => !s.pas), sk = act[k], i = C.skills.indexOf(sk), pl = __G.player;
-      const m = __G.ents.filter(e => e.kind === 'mob' && !e.dead)[0]; m.x = pl.x + 2; m.y = pl.y; m.hp = m.maxHp = 99999; setTarget(m); pl.cds = {}; pl.mp = 99999; pl.atkT = 5; useSkill(i); }, k);
+      const m = __G.ents.filter(e => e.kind === 'mob' && !e.dead)[0]; m.x = pl.x + 2; m.y = pl.y; m.hp = m.maxHp = 99999; setTarget(m, true); pl.cds = {}; pl.mp = 99999; pl.atkT = 5; useSkill(i); }, k);
     for (let j = 0; j < 12; j++) { await p.waitForTimeout(70); await p.screenshot({ path: (process.env.OUT || '/tmp') + `/z_${k}_${String(j).padStart(2,'0')}.png`, clip: { x: 290, y: 60, width: 200, height: 200 } }); }
     await p.waitForTimeout(1200);
   }

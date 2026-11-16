@@ -259,7 +259,7 @@ const UI = (() => {
   function cancelAssign() { if (assign) { assign = null; toastT = 0; } }
   function quick(i) { const sl = Game.P.quick[i]; if (!sl) return; if (sl[0] === 's') useSkill(+sl.slice(1)); else useItem(sl.slice(2)); }
   let talkPress = 0;
-  function attack() { const p = Game.player; const t = Game.target && Game.target.kind === 'mob' && !Game.target.dead ? Game.target : nearestMob(9); if (t) { setTarget(t); p.path = null; } else log('Yakında hedef yok.'); }
+  function attack() { const p = Game.player; const t = Game.target && Game.target.kind === 'mob' && !Game.target.dead ? Game.target : nearestMob(9); if (t) { setTarget(t, true); p.path = null; } else log('Yakında hedef yok.'); }
   function drawMinimap(x, y, w, h) {
     const map = Game.map;
     if (mmMap !== map) {
@@ -357,7 +357,7 @@ const UI = (() => {
       title = 'Ayarlar';
       h = `<div class="iact"><button class="obtn" data-act="tsfx">Ses efektleri: ${SFX.opt.sfx ? 'Açık' : 'Kapalı'}</button><button class="obtn" data-act="tmus">Müzik: ${SFX.opt.music ? 'Açık' : 'Kapalı'}</button></div>
         <div class="iact"><button class="obtn" data-act="lang">${LANG === 'tr' ? 'Language: English' : 'Dil: Türkçe'}</button></div>
-        <div class="iact"><button class="obtn" data-act="totitle">Giriş ekranına dön</button><button class="obtn" data-act="newchar">Yeni karakter oluştur</button></div><p class="hint">Oyun otomatik kaydedilir. Sürüm 11161755</p>`;
+        <div class="iact"><button class="obtn" data-act="totitle">Giriş ekranına dön</button><button class="obtn" data-act="newchar">Yeni karakter oluştur</button></div><p class="hint">Oyun otomatik kaydedilir. Sürüm 11161826</p>`;
     }
     ptitle.textContent = tx(title); pbody.innerHTML = h; txDom(pbody);
   }

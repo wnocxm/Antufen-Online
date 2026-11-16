@@ -441,7 +441,9 @@ function gainXp(n) {
     const nq = questsUnlockedAt(P.lv); for (const q of nq) UI.log(`${tx('Yeni görev')}: ${q.title} · ${trName(q.giver)}`, 'q'); if (nq.length) UI.toast(`${nq.length} ${tx('yeni görev açıldı')}`); }
   UI.refresh();
 }
-function setTarget(e) { Game.target = e; UI.target(e); }
+// hedef seçmek saldırı başlatmaz: Game.engage yalnız saldırı düğmesi, seçili canavara ikinci dokunuş, beceri ya da görev yürüyüşüyle açılır;
+// yön tuşu (joystick) saldırıyı bırakır, hedef seçili kalır (kullanıcı isteği)
+function setTarget(e, engage = false) { Game.engage = !!(engage && e); Game.target = e; UI.target(e); }
 function cycleTarget() {
   const p = Game.player;
   const list = Game.ents.filter(e => e.kind === 'mob' && !e.dead && Math.hypot(e.x - p.x, e.y - p.y) < 9).sort((a, b) => Math.hypot(a.x - p.x, a.y - p.y) - Math.hypot(b.x - p.x, b.y - p.y));
@@ -457,7 +459,7 @@ function useSkill(i) {
   if (p.mp < sk.mp) { UI.log('Mana yetersiz!'); return; }
   let t = Game.target && !Game.target.dead && Game.target.kind === 'mob' ? Game.target : null;
   const needT = sk.mult && !sk.aoe;
-  if (needT && !t) { t = nearestMob(8); if (t) setTarget(t); }
+  if (needT && !t) { t = nearestMob(8); if (t) setTarget(t, true); } else if (t) Game.engage = true;   // beceri kullanınca o hedefle dövüş sürer
   if (needT && !t) { UI.log('Hedef yok.'); return; }
   if (t && sk.range && Math.hypot(t.x - p.x, t.y - p.y) > sk.range + 0.3) { p.pending = i; p.path = null; return; }
   p.pending = null; p.mp -= sk.mp; p.cds[sk.id] = sk.cd; p.combatT = 5; if (i === 0) p.atkT = Math.max(p.atkT, 0.9);
@@ -681,7 +683,7 @@ function questWalk(q) {
     if (st && !st.ready && (q.type === 'kill' || q.type === 'collect')) { const sid = monSceneNear(q.target); if (sid && sid !== Game.sceneId) { Game.routeNpc = null; return routeTo(sid); } }
     return routeToNpc(st ? q.to : q.giver);
   }
-  if (t.kind === 'mob') { setTarget(t); p.path = null; return; }
+  if (t.kind === 'mob') { setTarget(t, true); p.path = null; return; }   // görev yürüyüşü: göreve yazılı canavara saldırır
   p.path = findPath(Game.map, p.x, p.y, t.x, t.y + 1); Game.goTarget = t; setTarget(null);
 }
 function pickupNode(n) {
@@ -727,7 +729,7 @@ function update(dt) {
     const J = Input.joy();
     let moving = false;
     if (J) {
-      p.path = null; p.pending = null; Game.goTarget = null; Game.route = null; Game.routeNpc = null;
+      p.path = null; p.pending = null; Game.goTarget = null; Game.route = null; Game.routeNpc = null; Game.engage = false;
       const [cx, cy] = snapScreen4(J.x, J.y), l = 1, sp = RUN * (1 + s.spd) * (Game.fast ? 2.6 : 1) * dt;
       moveEnt(p, cx / l * sp, cy / l * sp); p.dir = dirOf(cx, cy); moving = true;
     } else if ((lastJoyDir = -1, p.state !== 'attack' && p.state !== 'cast')) {
@@ -735,9 +737,11 @@ function update(dt) {
       if (p.pending != null && t && !t.dead) {
         const sk = CLS[P.cls].skills[p.pending];
         if (Math.hypot(t.x - p.x, t.y - p.y) <= sk.range) useSkill(p.pending); else { stepTo(p, t.x, t.y, RUN * (1 + s.spd) * (Game.fast ? 2.6 : 1), dt, true); moving = true; }
-      } else if (t && t.kind === 'mob' && !t.dead && !p.path) {
+      } else if (Game.engage && t && t.kind === 'mob' && !t.dead && !p.path) {
         const C = CLS[P.cls], d = Math.hypot(t.x - p.x, t.y - p.y);
-        if (d > C.range) { stepTo(p, t.x, t.y, RUN * (1 + s.spd) * (Game.fast ? 2.6 : 1), dt, true); moving = true; }
+        // 4 yönlü yürüyüşte engelli karede takılırsa (yaklaşamıyorsa) ve yeterince yakınsa olduğu yerden vurur
+        const stuck = p.chaseD != null && p.chaseD - d < 0.005 && d <= C.range + 0.6; p.chaseD = d;
+        if (d > C.range && !stuck) { stepTo(p, t.x, t.y, RUN * (1 + s.spd) * (Game.fast ? 2.6 : 1), dt, true); moving = true; }
         else if (p.atkT <= 0) {
           p.atkT = 1.1; p.combatT = 5; p.dir = dirOf(t.x - p.x, t.y - p.y);
           if (C.melee) { p.state = 'attack'; p.animT = 0; p.stateT = 0.45; later(0.25, () => { if (!t.dead && Math.hypot(t.x - p.x, t.y - p.y) < C.range + 0.6) { hitMob(t, 1); SFX.play(C.snd); Game.fx.push(new Fx('BLOOD', t.x, t.y)); } }); }
@@ -820,7 +824,7 @@ function tapWorld(sx, sy) {
     const d = Math.hypot(e.X - W.x, (e.Y - 22) - W.y); if (d < bd) { bd = d; best = e; }
   }
   if (best) {
-    if (best.kind === 'mob') { setTarget(best); p.path = null; return; }
+    if (best.kind === 'mob') { setTarget(best, Game.target === best); p.path = null; return; }   // ilk dokunuş seçer, seçiliye ikinci dokunuş saldırır
     // NPC: ilk dokunuş hedef alır (sağ alttaki büyük düğme konuşma düğmesine döner); hedefliyken ikinci dokunuş konuşmaya gider
     if (best.kind === 'npc' && Game.target !== best) { setTarget(best); p.path = null; SFX.play('menusel', 0.5); return; }
     return talkTo(best);
