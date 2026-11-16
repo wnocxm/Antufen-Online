@@ -33,7 +33,11 @@ Otomatik yol: `routeTo(sid)` sahneler arası (`scenePath`), `routeToNpc(cn)`, `w
 ## Savaş
 - `stats()` sınıf tabanı (`CLS[cls]`: hp, mp, atk, def ve seviye artışları) + ekipman + pasif beceriler + bufflar.
 - `dmgCalc(atk, def, mult, critBonus, add)`: `(atk·mult+add)·rnd(0.92..1.08)·1000/(1000+3·def)`, kritik %8+bonus.
-- `xpNeed(l) = 40·l^1.85 + 20`. `gainXp` seviye atlatır, yeni açılan görevleri günlüğe yazar (`questsUnlockedAt`).
+- `xpNeed(l) = (40·l^1.85 + 20)·(1 + 1,5·clamp((l−10)/30, 0, 1))` (10'a kadar hızlı, 40'tan sonra ×2,5). `gainXp` seviye atlatır, yeni açılan görevleri günlüğe yazar (`questsUnlockedAt`).
+- Görev deneyimi: öldür/topla `(adet·canavarTP·1,6 + 60·L)·QXP_F(L)`, konuşma `(80 + 50·L)·QXP_F(L)`; `QXP_F = clamp(1,2 − L/40, 0,3, 1)`. (APK'daki `exp` ödülleri seviyeden bağımsız ~300 yer tutucu, kullanılmıyor.)
+- Canavar değerleri (`Mob`): TP `(250+260·L)`, saldırı `48 + 27·L + 0,15·L²`, savunma `8·L`; seçkin ☆ ×3 TP ×1,15 saldırı (×1,5 savunma), patron ☆☆ ×18 TP ×1,8 saldırı.
+  Sınıf tabanı: savaşçı 1200 TP (+180/sv), büyücü 1000 (+140), elçi 1050 (+150).
+- **Denge ölçümü**: `tools/test/denge.js` (RACE=人类|精灵, GRIND=0: kasmasız; seviye seviye görev/öldürme/kasma), `tools/test/savas.js` (her sınıf, seviyesindeki normal ve ☆ canavara karşı süre ve kayıp can). 1. tur sonucu: normal canavar 3-7 sn, %2-24 can; seçkin 11-33 sn, %7-82 can; bütün sınıflar potsuz kazanıyor.
 - Canavar seviyesi `monDef(ad, sahne)`: elle `MON` tablosu (sahne aralığına kıstırılır) ya da otomatik: sahnenin `lvr` aralığına göre; ☆ = seçkin (+1, ×3 TP), ☆☆ = patron (+2, ×25 TP). TP `(4+5·lv)·(25|3|1)`.
 - Normal saldırı: savaşçı yakın dövüş; büyücü/elçi mermi (`C.bolt`) + çarpma efekti (`C.boltHit`) + `skill_bomb` sesi.
   Orijinal sınıf tablosuna göre normal saldırı = ilk beceri: büyücü 火球术 (火球→火爆炸), elçi 暗影冲击 (暗影冲击_红→冲击爆炸).

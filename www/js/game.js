@@ -83,7 +83,7 @@ const CLS = {
       { id: 'wp5', pas: { hpreg: 60 }, name: 'Hızlı İyileşme', icon: 1135, lv: 14, desc: 'Can yenilenmesi artar.' },
       { id: 'wp6', pas: { dr: 8 }, name: 'Dayanıklılık Halesi', icon: 1110, lv: 18, desc: 'Alınan hasar −%8.' },
     ] },
-  '法师': { hp: 850, mp: 800, atk: 70, def: 20, ghp: 130, gmp: 90, gatk: 14, gdef: 5, range: 6, color: '蓝', bolt: '特效-火球', boltHit: '特效-火爆炸', snd: 'skill_fire2',
+  '法师': { hp: 1000, mp: 800, atk: 70, def: 20, ghp: 140, gmp: 90, gatk: 14, gdef: 5, range: 6, color: '蓝', bolt: '特效-火球', boltHit: '特效-火爆炸', snd: 'skill_fire2',
     skills: [
       { id: 'm1', name: 'Ateş Topu', icon: 1137, mp: 20, cd: 1.2, mult: 1.5, range: 7, proj: '特效-火球', hit: '特效-火爆炸', snd: 'skill_fireball', snd2: 'skill_bomb', add: [60, 65, 70, 75, 80, 90, 100, 110, 120, 130], lv: 1, desc: 'Uzaktan ateş büyüsü.' },
       { id: 'm2', name: 'Dondurma', icon: 1132, mp: 30, cd: 0.9, mult: 1.5, crit: 15, range: 7, proj: '特效-冰球', hit: 'WATER_ATTACK', slow: 4, snd: 'skill_wind', snd2: 'skill_bubble', add: [80, 90, 100, 110, 120, 135, 150, 165, 180, 195], lv: 3, desc: 'Buz büyüsü; hedefi yavaşlatır.' },
@@ -98,7 +98,7 @@ const CLS = {
       { id: 'mp5', pas: { mpreg: 60 }, name: 'Mana Yenilenmesi', icon: 1104, lv: 14, desc: 'Mana yenilenmesi artar.' },
       { id: 'mp6', pas: { mpPct: 10 }, name: 'Mana Halesi', icon: 1111, lv: 19, desc: 'Mana sınırı +%10 daha.' },
     ] },
-  '牧师': { hp: 900, mp: 700, atk: 60, def: 30, ghp: 140, gmp: 80, gatk: 12, gdef: 6, range: 5.5, color: '金', bolt: '特效-暗影冲击_红', boltHit: '特效-冲击爆炸', snd: 'skill_wind',
+  '牧师': { hp: 1050, mp: 700, atk: 60, def: 30, ghp: 150, gmp: 80, gatk: 12, gdef: 6, range: 5.5, color: '金', bolt: '特效-暗影冲击_红', boltHit: '特效-冲击爆炸', snd: 'skill_wind',
     skills: [
       { id: 'p1', name: 'Gölge Darbesi', icon: 1062, mp: 18, cd: 1.0, mult: 1.5, range: 7, proj: '特效-暗影冲击_红', hit: '特效-冲击爆炸', snd: 'skill_wind', snd2: 'skill_bomb', add: [25, 28, 31, 35, 40, 46, 55, 65, 72, 80], lv: 1, desc: 'Uzaktan gölge saldırısı.' },
       { id: 'p2', name: 'Çürüme', icon: 1066, mp: 30, cd: 6, mult: 0.3, dot: { n: 5 }, range: 7, fx: '特效-死亡标记', snd: 'skill_deathtag', dotT: [50, 60, 70, 80, 90, 100, 125, 150, 175, 200], lv: 3, desc: 'Hedefe lanet: 2 saniyede bir hasar verir.' },
@@ -216,7 +216,8 @@ function look() {
   const P = Game.P, e = P.eq || {}, G = sl => (e[sl] && ITEMS[e[sl]] && ITEMS[e[sl]].gfx) || null;
   return { cls: P.cls, race: P.race, sex: P.sex, bodyG: G('body'), headG: G('head'), weapG: G('weap') };
 }
-function xpNeed(l) { return Math.floor(40 * Math.pow(l, 1.85) + 20); }
+// seviye başına gereken deneyim: 10'a kadar hızlı, sonra kademeli ağırlaşır (40'tan sonra ×2,5) — bol kasma (kullanıcı kararı)
+function xpNeed(l) { return Math.floor((40 * Math.pow(l, 1.85) + 20) * (1 + 1.5 * clamp((l - 10) / 30, 0, 1))); }
 
 // ---------------- Varlıklar ----------------
 class Ent {
@@ -259,7 +260,8 @@ class Mob extends Ent {
     super('mob', x, y); const d = monDef(name, Game.scene);
     // canavar değerleri orijinalde sunucudaydı: seviyeden hesaplanır (haritaların seviye aralığına göre)
     const L = d.lv || 1, rk = d.rank || 0, soft = d.passive ? 0.55 : 1;
-    const mhp = Math.round((250 + 260 * L) * soft * (rk === 2 ? 18 : rk ? 4 : 1)); this.atk = Math.round((50 + 28 * L) * soft * (rk === 2 ? 1.8 : rk ? 1.25 : 1)); this.def = 8 * L * (rk ? 1.5 : 1);
+    // denge (tools/test/savas.js): seçkin ☆ ×3 can ×1,15 saldırı; saldırı yüksek seviyede biraz daha hızlı artar
+    const mhp = Math.round((250 + 260 * L) * soft * (rk === 2 ? 18 : rk ? 3 : 1)); this.atk = Math.round((48 + 27 * L + 0.15 * L * L) * soft * (rk === 2 ? 1.8 : rk ? 1.15 : 1)); this.def = 8 * L * (rk ? 1.5 : 1);
     Object.assign(this, { name, d, hp: mhp, maxHp: mhp, home, state: 'idle', atkT: 0, wanderT: rnd(1, 4), aggro: false, slowT: 0 });
     const info = Game.mobInfo(name); this.sp = info ? Game.map.sprite(info[1]) : null; this.deathFx = info?.[2];
     this.dir = irnd(0, 3);
@@ -580,8 +582,11 @@ function npcMark(cn) {
 const giveCount = q => (q.give || []).reduce((a, id) => a + countItem(id), 0);
 function takeGive(q) { let n = q.count; for (const id of q.give || []) { const k = Math.min(n, countItem(id)); if (k) { removeItem(id, k); n -= k; } } }
 // ödülü verilmemiş görevlere seviyeden ödül
+// Denge (kullanıcı kararı: orijinal gibi bol kasma): ilk seviyelerde görevler hızlı taşır, sonra görev deneyimi azalır
+// (QXP_F: 1 → 40. seviyeden sonra 0,3); deneyimin çoğu canavar kesmekten gelir. Ölçüm: tools/test/denge.js
+const QXP_F = L => clamp(1.2 - L / 40, 0.3, 1);
 for (const q of QUESTS) if (!q.reward) { const L = q.lv || (MON[q.target] && MON[q.target].lv) || 3, mx = (MON[q.target] && MON[q.target].xp) || 20;
-  q.reward = q.type === 'kill' || q.type === 'collect' ? { xp: Math.round((q.count || 1) * mx * 1.6 + 60 * L), gold: 10 + L * 6 } : { xp: 80 + 50 * L, gold: 8 + L * 4 }; }
+  q.reward = q.type === 'kill' || q.type === 'collect' ? { xp: Math.round(((q.count || 1) * mx * 1.6 + 60 * L) * QXP_F(L)), gold: 10 + L * 6 } : { xp: Math.round((80 + 50 * L) * QXP_F(L)), gold: 8 + L * 4 }; }
 // orijinal tablodaki altın ve eşya ödülü (tools/gorevler.py)
 for (const q of QUESTS) if (q.rw) { if (q.rw.gold) q.reward.gold = q.rw.gold; if (q.rw.items && q.rw.items.length) q.reward.items = q.rw.items; }
 function acceptQuest(q) { const P = Game.P; P.quests[q.id] = { n: 0, ready: q.type === 'talk' }; if (q.type === 'special' && Game.flags[q.flag]) P.quests[q.id].ready = true; UI.log(`Görev alındı: ${q.title}`, 'q'); SFX.play('accept_task'); UI.refresh(); save(); }

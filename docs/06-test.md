@@ -31,3 +31,4 @@ Oyun hazır: `window.__G && window.__G.player`. Konsoldan: `gmLevel(n)`, `loadSc
 - Yeni görsel/efekt görünmüyorsa: sürüm (`?v=`) artırıldı mı, ad `preload` listesinde mi (`loadScene` içindeki `names`).
 
 - `tools/test/adlar.js`: bütün haritalardaki adların TR/EN'de Çince kalmadığını denetler (beklenen: `cn: []`).
+- `tools/test/denge.js`: 1-55 deneyim benzetimi (RACE=人类|精灵, MAX, GRIND=0). `tools/test/savas.js`: sınıf × seviye dövüş benzetimi (gerçek `update` döngüsü, en iyi dükkân eşyası).

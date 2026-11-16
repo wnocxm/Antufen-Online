@@ -76,7 +76,7 @@ for i, t0 in T.items():
 out = []
 for i, v in Q.items():
     t = T[i]; typ, src = v[0], v[1]; ev = (t.get('events') or [{}])[0]
-    q = {'id': i, 'giver': npc(t['acceptNpcId']), 'to': npc(t['deliverNpcId']), 'type': typ}
+    q = {'id': i, 'giver': npc(t['acceptNpcId']), 'to': npc(t['deliverNpcId']), 'type': typ, 'race': '人类'}   # Guanlin, Trol Ormanı, Karanlık Gözcü Kulesi: insan bölgesi
     assert q['giver'] and q['to'], (i, t['acceptNpcId'], t['deliverNpcId'])
     mon = ev.get('targetName') if typ == 'kill' else src
     if typ in ('kill', 'collect'):
@@ -105,6 +105,8 @@ for f in sorted(glob.glob('kaynak/ceviri/gorevler/*.json')):
         q = {k: s0[k] for k in ('id', 'giver', 'to', 'type', 'target', 'node', 'count', 'sc', 'chance', 'req', 'rw') if k in s0}
         if str(i) in C.get('zincir', {}): q['req'] = C['zincir'][str(i)]   # elle verilen zincir bağı
         if str(i) in C.get('seviyeler', {}): q['lvMin'] = C['seviyeler'][str(i)]
+        rc = C.get('irklar', {}).get(str(i), C.get('irk'))   # ırk: bölgenin ırkı ya da göreve özel; yoksa iki ırka açık
+        if rc: q['race'] = rc
         if C.get('seviye') and q['type'] not in ('kill', 'collect', 'pickup'): q['lv0'] = C['seviye']   # şehirde verilen konuşma görevinin en düşük seviyesi
         if q['type'] in ('kill', 'collect', 'pickup'):
             nm = s0.get('sc'); r = next((x.get('lvr') for x in S.values() if x['name'] == nm and x.get('lvr')), None)

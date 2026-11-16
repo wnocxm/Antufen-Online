@@ -18,6 +18,9 @@ Kullanıcı ileride Unity'ye taşımayı düşünüyor; bunu kendi bilgisayarın
 - Beceri görselleri orijinal efekt tablosuyla birebir (bkz. `03-istemci.md` › Efektler).
 - **Çevrimdışı mod** sunucu kurulana kadar test için kalır; oyun çıkınca kaldırılacak (yalnızca hesapla giriş; bir ayar bayrağıyla).
 - Kapsam: önce **55. seviyeye kadar** kusursuz; 70-80-90 sonra.
+- **Görevler ırka göre ayrı** (orijinaldeki gibi): İnsan = Guanlin, Koşanat, Karakol, Başkent, Dağgören (+ Trol Ormanı, Karanlık Gözcü Kulesi);
+  Gece Elfi = Kâhin Tapınağı, Gözcü Kampı, Güneşgören, Yoğunsis, Sanatçılar Loncası; ortak = Altındalga Limanı, Büyü Akademisi.
+- **Orijinal gibi bol kasma**: ilk ~16 seviye görevlerle; sonra deneyimin çoğu canavar kesmekten (1-55 ≈ 7-9 bin öldürme, ~20-25 saat).
 - Müzik: APK'daki 12 kaydedilmiş parça kullanılıyor (Symbian MIDI'leri yanlış geldi).
 
 ## Durum (son güncelleme: görevler 1. tur)
@@ -30,7 +33,7 @@ Tamam:
 - Görevler (oyunda 801, SQL'de 832 satır): Acemi kampları, Guanlin, Koşanat Şehri, Kâhin Tapınağı, Gözcü Kampı, Güneşgören Şehri (+Dinlenme Bölgesi, lonca terasları), İstihbarat Karakolu, İmparatorluk Başkenti çevresi, Dağgören Şehri, Yoğunsis Kasabası, Sanatçılar Loncası, Altındalga Limanı, Büyü Akademisi. **55'e kadar bütün bölgelerin hikâye görevleri alındı.**
 
 Sırada (bölge sırası seviyeye göre):
-1. 55'e kadar baştan sona oynanış testi, denge, eşyalar (bölgelere göre). (Harita adları ve sahnelerdeki 1519 NPC/canavar/nesne adı çevrildi.)
+1. Denge 1. tur yapıldı (bkz. 03 › Denge). Kalan: insan yolunda 40-48 arası görev yok (yalnız kasma); eşyalar (bölgelere göre), elle oynanış testi. (Harita adları ve sahnelerdeki 1519 NPC/canavar/nesne adı çevrildi.)
 
 Ertelenenler / bilinenler:
 - 6 ileri beceri ağacı, ırk becerileri, 40. seviye sınıf yükselmesi, mücevher/tarif/unvan/evcil hayvan yok.

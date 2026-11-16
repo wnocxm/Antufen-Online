@@ -27,6 +27,8 @@
    ```json
    {"bolge": "…", "seviye": 33, "atla": [id…], "zincir": {"id": oncekiId}, "seviyeler": {"id": enDüşükSeviye},
     "adlar": {"Çince": ["Türkçe", "English"]},
+    "irk": "人类" | "精灵",        // bölgenin ırkı (görevler yalnız o ırka açık); yoksa ortak
+    "irklar": {"id": "精灵"},       // göreve özel ırk (ortak bölgedeki ırk zincirleri)
     "gorevler": {"id": {"tr": [başlık, metin, bekleme, bitiş, (eşya)], "en": [...]}}}
    ```
    `seviye`: o şehirde verilen hedefsiz konuşma görevlerinin en düşük seviyesi (aynı adlı NPC başka şehirde de durunca seviye yanlış çıkmasın).

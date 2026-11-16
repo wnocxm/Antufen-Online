@@ -2,6 +2,7 @@
  "bolge": "金波港",
  "not": "Altındalga Limanı + lağımı, Gece Elfi Mahallesi'nden Yoğunsis'e giden zincir (81883→81884→81885→81914→81915). Alınmadı: itibar/iyilik-kötülük değeri ve unvan görevleri (ozan çırağının kötü karakter kopyaları 80649/80651/80653/80655/80659, 80345, 80611-80622, 80656-80657), zindan (副本) görevleri, lonca panosu tabelaları, deniz mağarası, Akankum Limanı. Dağ Eteği Kampı 山麓营地 görevleri 60+.",
  "seviye": 40,
+ "irklar": {"81884": "精灵", "81885": "精灵", "81914": "精灵", "81810": "人类", "81811": "人类"},
  "zincir": {"81884": 81883, "81885": 81884, "81914": 81885, "82544": 82543, "82875": 82874},
  "adlar": {
   "☆下水道巨魔": ["☆Lağım Trolü", "☆Sewer Troll"],
