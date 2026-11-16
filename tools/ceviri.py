@@ -90,6 +90,11 @@ N={
 '☆剧毒撕裂者':('☆Zehirli Parçalayıcı','☆Venomous Ripper'),'污染者':('Kirletici','Defiler'),'☆鬼巨魔':('☆Hayalet Trol','☆Ghost Troll'),'奔马城城主':('Koşanat Şehri Beyi','Lord of Galloping Horse City'),
 '【工人】乔治':('【İşçi】George','【Worker】George'),'【美女炼金师】爱丽丝':('【Güzel Simyacı】Alice','【Beautiful Alchemist】Alice'),'【兽医】詹姆斯':('【Veteriner】James','【Vet】James'),'【蠢蛋将军】米斯特':('【Ahmak General】Mister','【Blockhead General】Mister'),
 }
+# görev çeviri dosyalarındaki adlar (kaynak/ceviri/gorevler/*.json -> "adlar")
+import glob as _glob
+for _f in sorted(_glob.glob('kaynak/ceviri/gorevler/*.json')):
+    if _f.endswith('_kaynak.json'): continue
+    for _k, _v in json.load(open(_f, encoding='utf-8')).get('adlar', {}).items(): N.setdefault(_k, tuple(_v))
 NUM={'一':1,'二':2,'三':3,'四':4,'五':5,'六':6,'七':7,'八':8,'九':9}
 def tr(n):
     if n in B: return B[n]

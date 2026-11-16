@@ -87,6 +87,32 @@ for i, v in Q.items():
     rw = t.get('rewards') or {}; q['rw'] = {'gold': rw.get('gold', 0), 'items': [[str(x['itemId']), x['count']] for x in rw.get('items', [])]}
     q['tr'] = [v[2], v[4], OK[0], v[6], v[8]] + ([v[10]] if len(v) > 10 else []); q['en'] = [v[3], v[5], OK[1], v[7], v[9]] + ([v[11]] if len(v) > 11 else [])
     out.append(q)
+# bölge çeviri dosyalarından otomatik aktarılan görevler (tools/gorev_aktar.py + kaynak/ceviri/gorevler/<ad>.json)
+import glob, os
+have = {q['id'] for q in out} | HAND
+for f in sorted(glob.glob('kaynak/ceviri/gorevler/*.json')):
+    if f.endswith('_kaynak.json'): continue
+    C = json.load(open(f, encoding='utf-8')); K = f[:-5] + '_kaynak.json'
+    if not os.path.exists(K): continue
+    skip = set(C.get('atla', [])); n0 = len(out)
+    for s0 in json.load(open(K, encoding='utf-8')):
+        i = s0['id']; c = C['gorevler'].get(str(i))
+        if i in have or i in skip or not c: continue
+        q = {k: s0[k] for k in ('id', 'giver', 'to', 'type', 'target', 'node', 'count', 'sc', 'chance', 'req', 'rw') if k in s0}
+        if str(i) in C.get('zincir', {}): q['req'] = C['zincir'][str(i)]   # elle verilen zincir bağı
+        if q['type'] in ('kill', 'collect', 'pickup'):
+            nm = s0.get('sc'); r = next((x.get('lvr') for x in S.values() if x['name'] == nm and x.get('lvr')), None)
+            q['lv'] = r[1] if r else 10
+        def arr(a):
+            a = list(a); item = a[4] if len(a) > 4 else ''
+            return [a[0], a[1], OK[0] if a is c['tr'] else OK[1], a[2], a[3]] + ([item] if item else [])
+        q['tr'] = arr(c['tr']); q['tr'][2] = OK[0]; q['en'] = arr(c['en']); q['en'][2] = OK[1]
+        out.append(q); have.add(i)
+    # zincir bağı: elenen ya da atlanan görevin yerine bir önceki geçerli görev
+    print(os.path.basename(f), 'görev', len(out) - n0)
+ids = {q['id'] for q in out} | HAND
+for q in out:
+    if q.get('req') and q['req'] not in ids: q.pop('req')
 # konuşma görevlerinin seviyesi: zincirdeki ya da aynı kişideki savaş görevinden
 byg = {}
 for q in out:
@@ -102,6 +128,8 @@ js = """// Görevler: tools/gorevler.py üretir; elle değiştirme. Yapı Androi
     q.title = s[0]; q.text = s[1]; q.ok = s[2]; q.wait = s[3]; q.done = s[4]; if (s[5]) q.item = s[5];
     q.goal = q.type === 'kill' ? (E ? `Kill ${q.count} ${mon} in ${sc}, then talk to ${to}.` : `${sc}: ${q.count} ${mon} öldür, sonra ${to} ile konuş.`)
       : q.type === 'collect' ? (E ? `Collect ${q.count} ${q.item} from ${mon} in ${sc}, then talk to ${to}.` : `${sc}: ${mon} canavarlarından ${q.count} ${q.item} topla, sonra ${to} ile konuş.`)
+      : q.type === 'pickup' ? (E ? `Gather ${q.count} ${q.item} in ${sc}, then talk to ${to}.` : `${sc}: ${q.count} ${q.item} topla, sonra ${to} ile konuş.`)
+      : q.item ? (E ? `Take the ${q.item} to ${to}.` : `${q.item} eşyasını ${to} kişisine götür.`)
       : (E ? `Talk to ${to}.` : `${to} ile konuş.`);
     delete q.tr; delete q.en; QUESTS.push(q);
   }

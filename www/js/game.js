@@ -525,7 +525,14 @@ function questOwnLv(q) {
   const pick = L => { let m = null; for (const sid of L) { const v = sceneQLv(sid); if (v != null && (m == null || v < m)) m = v; } return m; };
   const a = pick(T.filter(s => near.has(s))); return a != null ? a : pick(T);
 }
-let QNEXT = null;
+let QNEXT = null, HUBLV = null;
+// şehirde (seviye aralığı olmayan harita) duran kişinin görev seviyesi: aynı şehirde verilen savaş görevlerinin en düşüğü
+function hubLv(giver) {
+  sceneIndex();
+  if (!HUBLV) { HUBLV = {}; for (const x of QUESTS) { const o = questOwnLv(x); if (o == null) continue; for (const sid of NPC_SC[x.giver] || []) if (HUBLV[sid] == null || o < HUBLV[sid]) HUBLV[sid] = o; } }
+  let m = null; for (const sid of NPC_SC[giver] || []) if (HUBLV[sid] != null && (m == null || HUBLV[sid] < m)) m = HUBLV[sid];
+  return m != null ? m : 1;
+}
 function questMinLv(q) {
   if (q._lv != null) return q._lv;
   q._lv = 1;   // döngü koruması
@@ -537,7 +544,7 @@ function questMinLv(q) {
     const seen = new Set(); let front = [q];
     for (let d = 0; d < 6 && lv == null && front.length; d++) { const nx = []; for (const x of front) for (const y of QNEXT[x.id] || []) if (!seen.has(y.id)) { seen.add(y.id); const o = questOwnLv(y); if (o != null) lv = lv == null ? o : Math.min(lv, o); nx.push(y); } front = nx; }
   }
-  if (lv == null) { sceneIndex(); const z = zoneMin(NPC_SC[q.giver]); lv = z != null ? Math.max(1, z - 1) : 1; }
+  if (lv == null) { sceneIndex(); const z = zoneMin(NPC_SC[q.giver]); lv = z != null ? Math.max(1, z - 1) : hubLv(q.giver); }
   // önceki görev: tek kimlikse onun seviyesi; "herhangi biri" listesiyse (ırklara göre ayrı yollar) en düşüğü
   if (preLv != null) lv = Math.max(lv, preLv);
   return q._lv = lv;
