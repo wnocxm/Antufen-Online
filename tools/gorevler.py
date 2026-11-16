@@ -116,6 +116,7 @@ for f in sorted(glob.glob('kaynak/ceviri/gorevler/*.json')):
         if i in have or i in skip or not c: continue
         q = {k: s0[k] for k in ('id', 'giver', 'to', 'type', 'target', 'targets', 'node', 'count', 'sc', 'chance', 'req', 'rw') if k in s0}
         if str(i) in C.get('zincir', {}): q['req'] = C['zincir'][str(i)]   # elle verilen zincir bağı
+        if str(i) in C.get('sahneler', {}): q['sc'] = C['sahneler'][str(i)]   # hedefin asıl haritası (araç yanlış seçtiyse)
         if str(i) in C.get('seviyeler', {}): q['lvMin'] = C['seviyeler'][str(i)]
         rc = C.get('irklar', {}).get(str(i)) or taraf(q['giver'], C.get('irk'))   # ırk: göreve özel > veren NPC'nin haritasının tarafı > bölge dosyası
         if rc and rc != 'ortak': q['race'] = rc

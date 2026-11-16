@@ -364,6 +364,7 @@ function checkExits() {
   const cx = Math.round(p.x), cy = Math.round(p.y);
   for (const r of map.regionsOf(1)) {
     if (cx >= r[2] && cx <= r[4] && cy >= r[3] && cy <= r[5]) {
+      const fx = Dungeon.exitFix(Game.sceneId, r[0]); if (fx) { gotoScene(fx[0], null, [fx[1], fx[2]]); return; }   // yanlış bağlı geçit
       const ex = map.scene.exits.find(e => e[0] === r[0]); if (!ex) { if (Dungeon.door(r[0])) return; continue; }   // bağlanmamış geçit: zindan kapısı olabilir
       const target = ex[1].replace('(入口)', '');
       // hedef sahne numarası paketlemede çözülür (aynı adlı birden çok sahne olabilir)

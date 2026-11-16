@@ -18,11 +18,27 @@ const DUNGEONS = [
     copies: [{ door: ['120276', 7], scenes: ['120296', '120297', '120298', '120299', '120300', '120301'] }] },
   { id: 'sry', cn: '噬魂高地', lv: 40, lvr: [40, 42], daily: 3, board: '普通副本-噬魂高地(40级)', boss: '★噬魂男爵卡加斯', req: 82840, bossX: 1.3,
     copies: [{ door: ['120276', 9], scenes: ['120284', '120285', '120286', '120287', '120288', '120289'] }] },
+  // Kadim Ruhlar Sınav Kuleleri (上古之魂试练塔): merkez 灵魂悬台 (Dağgören'deki Dağ Cücesi Bilgin ışınlar); her kule 4 kat
+  { id: 'kkh', cn: '英雄塔', lv: 50, lvr: [50, 52], daily: 3, board: '普通副本-英雄塔(50级)', boss: '★上古英雄之魂',
+    copies: [{ door: ['120360', 3], scenes: ['120344', '120345', '120346', '120347'] }] },
+  { id: 'kks', cn: '巫师塔', lv: 50, lvr: [50, 52], daily: 3, board: '普通副本-巫师塔(50级)', boss: '★上古巫师之魂',
+    copies: [{ door: ['120360', 5], scenes: ['120348', '120349', '120350', '120351'] }] },
+  { id: 'kkb', cn: '术士塔', lv: 50, lvr: [50, 52], daily: 3, board: '普通副本-术士塔(50级)', boss: '★上古术士之魂',
+    copies: [{ door: ['120360', 7], scenes: ['120356', '120357', '120358', '120359'] }] },
+  { id: 'kkş', cn: '骑士塔', lv: 50, lvr: [50, 52], daily: 3, board: '普通副本-骑士塔(50级)', boss: '★上古骑士之魂',
+    copies: [{ door: ['120360', 9], scenes: ['120352', '120353', '120354', '120355'] }] },
+  // Akankum Limanı (流沙港): giriş 流沙港码头 (Altındalga'nın geçidi); normal kapı 5. Kahraman kopyası (kapı 7) Hilal Koyu'nda bu kopyayla birleşiyor: şimdilik aynı zindan sayılır
+  { id: 'akl', cn: '流沙港', lv: 50, lvr: [50, 53], daily: 3, board: '普通副本-流沙港(50级)', boss: '★大投机者图拉杨',
+    copies: [{ door: ['120315', 5], scenes: ['120302', '120303', '120304', '120305', '120306', '120307', '120308', '120309', '120310', '120311', '120312', '120313', '120314'] }] },
 ];
+// geçidi yanlış haritaya bağlı merkezler: Ruh Balkonu'nun çıkışı boş kuşatma haritasına (120204) gidiyor → gerçek Dağgören, Bilgin'in yanı
+const DUNGEON_EXIT = { '120360:1': ['120078', 14, 22] };
 // NPC ışınlanmaları (orijinal düğmeler: 军需官 "前往噬魂远征军前哨", 军官 "我要回金波港")
 const DUNGEON_TP = {
   '噬魂远征军军需官': { to: ['120276', 16, 21], lv: 40, label: ["Ruhyiyen Sefer Karakolu'na git", 'Go to the Soul Eater Expedition Outpost'] },
   '噬魂远征军军官': { to: ['120094', 35, 31], label: ["Altındalga Limanı'na dön", 'Return to Goldwave Harbor'] },
+  '瑟瑟发抖的勘察员': { to: ['120314'], label: ["Hilal Uzun Adası'na git", 'Go to Crescent Long Island'] },   // orijinal: 我要去新月长岛 (zindan içinde)
+  '矮人学者': { to: ['120360', 22, 30], lv: 50, label: ["Ruh Balkonu'na git", 'Go to the Soul Ledge'] },   // orijinal: 请送我到灵魂悬台
 };
 // pano metinleri (orijinal Çince metinlerin çevirisi)
 Object.assign(TR.greet, LANG === 'en' ? {
@@ -33,7 +49,13 @@ Object.assign(TR.greet, LANG === 'en' ? {
   '普通副本-薄暮山谷(40级)': "The Soul Eater Plains are a group of four dungeons. ★Entor, Eye of the Valley holds Dusk Valley. Reach level 40, complete the prerequisite quests and destroy him: he is one of the Baron's most trusted servants.",
   '普通副本-失落沼泽(40级)': "The Soul Eater Plains are a group of four dungeons. ★Semo, Throat of the Swamp holds the Lost Swamp. Reach level 40, complete the prerequisite quests and destroy him: he is one of the Baron's most trusted servants.",
   '噬魂远征军军需官': 'You must wonder why someone as out of place as me is in a splendid place like Goldwave. If you have the patience, let me tell you slowly.',
-  '噬魂远征军军官': 'This war has already cost too many lives. A clueless recruit like you would only throw his life away here.'
+  '噬魂远征军军官': 'This war has already cost too many lives. A clueless recruit like you would only throw his life away here.',
+  '普通副本-英雄塔(50级)': "The dwarves' love of digging caused all this! They disturbed the ancient spirits and brought an indelible curse upon Mountainwatch. Once you reach level 50, perhaps you'll have the power to lift it. The Hero, Wizard, Knight and Warlock Towers form the Ancient Spirits' Trial Towers dungeon group.",
+  '普通副本-巫师塔(50级)': "The dwarves' love of digging caused all this! They disturbed the ancient spirits and brought an indelible curse upon Mountainwatch. Once you reach level 50, perhaps you'll have the power to lift it. The Hero, Wizard, Knight and Warlock Towers form the Ancient Spirits' Trial Towers dungeon group.",
+  '普通副本-术士塔(50级)': "The dwarves' love of digging caused all this! They disturbed the ancient spirits and brought an indelible curse upon Mountainwatch. Once you reach level 50, perhaps you'll have the power to lift it. The Hero, Wizard, Knight and Warlock Towers form the Ancient Spirits' Trial Towers dungeon group.",
+  '普通副本-骑士塔(50级)': "The dwarves' love of digging caused all this! They disturbed the ancient spirits and brought an indelible curse upon Mountainwatch. Once you reach level 50, perhaps you'll have the power to lift it. The Hero, Wizard, Knight and Warlock Towers form the Ancient Spirits' Trial Towers dungeon group.",
+  '普通副本-流沙港(50级)': "The innocent are guilty if they hold a treasure! Quicksand Port, once famed for its beauty, drew the eye of the Crescent Speculators' Guild for the gold in its sands and was invaded; its peaceful people were enslaved. Heroes of level 50, answer the Quicksand Mayor's call for help, drive out the speculators and give the people back their land!",
+  '矮人学者': "Disaster doesn't come in a day; it grows quietly for a long time first… I must find its root and save my people."
 } : {
   '试炼森林(20级)': 'Tecrübeli maceracılar bu sık ormana "Sınav Ormanı" der; 20. seviyeye gelince yolculuklarının asıl başladığı yer burasıdır.',
   '普通副本-月夜林地(30级)': 'Her dolunay gecesi bu ormanın sessiz derinliklerinden yürek burkan bir kurt uluması yükselir… 30. seviyeye ulaşınca Sözleşme dünyasının bir başka zindanına, Mehtap Korusu\'na girebilirsin!',
@@ -42,7 +64,13 @@ Object.assign(TR.greet, LANG === 'en' ? {
   '普通副本-薄暮山谷(40级)': "Ruhyiyen Ovası dört zindandan oluşur. Alacakaranlık Vadisi'ni ★Vadinin Gözü Entor tutuyor. 40. seviyeye ulaşıp ön görevleri bitirince git ve onu yok et; Baron'un en güvendiği hizmetkârlarından biridir.",
   '普通副本-失落沼泽(40级)': "Ruhyiyen Ovası dört zindandan oluşur. Kayıp Bataklık'ı ★Bataklığın Gırtlağı Semo tutuyor. 40. seviyeye ulaşıp ön görevleri bitirince git ve onu yok et; Baron'un en güvendiği hizmetkârlarından biridir.",
   '噬魂远征军军需官': 'Altındalga gibi göz alıcı bir yerde benim gibi uyumsuz birinin ne aradığını merak ediyorsundur. Sabrın varsa yavaş yavaş anlatayım.',
-  '噬魂远征军军官': 'Bu savaş zaten çok can aldı. Senin gibi hiçbir şeyden haberi olmayan bir acemi burada ancak boş yere ölür.'
+  '噬魂远征军军官': 'Bu savaş zaten çok can aldı. Senin gibi hiçbir şeyden haberi olmayan bir acemi burada ancak boş yere ölür.',
+  '普通副本-英雄塔(50级)': "Dağ cücelerinin kazı merakı her şeye sebep oldu! Kadim ruhları rahatsız ettiler ve Dağgören'e silinmez bir lanet getirdiler. 50. seviyeye ulaşınca belki laneti kaldıracak güce sahip olursun. Kahraman, Sihirbaz, Şövalye ve Büyücü Kuleleri, Kadim Ruhlar Sınav Kuleleri zindan grubunu oluşturur.",
+  '普通副本-巫师塔(50级)': "Dağ cücelerinin kazı merakı her şeye sebep oldu! Kadim ruhları rahatsız ettiler ve Dağgören'e silinmez bir lanet getirdiler. 50. seviyeye ulaşınca belki laneti kaldıracak güce sahip olursun. Kahraman, Sihirbaz, Şövalye ve Büyücü Kuleleri, Kadim Ruhlar Sınav Kuleleri zindan grubunu oluşturur.",
+  '普通副本-术士塔(50级)': "Dağ cücelerinin kazı merakı her şeye sebep oldu! Kadim ruhları rahatsız ettiler ve Dağgören'e silinmez bir lanet getirdiler. 50. seviyeye ulaşınca belki laneti kaldıracak güce sahip olursun. Kahraman, Sihirbaz, Şövalye ve Büyücü Kuleleri, Kadim Ruhlar Sınav Kuleleri zindan grubunu oluşturur.",
+  '普通副本-骑士塔(50级)': "Dağ cücelerinin kazı merakı her şeye sebep oldu! Kadim ruhları rahatsız ettiler ve Dağgören'e silinmez bir lanet getirdiler. 50. seviyeye ulaşınca belki laneti kaldıracak güce sahip olursun. Kahraman, Sihirbaz, Şövalye ve Büyücü Kuleleri, Kadim Ruhlar Sınav Kuleleri zindan grubunu oluşturur.",
+  '普通副本-流沙港(50级)': "Masum olan suçlu sayılır, yeter ki elinde değerli bir şey olsun! Bir zamanlar güzelliğiyle ünlü Akankum Limanı, kumlarındaki yüksek altın yüzünden Hilal Vurguncular Loncası'nın gözüne girdi ve istila edildi; barışsever halkı köleleştirildi. 50. seviyedeki yiğitler, Akankum Muhtarı'nın yardım çağrısına kulak verin, vurguncuları kovun ve halka topraklarını geri verin!",
+  '矮人学者': "Felaket bir günde gelmez; önce sessizce uzun süre büyür… Kökenini mutlaka bulup halkımı kurtarmalıyım."
 });
 
 const Dungeon = (() => {
@@ -132,7 +160,8 @@ const Dungeon = (() => {
   // NPC'nin ışınlama seçenekleri (zindan merkezleri)
   function npcTp(cn) {
     const t = DUNGEON_TP[cn]; if (!t) return [];
-    return [{ label: T(...t.label), go() { if (t.lv && Game.P.lv < t.lv) return UI.toast(T(`${t.lv}. seviye gerekir.`, `Requires level ${t.lv}.`)); gotoScene(t.to[0], null, [t.to[1], t.to[2]]); } }];
+    return [{ label: T(...t.label), go() { if (t.lv && Game.P.lv < t.lv) return UI.toast(T(`${t.lv}. seviye gerekir.`, `Requires level ${t.lv}.`)); gotoScene(t.to[0], null, t.to[1] != null ? [t.to[1], t.to[2]] : null); } }];
   }
-  return { npcTp, init, door, exitTo, leave, onLoad, skip, key, tune, onKill, onRevive, of, list: DUNGEONS, usedToday };
+  const exitFix = (sid, region) => DUNGEON_EXIT[sid + ':' + region] || null;
+  return { exitFix, npcTp, init, door, exitTo, leave, onLoad, skip, key, tune, onKill, onRevive, of, list: DUNGEONS, usedToday };
 })();

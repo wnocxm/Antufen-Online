@@ -1299,5 +1299,29 @@
  "噬魂平原": [
   "Ruhyiyen Ovası",
   "Soul Eater Plains"
+ ],
+ "英雄塔": [
+  "Kahraman Kulesi",
+  "Hero Tower"
+ ],
+ "巫师塔": [
+  "Sihirbaz Kulesi",
+  "Wizard Tower"
+ ],
+ "术士塔": [
+  "Büyücü Kulesi",
+  "Warlock Tower"
+ ],
+ "骑士塔": [
+  "Şövalye Kulesi",
+  "Knight Tower"
+ ],
+ "流沙港": [
+  "Akankum Limanı",
+  "Quicksand Port"
+ ],
+ "财物箱": [
+  "Mal Sandığı",
+  "Chest of Valuables"
  ]
 }

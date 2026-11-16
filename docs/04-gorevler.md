@@ -29,6 +29,7 @@
     "adlar": {"Çince": ["Türkçe", "English"]},
     "irk": "人类" | "精灵",        // yedek ırk: veren NPC farklı taraflarda birden çok yerdeyse (asıl kural: NPC'nin haritasının tarafı, tools/taraf.py)
     "irklar": {"id": "精灵"},
+    "sahneler": {"id": "Çince sahne"}, // hedefin asıl haritası (araç yanlış seçtiyse)
     "lv": 40,                       // zindan görevleri: haritaların seviye aralığı yok; ödül ve en düşük seviye buradan       // göreve özel ırk (ortak bölgedeki ırk zincirleri)
     "gorevler": {"id": {"tr": [başlık, metin, bekleme, bitiş, (eşya)], "en": [...]}}}
    ```
@@ -62,6 +63,7 @@
 | `akademi.json` | Büyü Akademisi 魔法学院: Büyü Bahçesi, Peri Ormanı (sınıf yükseltme zincirleri alınmadı) | 49-52 | 10 |
 | `zindan30.json` | Mehtap Korusu zindanı (insan Cromwell, elf Gecekanat) | 30 | 2 |
 | `zindan40.json` | Ruhyiyen Ovası zindan grubu + merkezi (ortak) | 40 | 13 |
+| `zindan50.json` | Kuleler (Ruh Balkonu) + Akankum Limanı (ortak) | 50 | 13 |
 
 İnsan yolu: kamp → Guanlin (3-11) → korucu → Koşanat (17-34) → simyacı kolu → Kral'ın fermanı → Karakol (27-39) → Başkent (33-49).
 Elf yolu: kamp → Kâhin Tapınağı (6-20) → Gözcü Kampı (19-27) → Güneşgören (29-49).
