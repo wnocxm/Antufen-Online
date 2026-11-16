@@ -1,0 +1,42 @@
+{
+ "bolge": "魔法学院",
+ "not": "Büyü Akademisi 52-54: Büyü Bahçesi, Peri Ormanı. Alınmadı: sınıf yükseltme zincirleri (80226 Arma Büyücüsü, 80232 Alev Hocası), kütüphane/Kral zinciri parçaları 81256-81258, 60+ görevler.",
+ "seviye": 52,
+ "adlar": {
+  "☆书卷仙子": ["☆Kitap Perisi", "☆Tome Fairy"],
+  "☆凶暴野猪": ["☆Azgın Yaban Domuzu", "☆Savage Boar"],
+  "☆暗黑魔法师": ["☆Kara Büyücü", "☆Dark Magician"],
+  "☆生病的仙子": ["☆Hasta Peri", "☆Sick Fairy"],
+  "☆魔法仙子": ["☆Büyü Perisi", "☆Magic Fairy"],
+  "☆魔法灵能": ["☆Büyü Ruhu", "☆Magic Spirit"],
+  "克莉斯": ["Chris", "Chris"],
+  "大地导师": ["Toprak Hocası", "Earth Mentor"],
+  "流水导师": ["Akarsu Hocası", "Flowing Water Mentor"],
+  "疾风导师": ["Rüzgâr Hocası", "Gale Mentor"],
+  "附魔大师": ["Büyüleme Ustası", "Enchanting Master"],
+  "纹章法师": ["Arma Büyücüsü", "Heraldry Mage"],
+  "魔法少女玛利亚": ["Büyücü Kız Maria", "Magical Girl Maria"]
+ },
+ "gorevler": {
+  "81912": {"tr": ["Başka Bir Yol", "Belki de iş düşündüğün kadar kötü değildir. Demek istediğim, son zamanlarda dertlerim çok; birkaçını çözmeme yardım edersen belki belli bir saatte biraz ortadan kaybolurum. Düşünmek ister misin?", "Ne dersin?", "Güzel; o zaman işe koyulalım."],
+            "en": ["Another Way", "Maybe things aren't as bad as you think. I mean, I've had a lot of worries lately; if you help me solve a few, I might step away for a while at a certain hour. Want to think it over?", "What do you say?", "Good; then let's get to work."]},
+  "81913": {"tr": ["Büyü Gücü Topla", "Son zamanlarda büyü gücümün yavaş yavaş azaldığını hissediyorum; beni en çok üzen şey bu, ama çaresini buldum. O ☆Büyü Ruhlarını görmüşsündür; içlerindeki büyü özüne ihtiyacım var.", "Bu basit bir iş.", "Saçtıkları ışığa bir bak.", "Büyü Özü"],
+            "en": ["Gather Magic Power", "Lately I feel my magic power slowly waning; that worries me most, but I've found a way to fix it. You must have seen those ☆Magic Spirits; I need the magic essence inside them.", "This is a simple job.", "Look at the light they give off.", "Magic Essence"]},
+  "81911": {"tr": ["Kara Büyücüler", "Bir zamanlar buradan bir kara büyücü geçti, dağlara yürüdü, ardında kan izleri bıraktı. O günden beri buraya kara büyücünün izini süren bir sürü çırak doldu ve kutsal Büyü Akademisi'ni kirletti. Benim gücüm yetmiyor; keskin kılıcınla onları kovar mısın?", "Kara büyülerine dikkat et.", "Bu lanet herifler çoktan böyle yok olmalıydı."],
+            "en": ["Dark Magicians", "Once a dark magician passed through here, walked into the mountains, and left a trail of blood. Since then many apprentices seeking his tracks have come, polluting the sacred Magic Academy. I'm not strong enough; will you drive them out with your sharp blade?", "Beware their dark magic.", "These damned wretches should have vanished long ago."]},
+  "82138": {"tr": ["Huzura Kavuştur", "Periler aslında büyücülerin dostuydu; yumuşak huylu, iyi kalpliydiler, vahşi doğada kaybolan çaresiz yolculara hep yardım ederlerdi. Ama şimdi kara büyü bu perileri de etkiledi; acı içinde kıvranmalarına artık dayanamıyorum, onları yolcu etmeme yardım et.", "Bunların hepsi o kara büyücünün etkisi.", "Ruhları huzur bulsun."],
+            "en": ["Give Them Peace", "Fairies were once friends of mages; gentle and kind, they often helped helpless travelers lost in the wild. But now dark magic has affected these fairies too; I can't bear watching them writhe in pain; help me send them off.", "This is all the dark magician's doing.", "May their souls rest in peace."]},
+  "82139": {"tr": ["Borcunu Öde", "Kim demiş büyücülerin paraya ihtiyacı olmaz diye… Geçenlerde Başkent'e gidip bir güzel eğlendim, asa almak için borç aldığım bütün parayı harcadım. Bu parayı Toprak Hocası'na geri öder misin?", "Parayı götürdün mü?", "Ha, sonunda borcunu ödedi demek! Teşekkürler.", "Borç Parası"],
+            "en": ["Repay the Debt", "Who says mages don't need money… The other day I went to the Capital and lived it up, spending all the money I'd borrowed to buy a staff. Could you repay it to the Earth Mentor for me?", "Did you deliver the money?", "Ha, so he finally paid me back! Thanks.", "Borrowed Money"]},
+  "82808": {"tr": ["Bu Kadarı Yeter (1)", "Büyü Bahçesi aslında yürüyüş yapıp büyü alıştırması yaptığımız yerdi; o periler geldiğinden beri hep işimizi bozuyorlar, gittikçe de azıyorlar; üstelik son zamanlarda büyülerimizi gizlice öğrenmeye başladılar! Bu yasak! Canlarına susamışlar.", "Önce ☆Büyü Perilerinden başla!", "Şimdi akılları başlarına gelmiştir! Biz büyücüleri kolay lokma sanmasınlar."],
+            "en": ["Enough Is Enough (1)", "The Magic Garden was where we strolled and sparred with magic; ever since those fairies came, they've caused trouble, worse and worse, and lately they've even started secretly learning our magic! That's forbidden! They must be tired of living.", "Start with the ☆Magic Fairies!", "Now they know what's what! They shouldn't think mages are easy to push around."]},
+  "82809": {"tr": ["Bu Kadarı Yeter (2)", "Tamam! Bu periler artık büyülerimizi gizlice öğrenmiyor, şimdi de kitap çalmaya başladılar! Resmen ölümü arıyorlar! Büyü Akademisi onları kendi hallerine bırakırsa olacak iş değil!", "☆Kitap Perileri büyü kitaplarımızı çalmaya cüret ediyor!", "Şimdi akılları başlarına gelmiştir! Biz büyücüleri kolay lokma sanmasınlar."],
+            "en": ["Enough Is Enough (2)", "Right! These fairies no longer steal our magic, now they've started stealing books! They're asking for death! If the Magic Academy lets them run wild, who knows what's next!", "The ☆Tome Fairies dare steal our spellbooks!", "Now they know what's what! They shouldn't think mages are easy to push around."]},
+  "82810": {"tr": ["Ruh Kıvılcımı", "Silahları parlatabilecek bir malzemeye acilen ihtiyacım var; öyle olursa çok havalı olurum, bütün Büyü Akademisi zekâmı kıskanır! Ah! Ne güzel bir his! ☆Büyü Ruhlarının ışığı ne kadar da güzel!", "Ben Freyania'nın bir numaralı büyüleme ustasıyım.", "Bu ruh özünün silahlarda parlaması ne kadar havalı olur, düşünsene.", "Ruh Özü"],
+            "en": ["Spirit Spark", "I urgently need a material that makes weapons glow; then I'll be so cool, and the whole Magic Academy will envy my brilliance! Ah! What a wonderful feeling! The light of the ☆Magic Spirits is so beautiful!", "I'm the number-one enchanter of Freyania.", "Just imagine how cool this spirit essence glowing on weapons will be.", "Spirit Essence"]},
+  "82813": {"tr": ["Trafik Güvenliği", "Pantolonumda kocaman bir delik açıldı! Gördün mü, dikmem çok uzun sürecek! Hem pantolon dikerken büyü de kullanamıyorum. Hepsi o serserilerin suçu! Git, Peri Ormanı'ndaki şu ☆Azgın Yaban Domuzlarını öldür; yollarına bakmayıp pantolonumu deldiler!", "Trafik güvenliği ciddiye alınmalı!", "Pantolonumun da hıncı alındı artık!"],
+            "en": ["Traffic Safety", "My trousers have a huge hole in them! See, it'll take ages to sew up! And I can't use magic to sew trousers. It's all those rascals' fault! Go kill the ☆Savage Boars in the Fairy Forest; they didn't watch where they were going and tore my trousers!", "Traffic safety must be taken seriously!", "My trousers have been avenged!"]},
+  "82886": {"tr": ["Can Dostum!", "Selam yiğit, senden bir ricam var; buraya yakın Dağ Eteği Kampı'nda can dostum Chris var. Ona burada çok iyi olduğumu söyle; vaktim olunca onu görmeye gelirim.", "Ben tatlı değil miyim?", "Ah, sonunda Maria'dan haber geldi!"],
+            "en": ["Best Friends!", "Hi, hero, I have a favor to ask; my best friend Chris is in the Foothill Camp near here. Please tell her I'm doing very well, and I'll visit when I have time.", "Aren't I cute?", "Ah, finally news from Maria!"]}
+ }
+}

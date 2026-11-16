@@ -55,6 +55,8 @@
 | `daggoren.json` | Dağgören Şehri 望山城 (55 altı kısmı) | 37-54 | 30 |
 | `sisli.json` | Yoğunsis Kasabası 浓雾镇: Cinateşi Ormanı, kıyı, Feryat Patikası, Obur/Karakan Ormanı | 39-47 | 120 |
 | `sanatci.json` | Sanatçılar Loncası 艺术家工会前厅 (Resim/Heykel koridorları 90, elendi). Loş Kamp 幽暗营地: hepsi 60+, alınmadı | 49-51 | 22 |
+| `liman.json` | Altındalga Limanı 金波港 + lağım, Gece Elfi Mahallesi→Yoğunsis zinciri (81883→81884→81885→81914→81915). İtibar/unvan, zindan, tabela görevleri alınmadı. Dağ Eteği Kampı 60+ | 38-40 | 12 |
+| `akademi.json` | Büyü Akademisi 魔法学院: Büyü Bahçesi, Peri Ormanı (sınıf yükseltme zincirleri alınmadı) | 49-52 | 10 |
 
 İnsan yolu: kamp → Guanlin (3-11) → korucu → Koşanat (17-34) → simyacı kolu → Kral'ın fermanı → Karakol (27-39) → Başkent (33-49).
 Elf yolu: kamp → Kâhin Tapınağı (6-20) → Gözcü Kampı (19-27) → Güneşgören (29-49).
@@ -62,3 +64,8 @@ Elf yolu: kamp → Kâhin Tapınağı (6-20) → Gözcü Kampı (19-27) → Gün
 ### NPC'ye eşya kullanma görevleri
 `pickup` görevinin `node`'u bir NPC ise (ör. iksiri 护炉人加里 Gary'ye içir) `gorevler.py` ona `use: 1` koyar; hedef metni
 "X eşyasını Y üzerinde kullan" olur ve oyunda o NPC'ye dokununca görev hazır olur (`interact()` içinde).
+
+### Bilinçli olarak alınmayan görev türleri (sistemi yok)
+İtibar / iyilik-kötülük değeri / unvan ödüllü görevler (ozan çırağı), zindan (副本) görevleri, lonca panosu tabelaları,
+40. seviye sınıf yükseltme zincirleri (纹章法师, 烈焰导师 …), deniz mağarası. Bu sistemler gelince ayrı ele alınacak.
+`gecemah_kaynak.json`, `insanmah_kaynak.json`, `adalet_kaynak.json` yalnızca başka bölgelerin zincir halkaları için yapı sağlar.

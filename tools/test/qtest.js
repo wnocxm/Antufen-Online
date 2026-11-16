@@ -16,9 +16,9 @@ const { chromium } = require('playwright');
     return out; });
   console.log('STATİK', JSON.stringify(bad));
   // 2) zincir oyna: Koşanat 81654 -> 81655 -> 81656 (öldür, konuş, topla)
-  const r = await p.evaluate(() => { gmLevel(52); const P = __G.P, log = [];
+  const r = await p.evaluate(() => { gmLevel(54); const P = __G.P, log = [];
     const by = id => QUESTS.find(q => q.id === id);
-    for (const id of [82108, 82109, 82110, 82111, 82112, 82634, 82642, 82643, 82644, 82645]) {
+    for (const id of [81883, 81884, 81885, 81914, 81915, 80648, 80658, 81810, 81811, 82543, 82544, 81912, 81913, 81911, 82138, 82139, 82808, 82886]) {
       const q = by(id); const st0 = questState(q); if (st0 !== 'new' && st0 !== 'avail' && st0 !== 'ready' && st0 !== 'can') log.push(id + ' durum ' + st0);
       acceptQuest(q);
       if (q.type === 'kill') for (let i = 0; i < q.count; i++) questKill(q.target);
