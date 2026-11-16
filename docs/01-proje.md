@@ -36,7 +36,7 @@ Tamam:
 
 Sırada (kullanıcı onayladı):
 0. **Zindan sistemi** ✔ (tek kişi; grup girişi çevrimiçi grup sistemiyle sonra): 20 Sınav Ormanı, 30 Mehtap Korusu, 40 Ruhyiyen'in 4 zindanı, 50 dört Kule + Akankum Limanı; 28 zindan görevi. Kalan: kahraman (zor) modları, Tozçamur Madeni (60 bölgesiyle). Ajan Hans (代理人汉斯, 831xx) görevleri APK eklemesi, alınmaz.
-0b. **Ardından evcil hayvanlar (pet / 魔法兽)** — kullanıcı "unutmayalım" dedi.
+0b. **Evcil hayvanlar (魔法兽)**: 1. aşama ✔ (bkz. `docs/07-evcil.md`); sırada 2. aşama (yetenek, kişilik, ömür), 3. (dönüşüm, beceri aktarma), 4. (çevrimiçi çiftleştirme, pazar).
 1. Denge 1. tur yapıldı (bkz. 03 › Denge). Kalan: insan yolunda 40-48 arası görev yok (yalnız kasma; büyük olasılıkla orijinalde 40. seviye ortak zindanlarla doluyordu); eşyalar (bölgelere göre), elle oynanış testi. (Harita adları ve sahnelerdeki 1519 NPC/canavar/nesne adı çevrildi.)
 
 Ertelenenler / bilinenler:

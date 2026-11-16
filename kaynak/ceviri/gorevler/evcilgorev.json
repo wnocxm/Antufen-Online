@@ -1,0 +1,265 @@
+{
+ "bolge": "驯兽师 (Hayvan Terbiyecisi)",
+ "not": "Evcil hayvan görev zinciri (docs/07-evcil.md). 80268/80405/80410/80411 ve insan 80249/80221 yapıları elle (evcilelle_kaynak.json: Symbian kayıtları, APK'da yok).",
+ "seviye": 5,
+ "zincir": {
+  "80249": 80268,
+  "80221": 80249,
+  "80254": 80221,
+  "80405": 80254,
+  "80045": 80405,
+  "80250": 80254,
+  "80255": 80410,
+  "80222": 80255,
+  "80260": 80222,
+  "80411": 80260,
+  "80046": 80411,
+  "80256": 80260
+ },
+ "teslim": {
+  "80221": [
+   "30166"
+  ],
+  "80222": [
+   "30166"
+  ]
+ },
+ "ozel": {
+  "80254": "hatch",
+  "80260": "hatch"
+ },
+ "hedefler": {
+  "80254": [
+   "Çantadaki evcil hayvan yumurtasını kullanıp kuluçkaya yatır, sonra Hayvan Terbiyecisi ile konuş.",
+   "Use the pet egg in your bag to hatch it, then talk to the Beast Tamer."
+  ],
+  "80260": [
+   "Çantadaki evcil hayvan yumurtasını kullanıp kuluçkaya yatır, sonra Hayvan Terbiyecisi ile konuş.",
+   "Use the pet egg in your bag to hatch it, then talk to the Beast Tamer."
+  ]
+ },
+ "adlar": {
+  "遗失的魔法兽蛋": [
+   "Kayıp Evcil Hayvan Yumurtası",
+   "Lost Pet Egg"
+  ],
+  "☆巨魔摧毁者": [
+   "☆Trol Yıkıcı",
+   "☆Troll Destroyer"
+  ],
+  "☆老影狼": [
+   "☆Yaşlı Gölge Kurt",
+   "☆Old Shadow Wolf"
+  ]
+ },
+ "gorevler": {
+  "80268": {
+   "tr": [
+    "Ömür Boyu Başarı: Evcil Hayvan Edin",
+    "Evcil hayvan yumurtaları canavar öldürerek elde edilebilir; istersen benim \"Kayıp Yumurta\" görevimi yapıp bir yumurta kazanabilirsin. Sonra yumurtayı kuluçka kutusuyla çıkarırsın.",
+    "Anlaşıldı.",
+    "Anlaşıldı. Yumurtayı kuluçka kutusuyla çıkarırsın."
+   ],
+   "en": [
+    "Lifetime Achievement: Get a Pet",
+    "Pet eggs can be obtained by slaying monsters, or you can do my \"Lost Egg\" quest to earn one. Then you hatch the egg with an incubator.",
+    "Got it.",
+    "Got it. You hatch the egg with an incubator."
+   ]
+  },
+  "80410": {
+   "tr": [
+    "Ömür Boyu Başarı: Evcil Hayvan Edin",
+    "Evcil hayvan yumurtaları canavar öldürerek elde edilebilir; istersen benim \"Kayıp Yumurta\" görevimi yapıp bir yumurta kazanabilirsin. Sonra yumurtayı kuluçka kutusuyla çıkarırsın.",
+    "Anlaşıldı.",
+    "Anlaşıldı. Yumurtayı kuluçka kutusuyla çıkarırsın."
+   ],
+   "en": [
+    "Lifetime Achievement: Get a Pet",
+    "Pet eggs can be obtained by slaying monsters, or you can do my \"Lost Egg\" quest to earn one. Then you hatch the egg with an incubator.",
+    "Got it.",
+    "Got it. You hatch the egg with an incubator."
+   ]
+  },
+  "80405": {
+   "tr": [
+    "Ömür Boyu Başarı: Evcil Hayvan Besle",
+    "Evcil hayvanları beslemek onları daha mutlu ve daha güçlü yapar; yem istersen benden alabilirsin.",
+    "Anlaşıldı.",
+    "Beslenen hayvan mutlu hayvandır!"
+   ],
+   "en": [
+    "Lifetime Achievement: Feed a Pet",
+    "Feeding pets makes them happier and stronger; if you need pet food, you can buy it from me.",
+    "Got it.",
+    "A well-fed pet is a happy pet!"
+   ]
+  },
+  "80411": {
+   "tr": [
+    "Ömür Boyu Başarı: Evcil Hayvan Besle",
+    "Evcil hayvanları beslemek onları daha mutlu ve daha güçlü yapar; yem istersen benden alabilirsin.",
+    "Anlaşıldı.",
+    "Beslenen hayvan mutlu hayvandır!"
+   ],
+   "en": [
+    "Lifetime Achievement: Feed a Pet",
+    "Feeding pets makes them happier and stronger; if you need pet food, you can buy it from me.",
+    "Got it.",
+    "A well-fed pet is a happy pet!"
+   ]
+  },
+  "80249": {
+   "tr": [
+    "Kayıp Yumurta",
+    "Geçenlerde ormanda bir Bal Perisi bir evcil hayvan yumurtamı çaldı; o yumurtadan seninle birlikte savaşacak bir hayvan çıkar! Bak ne diyeceğim, artık senin de bir evcil hayvanın olma zamanı gelmiş; o yumurtayı bulup getirirsen sana veririm.",
+    "Evcil hayvanla birlikte savaşmak istemiyor musun?",
+    "Harika! Yumurtayı en iyi hâline getirip kuluçka malzemesiyle birlikte sana vereceğim. Ona iyi bak; acıkınca yiyeceğini benden alabilirsin.",
+    "Kayıp Evcil Hayvan Yumurtası"
+   ],
+   "en": [
+    "The Lost Egg",
+    "The other day a Honey Fairy stole one of my pet eggs in the forest; a pet that fights by your side hatches from it! Tell you what, it's time you had a pet of your own; find that egg and it's yours.",
+    "Don't you want a pet to fight alongside you?",
+    "Wonderful! I'll get the egg into perfect shape and give it to you with the hatching supplies. Take good care of it; when it's hungry, you can buy food from me.",
+    "Lost Pet Egg"
+   ]
+  },
+  "80255": {
+   "tr": [
+    "Kayıp Yumurta",
+    "Geçenlerde yabanda bir slime bir evcil hayvan yumurtamı çaldı; o yumurtadan seninle birlikte savaşacak bir hayvan çıkar! Bak ne diyeceğim, artık senin de bir evcil hayvanın olma zamanı gelmiş; o yumurtayı bulup getirirsen sana veririm.",
+    "Evcil hayvanla birlikte savaşmak istemiyor musun?",
+    "Harika! Yumurtayı en iyi hâline getirip kuluçka malzemesiyle birlikte sana vereceğim. Ona iyi bak; acıkınca yiyeceğini benden alabilirsin.",
+    "Kayıp Evcil Hayvan Yumurtası"
+   ],
+   "en": [
+    "The Lost Egg",
+    "The other day a slime in the wilds stole one of my pet eggs; a pet that fights by your side hatches from it! Tell you what, it's time you had a pet of your own; find that egg and it's yours.",
+    "Don't you want a pet to fight alongside you?",
+    "Wonderful! I'll get the egg into perfect shape and give it to you with the hatching supplies. Take good care of it; when it's hungry, you can buy food from me.",
+    "Lost Pet Egg"
+   ]
+  },
+  "80221": {
+   "tr": [
+    "Kuluçka Kutusu Al",
+    "Kendi evcil hayvanın olsun ister misin? O zaman benden bir Tahta Kuluçka Kutusu satın almalısın. Kutuyu bana getir, sana kuluçkanın sırrını anlatayım.",
+    "Bir Tahta Kuluçka Kutusu satın almalısın.",
+    "Tanışma hediyesi olarak sana iki Tahta Kuluçka Kutusu veriyorum; benimle yeniden konuş, yumurtayı nasıl çıkaracağını anlatayım.",
+    "Tahta Kuluçka Kutusu"
+   ],
+   "en": [
+    "Buy an Incubator",
+    "Do you want a pet of your own? Then you need to buy a Wooden Incubator from me. Bring it to me and I'll tell you the secret of hatching.",
+    "You need to buy a Wooden Incubator.",
+    "As a welcome gift I'll give you two Wooden Incubators; talk to me again and I'll tell you how to hatch your egg.",
+    "Wooden Incubator"
+   ]
+  },
+  "80222": {
+   "tr": [
+    "Kuluçka Kutusu Al",
+    "Kendi evcil hayvanın olsun ister misin? O zaman benden bir Tahta Kuluçka Kutusu satın almalısın. Kutuyu bana getir, sana kuluçkanın sırrını anlatayım.",
+    "Bir Tahta Kuluçka Kutusu satın almalısın.",
+    "Tanışma hediyesi olarak sana iki Tahta Kuluçka Kutusu veriyorum; benimle yeniden konuş, yumurtayı nasıl çıkaracağını anlatayım.",
+    "Tahta Kuluçka Kutusu"
+   ],
+   "en": [
+    "Buy an Incubator",
+    "Do you want a pet of your own? Then you need to buy a Wooden Incubator from me. Bring it to me and I'll tell you the secret of hatching.",
+    "You need to buy a Wooden Incubator.",
+    "As a welcome gift I'll give you two Wooden Incubators; talk to me again and I'll tell you how to hatch your egg.",
+    "Wooden Incubator"
+   ]
+  },
+  "80254": {
+   "tr": [
+    "Yumurtayı Çıkar",
+    "Haydi, yumurtanı kuluçkaya yatır! Hazır mısın? Sıradan yumurtalara Tahta, iyi yumurtalara Metal, seçkin yumurtalara Büyülü Kuluçka Kutusu gerekir.",
+    "Haydi, hayvanını yumurtadan çıkar.",
+    "Kutuda yeni bir hayat filizleniyor; çok geçmeden doğacak, ne heyecanlı an!"
+   ],
+   "en": [
+    "Hatch Your Egg",
+    "Go on, start hatching your egg! Ready? Common eggs need a Wooden Incubator, fine eggs a Metal one, superior eggs a Magic one.",
+    "Go on, hatch your pet.",
+    "New life is stirring in the incubator; it'll be born before long, what an exciting moment!"
+   ]
+  },
+  "80260": {
+   "tr": [
+    "Yumurtayı Çıkar",
+    "Haydi, yumurtanı kuluçkaya yatır! Hazır mısın? Sıradan yumurtalara Tahta, iyi yumurtalara Metal, seçkin yumurtalara Büyülü Kuluçka Kutusu gerekir.",
+    "Haydi, hayvanını yumurtadan çıkar.",
+    "Kutuda yeni bir hayat filizleniyor; çok geçmeden doğacak, ne heyecanlı an!"
+   ],
+   "en": [
+    "Hatch Your Egg",
+    "Go on, start hatching your egg! Ready? Common eggs need a Wooden Incubator, fine eggs a Metal one, superior eggs a Magic one.",
+    "Go on, hatch your pet.",
+    "New life is stirring in the incubator; it'll be born before long, what an exciting moment!"
+   ]
+  },
+  "80045": {
+   "tr": [
+    "Evcil Hayvan Taktikleri",
+    "Evcil hayvanların birçok taktik modu vardır; sahibinin ayarına göre davranırlar: Saldırı (sahibinin hedefine saldırır), Karşı Saldırı (sahibine saldırana saldırır), Destek (yalnız destek becerisi), Serbest Saldırı (görüşteki düşmana saldırır), Bekleme (izler, hiçbir şey yapmaz).",
+    "Ne öğrenmek istersen sor!",
+    "Evcil hayvan penceresini aç, \"Taktik\" yuvasına dokun ve istediğin modu seç."
+   ],
+   "en": [
+    "Pet Tactics",
+    "Pets have several tactical modes and act according to their owner's setting: Attack (its owner's target), Counter (whoever attacks its owner), Support (support skills only), Free Attack (any enemy in sight), Standby (follows, does nothing).",
+    "Ask me anything!",
+    "Open the pet window, tap the \"Tactics\" slot and pick the mode you want."
+   ]
+  },
+  "80046": {
+   "tr": [
+    "Evcil Hayvan Taktikleri",
+    "Evcil hayvanların birçok taktik modu vardır; sahibinin ayarına göre davranırlar: Saldırı (sahibinin hedefine saldırır), Karşı Saldırı (sahibine saldırana saldırır), Destek (yalnız destek becerisi), Serbest Saldırı (görüşteki düşmana saldırır), Bekleme (izler, hiçbir şey yapmaz).",
+    "Ne öğrenmek istersen sor!",
+    "Evcil hayvan penceresini aç, \"Taktik\" yuvasına dokun ve istediğin modu seç."
+   ],
+   "en": [
+    "Pet Tactics",
+    "Pets have several tactical modes and act according to their owner's setting: Attack (its owner's target), Counter (whoever attacks its owner), Support (support skills only), Free Attack (any enemy in sight), Standby (follows, does nothing).",
+    "Ask me anything!",
+    "Open the pet window, tap the \"Tactics\" slot and pick the mode you want."
+   ]
+  },
+  "80250": {
+   "tr": [
+    "Besleyici Yiyecek",
+    "Şu hayvanın hâline bak! Ne kadar cılız, ne kadar çelimsiz! Haydi, bana 5 trol kanı getir; ona gerçekten besleyici bir şey yapacağım! Yalnız Trol Ormanı'ndaki en güçlü ☆Trol Yıkıcıların kanı işe yarar.",
+    "Senin evcil hayvanın olmak ne acı.",
+    "He he… güç dolu trol kanı geldi! İşte sana bir güç meyvesi!",
+    "Trol Kanı"
+   ],
+   "en": [
+    "Nutritious Food",
+    "Look at your pet! How scrawny, how frail! Go get me 5 troll bloods; I'll make it something truly nutritious! Only the blood of the mightiest ☆Troll Destroyers in the Troll Forest will do.",
+    "How sad to be your pet.",
+    "Heh… troll blood brimming with power! Here's a strength fruit!",
+    "Troll Blood"
+   ]
+  },
+  "80256": {
+   "tr": [
+    "Besleyici Yiyecek",
+    "Şu hayvanın hâline bak! Ne kadar cılız, ne kadar çelimsiz! Haydi, bana 5 gölge kurt kanı getir; ona gerçekten besleyici bir şey yapacağım! Kâbus Ovası Batı'daki ☆Yaşlı Gölge Kurtların kanı gerekir.",
+    "Senin evcil hayvanın olmak ne acı.",
+    "He he… güç dolu gölge kurt kanı geldi! İşte sana bir güç meyvesi!",
+    "Gölge Kurt Kanı"
+   ],
+   "en": [
+    "Nutritious Food",
+    "Look at your pet! How scrawny, how frail! Go get me 5 shadow wolf bloods; I'll make it something truly nutritious! It must be from the ☆Old Shadow Wolves of Nightmare Plain West.",
+    "How sad to be your pet.",
+    "Heh… shadow wolf blood brimming with power! Here's a strength fruit!",
+    "Shadow Wolf Blood"
+   ]
+  }
+ }
+}

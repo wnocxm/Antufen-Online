@@ -14,6 +14,7 @@ Bir konuya girmeden önce ilgili belgeyi oku; bir sistemi değiştirince belgesi
 | `docs/03-istemci.md` | Oyun istemcisi: dosyalar, motor, savaş, beceri/efekt, eşya, arayüz, GM, ses, dil, kayıt |
 | `docs/04-gorevler.md` | Görev sistemi ve bölge bölge görev ekleme yöntemi (adım adım) |
 | `docs/05-sunucu.md` | Node + PostgreSQL sunucusu, tablolar, API, çevrimiçi oyun |
+| `docs/07-evcil.md` | Evcil hayvanlar: kaynaklar, aşamalar, nasıl çalışıyor |
 | `docs/06-test.md` | Yerel çalıştırma, Playwright test betikleri (`tools/test/`), sık hatalar |
 
 ## Her işte uyulacak kurallar

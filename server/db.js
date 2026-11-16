@@ -88,6 +88,8 @@ async function saveCharacter(accountId, id, P) {
 
 async function writeState(c, id, P) {
   const extra = {}; for (const k in P) if (!CORE.includes(k)) extra[k] = P[k];
+  // çok hedefli görevlerin hedef başına sayaçları (character_quests yalnız toplamı tutar)
+  const qc = {}; for (const [q, st] of Object.entries(P.quests || {})) if (st && st.c) qc[q] = st.c; if (Object.keys(qc).length) extra.qc = qc; else delete extra.qc;
   await c.query(`UPDATE characters SET lv=$2, xp=$3, gold=$4, hp=$5, mp=$6, skill_points=$7, scene=$8, x=$9, y=$10, home=$11, flags=$12, extra=$13,
     face=$14, updated_at=now(), last_seen=now() WHERE id=$1`,
     [id, Math.max(1, Math.min(200, num(P.lv, 1))), Math.max(0, num(P.xp)), Math.max(0, num(P.gold)), Math.max(0, Math.min(2e9, Math.round(num(P.hp)))),
@@ -123,6 +125,7 @@ async function loadCharacter(accountId, id) {
     quests: {}, done: {}, sk: Object.fromEntries(sk.map(s => [s.skill_id, s.rank])), quick: [null, null, null, null, null, null, null, null],
   });
   for (const q of qs) { if (q.state === 'done') P.done[q.quest_id] = true; else P.quests[q.quest_id] = { n: q.progress, ready: q.state === 'ready' }; }
+  for (const [q, c] of Object.entries(P.qc || {})) if (P.quests[q]) P.quests[q].c = c; delete P.qc;
   for (const q of qb) P.quick[q.slot] = q.value;
   return P;
 }

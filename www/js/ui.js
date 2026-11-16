@@ -105,6 +105,7 @@ const UI = (() => {
           ctx.fillStyle = '#000'; ctx.fillRect(X - 16, Y - 54, 32, 3); ctx.fillStyle = '#d02010'; ctx.fillRect(X - 16, Y - 54, 32 * Math.max(0, e.hp / e.maxHp), 3);
         }
       } else if (e.kind === 'player') { text(Game.P.name, X, Y - 64, '#ffe48a'); if (e.sayT > 0) bubble(e.say, X, Y - 76, e.sayT); }
+      else if (e.kind === 'pet') { const st = Pet.stats(e.p); text(`${e.name} ${tx('Sv')}${e.p.lv}`, X, Y - 52, '#8fe3ff'); ctx.fillStyle = '#000'; ctx.fillRect(X - 14, Y - 48, 28, 3); ctx.fillStyle = '#30c040'; ctx.fillRect(X - 14, Y - 48, 28 * Math.max(0, e.p.hp / st.hp), 3); if (e.sayT > 0) bubble(e.say, X, Y - 62, e.sayT); }
     }
     // diğer oyuncular: ad ve konuşma balonu
     if (Net.on) for (const o of Net.others.values()) {
@@ -356,7 +357,7 @@ const UI = (() => {
       title = 'Ayarlar';
       h = `<div class="iact"><button class="obtn" data-act="tsfx">Ses efektleri: ${SFX.opt.sfx ? 'Açık' : 'Kapalı'}</button><button class="obtn" data-act="tmus">Müzik: ${SFX.opt.music ? 'Açık' : 'Kapalı'}</button></div>
         <div class="iact"><button class="obtn" data-act="lang">${LANG === 'tr' ? 'Language: English' : 'Dil: Türkçe'}</button></div>
-        <div class="iact"><button class="obtn" data-act="totitle">Giriş ekranına dön</button><button class="obtn" data-act="newchar">Yeni karakter oluştur</button></div><p class="hint">Oyun otomatik kaydedilir. Sürüm 11161210</p>`;
+        <div class="iact"><button class="obtn" data-act="totitle">Giriş ekranına dön</button><button class="obtn" data-act="newchar">Yeni karakter oluştur</button></div><p class="hint">Oyun otomatik kaydedilir. Sürüm 11161453</p>`;
     }
     ptitle.textContent = tx(title); pbody.innerHTML = h; txDom(pbody);
   }
@@ -604,7 +605,7 @@ const UI = (() => {
     
   }
   async function boot() {
-    txDom(document.body); await Assets.init('assets/'); await loadItems(); await Forms.init('assets/');
+    txDom(document.body); await Assets.init('assets/'); await loadItems(); await Pet.init(); await Forms.init('assets/');
     Input.bind(cv);
     for (const k of ['AnbufenUI_Resource_7005', 'AnbufenUI_Resource_7078', 'icon_res_item_1038', 'AnbufenUI_Resource_7003', 'AnbufenUI_Resource_7002', 'AnbufenUI_Resource_7009', 'UIData_2067']) uiImg(k);
     $('#loading').classList.add('hidden');

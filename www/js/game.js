@@ -349,6 +349,7 @@ async function loadScene(sid, arrive) {
   if (map.blocked(px, py)) { const r = map.regionsOf(0)[0] || [0, 0, Math.floor(map.w / 2), Math.floor(map.h / 2)]; px = r[2]; py = r[3]; }
   if (map.blocked(px, py)) { outer: for (let r = 1; r < 30; r++) for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) if (!map.blocked(px + dx, py + dy)) { px += dx; py += dy; break outer; } }
   Game.player = new Player(px, py); Game.ents.push(Game.player);
+  Pet.spawn();   // çağrılmış evcil hayvan sahibinin yanında
   Net.scene(sid, px, py);   // çevrimiçiyse sunucuya bu haritada olduğumuzu bildir
   if (Game.route) setTimeout(routeStep, 400);   // otomatik yol sürüyorsa sonraki geçide yürü
   Game.cam.x = Game.player.X; Game.cam.y = Game.player.Y;
@@ -404,7 +405,7 @@ function dmgCalc(atk, def, mult, critB = 0, add = 0) { const base = (atk * mult 
 function hitMob(m, mult, o = {}) {
   if (!m || m.dead) return;
   const s = stats(); const r = dmgCalc(s.atk, m.def * (m.weakT > 0 ? 0.4 : 1), mult * (m.weakT > 0 ? 1.15 : 1), s.crit + (o.crit || 0), o.add || 0);
-  m.hp -= r.d; m.aggro = true; m.state = 'hurt'; m.animT = 0; m.stateT = 0.3;
+  m.hp -= r.d; m.aggro = true; m.state = 'hurt'; m.animT = 0; m.stateT = 0.3; if (!(m.tauntT > 0)) m.foe = Game.player;
   if (o.slow) m.slowT = o.slow;
   UI.float(m, (r.crit ? '!' : '') + r.d, r.crit ? '#ffd040' : '#fff', r.crit ? 1.3 : 1);
   if (m.hp <= 0) killMob(m);
@@ -421,7 +422,7 @@ function killMob(m) {
   if (m.d.rank && Math.random() < 0.6) { const g = randomGear(Math.max(1, m.d.lv + 2)); if (g) { addItem(g, 1, true); UI.log(`Ganimet: ${ITEMS[g].name}!`, 'q'); UI.toast(`Ganimet: ${ITEMS[g].name}`); } }
   else if (!m.d.passive && Math.random() < 0.025) { const g = randomGear(Math.max(1, m.d.lv)); if (g) { addItem(g, 1, true); UI.log(`Ganimet: ${ITEMS[g].name}`, 'loot'); } }
   questKill(m.name);
-  Dungeon.onKill(m);
+  Dungeon.onKill(m); Pet.onKill(m, xp); Pet.dropEgg(m);
   if (m.deathFx) Game.fx.push(new Fx(m.deathFx, m.x, m.y));
 }
 function hurtPlayer(m) {
@@ -497,6 +498,7 @@ function countItem(id) { const e = Game.P.bag.find(b => b.id === id); return e ?
 function removeItem(id, n = 1) { const P = Game.P, e = P.bag.find(b => b.id === id); if (!e || e.n < n) return false; e.n -= n; if (e.n <= 0) P.bag.splice(P.bag.indexOf(e), 1); UI.refresh(); return true; }
 function useItem(id) {
   const it = ITEMS[id], p = Game.player, s = stats(); if (!it || !countItem(id) || p.dead) return;
+  if (it.pet) return Pet.useItem(id);   // evcil hayvan eşyaları (pet.js)
   if (it.slot) return equip(id);
   if (it.use) {
     if (it.use.hp) { if (p.hp >= s.hp) return UI.log('Canın dolu.'); p.hp = Math.min(s.hp, p.hp + it.use.hp); UI.float(p, '+' + it.use.hp, '#7bff8a'); }
@@ -752,6 +754,7 @@ function update(dt) {
     if (p.state === 'move') p.t += went * 8 / STRIDE; else p.t += dt * TICK;
     checkExits();
   }
+  Pet.update(dt);   // evcil hayvan
   // canavarlar
   for (const e of Game.ents) {
     if (e.kind === 'npc') { e.t += dt * TICK * 0.8; if (e.hidden && (e.respawnT -= dt) <= 0) e.hidden = false; continue; }
@@ -765,9 +768,12 @@ function update(dt) {
     if (!e.aggro && !e.d.passive && !p.dead && dp < 3.5 && e.d.lv >= P.lv - 5) e.aggro = true;
     if (e.aggro && (dh > 12 || p.dead)) { e.aggro = false; e.hp = e.maxHp; }
     if (e.state === 'hurt' || e.state === 'attack') continue;
+    if (e.tauntT > 0) e.tauntT -= dt;
+    // hedef: son vuran (evcil hayvan da olabilir); hayvan yoksa oyuncu
+    const fo = e.foe && e.foe.kind === 'pet' && e.foe === Pet.ent ? e.foe : p, df = Math.hypot(fo.x - e.x, fo.y - e.y);
     if (e.aggro && !p.dead) {
-      if (dp > 1.3) { stepTo(e, p.x, p.y, sp, dt, true); e.state = 'move'; }
-      else { e.dir = dirOf(p.x - e.x, p.y - e.y); if (e.atkT <= 0) { e.atkT = 1.6; e.state = 'attack'; e.animT = 0; e.stateT = 0.5; later(0.3, () => { if (!e.dead && Math.hypot(p.x - e.x, p.y - e.y) < 1.9) hurtPlayer(e); }); } else e.state = 'idle'; }
+      if (df > 1.3) { stepTo(e, fo.x, fo.y, sp, dt, true); e.state = 'move'; }
+      else { e.dir = dirOf(fo.x - e.x, fo.y - e.y); if (e.atkT <= 0) { e.atkT = 1.6; e.state = 'attack'; e.animT = 0; e.stateT = 0.5; later(0.3, () => { if (e.dead || Math.hypot(fo.x - e.x, fo.y - e.y) >= 1.9) return; if (fo === p) hurtPlayer(e); else if (fo === Pet.ent) Pet.hurt(e); }); } else e.state = 'idle'; }
     } else {
       e.wanderT -= dt;
       if (e.wanderT <= 0) { e.wanderT = rnd(2, 6); e.wx = e.home.x + rnd(-3, 3); e.wy = e.home.y + rnd(-3, 3); if (Game.map.blocked(e.wx, e.wy)) e.wx = null; }

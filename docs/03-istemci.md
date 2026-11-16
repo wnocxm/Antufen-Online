@@ -77,3 +77,6 @@ Otomatik yol: `routeTo(sid)` sahneler arası (`scenePath`), `routeToNpc(cn)`, `w
 - Veri düzeltmesi `fixMonData`: ☆☆【小胖】拉斯 kaydında görünüm/ölüm efekti alanları ters.
 - `arrivalNear(regs, geçit)`: geçidin varış bölgesi geçit+1 değilse en yakın tür 0 bölge (önceden oyuncu çıkış bölgesinin üstüne doğuyordu).
 - Test: `tools/test/zindan.js` (giriş/çıkış/sandık/sınır/ölüm), `BOSS='sahne:ad:sv;…' node tools/test/savas.js` (boss dövüşü, iksirli). Sonuç: Lars (Sv 20) ve ★Mehtap Kurt Kralı (Sv 30) üç sınıfla da yeniliyor, %43-59 can, 0-4 iksir.
+
+## Evcil hayvanlar
+Ayrıntı: `docs/07-evcil.md` (`www/js/pet.js`, `Pet` modülü).

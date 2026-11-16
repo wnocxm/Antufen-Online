@@ -62,7 +62,7 @@ const Win = (() => {
     const modern = cur !== 'menu';   // yeni arayüz: oyun ekranı karartılmaz
     if (!modern) { ctx.fillStyle = 'rgba(0,0,0,.5)'; ctx.fillRect(0, 0, vw, VH); }
     if (cur === 'bag') drawBag2(ctx, vw, VH); else if (cur === 'role') drawRole2(ctx, vw, VH); else if (cur === 'npc') drawNpc2(ctx, vw, VH); else if (cur === 'task') drawTask2(ctx, vw, VH); else if (cur === 'menu') drawMenu(ctx, vw, VH); else if (cur === 'skill') drawSkill2(ctx, vw, VH); else if (cur === 'shop') drawShop2(ctx, vw, VH); else if (cur === 'dead') drawDead2(ctx, vw, VH);
-    if (cur === 'sys') { drawHub2(ctx, vw, VH); drawSys2(ctx, vw, VH); } else if (cur === 'map') { drawMap(ctx, vw, VH); drawHub2(ctx, vw, VH); }
+    if (cur === 'sys') { drawHub2(ctx, vw, VH); drawSys2(ctx, vw, VH); } else if (cur === 'pet') { drawHub2(ctx, vw, VH); drawPet2(ctx, vw, VH); } else if (cur === 'map') { drawMap(ctx, vw, VH); drawHub2(ctx, vw, VH); }
     if (cur === 'hub') drawHub2(ctx, vw, VH);
     if (modal) drawModal2(ctx, vw, VH);
     if (pressed && performance.now() - pressT > 160) pressed = null;
@@ -120,7 +120,7 @@ const Win = (() => {
   }
   // ---------------- Ana menü (NEW_FORM_V5_MENU): sol sütunda kırmızı düğmeler ----------------
   const HUBB = [50223, 50224, 50225, 50226, 50227, 50228, 50229];
-  function hubItems() { const L = [['role', 'Karakter'], ['skill', 'Beceri'], ['bag', 'Çanta'], ['task', 'Görev'], ['map', 'Harita']]; if (isGM()) L.push(['gm', 'GM']); L.push(['sys', 'Sistem']); return L; }
+  function hubItems() { return [['role', 'Karakter'], ['skill', 'Beceri'], ['bag', 'Çanta'], ['pet', 'Evcil'], ['task', 'Görev'], ['map', 'Harita'], ['sys', 'Sistem']]; }
   function drawHub2(ctx, vw, VH) {
     nBegin(ctx, VH); const f = 'n_v5_menu', L = hubItems();
     nDraw(ctx, f, 50222, 0); nHit('frame', 0, 0, 126, 320);
@@ -135,7 +135,7 @@ const Win = (() => {
     const P = Game.P;
     if (B.cat === 3) { const qi = []; for (const q of QUESTS) { const st = P.quests[q.id]; if (st && q.item && st.n) qi.push({ quest: q.item, n: st.n }); } return qi; }
     if (B.cat === 4) return [];
-    return P.bag.filter(b => { const it = ITEMS[b.id]; if (!it) return false; return (it.slot ? 0 : (it.use || it.growth) ? 1 : 2) === B.cat; });
+    return P.bag.filter(b => { const it = ITEMS[b.id]; if (!it) return false; return (it.slot ? 0 : (it.use || it.growth || it.pet) ? 1 : 2) === B.cat; });
   }
   function itemLines(it) {
     const P = Game.P, L = [[it.name, '#7a1c08', 12]];
@@ -393,6 +393,7 @@ const Win = (() => {
     nText(ctx, Net.on ? 'Sunucuya otomatik kaydedilir.' : 'Oyun otomatik kaydedilir.', 113, 52, '#2a1a0a', 11, 'center', 200); nText(ctx, tx('Sürüm ' + VER), 113, 70, '#5a4020', 10, 'center');
     const rows = [['sfx', `${tx('Ses efektleri')}: ${SFX.opt.sfx ? on : off}`], ['mus', `${tx('Müzik')}: ${SFX.opt.music ? on : off}`], ['lang', `Dil / Language: ${LANG === 'tr' ? 'Türkçe' : 'English'}`], ['title', 'Giriş ekranına dön'], ['newc', Net.on ? 'Karakter değiştir' : 'Yeni karakter oluştur']];
     rows.forEach(([key, label], i) => nRow(ctx, f, DS[i], pressed === 's:' + key, label, 's:' + key));
+    if (isGM()) { nText(ctx, '⚙ GM', 113, 352, pressed === 's:gm' ? '#ffffff' : '#7a1c08', 13, 'center'); nHit('s:gm', 70, 338, 86, 28); }   // GM paneli (menüde yer kalmadı)
     nEnd(ctx);
   }
   // ---------------- Onay ve sayı kutuları (NEW_FORM_DIALOG_YESNO, NEW_FORM_SELNUM) ----------------
@@ -415,6 +416,66 @@ const Win = (() => {
     nEnd(ctx); modal.hits = mh;
   }
 
+  // ---------------- Evcil hayvan (NEW_FORM petcomplex + taktik newpetai) ----------------
+  const PW = { i: 0, ai: false };
+  const PCLS = { 1: ['Destek', 'Support'], 2: ['Fiziksel', 'Physical'], 3: ['Savunma', 'Defense'], 4: ['Büyü', 'Magic'] };
+  const T2 = (a, b) => LANG === 'en' ? b : a;
+  function drawPet2(ctx, vw, VH) {
+    const k = VH / 290, f = 'n_petcomplex', L = Pet.list(); if (PW.i >= L.length) PW.i = 0; const p = L[PW.i];
+    nBegin(ctx, VH, { k, x: (UI.safeL || 0) + 126 * VH / 320, y: Math.round((VH - 259 * k) / 2) });
+    nDraw(ctx, f, 50123, 0); nHit('frame', 0, 9, 227, 250);
+    { const r = nDraw(ctx, f, 50124, pressed === 'p:x'); nHit('p:x', r[0], r[1], r[2], r[3]); }
+    const box = nC(f, 50125).s[0].r; nDraw(ctx, f, 50125, 0);
+    if (!p) {
+      nText(ctx, T2('Evcil hayvanın yok', 'No pets yet'), 146, 43, '#3a1c08', 12, 'center', 120);
+      wrap(ctx, T2('Şehirlerdeki Hayvan Terbiyecisi\'nden bilgi al. Yumurtayı kuluçka kutusuyla çıkar; yumurtalar canavarlardan da düşer.', 'Ask a Beast Tamer in town. Hatch an egg with an incubator; eggs also drop from monsters.'), 196, 11).slice(0, 8).forEach((l, i) => nText(ctx, l, 14, 140 + i * 14, '#2a1a0a', 10.5, 'left', 198));
+      nEnd(ctx); return;
+    }
+    const st = Pet.stats(p), S = Pet.sp(p), on = Game.P.petOn === p.uid;
+    // portre: hayvanın kendisi
+    { const sp = Game.map.sprite(Pet.look(p)); if (!sp.ok && !PW.loading) { PW.loading = true; Assets.preload([Pet.look(p)]).then(() => PW.loading = false); }
+      if (sp.ok) { ctx.save(); ctx.beginPath(); ctx.rect(box[0] + 2, box[1] + 2, box[2] - 4, box[3] - 4); ctx.clip(); sp.draw(ctx, 2, Game.time * TICK, box[0] + box[2] / 2, box[1] + box[3] - 8); ctx.restore(); } }
+    { const r = nDraw(ctx, f, 50126, 0); nText(ctx, `${Pet.nm(p)}  ${tx('Sv')} ${p.lv}`, r[0] + r[2] / 2, r[1] + r[3] / 2, p.dead ? '#a02010' : '#ffe9a8', 11, 'center', r[2] - 6); }
+    { const r = nDraw(ctx, f, 50127, pressed === 'p:on'), lab = p.dead ? T2('Ölü', 'Dead') : on ? T2('Geri çağır', 'Dismiss') : T2('Çağır', 'Summon'); nText(ctx, lab, r[0] + r[2] / 2, r[1] + r[3] / 2, '#f4ead0', 11, 'center'); nHit('p:on', r[0], r[1], r[2], r[3]); }
+    // yuvalar: besle, taktik, bırak; küçük yuva: sıradaki hayvan
+    [[50756, 'feed', T2('Besle', 'Feed')], [50757, 'ai', T2('Taktik', 'Tactics')], [50758, 'rel', T2('Bırak', 'Release')]].forEach(([id, key, lab]) => { const r = nDraw(ctx, f, id, pressed === 'p:' + key || (key === 'ai' && PW.ai)); nText(ctx, lab, r[0] + r[2] / 2, r[1] + r[3] / 2, '#2a1a0a', 9.5, 'center', r[2] - 2); nHit('p:' + key, r[0], r[1], r[2], r[3]); });
+    { const r = nDraw(ctx, f, 50128, pressed === 'p:next'); nText(ctx, `${PW.i + 1}/${L.length}`, r[0] + r[2] / 2, r[1] + r[3] / 2, '#2a1a0a', 9.5, 'center'); if (L.length > 1) nHit('p:next', r[0], r[1], r[2], r[3]); }
+    const sk = Pet.D.skills[S.skill], md = Pet.MODEN[Game.P.petMode || 'attack'], cls = PCLS[S.cls];
+    const lines = [
+      `${T2(S.tr, S.en)} · ${T2(cls[0], cls[1])} · ${T2('Yetenek', 'Talent')} ×${p.tal}`,
+      `${T2('Can', 'HP')} ${Math.round(p.hp)}/${st.hp} · ${T2('Mana', 'MP')} ${Math.round(p.mp)}/${st.mp}`,
+      `${T2('Saldırı', 'Attack')} ${S.cls === 4 ? st.matk : st.patk} · ${T2('Savunma', 'Defense')} ${st.def}`,
+      `${T2('Deneyim', 'XP')} ${p.xp}/${Pet.needXp(p.lv)}${p.lv >= Game.P.lv ? T2(' (sınır: senin seviyen)', ' (cap: your level)') : ''}`,
+      `${T2('Tokluk', 'Satiety')} ${p.sat} · ${T2('Mutluluk', 'Happiness')} ${p.joy}${p.sat <= 0 || p.joy <= 20 ? T2(' · savaşmıyor!', ' · won\'t fight!') : ''}`,
+      `${T2('Beceri', 'Skill')}: ${sk ? T2(sk.tr[0], sk.en[0]) : '-'}`,
+      ...(sk ? wrap(ctx, T2(sk.tr[1], sk.en[1]), 194, 10).slice(0, 2) : []),
+      `${T2('Taktik', 'Tactics')}: ${T2(md[0], md[1])}`,
+    ];
+    lines.forEach((l, i) => nText(ctx, l, 14, 140 + i * 13.5, i === 0 ? '#7a1c08' : '#2a1a0a', 10.5, 'left', 198));
+    nEnd(ctx);
+    if (PW.ai) {   // taktik: 5 orijinal mod
+      const f2 = 'n_newpetai', rows = [50145, 50146, 50147, 50148, 50149, 50150];
+      nBegin(ctx, VH, { k: k * 0.9, x: (UI.safeL || 0) + 126 * VH / 320 + 232 * k, y: Math.round((VH - 300 * k * 0.9) / 2) });
+      nDraw(ctx, f2, 50143, 0); nHit('frame', 0, 20, 227, 250);
+      Pet.MODES.forEach((m, i) => { const r = nDraw(ctx, f2, rows[i], (Game.P.petMode || 'attack') === m || pressed === 'p:m:' + m), M = Pet.MODEN[m];
+        nText(ctx, T2(M[0], M[1]), r[0] + 12, r[1] + 15, '#3a1c08', 12, 'left', 170); nText(ctx, T2(M[2], M[3]), r[0] + 12, r[1] + 30, '#5a3a18', 9, 'left', 175); nHit('p:m:' + m, r[0], r[1], r[2], r[3]); });
+      { const r = nDraw(ctx, f2, 50144, pressed === 'p:aix'); nHit('p:aix', r[0], r[1], r[2], r[3]); }
+      nEnd(ctx);
+    }
+  }
+  function tapPet2(id) {
+    if (typeof id !== 'string') return; const L = Pet.list(), p = L[PW.i];
+    if (id === 'p:x') return close();
+    if (id === 'p:next') { PW.i = (PW.i + 1) % L.length; return; }
+    if (id === 'p:aix') { PW.ai = false; return; }
+    if (id.startsWith('p:m:')) { Pet.setMode(id.slice(4)); PW.ai = false; return; }
+    if (!p) return;
+    if (id === 'p:on') { if (Game.P.petOn === p.uid) Pet.dismiss(); else Pet.summon(p.uid); return; }
+    if (id === 'p:ai') { PW.ai = !PW.ai; return; }
+    if (id === 'p:feed') { const f = ['30022'].find(x => countItem(x)); if (!f) return UI.toast(T2('Biluo Meyven yok (Hayvan Terbiyecisi satar).', 'No Biluo Fruit (Beast Tamers sell it).')); if (Game.P.petOn !== p.uid) return UI.toast(T2('Beslemek için önce çağır.', 'Summon it first to feed it.')); useItem(f); return; }
+    if (id === 'p:rel') { ask(T2(`${Pet.nm(p)} serbest bırakılsın mı? Geri dönmez.`, `Release ${Pet.nm(p)}? It won't come back.`), () => { Pet.release(p.uid); PW.i = 0; }); return; }
+  }
+
   // ---------------- Ayarlar ----------------
   let sysSure = false;
   function drawSys(ctx, vw, VH) {
@@ -429,6 +490,7 @@ const Win = (() => {
   }
   function tapSys(id) {
     if (id !== 'newc') sysSure = false;
+    if (id === 'gm') { UI.open('gm'); return; }
     if (id === 'sfx') SFX.setSfx(!SFX.opt.sfx); else if (id === 'mus') SFX.setMusic(!SFX.opt.music);
     else if (id === 'lang') { save(); Net.now().then(() => setLang(LANG === 'tr' ? 'en' : 'tr')); }
     else if (id === 'title' || (id === 'newc' && Net.on)) { save(); Net.now().then(() => location.reload()); }
@@ -558,7 +620,7 @@ const Win = (() => {
     pressed = h.id; pressT = performance.now();
     if (typeof h.id === 'string' && h.id.startsWith('hub:')) { const k = h.id.slice(4); SFX.play('skill_pageflip'); if (k === 'gm') { UI.open('gm'); return true; } if (k !== cur) { close(); open(k); } return true; }
     if (h.id === 'close') { UI.closeAll(); return true; }
-    if (cur === 'sys') { if (typeof h.id === 'string' && h.id.startsWith('s:')) tapSys(h.id.slice(2)); return true; } if (cur === 'map') { tapMap(h.id); return true; } if (cur === 'hub') return true;
+    if (cur === 'sys') { if (typeof h.id === 'string' && h.id.startsWith('s:')) tapSys(h.id.slice(2)); return true; } if (cur === 'pet') { tapPet2(h.id); return true; } if (cur === 'map') { tapMap(h.id); return true; } if (cur === 'hub') return true;
     if (cur === 'bag') tapBag2(h.id); else if (cur === 'role') tapRole2(h.id); else if (cur === 'npc') tapNpc2(h.id); else if (cur === 'task') tapTask2(h.id); else if (cur === 'menu') tapMenu(h.id); else if (cur === 'skill') tapSkill2(h.id); else if (cur === 'shop') tapShop2(h.id); else if (cur === 'dead') { if (h.id === 'revive') { close(); revive(); } }
     return true;
   }
@@ -851,5 +913,5 @@ const Win = (() => {
     hits.push({ id: 'frame', x: ox, y: oy, w: f.w, h: 226 });
   }
   function tapDead(id) { if (id === 52040) { close(); revive(); } }
-  return { ask, askNum, open, close, isOpen, draw, tap, drag, get cur() { return cur; } };
+  return { ask, askNum, open, close, isOpen, draw, tap, drag, get cur() { return cur; }, PW };
 })();

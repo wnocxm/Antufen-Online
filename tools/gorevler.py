@@ -117,6 +117,9 @@ for f in sorted(glob.glob('kaynak/ceviri/gorevler/*.json')):
         q = {k: s0[k] for k in ('id', 'giver', 'to', 'type', 'target', 'targets', 'node', 'count', 'sc', 'chance', 'req', 'rw') if k in s0}
         if str(i) in C.get('zincir', {}): q['req'] = C['zincir'][str(i)]   # elle verilen zincir bağı
         if str(i) in C.get('sahneler', {}): q['sc'] = C['sahneler'][str(i)]   # hedefin asıl haritası (araç yanlış seçtiyse)
+        if str(i) in C.get('teslim', {}): q.update(type='deliver', give=C['teslim'][str(i)], count=1)   # eşya getirme (çantadaki eşya teslim edilir)
+        if str(i) in C.get('ozel', {}): q.update(type='special', flag=C['ozel'][str(i)])                 # oyundaki bir olayla biter (ör. kuluçka)
+        if str(i) in C.get('hedefler', {}): q['g'] = C['hedefler'][str(i)]                               # elle yazılmış hedef cümlesi [tr, en]
         if str(i) in C.get('seviyeler', {}): q['lvMin'] = C['seviyeler'][str(i)]
         rc = C.get('irklar', {}).get(str(i)) or taraf(q['giver'], C.get('irk'))   # ırk: göreve özel > veren NPC'nin haritasının tarafı > bölge dosyası
         if rc and rc != 'ortak': q['race'] = rc
@@ -153,7 +156,7 @@ js = """// Görevler: tools/gorevler.py üretir; elle değiştirme. Yapı Androi
     const s = E ? q.en : q.tr, to = trName(q.to), sc = q.sc ? trName(q.sc) : '', mon = q.target ? trName(q.target) : '';
     q.title = s[0]; q.text = s[1]; q.ok = s[2]; q.wait = s[3]; q.done = s[4]; if (s[5]) q.item = s[5];
     const many = q.targets && q.targets.map(x => `${x[1]} ${trName(x[0])}`).join(', ');   // çok hedefli
-    q.goal = q.type === 'kill' ? (E ? `Kill ${many || q.count + ' ' + mon} in ${sc}, then talk to ${to}.` : `${sc}: ${many || q.count + ' ' + mon} öldür, sonra ${to} ile konuş.`)
+    q.goal = q.g ? (E ? q.g[1] : q.g[0]) : q.type === 'deliver' ? (E ? `Bring ${q.item} to ${to}.` : `${q.item} eşyasını ${to} kişisine getir.`) : q.type === 'kill' ? (E ? `Kill ${many || q.count + ' ' + mon} in ${sc}, then talk to ${to}.` : `${sc}: ${many || q.count + ' ' + mon} öldür, sonra ${to} ile konuş.`)
       : q.type === 'collect' ? (E ? `Collect ${q.count} ${q.item} from ${mon} in ${sc}, then talk to ${to}.` : `${sc}: ${mon} canavarlarından ${q.count} ${q.item} topla, sonra ${to} ile konuş.`)
       : q.use ? (E ? `Use the ${q.item} on ${trName(q.node)}, then talk to ${to}.` : `${q.item} eşyasını ${trName(q.node)} üzerinde kullan, sonra ${to} ile konuş.`)
       : q.type === 'pickup' ? (E ? `Gather ${q.count} ${q.item} in ${sc}, then talk to ${to}.` : `${sc}: ${q.count} ${q.item} topla, sonra ${to} ile konuş.`)
