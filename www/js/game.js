@@ -248,7 +248,7 @@ function monDef(nm, sc) {
     if (R && !d.auto && !d.fit && d.lv) { d.fit = true; const lv = clamp(d.lv, R[0], R[1] + (d.rank === 2 ? 2 : d.rank ? 1 : 0)); if (lv !== d.lv) { d.lv = lv; d.xp = xpOf(lv, d.rank || 0); } }
     return d;
   }
-  const rank = nm.startsWith('☆☆') ? 2 : nm.includes('☆') ? 1 : 0, S = (sc && sc.lv) || 1;
+  const rank = nm.startsWith('☆☆') || nm.startsWith('★') ? 2 : nm.includes('☆') ? 1 : 0, S = (sc && sc.lv) || 1;   // ★ = zindan boss'u
   const kinds = sc ? [...new Set(sc.ents.filter(e => Assets.D.mon[e[0]] && !e[1].includes('☆')).map(e => e[1]))] : [], i = Math.max(0, kinds.indexOf(nm));
   let lv;
   if (R) lv = rank === 2 ? R[1] + 2 : rank ? R[1] + 1 : R[0] + Math.round(i * (R[1] - R[0]) / Math.max(1, kinds.length - 1));
@@ -263,6 +263,7 @@ class Mob extends Ent {
     // denge (tools/test/savas.js): seçkin ☆ ×3 can ×1,15 saldırı; saldırı yüksek seviyede biraz daha hızlı artar
     const mhp = Math.round((250 + 260 * L) * soft * (rk === 2 ? 18 : rk ? 3 : 1)); this.atk = Math.round((48 + 27 * L + 0.15 * L * L) * soft * (rk === 2 ? 1.8 : rk ? 1.15 : 1)); this.def = 8 * L * (rk ? 1.5 : 1);
     Object.assign(this, { name, d, hp: mhp, maxHp: mhp, home, state: 'idle', atkT: 0, wanderT: rnd(1, 4), aggro: false, slowT: 0 });
+    Dungeon.tune(this);   // zindan: sınav canavarı zayıf, boss tek kişilik
     const info = Game.mobInfo(name); this.sp = info ? Game.map.sprite(info[1]) : null; this.deathFx = info?.[2];
     this.dir = irnd(0, 3);
   }
@@ -304,8 +305,11 @@ class Fx {
 
 // ---------------- Sahne yükleme ----------------
 Game.mobInfo = name => { for (const k in Assets.D.mon) if (Assets.D.mon[k][0] === name) return Assets.D.mon[k]; return null; };
+// veri düzeltmesi: bir canavar kaydında (☆☆【小胖】拉斯) görünüm ile ölüm efekti alanları yer değiştirmiş
+let MON_FIXED = false;
+function fixMonData() { if (MON_FIXED) return; MON_FIXED = true; for (const v of Object.values(Assets.D.mon)) if (v.length > 2 && /^特效-/.test(v[1]) && !/^特效-/.test(v[2])) [v[1], v[2]] = [v[2], v[1]]; }
 async function loadScene(sid, arrive) {
-  UI.fade(true);
+  UI.fade(true); fixMonData();
   const D = Assets.D, sc = D.scenes[sid];
   const json = await fetch(vq(Assets.base + 'maps/' + sc.map + '.json')).then(r => r.json());
   const map = new GameMap(sc.map, json, sc);
@@ -319,9 +323,10 @@ async function loadScene(sid, arrive) {
   Game.player && (Game.player = null);
   Game.map = map; Game.scene = sc; Game.sceneId = sid; Game.target = null; Game.ents = []; Game.fx = []; Game.floats = [];
   map.build();
+  Dungeon.onLoad(sid);
   // NPC'ler ve canavarlar
-  for (const [id, nm, pos] of sc.ents) {
-    const [x, y] = pos;
+  for (let ei = 0; ei < sc.ents.length; ei++) {
+    const [id, nm, pos] = sc.ents[ei], [x, y] = pos;
     if (D.cit[id]) { const n = new Npc(id, D.cit[id], x, y); Game.ents.push(n); if (!n.pickup) map.extraBlock[map.idx(x, y)] = 1; }
     else if (D.mon[id]) {
       const d = monDef(nm, sc);
@@ -331,9 +336,10 @@ async function loadScene(sid, arrive) {
       if (d.dummy || still) { const n = new Npc(id, [nm, D.mon[id][1]], x, y); n.dummy = true; n.node = still; Game.ents.push(n); if (still && !d.dummy) map.extraBlock[map.idx(x, y)] = 1; continue; }
       const cnt = d.n || 5, wide = d.wide || 5;
       for (let i = 0; i < cnt; i++) {
+        if (Dungeon.skip(sid, ei, i)) continue;   // normal zindanda bu koşuda kesilmiş
         let px = x, py = y;
         for (let k = 0; k < 30; k++) { const a = rnd(-wide, wide), b = rnd(-wide, wide); if (!map.blocked(x + a, y + b)) { px = Math.round(x + a); py = Math.round(y + b); break; } }
-        Game.ents.push(new Mob(nm, px, py, { x: px, y: py }));
+        const mb = new Mob(nm, px, py, { x: px, y: py }); mb.key = Dungeon.key(sid, ei, i); Game.ents.push(mb);
       }
     }
   }
@@ -358,15 +364,24 @@ function checkExits() {
   const cx = Math.round(p.x), cy = Math.round(p.y);
   for (const r of map.regionsOf(1)) {
     if (cx >= r[2] && cx <= r[4] && cy >= r[3] && cy <= r[5]) {
-      const ex = map.scene.exits.find(e => e[0] === r[0]); if (!ex) continue;
+      const ex = map.scene.exits.find(e => e[0] === r[0]); if (!ex) { if (Dungeon.door(r[0])) return; continue; }   // bağlanmamış geçit: zindan kapısı olabilir
       const target = ex[1].replace('(入口)', '');
       // hedef sahne numarası paketlemede çözülür (aynı adlı birden çok sahne olabilir)
       const sid = ex[2] || Object.keys(Assets.D.scenes).find(k => Assets.D.scenes[k].name === target);
       if (!sid || !Assets.D.scenes[sid]) { if (!Game.warnT) { UI.toast(`${trName(target)}: bu bölge henüz açılmadı`); Game.warnT = 3; } return; }
+      if (Dungeon.exitTo(sid)) return;   // zindandan alana çıkış: kapının dışına
       gotoScene(sid, Game.scene.name, null, Game.sceneId);
       return;
     }
   }
+}
+// geçidin yanındaki varış bölgesi: çoğunlukla geçit+1 (tür 0); değilse geçide en yakın varış bölgesi (ör. Mehtap Korusu'nda geçit−1)
+function arrivalNear(regs, idx) {
+  const ex = regs.find(g => g[0] === idx && g[1] === 1) || regs.find(g => g[0] === idx), nx = regs.find(g => g[0] === idx + 1 && g[1] === 0);
+  if (nx || !ex) return nx || ex;
+  const c = g => [(g[2] + g[4]) / 2, (g[3] + g[5]) / 2], [ax, ay] = c(ex); let best = null, bd = 1e9;
+  for (const g of regs) if (g[1] === 0) { const [x, y] = c(g), d = Math.hypot(x - ax, y - ay); if (d < bd) { bd = d; best = g; } }
+  return best || ex;
 }
 async function gotoScene(sid, fromName, fixed, fromSid) {
   Game.transit = true; save();
@@ -376,7 +391,7 @@ async function gotoScene(sid, fromName, fixed, fromSid) {
     const json = await fetch(vq(Assets.base + 'maps/' + sc.map + '.json')).then(r => r.json());
     const back = (fromSid && sc.exits.find(e => e[2] === fromSid)) || sc.exits.find(e => e[1].replace('(入口)', '') === fromName);
     const regs = json.regions;
-    const r = back ? (regs.find(g => g[0] === back[0] + 1 && g[1] === 0) || regs.find(g => g[0] === back[0])) : regs.find(g => g[1] === 0);
+    const r = back ? arrivalNear(regs, back[0]) : regs.find(g => g[1] === 0);
     if (r) arrive = [Math.round((r[2] + r[4]) / 2), Math.round((r[3] + r[5]) / 2)];
   }
   await loadScene(sid, arrive);
@@ -405,6 +420,7 @@ function killMob(m) {
   if (m.d.rank && Math.random() < 0.6) { const g = randomGear(Math.max(1, m.d.lv + 2)); if (g) { addItem(g, 1, true); UI.log(`Ganimet: ${ITEMS[g].name}!`, 'q'); UI.toast(`Ganimet: ${ITEMS[g].name}`); } }
   else if (!m.d.passive && Math.random() < 0.025) { const g = randomGear(Math.max(1, m.d.lv)); if (g) { addItem(g, 1, true); UI.log(`Ganimet: ${ITEMS[g].name}`, 'loot'); } }
   questKill(m.name);
+  Dungeon.onKill(m);
   if (m.deathFx) Game.fx.push(new Fx(m.deathFx, m.x, m.y));
 }
 function hurtPlayer(m) {
@@ -805,4 +821,4 @@ function talkTo(n) {
   if (Math.hypot(n.x - p.x, n.y - p.y) < 2) return interact(n);
   p.path = findPath(Game.map, p.x, p.y, n.x, n.y + 1); Game.goTarget = n; if (!p.path) UI.toast('Oraya yol bulunamadı.');
 }
-function revive() { const p = Game.player, s = stats(); p.dead = false; p.state = 'idle'; p.hp = Math.round(s.hp * 0.5); p.mp = Math.round(s.mp * 0.5); const P0 = Game.P; if (!P0.home && (P0.done[80003] || P0.quests[80003])) P0.home = ['120005', 33, 20]; const town = P0.home; if (town) gotoScene(town[0], null, town[1] != null ? [town[1], town[2]] : null); else { const r = Game.map.regionsOf(0)[0]; if (r) { p.x = r[2]; p.y = r[3]; } } }
+function revive() { const p = Game.player, s = stats(); p.dead = false; p.state = 'idle'; p.hp = Math.round(s.hp * 0.5); p.mp = Math.round(s.mp * 0.5); if (Dungeon.onRevive()) return; const P0 = Game.P; if (!P0.home && (P0.done[80003] || P0.quests[80003])) P0.home = ['120005', 33, 20]; const town = P0.home; if (town) gotoScene(town[0], null, town[1] != null ? [town[1], town[2]] : null); else { const r = Game.map.regionsOf(0)[0]; if (r) { p.x = r[2]; p.y = r[3]; } } }

@@ -46,7 +46,7 @@ const Win = (() => {
   }
   function open(name, o = {}) { cur = name; opt = o; if (name === 'map') { WM.mode = 'world'; WM.sel = null; wmData(); } if (name === 'npc') { D.q = null; SFX.play('request', 0.6); } if (name === 'task') { K.sel = null; K.sure = false; } if (name === 'menu') M.page = 0; if (name === 'shop') { H.tab = 0; H.sel = null; H.off = 0; } B.sel = null; B.sure = false; B.assign = false; B.page = 0; if (o.cat != null) B.cat = o.cat; SFX.play('menu_appear', 0.5); if (name === 'bag') questFlag('openBag'); }
   function close() { cur = null; opt = {}; modal = null; }
-  const isOpen = () => !!cur;
+  const isOpen = () => !!cur || !!modal;   // tek başına onay kutusu da (ör. zindan girişi) pencere sayılır
 
   function bagItems() {
     const P = Game.P;
@@ -58,7 +58,7 @@ const Win = (() => {
   function uiImgAny(it) { const k = `icon_res_${it.ik || 'item'}_${it.icon}`; let I = icache[k]; if (!I) { I = new Image(); I.src = `${Assets.base}ui/${k}.png`; icache[k] = I; } return I; }
 
   function draw(ctx, vw, VH) {
-    if (!cur) return; hits = [];
+    if (!cur) { if (modal) { hits = []; drawModal2(ctx, vw, VH); } return; } hits = [];
     const modern = cur !== 'menu';   // yeni arayüz: oyun ekranı karartılmaz
     if (!modern) { ctx.fillStyle = 'rgba(0,0,0,.5)'; ctx.fillRect(0, 0, vw, VH); }
     if (cur === 'bag') drawBag2(ctx, vw, VH); else if (cur === 'role') drawRole2(ctx, vw, VH); else if (cur === 'npc') drawNpc2(ctx, vw, VH); else if (cur === 'task') drawTask2(ctx, vw, VH); else if (cur === 'menu') drawMenu(ctx, vw, VH); else if (cur === 'skill') drawSkill2(ctx, vw, VH); else if (cur === 'shop') drawShop2(ctx, vw, VH); else if (cur === 'dead') drawDead2(ctx, vw, VH);
@@ -550,8 +550,8 @@ const Win = (() => {
   function panel(ctx, x, y, w, h) { ctx.fillStyle = 'rgba(0,0,0,.8)'; ctx.fillRect(x, y, w, h); ctx.strokeStyle = '#9f998f'; ctx.lineWidth = 1; ctx.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1); ctx.strokeStyle = '#4b4547'; ctx.strokeRect(x + 1.5, y + 1.5, w - 3, h - 3); }
 
   function tap(x, y) {
-    if (!cur) return false;
     if (modal) { tapModal(x, y); return true; }
+    if (!cur) return false;
     let h = null; for (const r of hits) if (x >= r.x && x < r.x + r.w && y >= r.y && y < r.y + r.h) { if (r.id === 'frame') { if (!h) h = r; } else if (!h || h.id === 'frame' || r.w * r.h < h.w * h.h) h = r; }
     if (!h) { if (cur !== 'dead') close(); return true; }
     pressed = h.id; pressT = performance.now();

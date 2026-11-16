@@ -62,3 +62,14 @@ Otomatik yol: `routeTo(sid)` sahneler arası (`scenePath`), `routeToNpc(cn)`, `w
 - HUD: çerçeveli minimap (`ui2/hud_frame.png`), 6 yuvarlak harf düğmesi (`ui2/hud_btn.png`): Karakter, Çanta, Beceri, Görev, Harita, Sohbet/Ayarlar.
 - Dünya haritası: `assets/wm/` (world.jpg, r1..r7.jpg bölge resimleri, `wm.json`): dünya → bölge → yerel; Otomatik Yol, NPC Listesi.
 - Pencere açıkken oyun güncellenmeye devam eder (`update` hep çalışır).
+
+## Zindanlar (`www/js/dungeon.js`)
+- `DUNGEONS`: `{id, cn, lv, lvr, train, daily, board, boss, copies:[{door:[alanSahnesi, geçitBölgesi], scenes:[…]}]}`. Irk başına ayrı kopya olabilir (Sınav Ormanı, Mehtap Korusu: insan + elf girişi).
+- **Kapılar**: alan haritalarındaki, geçit tablosunda karşılığı olmayan tür 1 bölgeler (APK geçit tablosu boş/kendine bağlamış). `checkExits` → `Dungeon.door(bölge)` → onay kutusu (`Win.ask`, pencere açık olmadan da çalışır) → `enter`.
+- **Koşu** `P.dun = {id, copy, cleared:{sahne:varlık:sıra}, boss, t}` kayıtta durur; harita yüklenince `onLoad` (zindandaysa koşu yoksa açar, dışarıdaysa kapatır). Normal zindanda kesilen canavar `cleared`a yazılır ve yeniden doğmaz (`skip`), sınav zindanında yeniden doğar.
+- **Canavar**: zindan sahnelerinin `lvr`'si tanımdan; sınav canavarı ×0,7 can ×0,6 saldırı ×0,5 savunma (pano: "zayıf saldırı ve savunma"); boss = ★/☆☆ ya da orijinal `instance_progress` işaretli (101 canavar) → alan boss'unun ×18/×1,8'i yerine ×8 can ×1,2 saldırı (tek kişilik). `★` adlı canavarlar artık boss sayılır (`monDef`).
+- **Boss sandığı** (son boss, `d.boss` ya da ilk boss): 40·sv altın, 1-2 ekipman (`randomGear(sv+2)`), 3 iksir; sonra "çıkılsın mı?". Çıkış geçidi ya da ölüm → kapının dışına (`arrivalNear`), koşu kapanır.
+- **Günlük sınır** `P.dg = {day, n:{id:adet}}` (normal zindan 3/gün; sınav sınırsız).
+- Veri düzeltmesi `fixMonData`: ☆☆【小胖】拉斯 kaydında görünüm/ölüm efekti alanları ters.
+- `arrivalNear(regs, geçit)`: geçidin varış bölgesi geçit+1 değilse en yakın tür 0 bölge (önceden oyuncu çıkış bölgesinin üstüne doğuyordu).
+- Test: `tools/test/zindan.js` (giriş/çıkış/sandık/sınır/ölüm), `BOSS='sahne:ad:sv;…' node tools/test/savas.js` (boss dövüşü, iksirli). Sonuç: Lars (Sv 20) ve ★Mehtap Kurt Kralı (Sv 30) üç sınıfla da yeniliyor, %43-59 can, 0-4 iksir.

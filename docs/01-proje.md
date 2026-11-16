@@ -34,7 +34,9 @@ Tamam:
 - Sunucu: hesap, karakter, kayıt, WebSocket'te aynı haritadaki oyuncular ve sohbet; görevler de SQL'de.
 - Görevler (oyunda 801, SQL'de 832 satır): Acemi kampları, Guanlin, Koşanat Şehri, Kâhin Tapınağı, Gözcü Kampı, Güneşgören Şehri (+Dinlenme Bölgesi, lonca terasları), İstihbarat Karakolu, İmparatorluk Başkenti çevresi, Dağgören Şehri, Yoğunsis Kasabası, Sanatçılar Loncası, Altındalga Limanı, Büyü Akademisi. **55'e kadar bütün bölgelerin hikâye görevleri alındı.**
 
-Sırada (bölge sırası seviyeye göre):
+Sırada (kullanıcı onayladı):
+0. **Zindan sistemi** (tek kişi girer; grup girişi çevrimiçi grup sistemiyle sonra). Sıra: çekirdek + 20 Sınav Ormanı → 30 Mehtap Korusu → 40 Ruhyiyen'in 4 zindanı + Sınav Ovası → 50 Sınav Üssü, 4 Kule, Akankum. Ajan Hans (代理人汉斯, 831xx) görevleri APK eklemesi, alınmaz.
+0b. **Ardından evcil hayvanlar (pet / 魔法兽)** — kullanıcı "unutmayalım" dedi.
 1. Denge 1. tur yapıldı (bkz. 03 › Denge). Kalan: insan yolunda 40-48 arası görev yok (yalnız kasma; büyük olasılıkla orijinalde 40. seviye ortak zindanlarla doluyordu); eşyalar (bölgelere göre), elle oynanış testi. (Harita adları ve sahnelerdeki 1519 NPC/canavar/nesne adı çevrildi.)
 
 Ertelenenler / bilinenler:
