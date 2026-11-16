@@ -52,6 +52,12 @@
 | `gunesgoren.json` | Güneşgören Şehri 望日城 + Dinlenme Bölgesi + lonca terasları | 20-49 | 124 |
 | `karakol.json` | İstihbarat Karakolu 军情前哨 | 24-39 | 67 |
 | `baskent.json` | Başkent 帝都 + Soylular/Kahramanlar/Tapınak + İnsan Mahallesi + lağım | 32-49 | 119 |
+| `daggoren.json` | Dağgören Şehri 望山城 (55 altı kısmı) | 37-54 | 30 |
+| `sisli.json` | Yoğunsis Kasabası 浓雾镇: Cinateşi Ormanı, kıyı, Feryat Patikası, Obur/Karakan Ormanı | 39-47 | 120 |
 
 İnsan yolu: kamp → Guanlin (3-11) → korucu → Koşanat (17-34) → simyacı kolu → Kral'ın fermanı → Karakol (27-39) → Başkent (33-49).
 Elf yolu: kamp → Kâhin Tapınağı (6-20) → Gözcü Kampı (19-27) → Güneşgören (29-49).
+
+### NPC'ye eşya kullanma görevleri
+`pickup` görevinin `node`'u bir NPC ise (ör. iksiri 护炉人加里 Gary'ye içir) `gorevler.py` ona `use: 1` koyar; hedef metni
+"X eşyasını Y üzerinde kullan" olur ve oyunda o NPC'ye dokununca görev hazır olur (`interact()` içinde).

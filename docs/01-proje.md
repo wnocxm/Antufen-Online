@@ -27,14 +27,12 @@ Tamam:
 - Yeni arayüz (karakter, çanta, beceri, görev, dükkân, sistem, dünya haritası), NPC hedefleme, konuşma düğmesi.
 - 169 eşya, dükkânlar; GM araçları; otomatik yol (görev hedefine yürüme).
 - Sunucu: hesap, karakter, kayıt, WebSocket'te aynı haritadaki oyuncular ve sohbet; görevler de SQL'de.
-- Görevler (oyunda 607): Acemi kampları, Guanlin, Koşanat Şehri, Kâhin Tapınağı, Gözcü Kampı, Güneşgören Şehri (+Dinlenme Bölgesi, lonca terasları), İstihbarat Karakolu, İmparatorluk Başkenti çevresi.
+- Görevler (oyunda 757, SQL'de 832 satır): Acemi kampları, Guanlin, Koşanat Şehri, Kâhin Tapınağı, Gözcü Kampı, Güneşgören Şehri (+Dinlenme Bölgesi, lonca terasları), İstihbarat Karakolu, İmparatorluk Başkenti çevresi, Dağgören Şehri, Yoğunsis Kasabası.
 
 Sırada (bölge sırası seviyeye göre):
-1. Dağgören Şehri 望山城 (37) — 235 görev, büyük; 55 üstüne gidenler elenecek.
-2. Yoğunsis Kasabası 浓雾镇 (görevleri 40-50: Cinateşi Ormanı, kıyı).
-3. Sanatçılar Loncası 艺术家工会前厅 (45), Loş Kamp 幽暗营地 (47).
-4. Altın Dalga Limanı 金波港 + Dağ Eteği Kampı 山麓营地 (50), Büyü Akademisi 魔法学院 (54).
-5. Sonra: 55'e kadar baştan sona oynanış testi, denge, eşyalar (bölgelere göre), kalan ~1100 NPC/canavar adının çevirisi.
+1. Sanatçılar Loncası 艺术家工会前厅 (45), Loş Kamp 幽暗营地 (47).
+2. Altın Dalga Limanı 金波港 + Dağ Eteği Kampı 山麓营地 (50), Büyü Akademisi 魔法学院 (54).
+3. Sonra: 55'e kadar baştan sona oynanış testi, denge, eşyalar (bölgelere göre), kalan ~1100 NPC/canavar adının çevirisi.
 
 Ertelenenler / bilinenler:
 - 6 ileri beceri ağacı, ırk becerileri, 40. seviye sınıf yükselmesi, mücevher/tarif/unvan/evcil hayvan yok.

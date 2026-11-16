@@ -123,6 +123,10 @@ for q in out:
 byg = {}
 for q in out:
     if 'lv' in q: byg.setdefault(q['giver'], q['lv'])
+# hedefi bir NPC olan "kullan/ver" görevleri (iksiri Gary'ye içir): NPC'ye dokununca biter
+npcs = {q['giver'] for q in out} | {q['to'] for q in out}
+for q in out:
+    if q['type'] == 'pickup' and q.get('node') in npcs: q['use'] = 1
 for q in out:
     if 'lv' not in q: q['lv'] = byg.get(q['giver']) or byg.get(q['to']) or 10
 js = """// Görevler: tools/gorevler.py üretir; elle değiştirme. Yapı Android sürümünün görev tablosundan, metinler çevrildi.
@@ -134,6 +138,7 @@ js = """// Görevler: tools/gorevler.py üretir; elle değiştirme. Yapı Androi
     q.title = s[0]; q.text = s[1]; q.ok = s[2]; q.wait = s[3]; q.done = s[4]; if (s[5]) q.item = s[5];
     q.goal = q.type === 'kill' ? (E ? `Kill ${q.count} ${mon} in ${sc}, then talk to ${to}.` : `${sc}: ${q.count} ${mon} öldür, sonra ${to} ile konuş.`)
       : q.type === 'collect' ? (E ? `Collect ${q.count} ${q.item} from ${mon} in ${sc}, then talk to ${to}.` : `${sc}: ${mon} canavarlarından ${q.count} ${q.item} topla, sonra ${to} ile konuş.`)
+      : q.use ? (E ? `Use the ${q.item} on ${trName(q.node)}, then talk to ${to}.` : `${q.item} eşyasını ${trName(q.node)} üzerinde kullan, sonra ${to} ile konuş.`)
       : q.type === 'pickup' ? (E ? `Gather ${q.count} ${q.item} in ${sc}, then talk to ${to}.` : `${sc}: ${q.count} ${q.item} topla, sonra ${to} ile konuş.`)
       : q.item ? (E ? `Take the ${q.item} to ${to}.` : `${q.item} eşyasını ${to} kişisine götür.`)
       : (E ? `Talk to ${to}.` : `${to} ile konuş.`);

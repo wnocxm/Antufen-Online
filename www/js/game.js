@@ -770,6 +770,8 @@ function interact(e) {
     if (e.node) { UI.say(e, 'Bu bir toplama noktası. Madencilik ve toplama meslekleri yakında eklenecek.'); return; }
     if (e.dummy) { UI.say(e, trName(e.cn) + ': eğitim alanı sergisi.'); return; }
     if (e.pickup) { pickupNode(e); return; }
+    // hedefi bir NPC olan "kullan/ver" görevleri (ör. iksiri Gary'ye içir): NPC'ye dokununca tamamlanır
+    for (const q of QUESTS) { const st = Game.P.quests[q.id]; if (st && !st.ready && q.type === 'pickup' && q.node === e.cn) { st.n = q.count; if (q.item) UI.log(`${q.item} ${st.n}/${q.count}`, 'loot'); readyQuest(q); } }
     // konuşma görevlerini tamamla
     for (const q of QUESTS) { const st = Game.P.quests[q.id]; if (st && !st.ready && q.type === 'talk' && q.to === e.cn) st.ready = true; }
     UI.dialog(e);

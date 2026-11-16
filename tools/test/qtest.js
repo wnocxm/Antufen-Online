@@ -16,14 +16,14 @@ const { chromium } = require('playwright');
     return out; });
   console.log('STATİK', JSON.stringify(bad));
   // 2) zincir oyna: Koşanat 81654 -> 81655 -> 81656 (öldür, konuş, topla)
-  const r = await p.evaluate(() => { gmLevel(38); const P = __G.P, log = [];
+  const r = await p.evaluate(() => { gmLevel(47); const P = __G.P, log = [];
     const by = id => QUESTS.find(q => q.id === id);
-    for (const id of [81749, 81762, 82250, 82251, 82252, 82253, 82254, 82543]) {
+    for (const id of [81915, 81917, 82421, 82422, 82423, 82424, 82469, 82470, 81056]) {
       const q = by(id); const st0 = questState(q); if (st0 !== 'new' && st0 !== 'avail' && st0 !== 'ready' && st0 !== 'can') log.push(id + ' durum ' + st0);
       acceptQuest(q);
       if (q.type === 'kill') for (let i = 0; i < q.count; i++) questKill(q.target);
       if (q.type === 'collect') for (let i = 0; i < q.count * 6 && !P.quests[q.id].ready; i++) questKill(q.target);
-      if (q.type === 'pickup') { P.quests[q.id].n = q.count; P.quests[q.id].ready = true; }
+      if (q.type === "pickup" && q.use) { const g = __G.player; interact({ kind: "npc", cn: q.node, x: g.x + 1, y: g.y, name: q.node }); UI.close && UI.close(); } else if (q.type === "pickup") { P.quests[q.id].n = q.count; P.quests[q.id].ready = true; }
       const ok = P.quests[q.id].ready; const xp0 = P.xp, g0 = P.gold; completeQuest(q);
       log.push(`${id} ${q.type} ${q.title} hazır=${ok} bitti=${!!P.done[id]} +${P.gold - g0} altın | ${q.goal}`);
     }
