@@ -1,0 +1,33 @@
+# Anrufen Online (契约OL) yeniden yapımı — çalışma rehberi
+
+Symbian MMORPG'si **Anrufen Online / 契约OL**'un Android/iOS için web (Canvas2D + Capacitor) yeniden yapımı.
+Kullanıcı hakların kendisinde olduğunu söyledi. **Kullanıcıyla Türkçe, sade dille konuş.**
+Hedef: orijinale olabildiğince sadık (orijinal görseller, arayüz, mekanikler, metinler), yatay ekran, Türkçe + İngilizce.
+
+Bu dosya ve `docs/` klasörü, konuşmanın tamamını okumadan işe devam edebilmek içindir.
+Bir konuya girmeden önce ilgili belgeyi oku; bir sistemi değiştirince belgesini de güncelle.
+
+| Belge | İçerik |
+|---|---|
+| `docs/01-proje.md` | Hedefler, kullanıcının verdiği kararlar, şu anki durum, sıradaki işler |
+| `docs/02-kaynaklar.md` | Orijinal dosya biçimleri, çıkarma araçları, nerede ne var (Symbian + APK) |
+| `docs/03-istemci.md` | Oyun istemcisi: dosyalar, motor, savaş, beceri/efekt, eşya, arayüz, GM, ses, dil, kayıt |
+| `docs/04-gorevler.md` | Görev sistemi ve bölge bölge görev ekleme yöntemi (adım adım) |
+| `docs/05-sunucu.md` | Node + PostgreSQL sunucusu, tablolar, API, çevrimiçi oyun |
+| `docs/06-test.md` | Yerel çalıştırma, Playwright test betikleri (`tools/test/`), sık hatalar |
+
+## Her işte uyulacak kurallar
+
+- **Yayınlama:** GitHub Pages depo kökünü sunar; `index.html` → `www/`. Her değişiklikten sonra sürümü artır, commit et, `main`'e push et (PR açma, kullanıcı istemedikçe).
+  ```bash
+  V=$(date -u +%m%d%H%M); sed -i -E "s/\?v=[0-9]{8}/?v=$V/g; s/(Sürüm[^0-9]*)[0-9]{8}/\1$V/" www/index.html www/js/ui.js
+  git add -A && git commit -q -F - <<EOF … EOF && git push -q origin main
+  ```
+  Commit mesajı Türkçe; sonunda sistemin verdiği `Co-Authored-By` ve `Claude-Session` satırları.
+  Durdurma kancası commit edilmemiş/izlenmeyen dosya varsa uyarır: her işi commit + push ile bitir.
+- **Üretilen dosyaları elle düzenleme:** `www/js/quests_gen.js` (`tools/gorevler.py`), `www/js/tr_scenes.js` (`tools/ceviri.py`), `www/assets/data.json` (`tools/pack_all.py`).
+- **Çeviriler** `kaynak/ceviri/gorevler/<bölge>.json` içindedir (görev metinleri + o bölgenin yeni NPC/canavar adları).
+- **Kapsam:** Şu an 55. seviyeye kadar her şey "kusursuz" olacak. 70-80-90 sonra. 55 üstü görevler `atla` ile dışarıda bırakılır.
+- **APK kullanımı:** APK'dan orijinal görsel ve veri alınır; APK ekibinin Unity kodu, sunucu adresi, yönetici araçları alınmaz.
+- Yerel testten önce: `service postgresql start`, sunucu `cd server && PORT=8099 DATABASE_URL=postgres://anrufen:anrufen_dev@localhost:5432/anrufen node server.js` (arka planda). Ayrıntı `docs/06-test.md`.
+- `rm` ile göreli joker kullanma (güvenlik denetimi engeller).
