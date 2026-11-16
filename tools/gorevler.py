@@ -76,7 +76,7 @@ for i, t0 in T.items():
 out = []
 for i, v in Q.items():
     t = T[i]; typ, src = v[0], v[1]; ev = (t.get('events') or [{}])[0]
-    q = {'id': i, 'giver': npc(t['acceptNpcId']), 'to': npc(t['deliverNpcId']), 'type': typ, 'race': '人类'}   # Guanlin, Trol Ormanı, Karanlık Gözcü Kulesi: insan bölgesi
+    q = {'id': i, 'giver': npc(t['acceptNpcId']), 'to': npc(t['deliverNpcId']), 'type': typ}
     assert q['giver'] and q['to'], (i, t['acceptNpcId'], t['deliverNpcId'])
     mon = ev.get('targetName') if typ == 'kill' else src
     if typ in ('kill', 'collect'):
@@ -87,6 +87,18 @@ for i, v in Q.items():
     rw = t.get('rewards') or {}; q['rw'] = {'gold': rw.get('gold', 0), 'items': [[str(x['itemId']), x['count']] for x in rw.get('items', [])]}
     q['tr'] = [v[2], v[4], OK[0], v[6], v[8]] + ([v[10]] if len(v) > 10 else []); q['en'] = [v[3], v[5], OK[1], v[7], v[9]] + ([v[11]] if len(v) > 11 else [])
     out.append(q)
+# görevin ırkı: veren NPC'nin bulunduğu haritanın tarafı (tools/taraf.py: APK muhafız tablosu + komşuluk); NPC farklı taraflarda birden çok yerdeyse bölge dosyasının "irk" alanı
+import subprocess as _sp, collections as _col
+_sp.run(['python3', 'tools/taraf.py'], check=True, stdout=_sp.DEVNULL)
+TARAF = json.load(open('kaynak/apk/taraflar.json')); _LOC = _col.defaultdict(set)
+for _sid, _s in S.items():
+    for _e in _s['ents']: _LOC[_e[1]].add(TARAF.get(_sid, 'ortak'))
+def taraf(npc, yedek=None):
+    v = _LOC.get(npc) or set()
+    if len(v) == 1: return next(iter(v))
+    v2 = v - {'ortak'}
+    return next(iter(v2)) if len(v2) == 1 else (yedek or 'ortak')
+for q in out: q['race'] = taraf(q['giver'], '人类'); q['race'] == 'ortak' and q.pop('race')
 # bölge çeviri dosyalarından otomatik aktarılan görevler (tools/gorev_aktar.py + kaynak/ceviri/gorevler/<ad>.json)
 import glob, os
 have = {q['id'] for q in out} | HAND
@@ -105,8 +117,8 @@ for f in sorted(glob.glob('kaynak/ceviri/gorevler/*.json')):
         q = {k: s0[k] for k in ('id', 'giver', 'to', 'type', 'target', 'node', 'count', 'sc', 'chance', 'req', 'rw') if k in s0}
         if str(i) in C.get('zincir', {}): q['req'] = C['zincir'][str(i)]   # elle verilen zincir bağı
         if str(i) in C.get('seviyeler', {}): q['lvMin'] = C['seviyeler'][str(i)]
-        rc = C.get('irklar', {}).get(str(i), C.get('irk'))   # ırk: bölgenin ırkı ya da göreve özel; yoksa iki ırka açık
-        if rc: q['race'] = rc
+        rc = C.get('irklar', {}).get(str(i)) or taraf(q['giver'], C.get('irk'))   # ırk: göreve özel > veren NPC'nin haritasının tarafı > bölge dosyası
+        if rc and rc != 'ortak': q['race'] = rc
         if C.get('seviye') and q['type'] not in ('kill', 'collect', 'pickup'): q['lv0'] = C['seviye']   # şehirde verilen konuşma görevinin en düşük seviyesi
         if q['type'] in ('kill', 'collect', 'pickup'):
             nm = s0.get('sc'); r = next((x.get('lvr') for x in S.values() if x['name'] == nm and x.get('lvr')), None)
