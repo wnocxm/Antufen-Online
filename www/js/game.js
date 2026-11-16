@@ -98,7 +98,7 @@ const CLS = {
       { id: 'mp5', pas: { mpreg: 60 }, name: 'Mana Yenilenmesi', icon: 1104, lv: 14, desc: 'Mana yenilenmesi artar.' },
       { id: 'mp6', pas: { mpPct: 10 }, name: 'Mana Halesi', icon: 1111, lv: 19, desc: 'Mana sınırı +%10 daha.' },
     ] },
-  '牧师': { hp: 900, mp: 700, atk: 60, def: 30, ghp: 140, gmp: 80, gatk: 12, gdef: 6, range: 5.5, color: '金', bolt: '特效-黑暗火球', boltHit: '特效-火爆炸', snd: 'skill_wind',
+  '牧师': { hp: 900, mp: 700, atk: 60, def: 30, ghp: 140, gmp: 80, gatk: 12, gdef: 6, range: 5.5, color: '金', bolt: '特效-暗影冲击_红', boltHit: '特效-冲击爆炸', snd: 'skill_wind',
     skills: [
       { id: 'p1', name: 'Gölge Darbesi', icon: 1062, mp: 18, cd: 1.0, mult: 1.5, range: 7, proj: '特效-暗影冲击_红', hit: '特效-冲击爆炸', snd: 'skill_wind', snd2: 'skill_bomb', add: [25, 28, 31, 35, 40, 46, 55, 65, 72, 80], lv: 1, desc: 'Uzaktan gölge saldırısı.' },
       { id: 'p2', name: 'Çürüme', icon: 1066, mp: 30, cd: 6, mult: 0.3, dot: { n: 5 }, range: 7, fx: '特效-死亡标记', snd: 'skill_deathtag', dotT: [50, 60, 70, 80, 90, 100, 125, 150, 175, 200], lv: 3, desc: 'Hedefe lanet: 2 saniyede bir hasar verir.' },
