@@ -87,20 +87,6 @@ const Assets = (() => {
     }
     ctx.globalAlpha = 1;
   }
-  // Beceri efektleri siyah zemin üstüne çizilmiştir (orijinalde ışık gibi eklenir): koyuluk saydamlığa çevrilir, renk parlak kalır.
-  function sheetGlow(file, bmp, palId) {
-    const base = sheet(file, bmp, palId); if (!base) return null;
-    const ck = 'glow|' + file + '_' + bmp + '|' + palId; let c = canv.get(ck); if (c) return c;
-    c = document.createElement('canvas'); c.width = base.width; c.height = base.height;
-    const x = c.getContext('2d'), id = base.getContext('2d').getImageData(0, 0, c.width, c.height), d = id.data;
-    for (let i = 0; i < d.length; i += 4) {
-      if (!d[i + 3]) continue;
-      const m = Math.max(d[i], d[i + 1], d[i + 2]), a = Math.min(255, m * 1.15);
-      if (m < 14) { d[i + 3] = 0; continue; }
-      const k = 255 / m; d[i] = Math.min(255, d[i] * k); d[i + 1] = Math.min(255, d[i + 1] * k); d[i + 2] = Math.min(255, d[i + 2] * k); d[i + 3] = a;
-    }
-    x.putImageData(id, 0, 0); canv.set(ck, c); return c;
-  }
   // Kayıt adına göre sprite
   class Sprite {
     constructor(name) {
@@ -119,11 +105,12 @@ const Assets = (() => {
     animLen(anim) { const seq = this.A.a[anim] || []; let n = 0; for (const s of seq) n += Math.max(1, s[1]); return n; }
     draw(ctx, anim, t, x, y, mirror, alpha) {
       if (!this.ok) return;
-      const S = (this.glow ? sheetGlow : this.add ? sheetAdd : sheet)(this.r[0], this.r[1], this.r[3]); if (!S) return;
+      const S = (this.add ? sheetAdd : sheet)(this.r[0], this.r[1], this.r[3]); if (!S) return;
       const f = this.frameOf(anim, t); if (f == null) return;
-      if (this.add) ctx.globalCompositeOperation = 'lighter';
+      // beceri efektleri (glow): Android sürümündeki gibi ışık olarak eklenir; siyah zemin hiçbir şey eklemez
+      if (this.add || this.glow) ctx.globalCompositeOperation = 'lighter';
       drawParts(ctx, this.A, f, [S], x, y, mirror, alpha);
-      if (this.add) ctx.globalCompositeOperation = 'source-over';
+      if (this.add || this.glow) ctx.globalCompositeOperation = 'source-over';
     }
     drawFrame(ctx, f, x, y) { const S = sheet(this.r[0], this.r[1], this.r[3]); if (S) drawParts(ctx, this.A, f, [S], x, y); }
   }

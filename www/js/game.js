@@ -71,11 +71,11 @@ const CLS = {
   '战士': { hp: 1200, mp: 300, atk: 60, def: 40, ghp: 180, gmp: 30, gatk: 12, gdef: 8, range: 1.4, color: '红', melee: true, snd: 'skill_sword',
     skills: [
       { id: 'w1', name: 'Temel Kılıç Ustalığı', icon: 1107, mp: 0, cd: 0.8, mult: 1.0, range: 1.6, fx: 'BLOOD', snd: 'skill_sword', lv: 1, desc: 'Yakın saldırı. Mana harcamaz.' },
-      { id: 'w2', name: 'Güçlü Savurma', icon: 1114, mp: 25, cd: 1.0, mult: 1.0, crit: 20, range: 1.6, fx: '特效-刀光-红', snd: 'skill_daoguang', add: [200, 220, 240, 260, 280, 300, 325, 350, 375, 400], lv: 3, desc: 'Güçlü yakın saldırı, kritik şansı yüksek.' },
+      { id: 'w2', name: 'Güçlü Savurma', icon: 1114, mp: 25, cd: 1.0, mult: 1.0, crit: 20, range: 1.6, self: '特效-刀光-红', hit: 'BLOOD', snd: 'skill_daoguang', add: [200, 220, 240, 260, 280, 300, 325, 350, 375, 400], lv: 3, desc: 'Güçlü yakın saldırı, kritik şansı yüksek.' },
       { id: 'w3', name: 'Bıçak Fırlatma', icon: 1127, mp: 35, cd: 1.5, mult: 0.8, range: 6, proj: '特效-飞刀', hit: '特效-细碎爆炸', splash: 1.8, snd: 'skill_nife', snd2: 'skill_pilipala', add: [60, 70, 80, 90, 100, 120, 140, 160, 180, 200], lv: 6, desc: 'Uzaktan alan saldırısı.' },
-      { id: 'w4', name: 'Çifte Darbe', icon: 1112, mp: 45, cd: 5, mult: 0.65, hits: 2, range: 1.6, fx: '特效-刀光', fx2: '特效-大喷血', snd: 'skill_daoguang', pct: [330, 360, 390, 420, 450, 480, 510, 540, 570, 600], lv: 10, desc: 'Art arda iki vuruş.' },
+      { id: 'w4', name: 'Çifte Darbe', icon: 1112, mp: 45, cd: 5, mult: 0.65, hits: 2, range: 1.6, self: '特效-刀光', hit: '特效-大喷血', fx2: 'BLOOD', snd: 'skill_daoguang', pct: [330, 360, 390, 420, 450, 480, 510, 540, 570, 600], lv: 10, desc: 'Art arda iki vuruş.' },
       { id: 'w5', name: 'Hız Patlaması', icon: 1103, mp: 30, cd: 20, buff: { spd: 0.25 }, dur: 5, fx: '特性-聚气', snd: 'skill_juqi', critT: [640, 680, 720, 760, 800, 840, 880, 920, 960, 1000], lv: 13, desc: '5 saniye %25 hızlı koşarsın, kritik şansın artar.' },
-      { id: 'w6', name: 'Ruh Yaran', icon: 1132, mp: 60, cd: 15, mult: 1.0, range: 5, fx: '特效-刀光', fx2: '特效-死亡标记', snd: 'skill_deathtag', pct: [420, 440, 460, 480, 500, 520, 540, 560, 580, 600], lv: 17, desc: 'Uzaktan karanlık saldırı.' },
+      { id: 'w6', name: 'Ruh Yaran', icon: 1132, mp: 60, cd: 15, mult: 1.0, range: 5, self: '特效-刀光', hit: '特效-死亡标记', snd: 'skill_deathtag', pct: [420, 440, 460, 480, 500, 520, 540, 560, 580, 600], lv: 17, desc: 'Uzaktan karanlık saldırı.' },
       { id: 'wp1', pas: { atk: 15 }, name: 'Silah Eğitimi', icon: 1136, lv: 2, desc: 'Saldırı artar.' },
       { id: 'wp2', pas: { hpPct: 8 }, name: 'Gürbüzlük', icon: 1109, lv: 4, desc: 'Can sınırı +%8.' },
       { id: 'wp3', pas: { dodge: 5 }, name: 'Çeviklik', icon: 1105, lv: 8, desc: 'Kaçınma +%5.' },
@@ -88,9 +88,9 @@ const CLS = {
       { id: 'm1', name: 'Ateş Topu', icon: 1137, mp: 20, cd: 1.2, mult: 1.5, range: 7, proj: '特效-火球', hit: '特效-火爆炸', snd: 'skill_fireball', snd2: 'skill_bomb', add: [60, 65, 70, 75, 80, 90, 100, 110, 120, 130], lv: 1, desc: 'Uzaktan ateş büyüsü.' },
       { id: 'm2', name: 'Dondurma', icon: 1132, mp: 30, cd: 0.9, mult: 1.5, crit: 15, range: 7, proj: '特效-冰球', hit: 'WATER_ATTACK', slow: 4, snd: 'skill_wind', snd2: 'skill_bubble', add: [80, 90, 100, 110, 120, 135, 150, 165, 180, 195], lv: 3, desc: 'Buz büyüsü; hedefi yavaşlatır.' },
       { id: 'm3', name: 'Şifa', icon: 1135, mp: 60, cd: 20, fx: 'LIGHT_ATTACK', snd: 'skill_light', healT: [300, 320, 340, 370, 400, 460, 530, 610, 700, 800], lv: 6, desc: 'Kendi canını yeniler.' },
-      { id: 'm4', name: 'Alev Yakışı', icon: 1114, mp: 70, cd: 8, mult: 1.5, aoe: 2.4, fxMob: 1, fx: 'FIRE_ATTACK', hit: '特效-火爆炸', snd: 'skill_fireball2', snd2: 'skill_bomb', add: [400, 425, 450, 475, 500, 530, 570, 620, 680, 750], lv: 10, desc: 'Yakın çevrendeki düşmanları yakar.' },
+      { id: 'm4', name: 'Alev Yakışı', icon: 1114, mp: 70, cd: 8, mult: 1.5, aoe: 2.4, projN: 3, fx: 'FIRE_ATTACK', hit: '特效-火爆炸', snd: 'skill_fireball2', snd2: 'skill_bomb', add: [400, 425, 450, 475, 500, 530, 570, 620, 680, 750], lv: 10, desc: 'Yakın çevrendeki düşmanları yakar.' },
       { id: 'm5', name: 'Büyü Kalkanı', icon: 1134, mp: 80, cd: 30, buff: { def: 0.6, dr: 30 }, dur: 10, fx: '特效-法力盾', snd: 'skill_juqi', lv: 13, desc: '10 saniye alınan hasarı azaltır.' },
-      { id: 'm6', name: 'Kar Fırtınası', icon: 1101, mp: 90, cd: 12, mult: 0.0, range: 7, proj: '特效-冰球', hit: '特效-冰块碎裂', splash: 2.6, slow: 4, snd: 'skill_wind', snd2: 'skill_ice', pct: [700, 725, 750, 775, 800, 840, 880, 920, 960, 1000], lv: 16, desc: 'Buz alan saldırısı.' },
+      { id: 'm6', name: 'Kar Fırtınası', icon: 1101, mp: 90, cd: 12, mult: 0.0, range: 7, proj: '特效-冰球', hit: '特效-冰块碎裂', hitN: 10, splash: 2.6, slow: 4, snd: 'skill_wind', snd2: 'skill_ice', pct: [700, 725, 750, 775, 800, 840, 880, 920, 960, 1000], lv: 16, desc: 'Buz alan saldırısı.' },
       { id: 'mp1', pas: { atk: 15 }, name: 'Büyü Çalışması', icon: 1133, lv: 2, desc: 'Büyü saldırısı artar.' },
       { id: 'mp2', pas: { mpPct: 10 }, name: 'Mana Güçlendirme', icon: 1105, lv: 4, desc: 'Mana sınırı +%10.' },
       { id: 'mp3', pas: { crit: 5 }, name: 'Mana Denetimi', icon: 1106, lv: 8, desc: 'İsabet ve kritik +%5.' },
@@ -103,8 +103,8 @@ const CLS = {
       { id: 'p1', name: 'Gölge Darbesi', icon: 1062, mp: 18, cd: 1.0, mult: 1.5, range: 7, proj: '特效-暗影冲击_红', hit: '特效-冲击爆炸', snd: 'skill_wind', snd2: 'skill_bomb', add: [25, 28, 31, 35, 40, 46, 55, 65, 72, 80], lv: 1, desc: 'Uzaktan gölge saldırısı.' },
       { id: 'p2', name: 'Çürüme', icon: 1066, mp: 30, cd: 6, mult: 0.3, dot: { n: 5 }, range: 7, fx: '特效-死亡标记', snd: 'skill_deathtag', dotT: [50, 60, 70, 80, 90, 100, 125, 150, 175, 200], lv: 3, desc: 'Hedefe lanet: 2 saniyede bir hasar verir.' },
       { id: 'p3', name: 'İlahi Gözdağı', icon: 1094, mp: 50, cd: 15, mult: 0.5, aoe: 3, weak: 10, fx: '特效-神之威慑', snd: 'skill_juqi', lv: 6, desc: 'Çevredeki düşmanların savunmasını düşürür.' },
-      { id: 'p4', name: 'Şifa Pınarı', icon: 1100, ik: 'item', mp: 60, cd: 15, buff: { hotT: 1 }, hotT: [210, 217, 225, 232, 239, 263, 313, 368, 433, 452], dur: 8, fx: '特效-治疗buff', snd: 'skill_light', lv: 10, desc: '8 saniye boyunca can yeniler.' },
-      { id: 'p5', name: 'Gölge Yakışı', icon: 1119, mp: 45, cd: 6, mult: 2.0, range: 7, proj: '特效-黑暗火球', hit: '特效-暗影灼烧_红', snd: 'skill_fire2', snd2: 'skill_bomb', lv: 13, desc: 'Karanlık ateşle yakar.' },
+      { id: 'p4', name: 'Şifa Pınarı', icon: 1100, ik: 'item', mp: 60, cd: 15, buff: { hotT: 1 }, hotT: [210, 217, 225, 232, 239, 263, 313, 368, 433, 452], dur: 8, fx: '特效-治疗之泉', snd: 'skill_light', lv: 10, desc: '8 saniye boyunca can yeniler.' },
+      { id: 'p5', name: 'Gölge Yakışı', icon: 1119, mp: 45, cd: 6, mult: 2.0, range: 7, hit: '特效-暗影灼烧_红', snd: 'skill_fire2', snd2: 'skill_bomb', lv: 13, desc: 'Karanlık ateşle yakar.' },
       { id: 'p6', name: 'Kutsal Işık', icon: 1030, ik: 'item', mp: 70, cd: 3, fx: '特效-缓缓加红', snd: 'skill_light', healT: [465, 490, 540, 584, 628, 666, 704, 754, 866, 987], lv: 16, desc: 'Canını yeniler.' },
       { id: 'p7', name: 'İlahi Öfke', icon: 1110, mp: 90, cd: 40, buff: { atk: 0.25, def: 0.25 }, dur: 20, fx: '特效-狂暴BUFF', snd: 'skill_relive', lv: 19, desc: 'Saldırı ve savunman 20 saniye artar.' },
       { id: 'pp1', pas: { atk: 15 }, name: 'Sofu İradesi', icon: 1244, ik: 'item', lv: 2, desc: 'Büyü saldırısı artar.' },
@@ -311,7 +311,7 @@ async function loadScene(sid, arrive) {
   const names = new Set(map.names);
   for (const [id, nm] of sc.ents) { const info = D.cit[id] || D.mon[id]; if (info) { names.add(info[1]); if (info[2]) names.add(info[2]); } }
   for (const n of ['特效-血爆死亡', '特效-刀光', 'LEVELUP', '特效-火球', '特效-火爆炸', '特效-冰球', '特效-冰块碎裂', '特效-黑暗火球', '特效-蓝火球', '特效-大喷血', '特效-治疗buff', 'NPC-新手引导－1', 'NPC-新手引导－2']) names.add(n);
-  for (const s of CLS[Game.P.cls].skills) for (const k of ['fx', 'proj', 'hit']) if (s[k]) names.add(s[k]);
+  for (const s of CLS[Game.P.cls].skills) for (const k of ['fx', 'proj', 'hit', 'self', 'fx2']) if (s[k]) names.add(s[k]);
   await Assets.preload([...names]);
   Game.player && (Game.player = null);
   Game.map = map; Game.scene = sc; Game.sceneId = sid; Game.target = null; Game.ents = []; Game.fx = []; Game.floats = [];
@@ -448,23 +448,24 @@ function useSkill(i) {
   const o = { slow: sk.slow, crit: sk.crit, add: skT(sk, 'add') };
   const land = () => {
     if (sk.snd2) SFX.play(sk.snd2);
-    if (sk.splash) { Game.fx.push(new Fx(sk.hit, t.x, t.y)); for (const m of mobsNear(t.x, t.y, sk.splash)) hitMob(m, MUL * SM, o); }
+    if (sk.splash) { const n = sk.hitN || 1; for (let k = 0; k < n; k++) later(k * 0.06, () => { const r = k ? Math.random() * 1.3 : 0, a = Math.random() * 6.283; Game.fx.push(new Fx(sk.hit, t.x + Math.cos(a) * r, t.y + Math.sin(a) * r)); }); for (const m of mobsNear(t.x, t.y, sk.splash)) hitMob(m, MUL * SM, o); }
     else { hitMob(t, MUL * SM, o); const f = sk.hit || sk.fx; if (f) Game.fx.push(new Fx(f, t.x, t.y)); }
     if (sk.fx2) Game.fx.push(new Fx(sk.fx2, t.x, t.y));
     if (sk.hits === 2) later(0.28, () => { if (!t.dead) { hitMob(t, MUL * SM, o); SFX.play(sk.snd); } });
     if (sk.dot && !t.dead) t.dot = { n: sk.dot.n, t: 2, mult: 0.1, add: skT(sk, 'dotT') };
   };
+  if (sk.self) Game.fx.push(new Fx(sk.self, p.x, p.y, { dir: p.dir }));
   later(0.25, () => {
     if (sk.proj) shoot(sk.proj, p, t, land);
-    else if (sk.aoe) { const near = mobsNear(p.x, p.y, sk.aoe); if (!sk.fxMob || !near.length) Game.fx.push(new Fx(sk.fx, p.x, p.y)); if (sk.snd2) SFX.play(sk.snd2); for (const m of near) { hitMob(m, MUL * SM, o); if (sk.weak) m.weakT = sk.weak; if (sk.fxMob) { Game.fx.push(new Fx(sk.fx, m.x, m.y)); if (sk.hit) later(0.45, () => Game.fx.push(new Fx(sk.hit, m.x, m.y))); } else if (sk.hit) Game.fx.push(new Fx(sk.hit, m.x, m.y)); } }
+    else if (sk.aoe) { const near = mobsNear(p.x, p.y, sk.aoe); if (!sk.projN || !near.length) Game.fx.push(new Fx(sk.fx, p.x, p.y)); if (sk.snd2 && !sk.projN) SFX.play(sk.snd2); for (const m of near) { hitMob(m, MUL * SM, o); if (sk.weak) m.weakT = sk.weak; if (sk.projN) { for (let k = 0; k < sk.projN; k++) later(k * 0.12, () => shoot(sk.fx, p, m, () => { if (sk.hit) Game.fx.push(new Fx(sk.hit, m.x, m.y)); if (k === 0 && sk.snd2) SFX.play(sk.snd2); }, true)); } else if (sk.hit) Game.fx.push(new Fx(sk.hit, m.x, m.y)); } }
     else if (sk.mult) land();
     else if (sk.heal || sk.healT) { const s = stats(); const h = Math.round(sk.healT ? skT(sk, 'healT') + s.atk : (s.hp * sk.heal + s.atk) * SM); p.hp = Math.min(s.hp, p.hp + h); UI.float(p, '+' + h, '#7bff8a'); Game.fx.push(new Fx(sk.fx, p.x, p.y, { follow: p })); }
     else if (sk.buff) { p.buffs = p.buffs.filter(b => b.id !== sk.id); p.buffs.push({ id: sk.id, buff: Object.assign({}, sk.buff, sk.critT ? { crit: skT(sk, 'critT') / 10 } : null, sk.hotT ? { hotT: skT(sk, 'hotT') } : null), t: sk.dur }); Game.fx.push(new Fx(sk.fx, p.x, p.y, { follow: p })); UI.log(`${sk.name} etkin.`); }
   });
   UI.refresh();
 }
-function shoot(name, from, to, cb) {
-  const f = new Fx(name, from.x, from.y, { z: 30 }); f.proj = { to, cb, sp: 9 }; f.loop = 1; Game.fx.push(f);
+function shoot(name, from, to, cb, vis) {
+  const f = new Fx(name, from.x, from.y, { z: 30 }); f.proj = { to, cb, sp: 9, vis }; f.loop = 1; Game.fx.push(f);
 }
 function nearestMob(r) { const p = Game.player; let best = null, bd = r; for (const e of Game.ents) if (e.kind === 'mob' && !e.dead) { const d = Math.hypot(e.x - p.x, e.y - p.y); if (d < bd) { bd = d; best = e; } } return best; }
 const timers = [];
@@ -741,7 +742,7 @@ function update(dt) {
   for (const f of Game.fx) {
     f.t += dt * TICK; if (f.follow) { f.x = f.follow.x; f.y = f.follow.y; }
     if (f.proj) {
-      const t = f.proj.to; if (!t || t.dead) { f.done = true; continue; }
+      const t = f.proj.to; if (!t || (t.dead && !f.proj.vis)) { f.done = true; continue; }
       const dx = t.x - f.x, dy = t.y - f.y, d = Math.hypot(dx, dy), st = f.proj.sp * dt;
       if (d <= st + 0.2) { f.done = true; f.proj.cb(); } else { f.x += dx / d * st; f.y += dy / d * st; }
     } else if (!f.loop && f.t >= f.len) f.done = true;
