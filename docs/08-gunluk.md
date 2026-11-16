@@ -40,3 +40,4 @@ Her commit'te buraya bir satır eklenir (tarih başlığı altında). Ayrıntı 
 - Görev yol bulma akıllandı: alınan görevde hedef canavarın/nesnenin haritasına gider ve varınca saldırır, hazır görevde ödülü veren kişiye gider (önceden hep görevi veren NPC'ye dönüyordu).
 - Görev yol bulma canavarın yanına götürür ve seçer, kendiliğinden saldırmaz.
 - Görev denetimi (orijinal ham kayıt): APK görev tablosunun seviye/deneyim/zincir verisinin yanlış okunduğu bulundu; zincir 67 görevde, adet ve çok hedef 5 görevde düzeltildi; bütün görevlerde orijinal altın ve sınıfa göre ödül eşyası (77 eşya eklendi); görev penceresinde ödül satırı; denetim araçları (gorev_ham.py, gorev_denetim.js, gorev_seviye.js, odul.js).
+- Deneyim sistemi (kullanıcı kararı "orijinal + %40 görev"): görevler orijinal deneyimi verir; seviye tablosu ve canavar deneyimi buna göre kuruldu (deneyim_tablosu.py). Görevler ~%40; seviye başına ~100 öldürme; 55'e kadar ~5.000 öldürme (eski ~7.400, çoğu 40 sonrası).

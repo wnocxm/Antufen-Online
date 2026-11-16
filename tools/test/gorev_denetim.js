@@ -46,7 +46,7 @@ for (const q of Q) {
   else if (!ours.length && orig.length) add('zincir:eksik', `${q.id} "${q.title}": bizde öncesiz, orijinalde önceki ${orig.join('/')}`);
   else if (ours.length && !orig.length) add('zincir:bizim', `${q.id} "${q.title}": orijinalde öncesiz, bizde ${ours.join('/')} (açılma için eklenmiş)`);
   // ödüller (oyundaki hesaplanmış ödül game.js'te; burada rw ve elle yazılan reward karşılaştırılır)
-  const rw = q.rw || q.reward || {}, g0 = rw.gold, x0 = (q.reward || {}).xp;
+  const rw = q.rw || q.reward || {}, g0 = rw.gold, x0 = q.rw ? q.rw.xp : (q.reward || {}).xp;   // oyun q.rw'yi esas alır (game.js)
   if (g0 != null && g0 !== r.gold) add('altın', `${q.id}: bizde ${g0}, orijinalde ${r.gold}`);
   if (x0 != null && x0 !== r.xp) add('deneyim', `${q.id}: bizde ${x0}, orijinalde ${r.xp}`);
   if (x0 == null) stat['deneyim (formülden)'] = (stat['deneyim (formülden)'] || 0) + 1;

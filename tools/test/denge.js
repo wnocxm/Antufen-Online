@@ -13,7 +13,7 @@ const RACE = process.env.RACE || '人类', MAX = +(process.env.MAX || 55), GRIND
   const r = await p.evaluate(([MAX, GRIND]) => {
     const P = __G.P, S = Assets.D.scenes, quiet = () => {}; UI.log = quiet; UI.toast = quiet; SFX.play = quiet; save = quiet;
     const scOf = nm => Object.values(S).find(s => s.name === nm);
-    const mobXp = (nm, sc) => { const d = monDef(nm, sc); return Math.max(1, Math.round(d.xp * clamp(1 + (d.lv - P.lv) * 0.1, 0.2, 1.5))); };
+    const kx = (nm, sc) => { const d = monDef(nm, sc); return Math.max(1, Math.round((typeof mobXp === 'function' ? mobXp(d.lv, d.rank || 0) : d.xp) * clamp(1 + (d.lv - P.lv) * 0.1, 0.2, 1.5))); };   // oyunla aynı (killMob)
     // kasma yeri: seviyeye uygun normal canavarlı bir harita
     const grindSpot = () => { let best = null;   // seviyesi oyuncuya en yakın (en çok 2 üstü) normal canavar
       for (const s of Object.values(S)) { if (!s.lvr || s.lvr[0] > P.lv + 2) continue;
@@ -28,12 +28,12 @@ const RACE = process.env.RACE || '人类', MAX = +(process.env.MAX || 55), GRIND
         const q = av[0]; acceptQuest(q); const R = row(); R.where.add(trName(q.giver)); R.over += P.lv - questMinLv(q);
         if (q.type === 'kill' || q.type === 'collect') {
           const sc = scOf(q.sc), n = q.type === 'kill' ? q.count : Math.ceil(q.count / (q.chance || 0.5));
-          for (let i = 0; i < n; i++) { const x = mobXp(q.target, sc); row().kill++; row().kxp += x; gainXp(x); }
+          for (let i = 0; i < n; i++) { const x = kx(q.target, sc); row().kill++; row().kxp += x; gainXp(x); }
         }
         P.quests[q.id].ready = true; const xp0 = q.reward.xp || 0; completeQuest(q); row().q++; row().qxp += xp0;
       } else {
         if (!GRIND) break;
-        const g = grindSpot(); if (!g) break; const x = mobXp(g[1], g[0]); const R = row(); R.grind++; R.gxp += x; R.spot = trName(g[0].name) + ' / ' + trName(g[1]); gainXp(x);
+        const g = grindSpot(); if (!g) break; const x = kx(g[1], g[0]); const R = row(); R.grind++; R.gxp += x; R.spot = trName(g[0].name) + ' / ' + trName(g[1]); gainXp(x);
       }
     }
     return Object.values(rows).map(R => ({ ...R, over: R.q ? (R.over / R.q).toFixed(1) : '', where: [...R.where].slice(0, 4).join(', ') }));

@@ -216,8 +216,11 @@ function look() {
   const P = Game.P, e = P.eq || {}, G = sl => (e[sl] && ITEMS[e[sl]] && ITEMS[e[sl]].gfx) || null;
   return { cls: P.cls, race: P.race, sex: P.sex, bodyG: G('body'), headG: G('head'), weapG: G('weap') };
 }
-// seviye başına gereken deneyim: 10'a kadar hızlı, sonra kademeli ağırlaşır (40'tan sonra ×2,5) — bol kasma (kullanıcı kararı)
-function xpNeed(l) { return Math.floor((40 * Math.pow(l, 1.85) + 20) * (1 + 1.5 * clamp((l - 10) / 30, 0, 1))); }
+// Seviye deneyim tablosu ve normal canavar deneyimi: tools/deneyim_tablosu.py üretir (elle değiştirme; orijinal görev deneyimine göre,
+// görevler gereken deneyimin ~%40'ı, canavarlar ~%60'ı; docs/04). XPT[L] = L → L+1 için gereken, MXPT[L] = L. seviye normal canavar.
+const XPT = [0, 670, 991, 1460, 2160, 3200, 3840, 4490, 4630, 4770, 4910, 5060, 5210, 5360, 5520, 5690, 5860, 6040, 6220, 6400, 7150, 7760, 8430, 9150, 9930, 30900, 38500, 47900, 59600, 74300, 78100, 94200, 114000, 137000, 166000, 236000, 293000, 326000, 336000, 346000, 356000, 367000, 378000, 389000, 401000, 413000, 426000, 438000, 452000, 465000, 479000, 493000, 508000, 523000, 539000, 555000, 572000, 589000, 607000, 625000, 644000, 663000, 683000, 703000, 725000, 746000, 769000, 792000, 816000, 840000, 865000, 891000, 918000, 945000, 974000, 1000000, 1030000, 1060000, 1100000, 1130000, 1160000, 1200000, 1230000, 1270000, 1310000, 1350000, 1390000, 1430000, 1470000, 1520000, 1560000, 1610000, 1660000, 1710000, 1760000, 1810000, 1870000, 1920000, 1980000, 2040000, 2100000, 2160000, 2230000, 2290000, 2360000, 2430000, 2510000, 2580000, 2660000, 2740000, 2820000, 2910000, 2990000, 3080000, 3180000, 3270000, 3370000, 3470000, 3580000, 3680000, 3790000];
+const MXPT = [0, 8, 11, 14, 18, 24, 26, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 30, 93, 116, 144, 179, 223, 234, 283, 342, 411, 498, 708, 879, 978, 1010, 1040, 1070, 1100, 1130, 1170, 1200, 1240, 1280, 1310, 1360, 1400, 1440, 1480, 1520, 1570, 1620, 1660, 1720, 1770, 1820, 1880, 1930, 1990, 2050, 2110, 2180, 2240, 2310, 2380, 2450, 2520, 2600, 2670, 2750, 2840, 2920, 3000, 3090, 3180, 3300, 3390, 3480, 3600, 3690, 3810, 3930, 4050, 4170, 4290, 4410, 4560, 4680, 4830, 4980, 5130, 5280, 5430, 5610, 5760, 5940, 6120, 6300, 6480, 6690, 6870, 7080, 7290, 7530, 7740, 7980, 8220, 8460, 8730, 8970, 9240, 9540, 9810, 10100, 10400, 10700, 11000, 11400];
+function xpNeed(l) { return XPT[clamp(Math.round(l), 1, XPT.length - 1)]; }
 
 // ---------------- Varlıklar ----------------
 class Ent {
@@ -240,8 +243,10 @@ class Player extends Ent {
 }
 // Elle ayarlanmamış canavarlar: seviye sahnenin seviyesinden, sıra adındaki yıldızlardan (☆ seçkin, ☆☆ patron) gelir.
 // Sahnenin seviyesi harita dosyası adındaki sayıdır (…-10, …-50); bir sahnedeki canavarlar o aralığa sırayla dağıtılır.
+// canavar deneyimi: seviyedeki normal canavar (MXPT, tools/deneyim_tablosu.py) × seçkin 3 / boss 25
+const mobXp = (lv, rank) => Math.round(MXPT[clamp(lv, 1, MXPT.length - 1)] * (rank === 2 ? 25 : rank ? 3 : 1));
 function monDef(nm, sc) {
-  const R = sc && sc.lvr, xpOf = (lv, rank) => Math.round((4 + 5 * lv) * (rank === 2 ? 25 : rank ? 3 : 1));
+  const R = sc && sc.lvr, xpOf = (lv, rank) => mobXp(lv, rank);
   if (MON[nm]) {
     const d = MON[nm];
     // elle yazılmış değerler gerçek seviye aralığının dışındaysa aralığa çekilir (aralıklar dünya haritası tablosundan)
@@ -414,7 +419,7 @@ function hitMob(m, mult, o = {}) {
 function killMob(m) {
   m.dead = true; m.deadT = 0; m.state = 'die'; m.respawnT = m.d.rank === 2 ? 90 : m.d.rank ? 40 : 15;
   if (Game.target === m) setTarget(null);
-  const P = Game.P, diff = m.d.lv - P.lv, xp = Math.max(1, Math.round(m.d.xp * clamp(1 + diff * 0.1, 0.2, 1.5)));
+  const P = Game.P, diff = m.d.lv - P.lv, xp = Math.max(1, Math.round(mobXp(m.d.lv, m.d.rank || 0) * clamp(1 + diff * 0.1, 0.2, 1.5)));
   gainXp(xp); UI.float(m, '+' + xp + ' TP', '#9fe060');
   const gold = irnd(m.d.lv, m.d.lv * 3) + (m.d.rank || 0) * 20; P.gold += gold; SFX.play('kill', 0.7); later(0.35, () => SFX.play('coin', 0.5)); UI.log(`${gold} altın alındı`, 'loot');
   if (Math.random() < 0.1) addItem(P.lv > 10 ? 'hp2' : 'hp1', 1);
@@ -602,15 +607,14 @@ function npcMark(cn) {
 // teslim görevi: çantadaki eşyalar (q.give kimlikleri) sayılır, tamamlanınca alınır
 const giveCount = q => (q.give || []).reduce((a, id) => a + countItem(id), 0);
 function takeGive(q) { let n = q.count; for (const id of q.give || []) { const k = Math.min(n, countItem(id)); if (k) { removeItem(id, k); n -= k; } } }
-// ödülü verilmemiş görevlere seviyeden ödül
-// Denge (kullanıcı kararı: orijinal gibi bol kasma): ilk seviyelerde görevler hızlı taşır, sonra görev deneyimi azalır
-// (QXP_F: 1 → 40. seviyeden sonra 0,3); deneyimin çoğu canavar kesmekten gelir. Ölçüm: tools/test/denge.js
+// ödülü olmayan görevlere (orijinal kaydı olmayan; şu an yok) yedek ödül formülü. Asıl ödüller orijinal (aşağıda q.rw).
+// Deneyim dengesi: görevler gereken deneyimin ~%40'ını, canavarlar ~%60'ını verir (XPT/MXPT, tools/deneyim_tablosu.py). Ölçüm: GRIND=1 tools/test/denge.js
 const QXP_F = L => clamp(1.2 - L / 40, 0.3, 1);
 for (const q of QUESTS) if (!q.reward) { const L = q.lv || (MON[q.target] && MON[q.target].lv) || 3, mx = (MON[q.target] && MON[q.target].xp) || 20;
   q.reward = q.type === 'kill' || q.type === 'collect' ? { xp: Math.round(((q.count || 1) * mx * 1.6 + 60 * L) * QXP_F(L)), gold: 10 + L * 6 } : { xp: Math.round((80 + 50 * L) * QXP_F(L)), gold: 8 + L * 4 }; }
 // orijinal tablodaki altın ve eşya ödülü (tools/gorevler.py)
-// orijinal altın ve eşya ödülü (Symbian ham kaydı, tools/gorev_ham.py → quests_gen.js QRW); eşyanın 3. öğesi sınıf: yalnız o sınıfa verilir
-for (const q of QUESTS) if (q.rw) { q.reward.gold = q.rw.gold; q.reward.items = q.rw.items || []; }
+// orijinal deneyim, altın ve eşya ödülü (Symbian ham kaydı, tools/gorev_ham.py → quests_gen.js QRW); eşyanın 3. öğesi sınıf: yalnız o sınıfa verilir
+for (const q of QUESTS) if (q.rw) { q.reward.xp = q.rw.xp; q.reward.gold = q.rw.gold; q.reward.items = q.rw.items || []; }   // deneyim de orijinal (kullanıcı kararı 16.11)
 const rewardItems = q => (q.reward.items || []).filter(([id, , c]) => ITEMS[id] && (!c || [].concat(c).includes(Game.P.cls)));
 function acceptQuest(q) { const P = Game.P; P.quests[q.id] = { n: 0, ready: q.type === 'talk' }; if (q.type === 'special' && Game.flags[q.flag]) P.quests[q.id].ready = true; UI.log(`Görev alındı: ${q.title}`, 'q'); SFX.play('accept_task'); UI.refresh(); save(); }
 function questKill(name) {

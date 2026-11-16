@@ -6,7 +6,7 @@
 - Türler: `talk` (kabul edince hazır; `to` ile konuşunca biter; `item` varsa "eşyayı götür"), `kill` (`target` × `count`),
   `collect` (`target` canavardan `chance` olasılıkla `item`), `pickup` (`node` toplama noktası), `deliver`, `special` (`flag`).
 - `req`: önceki görev (dizi = "herhangi biri", ırk yolları için). `race`: yalnızca o ırk.
-- Ödül: altın ve eşya orijinal (`q.rw` ← `QRW`, ham kayıt); TP şimdilik seviyeden hesaplanır (`q.reward`), orijinali `q.rw.xp`.
+- Ödül: deneyim, altın ve eşya orijinal (`q.rw` ← `QRW`, ham kayıt); `q.reward` bunlardan kurulur.
 
 ## Orijinal kaynak: ne var, ne yok (16.11.2026 denetimi)
 **Kaynak hiyerarşisi:** Symbian `all_task.godat` HAM kaydı (`tools/gorev_ham.py` → `kaynak/cikti/cozulmus/tablolar/gorev_ham.json`) esastır.
@@ -26,7 +26,7 @@
   - Ödül eşyası yalnız kendi sınıfına verilir (`rewardItems`). Görev penceresinde ödül satırı gösterilir.
 - **Ödül eşyaları:** `tools/odul_esyalari.py` ödül listesinde olup `items.json`'da olmayan eşyaları ekler (77 eşya). Değerleri mevcut merdivenden seviyeye göre ara değerle verilir. `30676` 成长大礼包 = oyundaki `growthBox`.
 - **Denetim:** `node tools/test/gorev_denetim.js` (`OUT=rapor`, `AYRINTI=1`). Bütün görevleri alan alan orijinalle karşılaştırır. Her görev değişikliğinden sonra çalıştır; `zincir:yanlış`, `zincir:eksik`, `adet`, `hedef`, `eşya`, `altın` sıfır olmalı.
-- **Deneyim:** görevlerin orijinal deneyimi `q.rw.xp`'de duruyor. Oyun henüz bizim formülü kullanıyor (`game.js` `q.reward.xp`), çünkü seviye tablosu orijinal görev deneyimine göre yeniden kurulmadı (karar bekliyor, docs/01).
+- **Deneyim:** görevler orijinal deneyimi verir (`q.rw.xp`). Seviye tablosu ve canavar deneyimi buna göre kuruldu (docs/03 › Savaş › Deneyim sistemi). Görev listesi ya da açılma seviyeleri değişince sırayla şunlar çalıştırılır: `JSON=kaynak/cikti/cozulmus/tablolar/gorev_seviye.json node tools/test/gorev_seviye.js`, `python3 tools/deneyim_tablosu.py`, `GRIND=1 node tools/test/denge.js` (görev payı ~%40 mı).
 
 ### Orijinalden bilinçli sapmalar (istisnalar, denetim aracında `ISTISNA`)
 - 81063 / 81396 Obur Ormanı: orijinal 15 食人鬼 + 15 恶咒食人鬼 + 15 鬼骑士. İlk ikisi orijinal harita verisinde de yok; yalnız 15 Hayalet Şövalye kaldı.

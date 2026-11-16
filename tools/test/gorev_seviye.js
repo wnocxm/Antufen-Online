@@ -19,5 +19,7 @@ const XP = {}; for (const [k, r] of Object.entries(H)) XP[k] = r.xp;
   }, XP);
   const lines = ['sv | insan: görev, orij.deneyim, bizim | elf: görev, orij.deneyim, bizim | seviye için gereken (bizim xpNeed)'];
   for (let lv = 1; lv <= 60; lv++) { const a = r['人类'][lv], e = r['精灵'][lv]; lines.push(`${String(lv).padStart(2)} | ${String(a.n).padStart(3)} ${String(a.xpOrig).padStart(7)} ${String(a.xpOurs).padStart(7)} | ${String(e.n).padStart(3)} ${String(e.xpOrig).padStart(7)} ${String(e.xpOurs).padStart(7)} | ${a.need}`); }
-  const rep = lines.join('\n'); if (process.env.OUT) fs.writeFileSync(process.env.OUT, rep); console.log(rep); await b.close();
+  const rep = lines.join('\n'); if (process.env.OUT) fs.writeFileSync(process.env.OUT, rep); console.log(rep);
+  if (process.env.JSON) fs.writeFileSync(process.env.JSON, JSON.stringify(r));   // tools/deneyim_tablosu.py girdisi
+  await b.close();
 })();

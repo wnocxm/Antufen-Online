@@ -35,9 +35,7 @@ Tamam:
 - Görevler (oyunda 801, SQL'de 832 satır): Acemi kampları, Guanlin, Koşanat Şehri, Kâhin Tapınağı, Gözcü Kampı, Güneşgören Şehri (+Dinlenme Bölgesi, lonca terasları), İstihbarat Karakolu, İmparatorluk Başkenti çevresi, Dağgören Şehri, Yoğunsis Kasabası, Sanatçılar Loncası, Altındalga Limanı, Büyü Akademisi. **55'e kadar bütün bölgelerin hikâye görevleri alındı.**
 
 **Görev denetimi (16.11):** ödül, zincir ve adet orijinale çekildi (docs/04 › Orijinal kaynak).
-- Karar bekliyor: deneyim sistemi.
-  - Orijinal görev deneyimi elde, ama seviye tablosu ve canavar deneyimi orijinal veride yok.
-  - Görev deneyimi orijinale geçerse seviye tablosu ve canavar deneyimi ona göre yeniden kurulmalı.
+- **Deneyim (kullanıcı kararı):** görev deneyimi orijinal. Seviye tablosu ve canavar deneyimi buna göre kuruldu; görevler ~%40, canavarlar ~%60 (docs/03 › Deneyim sistemi).
 - Görevlerin açılma seviyesi orijinal veride yok; tahmin olarak kalıyor.
 
 Sırada (kullanıcı onayladı):

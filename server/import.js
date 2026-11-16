@@ -47,12 +47,12 @@ function questList(lang) {
     const QT = questList('tr'), QE = Object.fromEntries(questList('en').map(q => [q.id, q]));
     await c.query('DELETE FROM quests');
     for (const q of QT) {
-      const e = QE[q.id] || {}, r = q.rw || {};
+      const e = QE[q.id] || {}, r = q.rw || {};   // r: orijinal ödül (q.rw ← quests_gen.js QRW)
       await c.query(`INSERT INTO quests (id, type, giver, deliver_to, target, node, count, scene, prev_quests, race, reward_xp, reward_gold, reward_items,
           title_tr, goal_tr, text_tr, wait_tr, done_tr, item_tr, title_en, goal_en, text_en, wait_en, done_en, item_en)
         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25)`,
         [q.id, q.type, q.giver, q.to, q.target || null, q.node || null, q.count || null, q.sc || null, q.req != null ? [].concat(q.req) : null, q.race || null,
-          (q.reward && q.reward.xp) || null, r.gold || (q.reward && q.reward.gold) || null, r.items && r.items.length ? JSON.stringify(r.items) : null,
+          r.xp != null ? r.xp : (q.reward && q.reward.xp) || null, r.gold != null ? r.gold : (q.reward && q.reward.gold) || null, r.items && r.items.length ? JSON.stringify(r.items) : null,
           q.title, q.goal || null, q.text || null, q.wait || null, q.done || null, q.item || null,
           e.title || null, e.goal || null, e.text || null, e.wait || null, e.done || null, e.item || null]);
     }
