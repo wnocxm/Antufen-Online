@@ -35,7 +35,7 @@ Oyun hazır: `window.__G && window.__G.player`. Konsoldan: `gmLevel(n)`, `loadSc
 - `tools/test/zindan.js`: zindan giriş/çıkış, kesilenlerin geri gelmemesi, boss sandığı, günlük sınır, ölüm. `BOSS=… node tools/test/savas.js`: boss dövüşleri.
 - `tools/test/zindan40.js`, `tools/test/zindan50.js`: 40 ve 50. seviye zindan grupları (ışınlanma, kapılar, ön görev, çok hedefli görev, boss'lar).
 - `tools/test/evcil.js`: kuluçka, savaş katkısı, besleme, ölüm/diriltme, yumurta düşmesi, rastgele beceri dağılımı, ağaç (8 biçim), dönüşüm, beceri aktarma, hale. Pencere görüntüleri: `_pencere`, `_taktik`, `_beceri`, `_agac`, `_donusum`.
-- `tools/test/yolbul.js`: görev yol bulma (alınmamış → veren, alınmış → canavarın haritası ve saldırı, hazır → ödülü veren).
+- `tools/test/yolbul.js`: görev yol bulma (alınmamış → veren, alınmış → canavarın haritası, varınca yanına yürür ama saldırmaz, hazır → ödülü veren).
 - `tools/test/hedef.js`: hedef seçme saldırı başlatmaz; ikinci dokunuş ve saldırı düğmesi saldırır; yön tuşu bırakır.
 - `tools/test/evcilgorev.js`: RACE=人类|精灵 Terbiyeci zinciri.
 - `tools/test/evcil_kolaj.js`: bütün türlerin 8 biçimi ve beceri simgeleri tek görselde (görsel denetim).

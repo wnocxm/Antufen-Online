@@ -33,7 +33,7 @@ Otomatik yol: `routeTo(sid)` sahneler arası (`scenePath`), `routeToNpc(cn)`, `w
 - Alınmamış görev → görevi veren.
 - Hazır görev (ya da konuş / teslim / özel görev) → ödülü veren kişi (`q.to`).
 - Öldür/topla görevi:
-  - Bu haritada yaşayan hedef varsa ona saldırır (çok hedefli görevde bitmemiş hedefler).
+  - Bu haritada yaşayan hedef varsa yanına yürür ve hedef olarak seçer; **saldırmaz** (kullanıcı isteği). Çok hedefli görevde bitmemiş hedefler.
   - Hepsi ölüyse doğdukları yere yürür.
   - Yoksa canavarın en yakın haritasına gider; görevdeki harita adı `q.sc` önceliklidir (`monSceneNear(ad, sc)`).
 - Nesne toplama → nesne ya da nesnenin haritası.

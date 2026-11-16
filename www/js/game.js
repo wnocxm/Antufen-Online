@@ -676,7 +676,7 @@ function routeStep() {
 function walkToEnt(t) { const p = Game.player; p.path = findPath(Game.map, p.x, p.y, t.x, t.y + 1); Game.goTarget = t; setTarget(null); if (!p.path) UI.toast('Oraya yol bulunamadı.'); }
 // Görev yol bulma (orijinaldeki "寻路"), görevin durumuna göre:
 //  alınmamış → görevi veren; hazır (ya da konuş/teslim/özel görev) → ödülü veren kişi (q.to);
-//  öldür/topla → hedef canavar (bu haritada yaşayan varsa saldırır, hepsi ölüyse doğdukları yere yürür, yoksa canavarın haritasına — q.sc öncelikli);
+//  öldür/topla → hedef canavar (bu haritada yaşayan varsa yanına yürüyüp seçer, saldırmaz; hepsi ölüyse doğdukları yere yürür, yoksa canavarın haritasına — q.sc öncelikli);
 //  nesne toplama → nesne (bu haritada yoksa nesnenin haritasına). Başka haritaya gidilince varışta görev yürüyüşü kendiliğinden sürer (Game.routeQuest).
 function questWalk(q) {
   const p = Game.player, st = Game.P.quests[q.id], near = f => { let b = null, bd = 1e9; for (const e of Game.ents) if (f(e)) { const d = Math.hypot(e.x - p.x, e.y - p.y); if (d < bd) { bd = d; b = e; } } return b; };
@@ -692,7 +692,7 @@ function questWalk(q) {
   }
   const names = q.targets ? q.targets.filter(x => ((st.c || {})[x[0]] || 0) < x[1]).map(x => x[0]) : [q.target];
   const t = near(e => e.kind === 'mob' && !e.dead && names.includes(e.name));
-  if (t) { setTarget(t, true); p.path = null; return; }   // göreve yazılı canavara saldırır
+  if (t) { p.path = findPath(Game.map, p.x, p.y, t.x, t.y + 1); Game.goTarget = null; setTarget(t); return; }   // canavarın yanına yürür ve seçer; saldırmaz (kullanıcı isteği)
   const spot = near(e => e.kind === 'mob' && names.includes(e.name));   // hepsi ölü: yeniden doğdukları yere yürü
   if (spot) { p.path = findPath(Game.map, p.x, p.y, spot.x, spot.y + 1); Game.goTarget = null; setTarget(null); UI.toast('Canavarlar yeniden doğuyor; doğdukları yere gidiliyor.'); return; }
   let best = null, bl = 1e9;

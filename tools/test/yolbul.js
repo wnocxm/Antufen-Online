@@ -1,4 +1,4 @@
-// Görev yol bulma: alınmamış → veren; alınmış öldür/topla → canavarın haritası (varınca saldırır); hazır → ödülü veren.
+// Görev yol bulma: alınmamış → veren; alınmış öldür/topla → canavarın haritası (varınca yanına yürür, seçer, saldırmaz); hazır → ödülü veren.
 // node tools/test/yolbul.js
 const { chromium } = require('playwright');
 (async () => {
@@ -17,7 +17,7 @@ const { chromium } = require('playwright');
     acceptQuest(q); Game.player.path = null; Game.goTarget = null; questWalk(q); out.alınmış = Game.route ? 'rota: ' + sc(Game.route) : Game.goTarget ? 'NPC: ' + trName(Game.goTarget.cn) : 'yok';
     // varışı taklit et: hedef haritaya git, rota bitişi görevi sürdürsün
     const dest = Game.route; Game.route = null; await gotoScene(dest); Game.route = dest; Game.routeQuest = q.id; routeStep();
-    out.varınca = Game.target ? 'saldırı: ' + trName(Game.target.name) + (Game.engage ? ' (saldırıda)' : '') : 'yok';
+    out.varınca = (Game.target ? 'hedef: ' + trName(Game.target.name) : 'hedef yok') + (Game.engage ? ' (SALDIRIYOR!)' : ' (saldırmıyor)') + (Game.player.path ? ', yanına yürüyor' : '');
     Game.P.quests[q.id].ready = true; Game.player.path = null; questWalk(q); out.hazır = Game.route ? 'rota: ' + sc(Game.route) + ' → ' + trName(Game.routeNpc || '') : Game.goTarget ? 'NPC: ' + trName(Game.goTarget.cn) : 'yok';
     return out;
   });
