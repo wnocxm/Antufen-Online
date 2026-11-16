@@ -88,7 +88,7 @@ const CLS = {
       { id: 'm1', name: 'Ateş Topu', icon: 1137, mp: 20, cd: 1.2, mult: 1.5, range: 7, proj: '特效-火球', hit: '特效-火爆炸', snd: 'skill_fireball', snd2: 'skill_bomb', add: [60, 65, 70, 75, 80, 90, 100, 110, 120, 130], lv: 1, desc: 'Uzaktan ateş büyüsü.' },
       { id: 'm2', name: 'Dondurma', icon: 1132, mp: 30, cd: 0.9, mult: 1.5, crit: 15, range: 7, proj: '特效-冰球', hit: 'WATER_ATTACK', slow: 4, snd: 'skill_wind', snd2: 'skill_bubble', add: [80, 90, 100, 110, 120, 135, 150, 165, 180, 195], lv: 3, desc: 'Buz büyüsü; hedefi yavaşlatır.' },
       { id: 'm3', name: 'Şifa', icon: 1135, mp: 60, cd: 20, fx: 'LIGHT_ATTACK', snd: 'skill_light', healT: [300, 320, 340, 370, 400, 460, 530, 610, 700, 800], lv: 6, desc: 'Kendi canını yeniler.' },
-      { id: 'm4', name: 'Alev Yakışı', icon: 1114, mp: 70, cd: 8, mult: 1.5, aoe: 2.4, fx: 'FIRE_ATTACK', hit: '特效-火爆炸', snd: 'skill_fireball2', snd2: 'skill_bomb', add: [400, 425, 450, 475, 500, 530, 570, 620, 680, 750], lv: 10, desc: 'Yakın çevrendeki düşmanları yakar.' },
+      { id: 'm4', name: 'Alev Yakışı', icon: 1114, mp: 70, cd: 8, mult: 1.5, aoe: 2.4, fxMob: 1, fx: 'FIRE_ATTACK', hit: '特效-火爆炸', snd: 'skill_fireball2', snd2: 'skill_bomb', add: [400, 425, 450, 475, 500, 530, 570, 620, 680, 750], lv: 10, desc: 'Yakın çevrendeki düşmanları yakar.' },
       { id: 'm5', name: 'Büyü Kalkanı', icon: 1134, mp: 80, cd: 30, buff: { def: 0.6, dr: 30 }, dur: 10, fx: '特效-法力盾', snd: 'skill_juqi', lv: 13, desc: '10 saniye alınan hasarı azaltır.' },
       { id: 'm6', name: 'Kar Fırtınası', icon: 1101, mp: 90, cd: 12, mult: 0.0, range: 7, proj: '特效-冰球', hit: '特效-冰块碎裂', splash: 2.6, slow: 4, snd: 'skill_wind', snd2: 'skill_ice', pct: [700, 725, 750, 775, 800, 840, 880, 920, 960, 1000], lv: 16, desc: 'Buz alan saldırısı.' },
       { id: 'mp1', pas: { atk: 15 }, name: 'Büyü Çalışması', icon: 1133, lv: 2, desc: 'Büyü saldırısı artar.' },
@@ -456,7 +456,7 @@ function useSkill(i) {
   };
   later(0.25, () => {
     if (sk.proj) shoot(sk.proj, p, t, land);
-    else if (sk.aoe) { Game.fx.push(new Fx(sk.fx, p.x, p.y)); if (sk.snd2) SFX.play(sk.snd2); for (const m of mobsNear(p.x, p.y, sk.aoe)) { hitMob(m, MUL * SM, o); if (sk.weak) m.weakT = sk.weak; if (sk.hit) Game.fx.push(new Fx(sk.hit, m.x, m.y)); } }
+    else if (sk.aoe) { const near = mobsNear(p.x, p.y, sk.aoe); if (!sk.fxMob || !near.length) Game.fx.push(new Fx(sk.fx, p.x, p.y)); if (sk.snd2) SFX.play(sk.snd2); for (const m of near) { hitMob(m, MUL * SM, o); if (sk.weak) m.weakT = sk.weak; if (sk.fxMob) { Game.fx.push(new Fx(sk.fx, m.x, m.y)); if (sk.hit) later(0.45, () => Game.fx.push(new Fx(sk.hit, m.x, m.y))); } else if (sk.hit) Game.fx.push(new Fx(sk.hit, m.x, m.y)); } }
     else if (sk.mult) land();
     else if (sk.heal || sk.healT) { const s = stats(); const h = Math.round(sk.healT ? skT(sk, 'healT') + s.atk : (s.hp * sk.heal + s.atk) * SM); p.hp = Math.min(s.hp, p.hp + h); UI.float(p, '+' + h, '#7bff8a'); Game.fx.push(new Fx(sk.fx, p.x, p.y, { follow: p })); }
     else if (sk.buff) { p.buffs = p.buffs.filter(b => b.id !== sk.id); p.buffs.push({ id: sk.id, buff: Object.assign({}, sk.buff, sk.critT ? { crit: skT(sk, 'critT') / 10 } : null, sk.hotT ? { hotT: skT(sk, 'hotT') } : null), t: sk.dur }); Game.fx.push(new Fx(sk.fx, p.x, p.y, { follow: p })); UI.log(`${sk.name} etkin.`); }

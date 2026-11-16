@@ -95,9 +95,9 @@ const Assets = (() => {
     const x = c.getContext('2d'), id = base.getContext('2d').getImageData(0, 0, c.width, c.height), d = id.data;
     for (let i = 0; i < d.length; i += 4) {
       if (!d[i + 3]) continue;
-      const m = Math.max(d[i], d[i + 1], d[i + 2]), a = Math.min(255, m * 2.2);
-      if (a < 12) { d[i + 3] = 0; continue; }
-      const k = 255 / a; d[i] = Math.min(255, d[i] * k); d[i + 1] = Math.min(255, d[i + 1] * k); d[i + 2] = Math.min(255, d[i + 2] * k); d[i + 3] = a;
+      const m = Math.max(d[i], d[i + 1], d[i + 2]), a = Math.min(255, m * 1.15);
+      if (m < 14) { d[i + 3] = 0; continue; }
+      const k = 255 / m; d[i] = Math.min(255, d[i] * k); d[i + 1] = Math.min(255, d[i + 1] * k); d[i + 2] = Math.min(255, d[i + 2] * k); d[i + 3] = a;
     }
     x.putImageData(id, 0, 0); canv.set(ck, c); return c;
   }
