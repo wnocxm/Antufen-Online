@@ -39,6 +39,7 @@ Oyun hazır: `window.__G && window.__G.player`. Konsoldan: `gmLevel(n)`, `loadSc
 - `tools/test/gorev_seviye.js`: her ırk için seviye başına açılan görev sayısı, orijinal ve bizim görev deneyimi, gereken deneyim.
 - `tools/test/odul.js`: orijinal altın + sınıfa göre ödül eşyası (her sınıf yalnız kendi eşyası), görev penceresinde ödül satırı.
 - `tools/test/yolbul.js`: görev yol bulma (alınmamış → veren, alınmış → canavarın haritası, varınca yanına yürür ama saldırmaz, hazır → ödülü veren).
+- `tools/test/alisveris.js`: adet girişi (dokunmatik sayı kutusu, bilgisayar rakamları, altın sınırı, satarken adet, ekipman onayı) ve NPC'nin içinden geçme.
 - `tools/test/hedef.js`: hedef seçme saldırı başlatmaz; ikinci dokunuş ve saldırı düğmesi saldırır; yön tuşu bırakır.
 - `tools/test/evcilgorev.js`: RACE=人类|精灵 Terbiyeci zinciri.
 - `tools/test/evcil_kolaj.js`: bütün türlerin 8 biçimi ve beceri simgeleri tek görselde (görsel denetim).

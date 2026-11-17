@@ -16,8 +16,41 @@ const Win = (() => {
   function buyAsk(id) {
     const it = ITEMS[id], P = Game.P, can = Math.floor(P.gold / it.price);
     if (can < 1) return UI.toast('Yeterli altının yok.');
-    if (!it.use) return ask(`${it.name}: ${it.price} ${tx('altın')}. ${tx('Satın alınsın mı?')}`, () => buyItem(id, 1));
-    askNum(it.name, Math.min(99, can), n => buyItem(id, n), it.price);
+    if (it.slot) return ask(`${it.name}: ${it.price} ${tx('altın')}. ${tx('Satın alınsın mı?')}`, () => buyItem(id, 1));   // ekipman tek tek
+    askNum(it.name, Math.min(999, can), n => buyItem(id, n), it.price);   // yığılabilen her eşya: adet sorulur
+  }
+  function sellAsk(id) {   // birden çok varsa satarken de adet sorulur
+    const it = ITEMS[id], n = countItem(id); if (!it) return;
+    if (n <= 1 || it.slot) return sellItem(id);
+    askNum(it.name, n, k => sellItem(id, k), it.sell || Math.max(1, Math.floor((it.price || 0) / 10)));
+  }
+  // ---- adet girişi: sayı alanına dokununca telefonda sayı klavyesi (HTML kutusu), bilgisayarda rakam tuşları doğrudan ----
+  let numBound = false;
+  const numBox = () => document.getElementById('numin'), numInp = () => document.getElementById('numv');
+  function numApply() { const m = modal, v = parseInt(numInp().value, 10); if (m && m.k === 'num' && v > 0) m.n = clamp(v, 1, m.max); }
+  function numClose() { const b = numBox(); if (b && !b.classList.contains('hidden')) { numApply(); b.classList.add('hidden'); numInp().blur(); } }
+  function numEdit() {
+    const m = modal; if (!m || m.k !== 'num' || !numBox()) return;
+    if (!numBound) { numBound = true; const i = numInp();
+      i.addEventListener('input', numApply);
+      i.addEventListener('keydown', e => { e.stopPropagation(); if (e.key === 'Enter') numClose(); else if (e.key === 'Escape') { numBox().classList.add('hidden'); i.blur(); } });
+      document.getElementById('numok').addEventListener('click', numClose); i.addEventListener('blur', () => setTimeout(numClose, 0)); }
+    document.getElementById('numt').textContent = `${tx('Adet')} (1-${m.max})`; const i = numInp(); i.max = m.max; i.value = m.n;
+    numBox().classList.remove('hidden'); i.focus(); i.select();
+  }
+  // bilgisayar: adet penceresi açıkken rakamlar sayıyı yazar, Enter onaylar, Esc kapatır (oyun kısayollarına gitmez)
+  function key(e) {
+    const m = modal; if (!m) return false;
+    if (m.k === 'num') {
+      if (/^[0-9]$/.test(e.key)) { m.typed = ((m.typed || '') + e.key).replace(/^0+/, '').slice(0, 4); m.n = clamp(parseInt(m.typed || '1', 10), 1, m.max); return true; }
+      if (e.key === 'Backspace') { m.typed = (m.typed || String(m.n)).slice(0, -1); m.n = clamp(parseInt(m.typed || '1', 10), 1, m.max); return true; }
+      if (e.key === 'Enter') { modal = null; numClose(); m.onOk(m.n); return true; }
+      if (e.key === 'ArrowUp' || e.key === '+') { m.n = Math.min(m.max, m.n + 1); m.typed = ''; return true; }
+      if (e.key === 'ArrowDown' || e.key === '-') { m.n = Math.max(1, m.n - 1); m.typed = ''; return true; }
+    }
+    if (e.key === 'Escape') { modal = null; numClose(); return true; }
+    if (m.k === 'yesno' && e.key === 'Enter') { modal = null; m.onYes(); return true; }
+    return true;   // açık onay/adet kutusu varken tuşlar oyuna gitmez
   }
   function drawModal(ctx, vw, VH) {
     ctx.fillStyle = 'rgba(0,0,0,.45)'; ctx.fillRect(0, 0, vw, VH); const mh = [];
@@ -39,13 +72,13 @@ const Win = (() => {
   function tapModal(x, y) {
     const h = (modal.hits || []).find(r => x >= r.x && x < r.x + r.w && y >= r.y && y < r.y + r.h); if (!h) return;
     pressed = h.id; pressT = performance.now(); SFX.play('menusel', 0.6); const m = modal;
-    if (h.id === 'm52786') { modal = null; m.onYes(); } else if (h.id === 'm52788' || h.id === 'm52792') modal = null;
-    else if (h.id === 'm50758') m.n = m.n > 1 ? m.n - 1 : m.max; else if (h.id === 'm50759') m.n = m.n < m.max ? m.n + 1 : 1;
-    else if (h.id === 'm50761') m.n = m.n === m.max ? 1 : Math.min(m.max, m.n < 10 ? 10 : m.max);   // sayıya dokun: 10, sonra en fazla
-    else if (h.id === 'm52791') { modal = null; m.onOk(m.n); }
+    if (h.id === 'm52786') { modal = null; m.onYes(); } else if (h.id === 'm52788' || h.id === 'm52792') { modal = null; numClose(); }
+    else if (h.id === 'm50758') { m.n = m.n > 1 ? m.n - 1 : m.max; m.typed = ''; } else if (h.id === 'm50759') { m.n = m.n < m.max ? m.n + 1 : 1; m.typed = ''; }
+    else if (h.id === 'm50761') numEdit();   // sayıya dokun: klavyeyle adet yaz
+    else if (h.id === 'm52791') { numClose(); modal = null; m.onOk(m.n); }
   }
   function open(name, o = {}) { cur = name; opt = o; if (name === 'map') { WM.mode = 'world'; WM.sel = null; wmData(); } if (name === 'npc') { D.q = null; SFX.play('request', 0.6); } if (name === 'task') { K.sel = null; K.sure = false; } if (name === 'menu') M.page = 0; if (name === 'shop') { H.tab = 0; H.sel = null; H.off = 0; } if (name === 'pet') { const L = Pet.list(), i = L.findIndex(x => x.uid === Game.P.petOn); if (i >= 0) PW.i = i; } if (name === 'petf') { TF.mode = o.mode || 'tf'; TF.main = o.main && Pet.resting(Pet.list().find(x => x.uid === o.main)) ? o.main : null; TF.mat = null; TF.a = [null, null]; } B.sel = null; B.sure = false; B.assign = false; B.page = 0; if (o.cat != null) B.cat = o.cat; SFX.play('menu_appear', 0.5); if (name === 'bag') questFlag('openBag'); }
-  function close() { cur = null; opt = {}; modal = null; }
+  function close() { cur = null; opt = {}; modal = null; numClose(); }
   const isOpen = () => !!cur || !!modal;   // tek başına onay kutusu da (ör. zindan girişi) pencere sayılır
 
   function bagItems() {
@@ -187,7 +220,7 @@ const Win = (() => {
     }
     if (!B.sel) return; const it = ITEMS[B.sel];
     if (id === 'use') return useItem(B.sel);
-    if (id === 'sell' && opt.shop) return sellItem(B.sel);
+    if (id === 'sell' && opt.shop) return sellAsk(B.sel);
     if (id === 'quick') { if (it.use) UI.startAssign('i:' + B.sel, it.name); return; }
     if (id === 'del') { const sid = B.sel; ask(`${it.name}: ${tx('yok edilsin mi?')}`, () => { removeItem(sid, countItem(sid)); B.sel = null; UI.log(`${it.name} yok edildi.`); save(); }); }
   }
@@ -749,7 +782,7 @@ const Win = (() => {
     if (!B.sel) return;
     const it = ITEMS[B.sel];
     if (id === 50773) { useItem(B.sel); return; }
-    if (id === 52400 && opt.shop) { sellItem(B.sel); return; }
+    if (id === 52400 && opt.shop) { sellAsk(B.sel); return; }
     if (id === 51672) { if (it.use) UI.startAssign('i:' + B.sel, it.name); else UI.toast('Yalnızca iksirler kısayola konabilir.'); return; }
     if (id === 52336) { B.detail = !B.detail; return; }
     if (id === 52337) { if (it.quest) return; const sid = B.sel; ask(`${it.name}: ${tx('yok edilsin mi?')}`, () => { removeItem(sid, countItem(sid)); B.sel = null; UI.log(`${it.name} yok edildi.`); save(); }); return; }
@@ -1025,6 +1058,6 @@ const Win = (() => {
   }
   function tapDead(id) { if (id === 52040) { close(); revive(); } }
   // testler için: açık penceredeki bir düğmeye kimliğiyle bas
-  function tapId(id) { if (cur === 'petf') tapPetF(id); else if (cur === 'pet') tapPet2(id); }
-  return { ask, askNum, open, close, isOpen, draw, tap, tapId, drag, get cur() { return cur; }, PW, TF };
+  function tapId(id) { if (modal) { const h = (modal.hits || []).find(r => r.id === id); if (h) tapModal(h.x + h.w / 2, h.y + h.h / 2); return; } if (cur === 'petf') tapPetF(id); else if (cur === 'pet') tapPet2(id); }
+  return { ask, askNum, buyAsk, sellAsk, open, close, isOpen, draw, tap, tapId, drag, key, get cur() { return cur; }, PW, TF };
 })();

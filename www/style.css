@@ -79,6 +79,10 @@ button { font: inherit; color: inherit; cursor: pointer; }
 
 #chat { position: fixed; left: 50%; transform: translateX(-50%); bottom: 8px; z-index: 22; display: flex; gap: 4px; width: min(520px, 92vw); padding: 5px; background: rgba(14,10,6,.92); border: 1px solid #8a6a30; }
 #chat input { flex: 1; min-width: 0; }
+/* adet girişi (satın al / sat): ekranın üstünde, telefon klavyesi altta kalır */
+#numin { position: fixed; left: 50%; transform: translateX(-50%); top: 10px; z-index: 30; display: flex; align-items: center; gap: 6px; padding: 6px 8px; background: rgba(14,10,6,.95); border: 1px solid #8a6a30; color: #e6cf89; font-size: 14px; }
+#numin input { width: 90px; font-size: 18px; text-align: center; }
+#numin button { padding: 6px 12px; color: #ffe8a0; background: url(assets/ui/AnbufenUI_Resource_7032.png) center/100% 100%; border: 1px solid #8a6a30; }
 #chat button { padding: 6px 10px; color: #ffe8a0; background: url(assets/ui/AnbufenUI_Resource_7032.png) center/100% 100%; border: 1px solid #8a6a30; }
 
 /* giriş ekranı: orijinal ana menü (logo, kitap, oklar) ve kullanıcı girişi; zemin orijinal kapak dokusu */

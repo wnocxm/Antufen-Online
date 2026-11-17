@@ -186,9 +186,9 @@ function buyItem(id, n = 1) {
   const P = Game.P, it = ITEMS[id], cost = it.price * n; if (P.gold < cost) return UI.toast('Yeterli altının yok.');
   P.gold -= cost; SFX.play('coin'); addItem(id, n, true); UI.log(`${it.name} ×${n} satın alındı (−${cost} altın).`, 'loot'); save();
 }
-function sellItem(id) {
-  const P = Game.P, it = ITEMS[id]; if (!it || it.quest || !removeItem(id)) return;
-  const g = it.sell || Math.max(1, Math.floor((it.price || 0) / 10)); P.gold += g; SFX.play('coin'); UI.log(`${it.name} satıldı (+${g} altın).`, 'loot'); save();
+function sellItem(id, n = 1) {
+  const P = Game.P, it = ITEMS[id]; n = Math.min(n, countItem(id)); if (!it || it.quest || n < 1 || !removeItem(id, n)) return;
+  const g = (it.sell || Math.max(1, Math.floor((it.price || 0) / 10))) * n; P.gold += g; SFX.play('coin'); UI.log(`${it.name}${n > 1 ? ' ×' + n : ''} satıldı (+${g} altın).`, 'loot'); save();
 }
 // seviyeye ve sınıfa uygun rastgele ekipman (dükkân listelerinden)
 function randomGear(lv) {
@@ -332,7 +332,7 @@ async function loadScene(sid, arrive) {
   // NPC'ler ve canavarlar
   for (let ei = 0; ei < sc.ents.length; ei++) {
     const [id, nm, pos] = sc.ents[ei], [x, y] = pos;
-    if (D.cit[id]) { const n = new Npc(id, D.cit[id], x, y); Game.ents.push(n); if (!n.pickup) map.extraBlock[map.idx(x, y)] = 1; }
+    if (D.cit[id]) { const n = new Npc(id, D.cit[id], x, y); Game.ents.push(n); }   // NPC'ler yolu kapatmaz: içlerinden geçilir (kullanıcı bildirdi; dar yolda/kapıda takılıyordu)
     else if (D.mon[id]) {
       const d = monDef(nm, sc);
       // tek kareli "canavarlar" aslında maden kayası, kalıntı gibi sabit toplama noktalarıdır: saldırılmaz

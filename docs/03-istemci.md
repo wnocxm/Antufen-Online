@@ -27,6 +27,7 @@ Boş yere dokunmak **yürütmez** (`tapWorld`); NPC'ye ilk dokunuş hedef alır,
 - Canavara ilk dokunuş yalnız seçer (`setTarget(e)`). Seçili canavara ikinci dokunuş, saldırı düğmesi (`UI.attack`), bir beceri ya da görev yürüyüşü saldırıyı başlatır (`setTarget(e, true)` → `Game.engage`).
 - Yön tuşu/joystick `Game.engage`'i kapatır; hedef seçili kalır, oyuncu kendiliğinden geri dönmez.
 - Yaklaşırken engelli karede takılırsa (`p.chaseD` ilerlemiyorsa) ve menzil +0,6 içindeyse olduğu yerden vurur.
+**Geçilebilirlik:** NPC'ler yolu kapatmaz, içlerinden geçilir (kullanıcı bildirdi; dar yolda/kapıda takılıyordu). Yalnız sabit toplama nesneleri (maden kayası, kalıntı) durdukları kareyi kapatır (`map.extraBlock`).
 - Test: `tools/test/hedef.js`. Test betikleri saldırı için `setTarget(m, true)` kullanır.
 Otomatik yol: `routeTo(sid)` sahneler arası (`scenePath`), `routeToNpc(cn)`, `walkToEnt`; görev penceresindeki "Yol Bul".
 **Görev yol bulma (`questWalk`)** görevin durumuna göre gider:
@@ -79,6 +80,12 @@ Otomatik yol: `routeTo(sid)` sahneler arası (`scenePath`), `routeToNpc(cn)`, `w
 - `Fx(name, x, y, {anim, dir, z, follow, loop})`; mermi `f.proj = {to, cb, sp:9, vis}`.
 
 ## Eşyalar ve dükkânlar
+- **Satın alma / satma adedi** (`win.js buyAsk`, `sellAsk`):
+  - Ekipman tek tek, onay kutusuyla alınır.
+  - Yığılabilen her eşyada adet penceresi (`n_selnum`) açılır; en fazla altının yettiği kadar (≤999).
+  - Satarken birden çok varsa adet sorulur.
+  - Sayıya dokununca ekranın üstünde sayı klavyeli HTML kutusu (`#numin`) açılır.
+  - Bilgisayarda pencere açıkken rakamlar sayıyı yazar, ↑/↓ bir artırıp azaltır, Enter onaylar, Esc kapatır (`Win.key`). Açık kutu varken tuşlar oyun kısayollarına gitmez.
 `www/assets/items.json` (169 eşya, `tools/esyalar.py`): `{name, en, slot, cls, lv, price, sell, icon:[tür, no], st:{atk…}, use:{hp|mp|hot:[kaynak, miktar, sn]}, gfx}`; `shops[npc] = [[sekme, [id…]]]`.
 `equip/unequip/buyItem/sellItem/useItem/addItem`; görev ödülündeki bilinmeyen eşya kimlikleri atlanır.
 
