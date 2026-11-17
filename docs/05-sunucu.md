@@ -21,7 +21,7 @@ Oyun verisi: `items`, `shops`, `scenes`, `quests` (tür, veren, teslim, hedef, a
 ## API
 `GET /api/health` · `POST /api/register|login` → `{token, admin, characters}` · `POST /api/password` · `POST /api/logout` ·
 `GET/POST /api/characters` · `GET/PUT/DELETE /api/characters/:id` · `GET /api/admin/stats`.
-"GM" önekli karakter adı yalnızca yöneticiye (aksi 403 `gmname`). Hesap başına en çok 4 karakter.
+Karakter listesi `adv` (sınıf yükseltme, `extra` JSONB'den) da döner. "GM" önekli karakter adı yalnızca yöneticiye (aksi 403 `gmname`). Hesap başına en çok 4 karakter.
 WebSocket mesajları: `join, pos, scene, chat` → `players, add, del, pos, chat`; aynı karakterle ikinci giriş eskisini 4001 ile kapatır.
 
 ## İstemci tarafı (`www/js/net.js`)

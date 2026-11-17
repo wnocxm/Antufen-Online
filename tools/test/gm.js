@@ -31,6 +31,14 @@ const { chromium } = require('playwright');
   console.log('beceri+malzeme  ', JSON.stringify(await p.evaluate(() => ({ beceriler: Pet.skills(Pet.active()).map(Pet.skName), hayvan: Pet.list().length, lütuf: countItem('30164'), altın: Game.P.gold }))));
   await p.evaluate(() => { UI.closeAll(); Win.open('pet'); }); await p.waitForTimeout(1200); await p.screenshot({ path: O + '_atesdevi.png' });
   await open(); await p.click('[data-g="v:pet"]'); await p.waitForTimeout(300); await p.click('[data-x="pet:petfs"]'); await p.waitForTimeout(1000); await p.screenshot({ path: O + '_aktarma.png' });
+  // sınıf yükseltme sekmesi (ClassGM): 40 yap + ilk görev, zincirin son görevini bitir → sınıf yükselir; acemiye döndür
+  await open(); await p.click('[data-g="v:cls"]'); await p.waitForTimeout(300); await p.screenshot({ path: O + '_sinif.png' });
+  await p.click('[data-x="cls:reset"]'); await p.click('[data-x="cls:start"]'); await p.waitForTimeout(200);
+  const sc = () => p.evaluate(() => ({ sınıf: clsName(), adv: Game.P.adv || 0, aktif: Object.keys(Game.P.quests).map(Number).filter(i => i >= 80000 && QBY[i] && (QBY[i].cls || QBY[i].auto)) }));
+  console.log('sınıf: başlat     ', JSON.stringify(await sc()));
+  const last = await p.evaluate(() => ClassGM.chain().filter(q => q.adv).map(q => q.id)[0]); await p.click(`[data-x="cls:done:${last}"]`); await p.waitForTimeout(200);
+  console.log('sınıf: bitir ' + last, JSON.stringify(await sc()));
+  await p.click('[data-x="cls:reset"]'); await p.waitForTimeout(200); console.log('sınıf: acemiye   ', JSON.stringify(await sc()));
   // sekme adları ve arama kutusu seçili dilde mi; çevrilmeden kalan Türkçe yazılar (DIL=en)
   await open(); await p.click('[data-g="v:dg"]'); await p.waitForTimeout(200);
   console.log('sekmeler        ', JSON.stringify(await p.evaluate(() => [...document.querySelectorAll('#gtools button')].map(b => b.textContent).join(' | ') + ' · ' + document.querySelector('#gq').placeholder)));

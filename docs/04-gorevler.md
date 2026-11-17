@@ -33,14 +33,32 @@
 - 80597 Hedef Seçme: orijinalde vereni boş bir eğitim görevi; bizde 初级战斗导师 → 教练员.
 - 81993 / 81998 zindan: "啃食者" başvuru listesinde yok, ilerleme metninde var (haritada ☆啃食者).
 - 81786 "Hızlı Öldürme": Symbian'da yok, APK eklemesi; atlandı.
-- `zincir:bizim` (59): orijinalde öncesi olmayan ama bizde bağlanan görevler.
+- `zincir:bizim` (69): orijinalde öncesi olmayan ama bizde bağlanan görevler.
   - `tr.js` eğitim sırası (kamp ve Guanlin girişi).
   - Evcil hayvan görevleri (hayvan şartı orijinalde sunucudaydı).
   - Birkaç bölge bağı.
+  - Sınıf yükseltme zincirleri (10 bağ: giriş görevleri 80344'e, elçi zincirleri; orijinalde sunucudaydı).
+
+## Sınıf yükseltme (40) — `sinif.json` + `sinif_kaynak.json` (17.11)
+Orijinal ham kayıt (b=4, ek alanda 130004 Savaşçı / 130005 Büyücü / 130011 Kutsal Elçi; metinler `tasks.json`). Akış:
+1. **80344 "Acemilikten Çıkış"** 40. seviyede kendiliğinden alınır (`auto`; orijinalde verensiz). Altındalga Limanı'ndaki Ozan'a teslim (2000 altın; unvan 180050 ödülü unvan sistemi olmadığı için yok).
+2. Ozan'da **"✦ Sınıf değiştirmek istiyorum!"** satırı (orijinal “我要转职！”) sınıfa ve ırka göre giriş görevini verir (`cls` + ırk; orijinalde verensiz görevler, bizde veren Ozan, `zincir` ile 80344'e bağlı).
+3. Zincirler (son görev `adv: 1` → `classUp`, sınıf ağacı açılır; ödül sınıfın 40. seviye takımı):
+   - İnsan savaşçı: 80569 Tom → 80223 ☆Karagece'den yüzük (Başkent Batısı) → 80224 Şato Uşağı'ndan Yıldız Taşı (Gümüşkartal Avlusu).
+   - Elf savaşçı: 80571 Özel Ataşe → 80238 ☆Su Perisi'nden 3 Ejder Dişi Yeşimi → 80239 Sınav Odası'nda 5 ☆Dehşet Bıçağı (Şan Zinciri).
+   - İnsan büyücü: 80570 Arma Büyücüsü → 80225 Işınlanma Koridoru'nun uçan canavarlarından 5 Tören Malzemesi + 1 Büyülü Mum (`mobs` + `drops`: iki eşyalı toplama) → 80226 Orman İnziva Perisi: **iki seçenekli bitiş** (`choice`: yarala / bırak; ikisi de Büyücü yapar, sonuç metni farklı).
+   - Elf büyücü: 80572 Büyücüler Loncası Başkanı → 80240 ☆Joule + ☆Dondur → 80241 Yetim Elf Kız.
+   - İnsan elçi: 82940 Frey Rahibi → 82941 ☆Thomas Young (Şaşkınlık Koridoru) → 82942 Frey Başrahibesi. Elf elçi: 81965 Dia → 82938 Thomas Young → 82939 Kehanet Kâhini.
+   - Bilgi görevleri: 80343 (Tom → Jessie, `tr.js`'te zaten vardı), 80346 (Yetim Elf Kız → Tapınak Öğretmeni).
+- Yapı dosyası (`sinif_kaynak.json`) elle kuruldu: `cls`, `adv`, `auto`, `mobs`, `drops` alanları. Çeviri dosyasında yeni alanlar: `kaynak` (önce bu yapı dosyası okunur; diğer `_kaynak` dosyalarındaki aynı numaralı yapıların üstündedir), `seviye_kesin` (`seviyeler` = tam açılma seviyesi, `q.lvAt`; hedef haritası daha yüksek olsa da 40), `esyalar` (çok eşyalı toplamanın adları), `secim` (seçimli bitiş). 82942 `baskent.json`'dan buraya taşındı.
+- **Seviye bulgusu:** harita dosyası adındaki sayı seviye değil (ör. 银鹰城 dosyası `-100` ama dünya haritasında 40-41; 哀嚎小径 `-70` ama 41-43). Dünya haritasında olmayan sahnelerin seviyesi bu yüzden yanlış çıkabiliyor. Orijinal görev deneyimi/altınından (seviyesi bilinen 571 görevle kurulan eğri) tahmin: `kaynak/seviye_tahmin.json` (`tools/pack_all.py` okur). Şimdilik: Gümüşkartal Avlusu 41-43 (eskiden 91-97 canavar!), Kışla/Depo 47-49, Sınav Odası 40-42.
+  - Henüz düzeltilmeyen, aynı yöntemle yanlış görünenler: yoksul mahalle altı katları (120081-120084, dosya 70-80, tahmin ~47-48), lağım parçaları (120106-120122, dosya 39-50, tahmin 47-63), Gümüşkartal iç şehir/kule (120135-120143, dosya 100, tahmin 53-61), Tarikat Üssü 120001 (dosya 50, tahmin ~26-33). Kapsam 55'e kadar olduğu için bunlar ayrı bir işte ele alınmalı (o bölgelerin 55 altı görevleri de alınabilir).
+- Thomas Young yalnız bu görevlerde geçen seçkin: `MON` ile 42. seviye (koridorun kendisi ~52; yanındaki ☆Taş Muhafız'a dikkat).
+- Test: `tools/test/sinif.js` (insan savaşçı zinciri NPC konuşmalarıyla, her sınıf/ırk için giriş görevi, iki eşyalı toplama, seçim, eski kayıt).
 
 ## Seviye kilidi (`game.js`)
 `questState(q)` → `done | ready | active | new | soon | locked`. `soon` = `P.lv < questMinLv(q)` (5 seviye içindeyse "Alınabilir"de gri görünür).
-`questMinLv(q)`:
+`questMinLv(q)` (`q.lvAt` varsa doğrudan o):
 1. `questOwnLv(q)`: hedef canavarın/noktanın bulunduğu sahnenin `lvr[0]-1`'i (görevi verenin sahnesine yakın olanlar öncelikli). Başlangıç kampları 1.
 2. Hedefsizse önceki görevin seviyesi; o da yoksa zincirde ileriye bakıp ilk savaş görevi.
 3. Hâlâ yoksa `q.lv0` (bölge dosyasındaki `seviye`) ya da `hubLv` (o şehirdeki savaş görevlerinin en düşüğü).

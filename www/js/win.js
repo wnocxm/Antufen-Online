@@ -248,7 +248,7 @@ const Win = (() => {
     if (R.page === 0) {
       const r = nDraw(ctx, f, 50122, 0), k = 'Portrait_' + P.face, I = porImg[k] || (porImg[k] = Object.assign(new Image(), { src: `${Assets.base}ui/${k}.png` }));
       if (I.complete && I.naturalWidth) ctx.drawImage(I, r[0] + 5, r[1] + 5, 59, 59);
-      nText(ctx, P.name, 280, 22, '#2a1a0a', 13, 'center', 118); nText(ctx, `${tx(TR.race[P.race])} · ${tx(TR.cls[P.cls])}`, 280, 42, '#5a4020', 11, 'center', 118);
+      nText(ctx, P.name, 280, 22, '#2a1a0a', 13, 'center', 118); nText(ctx, `${tx(TR.race[P.race])} · ${clsName()}`, 280, 42, '#5a4020', 11, 'center', 118);
       nText(ctx, `${tx('Seviye')} ${P.lv}`, 280, 62, '#7a1c08', 12, 'center', 118);
       const rows = [['Tecrübe', `${P.xp}/${xpNeed(P.lv)}`], ['Can', `${Math.ceil(p.hp)}/${s.hp}`], ['Mana', `${Math.floor(p.mp)}/${s.mp}`], [C.melee ? 'Fiz. Saldırı' : 'Büyü Saldırı', String(s.atk)], ['Savunma', String(s.def)],
         ['Kritik', (8 + s.crit) + '%'], ['Kaçınma', s.dodge + '%'], ['Büyü direnci', String(s.res)], ['Can yenileme', String(s.hpreg)], ['Mana yenileme', String(s.mpreg)], ['Altın', String(P.gold)]];
@@ -303,7 +303,7 @@ const Win = (() => {
     if (e.a === 'tp') { UI.closeAll(); setTimeout(() => questTeleport(e.q), 300); return; }
     if (e.a === 'dtp') { UI.closeAll(); setTimeout(() => e.d.go(), 300); return; }
     if (e.a === 'accept') { const q = D.q; acceptQuest(q); D.q = null; UI.closeAll(); if (q.tp) { setTimeout(() => questTeleport(q), 400); return; } if (q.type === 'talk' && q.to === n.cn) Game.P.quests[q.id].ready = true; return; }
-    if (e.a === 'complete') { const q = D.q; completeQuest(q); D.q = null; return; }
+    if (e.a === 'complete') { const q = D.q; completeQuest(q); D.q = null; if (e.ch != null && q.choice) opt.say = q.choice[e.ch][1]; return; }
   }
   // ---------------- Görev listesi (NEW_FORM_TASK): solda görev satırları, sağda seçili görevin bilgisi ----------------
   const K2ROWS = [50274, 50275, 50276, 50277, 50278], R2 = 'AnbufenUI_2_Resource';
@@ -370,16 +370,17 @@ const Win = (() => {
       const sk = byId(sid); if (!sk) continue; const x = 148 + col * 64, y = 12 + row * 86, r = skRank(sk), key = 'sk:' + sid; S._cell[key] = sk;
       Forms.drawCtrl(ctx, slot, sk.id === S.sel ? 1 : 0, x - sr[0], y - sr[1]);
       if (!r) ctx.globalAlpha = 0.4; drawIcon(ctx, { ik: sk.ik || 'skill', icon: sk.icon }, x + 7, y + 7, 32); ctx.globalAlpha = 1;
-      nText(ctx, `${r}/${SK_MAX}`, x + 23, y + 52, r ? '#7a1c08' : P.lv < sk.lv ? '#8a7a60' : '#2a1a0a', 10, 'center');
+      nText(ctx, `${r}/${SK_MAX}`, x + 23, y + 52, r ? '#7a1c08' : skLock(sk) ? '#8a7a60' : '#2a1a0a', 10, 'center');
       nText(ctx, sk.name, x + 23, y + 64, r ? '#2a1a0a' : '#7a6a50', 8.5, 'center', 66); nHit(key, x - 8, y, 62, 72);
     }
+    if (tree.adv && (P.adv || 0) < tree.adv) nText(ctx, 'Sınıf yükseltme görevini bitirince açılır.', 240, 268, '#a02010', 9.5, 'center', 200);   // orijinal: sınıf ağacı 40'taki görevle
     nText(ctx, `${tx('Beceri puanı')}: ${P.sp || 0}`, 140, 298, (P.sp || 0) > 0 ? '#ffe070' : '#e8dcc0', 12, 'left');
     if (selSk) {
       nActions(ctx, f, 50401, [50410, 50411], [['Yükselt', 'up'], ['Kısayol', 'quick']]);
       const r = skRank(selSk), L = [[selSk.name, '#7a1c08', 11], [`${tx('Kademe')} ${r}/${SK_MAX}${selSk.pas ? ' · ' + tx('edilgen') : ''}`, '#5a4020', 9.5]];
       wrap(ctx, selSk.desc || '', 92, 9.5).forEach(l => L.push([l, '#2a1a0a', 9.5]));
       if (!selSk.pas) L.push([`${selSk.mp} mana · ${selSk.cd} sn`, '#1a3a7a', 9.5]);
-      if (P.lv < selSk.lv) L.push([`${selSk.lv}. seviye gerekir.`, '#c02010', 9.5]);
+      if (skLock(selSk)) L.push([skLockMsg(selSk), '#c02010', 9.5]);
       L.slice(0, 14).forEach(([t, c, sz], i) => nText(ctx, t, 362, 118 + i * 12.5, c, sz, 'left', 94));
     }
     { const r = nDraw(ctx, f, 50413, pressed === 50413); nHit(50413, r[0] - 4, r[1], r[2] + 4, r[3]); }
@@ -805,7 +806,7 @@ const Win = (() => {
   function roleValues() {
     const P = Game.P, p = Game.player, s = stats(), C = CLS[P.cls];
     return { '昵称': P.name, '种族': TR.race[P.race], '等级': String(P.lv), '称号': '-', '体力': `${Math.ceil(p.hp)}/${s.hp}`, '物攻': String(C.melee ? s.atk : Math.round(s.atk * 0.3)), '防御': String(s.def),
-      '闪避': s.dodge + '%', '释放': Math.round(100 + s.spd * 100) + '%', '圣抗': String(s.res), '火抗': String(s.res), '职业': TR.cls[P.cls], '经验': `${P.xp}/${xpNeed(P.lv)}`, '公会': '-',
+      '闪避': s.dodge + '%', '释放': Math.round(100 + s.spd * 100) + '%', '圣抗': String(s.res), '火抗': String(s.res), '职业': clsName(), '经验': `${P.xp}/${xpNeed(P.lv)}`, '公会': '-',
       '法力': `${Math.floor(p.mp)}/${s.mp}`, '魔攻': String(C.melee ? 0 : s.atk), '命中': (95 + Math.min(5, s.crit)) + '%', '暴击': (8 + s.crit) + '%', '韧性': s.dr + '%', '暗抗': String(s.res), '冰抗': String(s.res) };
   }
   function drawRole(ctx, vw, VH) {
@@ -865,13 +866,14 @@ const Win = (() => {
     if (D.q) {
       const q = D.q, st = questState(q);
       if (st === 'new') { txt = q.text; o.push({ t: q.ok || 'Kabul et', a: 'accept' }, { t: 'Daha sonra', a: 'back' }); }
-      else if (st === 'ready' && q.to === n.cn) { txt = q.done; o.push({ t: 'Tamamla', a: 'complete' }); }
+      else if (st === 'ready' && q.to === n.cn) { txt = q.done; if (q.choice) q.choice.forEach((c, i) => o.push({ t: c[0], a: 'complete', ch: i })); else o.push({ t: 'Tamamla', a: 'complete' }); }   // q.choice: orijinaldeki iki seçenekli bitiş
       else { txt = q.wait || q.goal; o.push({ t: 'Tamam', a: 'back' }); }
     } else {
       if (SHOPS[n.cn]) o.push({ t: 'Alışveriş', a: 'shop', c: '#ffe070' });
       if (n.cn === '魔法兽强化大师') o.push({ t: '✦ ' + T2('Dönüşüm', 'Transformation'), a: 'petf', m: 'tf' }, { t: '✦ ' + T2('Beceri aktarma', 'Skill transfer'), a: 'petf', m: 'sk' },
         { t: T2('Dönüşüm ve beceri aktarma nedir?', 'What are transformation and skill transfer?'), a: 'say', s: T2(PETHELP[0], PETHELP[1]) });   // orijinal: 幻化 / 技能转移 düğmeleri
-      for (const q of questsFor(n.cn)) { const st = questState(q); o.push({ t: (st === 'ready' ? '? ' : st === 'new' ? '! ' : '… ') + q.title, a: 'q', q, c: st === 'active' ? '#c8c0b0' : '#ffe070' }); }
+      for (const q of questsFor(n.cn)) { const st = questState(q), cc = st === 'new' && q.req === 80344;   // orijinal: Ozan'da “我要转职！” seçeneği sınıfın giriş görevini verir
+        o.push({ t: cc ? '✦ ' + T2('Sınıf değiştirmek istiyorum!', 'I want to change my class!') : (st === 'ready' ? '? ' : st === 'new' ? '! ' : '… ') + q.title, a: 'q', q, c: st === 'active' ? '#c8c0b0' : '#ffe070' }); }
       const tq = tpQuestOf(n.cn); if (tq) o.push({ t: '✦ Işınlan: ' + trName(Assets.D.scenes[tq.tp[0]].name), a: 'tp', q: tq });
       for (const d of Dungeon.npcTp(n.cn)) o.push({ t: '✦ ' + d.label, a: 'dtp', d });   // zindan merkezine/merkezden ışınlanma
       o.push({ t: 'Hoşça kal', a: 'bye' });
@@ -905,7 +907,7 @@ const Win = (() => {
     if (e.a === 'tp') { UI.closeAll(); setTimeout(() => questTeleport(e.q), 300); return; }
     if (e.a === 'dtp') { UI.closeAll(); setTimeout(() => e.d.go(), 300); return; }
     if (e.a === 'accept') { const q = D.q; acceptQuest(q); D.q = null; UI.closeAll(); if (q.tp) { setTimeout(() => questTeleport(q), 400); return; } if (q.type === 'talk' && q.to === n.cn) Game.P.quests[q.id].ready = true; return; }   // görev alınınca pencere kapanır
-    if (e.a === 'complete') { const q = D.q; completeQuest(q); D.q = null; return; }
+    if (e.a === 'complete') { const q = D.q; completeQuest(q); D.q = null; if (e.ch != null && q.choice) opt.say = q.choice[e.ch][1]; return; }
   }
   // ---------------- Görev listesi (FORM_TASK) ----------------
   const K = { sel: null, sure: false, detail: false };
@@ -1070,6 +1072,8 @@ const Win = (() => {
   }
   function tapDead(id) { if (id === 52040) { close(); revive(); } }
   // testler için: açık penceredeki bir düğmeye kimliğiyle bas
-  function tapId(id) { if (modal) { const h = (modal.hits || []).find(r => r.id === id); if (h) tapModal(h.x + h.w / 2, h.y + h.h / 2); return; } if (cur === 'petf') tapPetF(id); else if (cur === 'pet') tapPet2(id); }
-  return { ask, askNum, buyAsk, sellAsk, open, close, isOpen, draw, tap, tapId, drag, key, get cur() { return cur; }, PW, TF, HUB };
+  function tapId(id) { if (modal) { const h = (modal.hits || []).find(r => r.id === id); if (h) tapModal(h.x + h.w / 2, h.y + h.h / 2); return; } if (cur === 'petf') tapPetF(id); else if (cur === 'pet') tapPet2(id); else if (cur === 'skill') tapSkill2(id); }
+  // testler için: NPC konuşmasının seçenekleri ve i. satıra dokunma (tools/test/sinif.js)
+  const npcOpts = () => npcOptions(), npcRow = i => tapNpc2(N2ROWS[i]), npcDrawn = () => N2ROWS.map(id => npcMap[id]).filter(Boolean).map(e => e.t);   // çizilen satırlar (sayfalı söz: "Devam")
+  return { ask, askNum, buyAsk, sellAsk, open, close, isOpen, draw, tap, tapId, drag, key, get cur() { return cur; }, PW, TF, HUB, npcOpts, npcRow, npcDrawn };
 })();

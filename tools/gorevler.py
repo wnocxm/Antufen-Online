@@ -110,17 +110,21 @@ for f in sorted(glob.glob('kaynak/ceviri/gorevler/*.json')):
     if f.endswith('_kaynak.json'): continue
     C = json.load(open(f, encoding='utf-8'))
     skip = set(C.get('atla', [])); n0 = len(out)
+    Y2 = {s1['id']: s1 for s1 in json.load(open(os.path.join(os.path.dirname(f), C['kaynak']), encoding='utf-8'))} if C.get('kaynak') else {}   # dosyanın kendi yapı dosyası önce gelir (ör. sinif_kaynak.json)
     for i in sorted(map(int, C['gorevler'])):
-        s0 = YAPI.get(i); c = C['gorevler'][str(i)]
+        s0 = Y2.get(i) or YAPI.get(i); c = C['gorevler'][str(i)]
         if not s0: print('  yapı yok:', i); continue
         if i in have or i in skip or not c: continue
-        q = {k: s0[k] for k in ('id', 'giver', 'to', 'type', 'target', 'targets', 'node', 'count', 'sc', 'chance', 'req', 'rw') if k in s0}
+        q = {k: s0[k] for k in ('id', 'giver', 'to', 'type', 'target', 'targets', 'node', 'count', 'sc', 'chance', 'req', 'rw', 'cls', 'adv', 'auto', 'mobs', 'drops') if k in s0}   # cls: yalnız o sınıf, adv: sınıf yükseltir, auto: seviyede kendiliğinden alınır, mobs/drops: çok eşyalı toplama (sinif_kaynak.json)
         if str(i) in C.get('zincir', {}): q['req'] = C['zincir'][str(i)]   # elle verilen zincir bağı
         if str(i) in C.get('sahneler', {}): q['sc'] = C['sahneler'][str(i)]   # hedefin asıl haritası (araç yanlış seçtiyse)
         if str(i) in C.get('teslim', {}): q.update(type='deliver', give=C['teslim'][str(i)], count=1)   # eşya getirme (çantadaki eşya teslim edilir)
         if str(i) in C.get('ozel', {}): q.update(type='special', flag=C['ozel'][str(i)])                 # oyundaki bir olayla biter (ör. kuluçka)
         if str(i) in C.get('hedefler', {}): q['g'] = C['hedefler'][str(i)]                               # elle yazılmış hedef cümlesi [tr, en]
         if str(i) in C.get('seviyeler', {}): q['lvMin'] = C['seviyeler'][str(i)]
+        if C.get('seviye_kesin') and 'lvMin' in q: q['lvAt'] = q['lvMin']   # görevin açılma seviyesi tam bu (hedef haritanın seviyesine bakılmaz; ör. 40'taki sınıf görevleri)
+        if str(i) in C.get('esyalar', {}): q['dn'] = C['esyalar'][str(i)]                                 # çok eşyalı toplamada eşya adları [[tr…], [en…]]
+        if str(i) in C.get('secim', {}): q['ch'] = [C['secim'][str(i)]['tr'], C['secim'][str(i)]['en']]   # bitişte seçim: [[düğme, sonuç metni]…]
         rc = C.get('irklar', {}).get(str(i)) or taraf(q['giver'], C.get('irk'))   # ırk: göreve özel > veren NPC'nin haritasının tarafı > bölge dosyası
         if rc and rc != 'ortak': q['race'] = rc
         if C.get('seviye') and q['type'] not in ('kill', 'collect', 'pickup'): q['lv0'] = C['seviye']   # şehirde verilen konuşma görevinin en düşük seviyesi
@@ -218,7 +222,9 @@ js = """// Görevler: tools/gorevler.py üretir; elle değiştirme. Yapı Androi
       : q.type === 'pickup' ? (E ? `Gather ${q.count} ${q.item} in ${sc}, then talk to ${to}.` : `${sc}: ${q.count} ${q.item} topla, sonra ${to} ile konuş.`)
       : q.item ? (E ? `Take the ${q.item} to ${to}.` : `${q.item} eşyasını ${to} kişisine götür.`)
       : (E ? `Talk to ${to}.` : `${to} ile konuş.`);
-    delete q.tr; delete q.en; QUESTS.push(q);
+    if (q.dn) { const n = E ? q.dn[1] : q.dn[0]; q.drops.forEach((d, i) => d[2] = n[i]); q.item = n.join(', '); }   // çok eşyalı toplama: [adet, olasılık, ad]
+    if (q.ch) q.choice = E ? q.ch[1] : q.ch[0];
+    delete q.dn; delete q.ch; delete q.tr; delete q.en; QUESTS.push(q);
   }
   // orijinal ödüller (Symbian ham kaydı): {gold, xp, items: [[id, adet, sınıf?]]} — elle yazılan görevler (tr.js) dahil
   for (const q of QUESTS) if (QRW[q.id]) q.rw = QRW[q.id];

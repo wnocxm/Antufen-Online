@@ -54,7 +54,7 @@ const CORE = ['v', 'sv', 'name', 'race', 'cls', 'sex', 'face', 'lv', 'xp', 'gold
 const num = (v, d = 0) => (Number.isFinite(+v) ? +v : d);
 
 async function listCharacters(accountId) {
-  const r = await pool.query('SELECT id, name, race, cls, sex, face, lv, scene, last_seen FROM characters WHERE account_id = $1 ORDER BY id', [accountId]);
+  const r = await pool.query('SELECT id, name, race, cls, sex, face, lv, scene, last_seen, COALESCE((extra->>\'adv\')::int, 0) AS adv FROM characters WHERE account_id = $1 ORDER BY id', [accountId]);
   return r.rows.map(c => ({ ...c, id: Number(c.id) }));
 }
 

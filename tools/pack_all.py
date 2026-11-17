@@ -69,6 +69,10 @@ for sid, s in scenes.items():
 if os.path.exists('kaynak/apk/seviyeler.json'):
     for sid, r in json.load(open('kaynak/apk/seviyeler.json')).items():
         if sid in scenes: scenes[sid]['lvr'] = r; scenes[sid]['lv'] = r[1]
+# dünya haritası tablosunda olmayıp dosya adındaki sayı yanlış seviye veren sahneler: orijinal görev deneyiminden tahmin (kaynak/seviye_tahmin.json)
+if os.path.exists('kaynak/seviye_tahmin.json'):
+    for sid, r in json.load(open('kaynak/seviye_tahmin.json')).items():
+        if sid in scenes and isinstance(r, list): scenes[sid]['lvr'] = r; scenes[sid]['lv'] = r[1]
 for _ in range(6):
     for sid, s in scenes.items():
         if s['lv']: continue

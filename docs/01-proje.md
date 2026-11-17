@@ -22,6 +22,7 @@ Kullanıcı ileride Unity'ye taşımayı düşünüyor; bunu kendi bilgisayarın
   muhafızsız şehirler komşu alanlardan; zindan ve savaş alanları ortak (`tools/taraf.py` → `kaynak/apk/taraflar.json`). Görevin ırkı = veren NPC'nin haritası.
   Sonuç: İnsan = Guanlin, Koşanat, Karakol, Başkent, Dağgören, Büyü Akademisi, Trol Ormanı; Gece Elfi = Kâhin Tapınağı, Gözcü, Güneşgören (+ lonca terasları, Dinlenme Bölgesi), Yoğunsis, Sanatçılar Loncası;
   ortak = Altındalga Limanı, Adalet Meydanı, lağım, zindanlar ve zindan merkezleri (ör. Ruhyiyen Sefer Karakolu, 40). Zindanlar eklenince görevleri kendiliğinden ortak olur.
+- **Sınıf ağacı orijinal gibi** (17.11): 40'taki sınıf yükseltme görevinden önce açılmaz.
 - **Orijinal gibi bol kasma**: ilk ~16 seviye görevlerle; sonra deneyimin çoğu canavar kesmekten (1-55 ≈ 7-9 bin öldürme, ~20-25 saat).
 - Müzik: APK'daki 12 kaydedilmiş parça kullanılıyor (Symbian MIDI'leri yanlış geldi).
 
@@ -47,6 +48,7 @@ Sırada (kullanıcı onayladı):
 1. Denge 1. tur yapıldı (bkz. 03 › Denge). Kalan: insan yolunda 40-48 arası görev yok (yalnız kasma; büyük olasılıkla orijinalde 40. seviye ortak zindanlarla doluyordu); eşyalar (bölgelere göre), elle oynanış testi. (Harita adları ve sahnelerdeki 1519 NPC/canavar/nesne adı çevrildi.)
 
 Ertelenenler / bilinenler:
-- 6 ileri beceri ağacı, ırk becerileri, 40. seviye sınıf yükselmesi, mücevher/tarif/unvan yok. Orijinal beceri ağacı yapısı çözüldü (docs/03 › Beceri ağaçları); sınıf ağacı orijinalde 40'taki sınıf yükseltmesiyle açılıyor, bizde 10-17'de açılıyor.
+- **40. seviye sınıf yükseltmesi ✔ (17.11)**: orijinal görevlerle; sınıf ağacı yalnız bununla açılır (kullanıcı kararı: orijinal gibi). Kalan: 80'deki uzmanlık ağaçları (kapsam dışı), ırk becerileri, mücevher/tarif/unvan.
+- Harita seviyeleri: dosya adındaki sayı seviye değil; dünya haritasında olmayan bazı sahneler yanlış seviyede (docs/04 › Sınıf yükseltme › Seviye bulgusu). Sırada önerilen: bu sahneleri düzeltip 55 altına düşen görevlerini almak.
 - Zindan, binek ve çok hedefli görevler alınmadı.
 - Sunucu için VPS + alan adı + HTTPS gerekiyor (kullanıcı hazır olunca).

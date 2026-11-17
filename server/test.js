@@ -45,6 +45,10 @@ server.listen(0, async () => {
     const L = (await call('GET', `/api/characters/${CID}`, null, TA)).j.state;
     for (const k of ['lv', 'xp', 'gold', 'x', 'y', 'eq', 'quests', 'done', 'sk', 'quick', 'home', 'qitems', 'gear', 'flags']) assert.deepStrictEqual(norm(L[k]), norm(P[k]), 'alan: ' + k);
     assert.deepStrictEqual(L.bag.sort((p, q) => p.id < q.id ? -1 : 1), P.bag.slice().sort((p, q) => p.id < q.id ? -1 : 1));
+    // sınıf yükseltme (40): extra alanında saklanır, karakter listesinde görünür
+    P.adv = 1; assert.equal((await call('PUT', `/api/characters/${CID}`, { state: P }, TA)).code, 200);
+    assert.equal((await call('GET', `/api/characters/${CID}`, null, TA)).j.state.adv, 1, 'sınıf yükseltme saklanır');
+    const lst = (await call('GET', '/api/characters', null, TA)).j; assert.equal((lst.characters || lst).find(x => x.id === CID).adv, 1, 'listede sınıf yükseltme');
     // ikinci hesap başkasının karakterine dokunamaz
     const b = await call('POST', '/api/register', { username: 't_b' + tag, password: 'gizli456' }); const TB = b.j.token;
     assert.equal((await call('GET', `/api/characters/${CID}`, null, TB)).code, 404);

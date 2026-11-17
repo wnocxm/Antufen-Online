@@ -245,7 +245,7 @@ const UI = (() => {
     if (sl[0] === 's') {
       const i = +sl.slice(1), sk = CLS[P.cls].skills[i]; if (!sk) return;
       const im = uiImg(`icon_res_${sk.ik || 'skill'}_${sk.icon}`); if (im.complete && im.naturalWidth) ctx.drawImage(im, x, y, 32, 32);
-      if (!skRank(sk)) { ctx.fillStyle = 'rgba(0,0,0,.7)'; ctx.fillRect(x, y, 32, 32); if (P.lv < sk.lv) { ctx.textAlign = 'center'; ctx.font = '8px sans-serif'; text('Sv' + sk.lv, x + 16, y + 20, '#ccc'); } return; }
+      if (!skRank(sk)) { ctx.fillStyle = 'rgba(0,0,0,.7)'; ctx.fillRect(x, y, 32, 32); if (skLock(sk)) { ctx.textAlign = 'center'; ctx.font = '8px sans-serif'; text(skLock(sk) === 'adv' ? '40 ★' : 'Sv' + sk.lv, x + 16, y + 20, '#ccc'); } return; }
       const cd = p.cds[sk.id] || 0; if (cd > 0) { ctx.fillStyle = 'rgba(0,0,0,.65)'; ctx.fillRect(x, y + 32 * (1 - cd / sk.cd), 32, 32 * cd / sk.cd); ctx.textAlign = 'center'; ctx.font = 'bold 11px sans-serif'; text(Math.ceil(cd), x + 16, y + 21, '#fff'); }
       if (p.mp < sk.mp) { ctx.fillStyle = 'rgba(0,30,120,.45)'; ctx.fillRect(x, y, 32, 32); }
     } else {
@@ -322,7 +322,7 @@ const UI = (() => {
     } else if (cur === 'char') {
       title = 'Karakter';
       h = `<div class="charp"><div class="sil"><img src="${Assets.base}ui/Portrait_${P.face}.png"></div><div class="cstats">
-        <div class="cname">${esc(P.name)}</div><div class="csub">${TR.race[P.race]} · ${TR.cls[P.cls]} · Seviye ${P.lv}</div>
+        <div class="cname">${esc(P.name)}</div><div class="csub">${TR.race[P.race]} · ${clsName()} · Seviye ${P.lv}</div>
         <table>${[['Can', s.hp], ['Mana', s.mp], ['Saldırı', s.atk], ['Savunma', s.def], ['Kritik', (8 + s.crit) + '%'], ['Tecrübe', `${P.xp}/${xpNeed(P.lv)}`], ['Altın', P.gold]].map(([a, b]) => `<tr><td>${a}</td><td>${b}</td></tr>`).join('')}</table>
         </div></div>
         <div class="eqgrid">${SLOTS.map(([k, n]) => { const id = P.eq[k], it = id && ITEMS[id]; return `<button class="slot eq ${sel === 'eq:' + k ? 'on' : ''}" data-sel="eq:${k}">${it ? `<img src="${iconSrc(it)}">` : `<span>${n}</span>`}</button>`; }).join('')}</div>
@@ -337,7 +337,7 @@ const UI = (() => {
       else h += `<p class="hint">Bir eşyaya dokun: bilgisini gör, kullan ya da giy.${shopNpc ? ' Satmak için de seçebilirsin.' : ''} Görev eşyaları (sarı çerçeve) görev bitince teslim edilir.</p>`;
     } else if (cur === 'skill') {
       title = 'Beceriler';
-      const row = (sk, i) => `<div class="skr ${P.lv < sk.lv ? 'lock' : ''}"><img src="${Assets.base}ui/icon_res_${sk.ik || 'skill'}_${sk.icon}.png"><div><b>${sk.name}</b> <small>${sk.pas ? '(edilgen)' : ''}</small><br><small>${esc(sk.desc || '')}</small><br><small>${sk.pas ? '' : `${sk.mp} mana · ${sk.cd} sn · `}${P.lv < sk.lv ? sk.lv + '. seviyede açılır' : sk.pas ? 'Etkin' : 'Kısayol ' + (i + 1)}</small></div></div>`;
+      const row = (sk, i) => `<div class="skr ${skLock(sk) ? 'lock' : ''}"><img src="${Assets.base}ui/icon_res_${sk.ik || 'skill'}_${sk.icon}.png"><div><b>${sk.name}</b> <small>${sk.pas ? '(edilgen)' : ''}</small><br><small>${esc(sk.desc || '')}</small><br><small>${sk.pas ? '' : `${sk.mp} mana · ${sk.cd} sn · `}${P.lv < sk.lv ? sk.lv + '. seviyede açılır' : sk.pas ? 'Etkin' : 'Kısayol ' + (i + 1)}</small></div></div>`;
       const all = CLS[P.cls].skills; h = `<div class="skgrid">${all.map((sk, i) => row(sk, i)).join('')}</div>`;
     } else if (cur === 'quest') {
       title = 'Görevler';
@@ -359,7 +359,7 @@ const UI = (() => {
       title = 'Ayarlar';
       h = `<div class="iact"><button class="obtn" data-act="tsfx">Ses efektleri: ${SFX.opt.sfx ? 'Açık' : 'Kapalı'}</button><button class="obtn" data-act="tmus">Müzik: ${SFX.opt.music ? 'Açık' : 'Kapalı'}</button></div>
         <div class="iact"><button class="obtn" data-act="lang">${LANG === 'tr' ? 'Language: English' : 'Dil: Türkçe'}</button></div>
-        <div class="iact"><button class="obtn" data-act="totitle">Giriş ekranına dön</button><button class="obtn" data-act="newchar">Yeni karakter oluştur</button></div><p class="hint">Oyun otomatik kaydedilir. Sürüm 11172046</p>`;
+        <div class="iact"><button class="obtn" data-act="totitle">Giriş ekranına dön</button><button class="obtn" data-act="newchar">Yeni karakter oluştur</button></div><p class="hint">Oyun otomatik kaydedilir. Sürüm 11172113</p>`;
     }
     ptitle.textContent = tx(title); pbody.innerHTML = h; txDom(pbody);
   }
@@ -467,9 +467,9 @@ const UI = (() => {
   }
   function drawList() {
     const v = $('#gq').value.trim().toLocaleLowerCase('tr'), hx = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    if (listMode === 'gm') $('#gstate').textContent = `${tx('Seviye')} ${Game.P.lv} · ${Game.P.gold} ${tx('altın')}${Game.god ? ' · ' + tx('ölümsüz') : ''}${Game.fast ? ' · ' + tx('hızlı') : ''}`;   // her sekmede
     if (listMode === 'gm' && gmView !== 'maps') { drawGmSys(v, hx); return; }
     if (listMode === 'gm') {
-      $('#gstate').textContent = `${tx('Seviye')} ${Game.P.lv} · ${Game.P.gold} ${tx('altın')}${Game.god ? ' · ' + tx('ölümsüz') : ''}${Game.fast ? ' · ' + tx('hızlı') : ''}`;
       const S = Assets.D.scenes, ids = Object.keys(S).filter(id => !v || (id + ' ' + trName(S[id].name) + ' ' + S[id].name).toLocaleLowerCase('tr').includes(v))
         .sort((a, b) => (S[a].kind[0] === 1 ? 0 : 1) - (S[b].kind[0] === 1 ? 0 : 1) || (S[a].lv || 0) - (S[b].lv || 0) || a - b);
       $('#glist').innerHTML = ids.slice(0, 200).map(id => `<button data-s="${id}" class="${id === Game.sceneId ? 'on' : ''}"><b>${hx(trName(S[id].name))}</b><small>${tx(KIND[S[id].kind[0]] || 'Özel')}${S[id].lv ? ' · ' + tx('Sv') + ' ' + S[id].lv : ''} · ${id}</small></button>`).join('') +
@@ -492,6 +492,12 @@ const UI = (() => {
       for (const d of Dungeon.list) if (!v || (trName(d.cn) + d.cn).toLocaleLowerCase('tr').includes(v))
         d.copies.forEach((c, i) => { h += row(`${trName(d.cn)}${d.copies.length > 1 ? (i ? GT(' (elf)', ' (elf)') : GT(' (insan)', ' (human)')) : ''}`, `${GT('Sv', 'Lv')} ${d.lv}+ · ${d.train ? GT('sınav', 'training') : GT('günde ', '') + d.daily + GT('', '/day')} · ${trName(Assets.D.scenes[c.door[0]].name)} ${GT('kapı', 'gate')} ${c.door[1]}`,
           [[`dg:door:${d.id}:${i}`, GT('Kapıya git', 'Go to gate')], [`dg:in:${d.id}:${i}`, GT('İçeri gir', 'Enter')]]); });
+    } else if (gmView === 'cls') {   // sınıf yükseltme (40): durum, zincirdeki görevler (ClassGM, game.js)
+      const P = Game.P, SN = { done: GT('bitti', 'done'), ready: GT('hazır', 'ready'), active: GT('sürüyor', 'active'), new: GT('alınabilir', 'available'), soon: GT('seviye bekliyor', 'level too low'), locked: GT('kilitli', 'locked') };
+      h += row(GT('Sınıf', 'Class'), `${clsName()} · ${GT('yükseltme', 'advancement')} ${P.adv || 0} · ${GT('Sv', 'Lv')} ${P.lv}`,
+        [['cls:up', GT('Sınıfı yükselt', 'Advance class')], ['cls:reset', GT('Acemiye döndür', 'Back to trainee')], ['cls:start', GT('40 yap + ilk görev', 'Set 40 + first quest')]]);
+      for (const q of ClassGM.chain()) if (!v || (q.title + ' ' + q.id).toLocaleLowerCase('tr').includes(v))
+        h += row(q.title + (q.adv ? ' ★' : ''), `${q.id} · ${trName(q.giver)} → ${trName(q.to)} · ${SN[questState(q)]}`, [[`cls:ready:${q.id}`, GT('Hazır yap', 'Make ready')], [`cls:done:${q.id}`, GT('Bitir', 'Complete')], [`cls:go:${q.id}`, GT('Git', 'Go')]]);
     } else {
       const p = Pet.active();
       h += row(GT('Evcil hayvan', 'Pet'), p ? `${Pet.nm(p)} · ${GT('Sv', 'Lv')} ${p.lv} · ${GT('tokluk', 'satiety')} ${p.sat} · ${Pet.list().length}/${Pet.slots()}` : GT('çağrılmış hayvan yok', 'no pet summoned'),
@@ -510,6 +516,7 @@ const UI = (() => {
   function gmX(k) {
     const [a, b, c, d] = k.split(':');
     if (a === 'dg') { const G = Dungeon.GM; if (b === 'in' || b === 'door') { closeAll(); setTimeout(() => G[b === 'in' ? 'enter' : 'door'](c, +d), 200); return; } if (b === 'last') { closeAll(); G.lastFloor(); return; } if (b === 'leave') { closeAll(); G.leave(); return; } G[b](); }
+    if (a === 'cls') { const G = ClassGM; if (b === 'go') { closeAll(); setTimeout(() => questWalk(QBY[c]), 200); return; } if (b === 'ready' || b === 'done') G[b](+c); else G[b](); }
     if (a === 'pet') { const G = Pet.GM; if (b === 'win') { closeAll(); Win.open('pet'); return; } if (b === 'petf' || b === 'petfs') { closeAll(); Win.open('petf', { mode: b === 'petf' ? 'tf' : 'sk' }); return; }
       if (b === 'give' || b === 'egg') G[b](c); else if (b === 'stage0') G.stage(0); else G[b](); }
     drawList();
@@ -526,7 +533,7 @@ const UI = (() => {
     if (a === 'lv1') gmLevel(P.lv + 1); else if (a === 'lv10') gmLevel(P.lv + 10); else if (a === 'lvset') { const n = +prompt(tx('Seviye (1-120):'), P.lv); if (n) gmLevel(n); }
     else if (a === 'gold') { P.gold += 100000; save(); } else if (a === 'heal') gmHeal(); else if (a === 'god') Game.god = !Game.god; else if (a === 'fast') Game.fast = !Game.fast;
     else if (a === 'gear') gmGear(); else if (a === 'sp') { P.sp = (P.sp || 0) + 20; save(); }
-    else if (a.startsWith('v:')) { gmView = a.slice(2); $('#gq').value = ''; $('#gq').placeholder = tx(gmView === 'maps' ? 'Harita ara: ad ya da numara…' : gmView === 'dg' ? 'Zindan ara…' : 'Tür ara…'); document.querySelectorAll('#gtools .gv').forEach(x => x.classList.toggle('on', x.dataset.g === a)); $('#glist').scrollTop = 0; }
+    else if (a.startsWith('v:')) { gmView = a.slice(2); $('#gq').value = ''; $('#gq').placeholder = tx(gmView === 'maps' ? 'Harita ara: ad ya da numara…' : gmView === 'dg' ? 'Zindan ara…' : gmView === 'cls' ? 'Görev ara…' : 'Tür ara…'); document.querySelectorAll('#gtools .gv').forEach(x => x.classList.toggle('on', x.dataset.g === a)); $('#glist').scrollTop = 0; }
     drawList();
   });
 
@@ -556,7 +563,7 @@ const UI = (() => {
   function titleOpen(s) {
     tSave = s; const T = $('#title');
     tItems = [
-      s && { label: 'Devam Et', page: 'p1', info: () => `${s.name} · ${tx(TR.cls[s.cls])} · ${tx('Seviye')} ${s.lv}`, go() { T.classList.add('hidden'); Game.P = s; start(); } },
+      s && { label: 'Devam Et', page: 'p1', info: () => `${s.name} · ${clsName(s)} · ${tx('Seviye')} ${s.lv}`, go() { T.classList.add('hidden'); Game.P = s; start(); } },
       { label: 'Yeni Karakter', page: 'p2', info: () => tx('Bu telefona kaydedilir'), go() {
         if (s && !tSure) { tSure = true; $('#tinfo').textContent = tx('Eski karakter silinecek. Onaylamak için tekrar dokun.'); return; }
         localStorage.removeItem(SAVE_KEY); T.classList.add('hidden'); onlineCreate = false; showCreate(); } },
@@ -591,7 +598,7 @@ const UI = (() => {
     try { ochars = list || await Net.chars(); } catch (e) { omsg(Net.why(e)); showLogin(); return; }
     oMode = 'chars'; vis('ologin', false); vis('ochars', true); vis('oreg', false); vis('ochg', false); vis('onew', ochars.length < 4); vis('oout', true);
     $('#olist').innerHTML = ochars.length ? ochars.map(c => `<button class="ochar" data-c="${c.id}"><img src="${Assets.base}ui/Portrait_${esc(c.face)}.png" alt=""><span><b>${esc(c.name)}</b>` +
-      `<small>${tx(TR.cls[c.cls])} · ${tx(TR.race[c.race])} · ${tx('Seviye')} ${c.lv}</small></span></button>`).join('') : `<p class="hint" style="grid-column:1/3;text-align:center">${tx('Bu hesapta henüz karakter yok.')}</p>`;
+      `<small>${clsName(c)} · ${tx(TR.race[c.race])} · ${tx('Seviye')} ${c.lv}</small></span></button>`).join('') : `<p class="hint" style="grid-column:1/3;text-align:center">${tx('Bu hesapta henüz karakter yok.')}</p>`;
     omsg(Net.user ? tx('Hesap') + ': ' + Net.user : '', true);
   }
   async function doLogin(isNew) {
@@ -623,7 +630,7 @@ const UI = (() => {
   async function start() {
     mode = 'loading'; $('#loading').classList.remove('hidden');
     await loadScene(Game.P.scene || (Game.P.race === '精灵' ? '120205' : '120207'));
-    $('#loading').classList.add('hidden'); mode = 'play';
+    $('#loading').classList.add('hidden'); mode = 'play'; autoQuests();   // 40'a gelmiş karakter: Acemilikten Çıkış görevi
     if (!Object.keys(Game.P.done).length && !Object.keys(Game.P.quests).length) { toast('Rehber seni bekliyor: başında ! olan kişiye dokun'); log('Sol alttaki ejderhayı parmağınla kaydırarak yürü.', '#ffd23a'); log('Canavara dokunursan saldırırsın; sağ alttaki büyük düğme de en yakın canavara saldırır.', '#ffd23a'); }
   }
   let last = performance.now();

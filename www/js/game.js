@@ -98,7 +98,7 @@ const CLS = {
       { id: 'mp5', pas: { mpreg: 60 }, name: 'Mana Yenilenmesi', icon: 1104, lv: 14, desc: 'Mana yenilenmesi artar.' },
       { id: 'mp6', pas: { mpPct: 10 }, name: 'Mana Halesi', icon: 1111, lv: 19, desc: 'Mana sınırı +%10 daha.' },
     ] },
-  '牧师': { hp: 1050, mp: 700, atk: 60, def: 30, ghp: 150, gmp: 80, gatk: 12, gdef: 6, range: 5.5, color: '金', bolt: '特效-暗影冲击_红', boltHit: '特效-冲击爆炸', snd: 'skill_wind',
+  '牧师': { hp: 1050, mp: 700, atk: 60, def: 30, ghp: 165, gmp: 80, gatk: 13, gdef: 7, range: 5.5, color: '金', bolt: '特效-暗影冲击_红', boltHit: '特效-冲击爆炸', snd: 'skill_wind',
     skills: [
       { id: 'p1', name: 'Gölge Darbesi', icon: 1062, mp: 18, cd: 1.0, mult: 1.5, range: 7, proj: '特效-暗影冲击_红', hit: '特效-冲击爆炸', snd: 'skill_wind', snd2: 'skill_bomb', add: [25, 28, 31, 35, 40, 46, 55, 65, 72, 80], lv: 1, desc: 'Uzaktan gölge saldırısı.' },
       { id: 'p2', name: 'Çürüme', icon: 1066, mp: 30, cd: 6, mult: 0.3, dot: { n: 5 }, range: 7, fx: '特效-死亡标记', snd: 'skill_deathtag', dotT: [50, 60, 70, 80, 90, 100, 125, 150, 175, 200], lv: 3, desc: 'Hedefe lanet: 2 saniyede bir hasar verir.' },
@@ -121,6 +121,13 @@ const TREES = {
   '法师': [{ name: 'Çırak', cells: [['m1', 1, 0], ['mp1', 2, 0], ['mp2', 0, 1], ['mp3', 2, 1], ['m3', 0, 2], ['m2', 2, 2]] }, { name: 'Büyücü', cells: [['m4', 1, 0], ['mp4', 2, 0], ['mp6', 0, 1], ['mp5', 2, 1], ['m5', 0, 2], ['m6', 2, 2]] }],
   '牧师': [{ name: 'Başlangıç', cells: [['p1', 1, 0], ['pp1', 2, 0], ['p2', 0, 1], ['pp2', 2, 1], ['pp3', 0, 2], ['p3', 2, 2]] }, { name: 'Elçi', cells: [['p4', 1, 0], ['pp4', 2, 0], ['p5', 0, 1], ['p6', 2, 1], ['pp5', 0, 2], ['p7', 2, 2]] }],
 };
+// Sınıf ağacı (TREES[sınıf][1]) orijinalde 40. seviyedeki sınıf yükseltme göreviyle açılır (P.adv >= 1; docs/03 › Beceri ağaçları).
+// Acemi ağacı 1-39 içindir. Sınıf ağacındaki beceriler sınıf yükseltilince (40) öğrenilebilir.
+for (const [c, T] of Object.entries(TREES)) { T[1].adv = 1; for (const [sid] of T[1].cells) { const sk = CLS[c].skills.find(k => k.id === sid); if (sk) { sk.adv = 1; sk.lv = Math.max(sk.lv, 40); } } }
+const skLock = sk => { const P = Game.P; return sk.adv && (P.adv || 0) < sk.adv ? 'adv' : P.lv < sk.lv ? 'lv' : null; };
+const skLockMsg = sk => skLock(sk) === 'adv' ? tx('Sınıf yükseltme görevi gerekir (40. seviye).') : tx(`${sk.lv}. seviye gerekir.`);
+// sınıf adı: acemi (见习战士 / 法师学徒 / 见习神使) ya da yükseltilmiş sınıf
+const clsName = (P = Game.P) => tx(((P.adv || 0) >= 1 ? TR.cls : TR.cls0)[P.cls]);
 const SK_MAX = 10;   // orijinal beceri kayıtlarında en yüksek kademe 10
 const skRank = sk => (Game.P.sk && Game.P.sk[sk.id]) || 0;
 const skT = (sk, key) => { const t = sk[key]; return t ? t[Math.max(1, skRank(sk)) - 1] : 0; };   // orijinal kademe tablosundan değer
@@ -128,7 +135,7 @@ const skMult = sk => (sk.add || sk.pct || sk.healT || sk.dotT || sk.hotT || sk.c
 function skillUp(sk) {
   const P = Game.P, r = skRank(sk);
   if (r >= SK_MAX) return UI.toast('Bu beceri en yüksek kademede.');
-  if (P.lv < sk.lv) return UI.toast(`${sk.lv}. seviye gerekir.`);
+  if (skLock(sk)) return UI.toast(skLockMsg(sk));
   if ((P.sp || 0) < 1) return UI.toast('Beceri puanın yok. Seviye atlayınca puan kazanırsın.');
   P.sp--; P.sk[sk.id] = r + 1; SFX.play('skill_levelup'); UI.log(`${sk.name}: ${tx('kademe')} ${r + 1}`, 'q'); clampVitals(); save();
 }
@@ -198,7 +205,7 @@ function randomGear(lv) {
 function save() { const P = Game.P; if (!P || !Game.player) return; P.scene = Game.sceneId; P.x = Game.player.x; P.y = Game.player.y; P.hp = Game.player.hp; P.mp = Game.player.mp; if (Net.on) return Net.save(P); try { localStorage.setItem(SAVE_KEY, JSON.stringify(P)); } catch (e) { } }
 function load() { try { return fixSave(JSON.parse(localStorage.getItem(SAVE_KEY))); } catch (e) { } return null; }
 // eski ya da sunucudan gelen kaydı tamamla
-function fixSave(s) { try { if (s && s.v === 1) { s.quests = s.quests || {}; s.done = s.done || {}; s.qitems = s.qitems || {}; s.flags = s.flags || {}; s.gear = s.gear || { weap: 0, body: 0, head: 0 }; if (!s.eq) { s.eq = Object.assign({}, STARTER[s.cls]); if (s.gear && s.gear.head) Object.assign(s.eq, { head: NEWBIE[s.cls][0], shoe: NEWBIE[s.cls][1] }); } if (s.sv !== 2) { s.sv = 2; s.quick = QUICK0.slice(); } if (!s.sk) { s.sk = {}; for (const k of CLS[s.cls].skills) if (s.lv >= k.lv) s.sk[k.id] = 1; s.sp = 1; } return s; } } catch (e) { } return null; }
+function fixSave(s) { try { if (s && s.v === 1) { s.quests = s.quests || {}; s.done = s.done || {}; s.qitems = s.qitems || {}; s.flags = s.flags || {}; s.gear = s.gear || { weap: 0, body: 0, head: 0 }; if (!s.eq) { s.eq = Object.assign({}, STARTER[s.cls]); if (s.gear && s.gear.head) Object.assign(s.eq, { head: NEWBIE[s.cls][0], shoe: NEWBIE[s.cls][1] }); } if (s.sv !== 2) { s.sv = 2; s.quick = QUICK0.slice(); } if (!s.sk) { s.sk = {}; for (const k of CLS[s.cls].skills) if (s.lv >= k.lv && !k.adv) s.sk[k.id] = 1; s.sp = 1; } if (!(s.adv >= 1)) for (const k of CLS[s.cls].skills) if (k.adv && s.sk[k.id]) { s.sp = (s.sp || 0) + s.sk[k.id]; delete s.sk[k.id]; } return s; } } catch (e) { } return null; }
 
 function stats() {
   const P = Game.P, C = CLS[P.cls], L = P.lv - 1, g = P.gear;
@@ -218,8 +225,8 @@ function look() {
 }
 // Seviye deneyim tablosu ve normal canavar deneyimi: tools/deneyim_tablosu.py üretir (elle değiştirme; orijinal görev deneyimine göre,
 // görevler gereken deneyimin ~%40'ı, canavarlar ~%60'ı; docs/04). XPT[L] = L → L+1 için gereken, MXPT[L] = L. seviye normal canavar.
-const XPT = [0, 670, 991, 1460, 2160, 3200, 3840, 4490, 4630, 4770, 4910, 5060, 5210, 5360, 5520, 5690, 5860, 6040, 6220, 6400, 7150, 7760, 8430, 9150, 9930, 30900, 38500, 47900, 59600, 74300, 78100, 94200, 114000, 137000, 166000, 236000, 293000, 326000, 336000, 346000, 356000, 367000, 378000, 389000, 401000, 413000, 426000, 438000, 452000, 465000, 479000, 493000, 508000, 523000, 539000, 555000, 572000, 589000, 607000, 625000, 644000, 663000, 683000, 703000, 725000, 746000, 769000, 792000, 816000, 840000, 865000, 891000, 918000, 945000, 974000, 1000000, 1030000, 1060000, 1100000, 1130000, 1160000, 1200000, 1230000, 1270000, 1310000, 1350000, 1390000, 1430000, 1470000, 1520000, 1560000, 1610000, 1660000, 1710000, 1760000, 1810000, 1870000, 1920000, 1980000, 2040000, 2100000, 2160000, 2230000, 2290000, 2360000, 2430000, 2510000, 2580000, 2660000, 2740000, 2820000, 2910000, 2990000, 3080000, 3180000, 3270000, 3370000, 3470000, 3580000, 3680000, 3790000];
-const MXPT = [0, 8, 11, 14, 18, 24, 26, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 30, 93, 116, 144, 179, 223, 234, 283, 342, 411, 498, 708, 879, 978, 1010, 1040, 1070, 1100, 1130, 1170, 1200, 1240, 1280, 1310, 1360, 1400, 1440, 1480, 1520, 1570, 1620, 1660, 1720, 1770, 1820, 1880, 1930, 1990, 2050, 2110, 2180, 2240, 2310, 2380, 2450, 2520, 2600, 2670, 2750, 2840, 2920, 3000, 3090, 3180, 3300, 3390, 3480, 3600, 3690, 3810, 3930, 4050, 4170, 4290, 4410, 4560, 4680, 4830, 4980, 5130, 5280, 5430, 5610, 5760, 5940, 6120, 6300, 6480, 6690, 6870, 7080, 7290, 7530, 7740, 7980, 8220, 8460, 8730, 8970, 9240, 9540, 9810, 10100, 10400, 10700, 11000, 11400];
+const XPT = [0, 670, 991, 1460, 2160, 3200, 3840, 4490, 4630, 4770, 4910, 5060, 5210, 5360, 5520, 5690, 5860, 6040, 6220, 6400, 7150, 7760, 8430, 9150, 9930, 30900, 38500, 47900, 59600, 74300, 78000, 94100, 113000, 137000, 165000, 236000, 294000, 327000, 337000, 347000, 358000, 369000, 380000, 391000, 403000, 415000, 427000, 440000, 453000, 467000, 481000, 495000, 510000, 525000, 541000, 557000, 574000, 591000, 609000, 627000, 646000, 666000, 686000, 706000, 727000, 749000, 772000, 795000, 819000, 843000, 869000, 895000, 921000, 949000, 978000, 1010000, 1040000, 1070000, 1100000, 1130000, 1170000, 1200000, 1240000, 1280000, 1310000, 1350000, 1390000, 1440000, 1480000, 1520000, 1570000, 1620000, 1660000, 1710000, 1770000, 1820000, 1870000, 1930000, 1990000, 2050000, 2110000, 2170000, 2240000, 2300000, 2370000, 2440000, 2520000, 2590000, 2670000, 2750000, 2830000, 2920000, 3010000, 3100000, 3190000, 3280000, 3380000, 3480000, 3590000, 3700000, 3810000];
+const MXPT = [0, 8, 11, 14, 18, 24, 26, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 30, 93, 116, 144, 179, 223, 234, 282, 339, 411, 495, 708, 882, 981, 1010, 1040, 1070, 1110, 1140, 1170, 1210, 1240, 1280, 1320, 1360, 1400, 1440, 1480, 1530, 1580, 1620, 1670, 1720, 1770, 1830, 1880, 1940, 2000, 2060, 2120, 2180, 2250, 2320, 2380, 2460, 2530, 2610, 2680, 2760, 2850, 2930, 3030, 3120, 3210, 3300, 3390, 3510, 3600, 3720, 3840, 3930, 4050, 4170, 4320, 4440, 4560, 4710, 4860, 4980, 5130, 5310, 5460, 5610, 5790, 5970, 6150, 6330, 6510, 6720, 6900, 7110, 7320, 7560, 7770, 8010, 8250, 8490, 8760, 9030, 9300, 9570, 9840, 10100, 10400, 10800, 11100, 11400];
 function xpNeed(l) { return XPT[clamp(Math.round(l), 1, XPT.length - 1)]; }
 
 // ---------------- Varlıklar ----------------
@@ -260,6 +267,8 @@ function monDef(nm, sc) {
   else { const base = Math.max(1, S - 9), span = Math.max(1, Math.min(9, kinds.length)); lv = Math.min(S + 5, base + Math.round(i * 8 / span) + (rank === 2 ? 6 : rank ? 3 : 0)); }
   return MON[nm] = { lv, rank, xp: xpOf(lv, rank), n: rank === 2 ? 1 : rank ? 2 : 7, wide: rank ? 4 : 8, auto: true };
 }
+// Sınıf yükseltme görevlerinin hedefi: orijinalde yalnız 82938/82941'de geçen, 40. seviye görevi için konmuş seçkin (bulunduğu koridor ~52)
+MON['☆【叛神者】托马斯杨'] = { lv: 42, rank: 1, xp: mobXp(42, 1), n: 1, wide: 2 };
 class Mob extends Ent {
   constructor(name, x, y, home) {
     super('mob', x, y); const d = monDef(name, Game.scene);
@@ -442,7 +451,8 @@ function gainXp(n) {
   const P = Game.P; P.xp += n;
   while (P.xp >= xpNeed(P.lv)) { P.xp -= xpNeed(P.lv); P.lv++; const s = stats(); Game.player.hp = s.hp; Game.player.mp = s.mp; Game.fx.push(new Fx('LEVELUP', Game.player.x, Game.player.y)); UI.levelUp(P.lv); SFX.play('levelup');
     P.sp = (P.sp || 0) + 1; UI.log('Beceri puanı kazandın! Beceriler ekranından harca.', 'q');
-    for (const sk of CLS[P.cls].skills) if (sk.lv === P.lv) UI.log(`Yeni beceri: ${sk.name}`, 'q');
+    for (const sk of CLS[P.cls].skills) if (sk.lv === P.lv && !skLock(sk)) UI.log(`Yeni beceri: ${sk.name}`, 'q');
+    autoQuests();
     const nq = questsUnlockedAt(P.lv); for (const q of nq) UI.log(`${tx('Yeni görev')}: ${q.title} · ${trName(q.giver)}`, 'q'); if (nq.length) UI.toast(`${nq.length} ${tx('yeni görev açıldı')}`); }
   UI.refresh();
 }
@@ -458,7 +468,7 @@ function cycleTarget() {
 }
 function useSkill(i) {
   const P = Game.P, p = Game.player, C = CLS[P.cls], sk = C.skills[i]; if (!sk || sk.pas || p.dead) return;
-  if (!skRank(sk)) { UI.log(P.lv < sk.lv ? `${sk.name} ${sk.lv}. seviyede açılır.` : 'Bu beceri henüz öğrenilmedi. Beceriler ekranından puan ver.'); return; }
+  if (!skRank(sk)) { const L = skLock(sk); UI.log(L === 'adv' ? `${sk.name}: ${skLockMsg(sk)}` : L ? `${sk.name} ${sk.lv}. seviyede açılır.` : 'Bu beceri henüz öğrenilmedi. Beceriler ekranından puan ver.'); return; }
   const SM = skMult(sk);
   if ((p.cds[sk.id] || 0) > 0) return;
   if (p.mp < sk.mp) { UI.log('Mana yetersiz!'); return; }
@@ -530,7 +540,7 @@ function refreshLook() { Game.player.doll.set(look()); Assets.preload([]); UI.re
 // ---------------- Görevler ----------------
 const QBY = Object.fromEntries(QUESTS.map(q => [q.id, q]));
 // q.race: yalnızca o ırk; q.req: tek kimlik ya da "herhangi biri" listesi
-function questState(q) { const P = Game.P; if (P.done[q.id]) return 'done'; if (P.quests[q.id]) return P.quests[q.id].ready || (q.type === 'deliver' && giveCount(q) >= q.count) ? 'ready' : 'active'; if (q.race && q.race !== P.race) return 'locked';
+function questState(q) { const P = Game.P; if (P.done[q.id]) return 'done'; if (P.quests[q.id]) return P.quests[q.id].ready || (q.type === 'deliver' && giveCount(q) >= q.count) ? 'ready' : 'active'; if ((q.race && q.race !== P.race) || (q.cls && q.cls !== P.cls)) return 'locked';
   if (q.req && !(Array.isArray(q.req) ? q.req.some(r => P.done[r]) : P.done[q.req])) return 'locked'; if (P.lv < questMinLv(q)) return 'soon'; return 'new'; }
 // ---------------- Görevlerin seviye şartı ----------------
 // Orijinal istemci seviye şartını taşımaz (sunucudaydı); şart orijinal verilerden türetilir:
@@ -563,6 +573,7 @@ function hubLv(giver) {
 }
 function questMinLv(q) {
   if (q._lv != null) return q._lv;
+  if (q.lvAt) return q._lv = q.lvAt;   // kesin açılma seviyesi (sınıf görevleri: orijinalde 40; hedef haritası daha yüksek olsa da)
   q._lv = 1;   // döngü koruması
   if (!QNEXT) { QNEXT = {}; for (const x of QUESTS) for (const r of [].concat(x.req || [])) (QNEXT[r] || (QNEXT[r] = [])).push(x); }
   let lv = questOwnLv(q);
@@ -626,6 +637,11 @@ function questKill(name) {
       if ((st.c[name] || 0) < tg[1]) { st.c[name] = (st.c[name] || 0) + 1; st.n = (st.n || 0) + 1; UI.log(`${trName(name)} ${st.c[name]}/${tg[1]}`, 'loot'); }
       if (q.targets.every(x => (st.c[x[0]] || 0) >= x[1])) readyQuest(q); UI.refresh(); continue;
     }
+    if (q.type === 'collect' && q.drops) {   // çok eşyalı toplama: q.mobs'tan biri her öldürmede eksik eşyaların her biri için şans
+      if (!(q.mobs || [q.target]).includes(name)) continue; st.c = st.c || {};
+      q.drops.forEach(([n, ch, nm], i) => { const k = 'd' + i; if ((st.c[k] || 0) < n && Math.random() < ch) { st.c[k] = (st.c[k] || 0) + 1; st.n = (st.n || 0) + 1; UI.log(`${nm} ${st.c[k]}/${n}`, 'loot'); } });
+      if (q.drops.every(([n], i) => (st.c['d' + i] || 0) >= n)) readyQuest(q); UI.refresh(); continue;
+    }
     if (q.type === 'kill' && q.target === name) { st.n++; if (st.n >= q.count) readyQuest(q); UI.refresh(); }
     if (q.type === 'collect' && q.target === name && Math.random() < q.chance) { st.n++; UI.log(`${q.item} ${st.n}/${q.count}`, 'loot'); if (st.n >= q.count) readyQuest(q); UI.refresh(); }
   }
@@ -637,8 +653,32 @@ function completeQuest(q) {
   const P = Game.P, r = q.reward; delete P.quests[q.id]; P.done[q.id] = true; SFX.play('finish_task');
   if (r.gold) P.gold += r.gold; for (const [id, n] of rewardItems(q)) addItem(id, n);
   gainXp(r.xp || 0); UI.log(`Ödül: ${r.xp} TP${r.gold ? ', ' + r.gold + ' altın' : ''}`, 'q');
+  if (q.adv) classUp(q.adv);
   UI.refresh(); save();
 }
+// ---------------- Sınıf yükseltme (orijinal 40. seviye görevleri: sinif.json; 80'deki uzmanlık kapsam dışı) ----------------
+function classUp(n) {
+  const P = Game.P; if ((P.adv || 0) >= n) return; P.adv = n;
+  Game.fx.push(new Fx('LEVELUP', Game.player.x, Game.player.y)); SFX.play('levelup');
+  UI.toast(`${tx('Sınıf yükseltildi')}: ${clsName()}`); UI.log(`${tx('Sınıf yükseltildi')}: ${clsName()} · ${tx('sınıf beceri ağacı açıldı')}`, 'q');
+  for (const sk of CLS[P.cls].skills) if (sk.adv === n && !skLock(sk)) UI.log(`Yeni beceri: ${sk.name}`, 'q');
+  UI.refresh(); save();
+}
+// seviyesi gelince kendiliğinden alınan görevler (orijinalde verensiz "gönderilen" görev: 80344 Acemilikten Çıkış)
+function autoQuests() { for (const q of QUESTS) if (q.auto && questState(q) === 'new') { acceptQuest(q); UI.toast(`${tx('Yeni görev')}: ${q.title}`); } }
+// GM: sınıf yükseltme (GM paneli › Sınıf; tools/test/sinif.js)
+const ClassGM = {
+  chain() { const P = Game.P; return QUESTS.filter(q => (q.cls === P.cls && (!q.race || q.race === P.race) && q.lvMin >= 40) || q.id === 80344).sort((a, b) => (a.id === 80344 ? -1 : b.id === 80344 ? 1 : 0) || chainDepth(a) - chainDepth(b)); },
+  up() { classUp(1); },
+  reset() { const P = Game.P; P.adv = 0; for (const k of CLS[P.cls].skills) if (k.adv && P.sk[k.id]) { P.sp = (P.sp || 0) + P.sk[k.id]; delete P.sk[k.id]; } for (const q of this.chain()) { delete P.quests[q.id]; delete P.done[q.id]; } UI.refresh(); save(); },
+  start() { const P = Game.P; if (P.lv < 40) gmLevel(40); autoQuests(); UI.refresh(); },
+  ready(id) { const q = QBY[id], P = Game.P; if (!q || P.done[id]) return; for (let r = q.req; r && !P.done[r]; r = QBY[r] && QBY[r].req) { P.done[r] = true; delete P.quests[r]; } if (!P.quests[id]) acceptQuest(q); readyQuest(q); save(); },
+  done(id) { const q = QBY[id]; if (!q || Game.P.done[id]) return; this.ready(id); if (q.type === 'deliver') return; completeQuest(q); },
+};
+// Ozan (金波港): 40'ta sınıf yükseltme görevlerini dağıtır (80344 metni)
+TR.greet['吟游诗人'] = LANG === 'en' ? 'My songs tell the tales of many heroes. When you reach level 40, come to me and I will tell you how to become a true warrior, mage or priest.'
+  : 'Şarkılarım nice kahramanın hikâyesini anlatır. 40. seviyeye gelince bana uğra; gerçek bir savaşçı, büyücü ya da kutsal elçi olmanın yolunu anlatayım.';
+function chainDepth(q) { let d = 0; for (let r = q.req; r && d < 20; r = QBY[r] && QBY[r].req) d++; return d; }
 // Görev hedefine otomatik yürü (orijinaldeki "寻路"): teslim edilecek kişi, toplama noktası ya da en yakın hedef canavar
 // ---------------- GM (oyun yöneticisi) ----------------
 // Çevrimdışı: adı "GM" ile başlayan karakter. Çevrimiçi: sunucuda yönetici yetkisi olan hesap (node make-admin.js <kullanıcı>).
@@ -696,7 +736,7 @@ function questWalk(q) {
     const sid = npcSceneNear(q.node); if (sid && sid !== Game.sceneId) return away(sid);
     UI.toast('Toplanacak yer bilinmiyor.'); return goNpc(q.to);
   }
-  const names = q.targets ? q.targets.filter(x => ((st.c || {})[x[0]] || 0) < x[1]).map(x => x[0]) : [q.target];
+  const names = q.targets ? q.targets.filter(x => ((st.c || {})[x[0]] || 0) < x[1]).map(x => x[0]) : q.mobs || [q.target];
   const t = near(e => e.kind === 'mob' && !e.dead && names.includes(e.name));
   if (t) { p.path = findPath(Game.map, p.x, p.y, t.x, t.y + 1); Game.goTarget = null; setTarget(t); return; }   // canavarın yanına yürür ve seçer; saldırmaz (kullanıcı isteği)
   const spot = near(e => e.kind === 'mob' && names.includes(e.name));   // hepsi ölü: yeniden doğdukları yere yürü

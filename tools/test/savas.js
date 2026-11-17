@@ -1,10 +1,11 @@
 // Savaş dengesi: her sınıf (战士/法师/牧师), seviyeye uygun en iyi dükkân eşyası ve dağıtılmış beceri puanlarıyla,
 // kendi seviyesindeki normal (ve ☆ seçkin) canavarla gerçek oyun döngüsünde (update) dövüşür.
-// Çıktı: öldürme süresi, kaybedilen can yüzdesi, kazanan. node tools/test/savas.js   (LVS=5,10,… CLS=战士,…)
+// Çıktı: öldürme süresi, kaybedilen can yüzdesi, kazanan. node tools/test/savas.js   (LVS=5,10,… CLS=战士,… ADV=0 sınıf yükseltmesiz)
 const { chromium } = require('playwright');
 const LVS = (process.env.LVS || '3,5,10,15,20,25,30,35,40,45,50,55').split(',').map(Number);
 const CLSS = (process.env.CLS || '战士,法师,牧师').split(',');
 const BOSS = (process.env.BOSS || '').split(';').filter(Boolean).map(x => x.split(':'));   // örn. BOSS='120278:★月夜狼王:30'
+const ADV = process.env.ADV != null ? +process.env.ADV : null;   // sınıf yükseltmesi (varsayılan: 40 ve üstü 1)
 (async () => {
   const b = await chromium.launch();
   for (const cls of CLSS) {
@@ -13,7 +14,7 @@ const BOSS = (process.env.BOSS || '').split(';').filter(Boolean).map(x => x.spli
     await p.goto(process.env.URL || 'http://localhost:8099/'); await p.waitForTimeout(1200); await p.keyboard.press('Enter');
     await p.click(`[data-cls="${cls}"]`); await p.fill('#cname', 'Savas'); await p.click('#cstart');
     await p.waitForFunction(() => window.__G && window.__G.player, null, { timeout: 30000 });
-    const r = await p.evaluate(async ([LVS, BOSS]) => {
+    const r = await p.evaluate(async ([LVS, BOSS, ADV]) => {
       const P = __G.P, S = Assets.D.scenes, q = () => {}; UI.log = q; UI.toast = q; SFX.play = q; save = q; UI.death = q; UI.float = q; UI.hurt = q; UI.levelUp = q;
       const C = CLS[P.cls], out = [];
       const spot = (L, elite) => { // seviyesi L'ye en yakın canavar
@@ -25,7 +26,8 @@ const BOSS = (process.env.BOSS || '').split(';').filter(Boolean).map(x => x.spli
       const fight = (L, elite, fixed) => {
         const sp = fixed || spot(L, elite); if (!sp) return null;
         L = fixed ? L : elite ? Math.max(1, monDef(sp[1], sp[0]).lv - 1) : L; gmLevel(L); P.sk = {};
-        for (const sk of C.skills) if (sk.lv <= L) P.sk[sk.id] = clamp(Math.floor((L - sk.lv) / 4) + 1, 1, 10);
+        P.adv = ADV != null ? ADV : L >= 40 ? 1 : 0;   // 40'tan sonra sınıf yükseltilmiş sayılır (ADV=0: sınıf görevleri sırasında, yalnız acemi ağacı)
+        for (const sk of C.skills) if (!skLock(sk)) P.sk[sk.id] = clamp(Math.floor((L - sk.lv) / 4) + 1, 1, 10);
         gmGear(); const st = stats(); const pl = __G.player; pl.buffs = []; pl.cds = {}; pl.hp = st.hp; pl.mp = st.mp; pl.dead = false; pl.state = 'idle';
         Game.ents = Game.ents.filter(e => e.kind !== 'mob'); Game.fx = [];
         const m = new Mob(sp[1], pl.x + 1.2, pl.y); m.home = { x: m.x, y: m.y }; m.aggro = true; Game.ents.push(m); setTarget(m, true);
@@ -47,7 +49,7 @@ const BOSS = (process.env.BOSS || '').split(';').filter(Boolean).map(x => x.spli
       if (BOSS.length) { for (const [sid, nm, L] of BOSS) { await gotoScene(sid); const f = fight(+L, false, [Assets.D.scenes[sid], nm]); if (f) out.push(f); } return out; }
       for (const L of LVS) for (const el of [false, true]) { const f = fight(L, el); if (f) out.push(f); }
       return out;
-    }, [LVS, BOSS]);
+    }, [LVS, BOSS, ADV]);
     console.log(`\n== ${cls} ==  Sv | canavar (sv) | canavar TP/saldırı | oyuncu TP/saldırı/savunma | süre sn | kaybedilen can % | sonuç | beceri`);
     for (const x of r) console.log([x.L + (x.elite ? '☆' : ''), `${x.mob} (${x.mlv})`, `${x.mhp}/${x.matk}`, `${x.php}/${x.patk}/${x.pdef}`, x.t, x.lost, x.win ? 'kazandı' : 'KAYBETTİ', x.casts, x.pots != null ? 'iksir ' + x.pots : ''].join(' | '));
     if (errs.length) console.log('HATA', errs.slice(0, 3));

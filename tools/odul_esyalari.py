@@ -26,6 +26,9 @@ N = {   # (TR, EN) — tüketimde (TR, EN, açıklama TR, açıklama EN, kullan�
     10069: ('Mana Tacı', 'Mana Circlet'), 10070: ('Kaliteli Boyalı Kemer', 'Fine Dyed Belt'), 10071: ('Boğumlu Asa', 'Knotted Staff'),
     10072: ('Koruyucu Cübbe', 'Guardian Robe'), 10073: ('Kaliteli Çırak Çizmesi', 'Fine Apprentice Boots'), 10074: ('Trol Kemeri', 'Troll Belt'),
     10075: ('Yolcu Çizmesi', 'Travel Boots'), 10093: ('Orman Çizmesi', 'Forest Boots'), 10097: ('Geniş Kılıç', 'Broadsword'), 10110: ('Rün Asası', 'Rune Staff'),
+    # 40. seviye sınıf yükseltme takımları (sinif.json): savaşçı 队长头盔/符文甲/金丝束带/大步靴, büyücü 琉璃圈/符文法袍/骨钉腰带/轻灵靴
+    10095: ('Yüzbaşı Miğferi', 'Captain\'s Helm'), 10098: ('Rün Zırhı', 'Rune Armor'), 10100: ('Altın Telli Kuşak', 'Gold-Thread Sash'), 10101: ('Uzun Adım Çizmesi', 'Striding Boots'),
+    10103: ('Sırlı Taç', 'Glazed Circlet'), 10105: ('Rün Cübbesi', 'Rune Robe'), 10107: ('Kemik Çivili Kemer', 'Bone-Stud Belt'), 10108: ('Hafif Adım Çizmesi', 'Lightstep Boots'),
     10128: ('Morsalkım Zırhı', 'Wisteria Armor'), 10130: ('Boz Ayı Savaş Eteği', 'Grizzly War Skirt'), 10131: ('Sık Orman Çizmesi', 'Deepwood Boots'),
     10132: ('Kaliteli Demir Miğfer', 'Fine Iron Helm'), 10135: ('Solgun Cübbe', 'Withered Robe'), 10137: ('Geyik Savaş Eteği', 'Stag War Skirt'),
     10148: ('Gizemli Miğfer', 'Mystic Helm'), 10156: ('Sırlı Peçe', 'Arcane Veil'), 10586: ('İsabet Bilekliği', 'Bracer of Accuracy'),

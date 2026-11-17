@@ -1,0 +1,7 @@
+{
+  "_not": "Dünya haritası tablosunda (kaynak/apk/seviyeler.json) olmayan ve harita dosyası adındaki sayı yanlış seviye veren sahneler. Dosya adındaki sayı seviye değildir (ör. 银鹰城 dosyası -100 ama 40-41; 哀嚎小径 -70 ama 41-43). Seviye, o sahnedeki canavarları hedefleyen orijinal görevlerin deneyim ve altınından (seviye aralığı bilinen 571 görevle uydurulan eğri) ve komşu sahneden tahmin edildi. docs/04 › Orijinal kaynak.",
+  "120132": [41, 43],
+  "120133": [47, 49],
+  "120134": [47, 49],
+  "120165": [40, 42]
+}

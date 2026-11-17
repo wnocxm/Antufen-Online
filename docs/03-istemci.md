@@ -43,7 +43,7 @@ Otomatik yol: `routeTo(sid)` sahneler arası (`scenePath`), `routeToNpc(cn)`, `w
 
 ## Veri ve kayıt
 - `data.json`: `scenes[sid] = {name, map, lv, lvr:[min,max], exits:[[bölge, ad, hedefSid]], ents:[[id, ad, konum]], music, kind}`, `cit` (NPC), `mon` (canavar), `reg` (görsel kayıt), `palidx`.
-- Kayıt (`SAVE_KEY = 'anrufen_save_v1'`, `newSave`): `{v, name, cls, race, sex, lv, xp, gold, hp, mp, gear, eq, bag:[{id,n}], quests:{id:{n,ready}}, done:{id:true}, qitems, scene, x, y, quick, sk:{becerId:kademe}, sp, flags, home}`. `fixSave` eski kayıtları düzeltir. Çevrimiçiyse `save()` → `Net.save`.
+- Kayıt (`SAVE_KEY = 'anrufen_save_v1'`, `newSave`): `{v, name, cls, race, sex, lv, xp, gold, hp, mp, gear, eq, bag:[{id,n}], quests:{id:{n,ready}}, done:{id:true}, qitems, scene, x, y, quick, sk:{becerId:kademe}, sp, flags, home, adv}` (`adv`: sınıf yükseltme). `fixSave` eski kayıtları düzeltir (sınıf yükseltilmemişse sınıf ağacı puanlarını geri verir). Çevrimiçiyse `save()` → `Net.save`.
 - Başlangıç: insan `120207`, elf `120205` (acemi kampları).
 
 ## Savaş
@@ -68,6 +68,7 @@ Otomatik yol: `routeTo(sid)` sahneler arası (`scenePath`), `routeToNpc(cn)`, `w
 - Canavar değerleri (`Mob`): TP `(250+260·L)`, saldırı `48 + 27·L + 0,15·L²`, savunma `8·L`; seçkin ☆ ×3 TP ×1,15 saldırı (×1,5 savunma), patron ☆☆ ×18 TP ×1,8 saldırı.
   Sınıf tabanı: savaşçı 1200 TP (+180/sv), büyücü 1000 (+140), elçi 1050 (+150).
 - **Denge ölçümü**: `tools/test/denge.js` (RACE=人类|精灵, GRIND=0: kasmasız, varsayılan kasmalı; seviye seviye görev/hedef öldürme/kasma), `tools/test/savas.js` (her sınıf, seviyesindeki normal ve ☆ canavara karşı süre ve kayıp can). 1. tur sonucu: normal canavar 3-7 sn, %2-24 can; seçkin 11-33 sn, %7-82 can; bütün sınıflar potsuz kazanıyor.
+  - 2. tur (17.11, sınıf ağacı 40'a çekilince): 10-39 arası yalnız acemi ağacı. Rahibin şifası 40'a kaldığı için seçkinlerde %96'ya çıkan kayıp, rahip tabanı `ghp 165, gatk 13, gdef 7` ile en çok ~%84'e indi; savaşçı seçkin ≤%62, büyücü ≤%74; 40 sonrası (sınıf ağacıyla) rahip seçkin %24-45. `ADV=0` ile sınıf görevi hedefleri 40'ta acemi ağacıyla: hepsi iksirsiz kazanılıyor (%36-59).
 - Canavar seviyesi `monDef(ad, sahne)`: elle `MON` tablosu (sahne aralığına kıstırılır) ya da otomatik: sahnenin `lvr` aralığına göre; ☆ = seçkin (+1), ☆☆ = patron (+2). Deneyim `mobXp` (yukarıda).
 - Normal saldırı: savaşçı yakın dövüş; büyücü/elçi mermi (`C.bolt`) + çarpma efekti (`C.boltHit`) + `skill_bomb` sesi.
   Orijinal sınıf tablosuna göre normal saldırı = ilk beceri: büyücü 火球术 (火球→火爆炸), elçi 暗影冲击 (暗影冲击_红→冲击爆炸).
@@ -79,7 +80,7 @@ Otomatik yol: `routeTo(sid)` sahneler arası (`scenePath`), `routeToNpc(cn)`, `w
 - **Çizim**: efekt resimleri siyah zemin üstünde; APK "glow" malzemesiyle ekler → bizde `Fx` sprite'ı `glow = true`, `globalCompositeOperation = 'lighter'`. Hangi animasyonun oynayacağı `fxAnim` (birden çok karesi olan animasyon; yönlüyse oyuncu yönüne göre).
 - `Fx(name, x, y, {anim, dir, z, follow, loop})`; mermi `f.proj = {to, cb, sp:9, vis}`.
 
-## Beceri ağaçları: orijinal yapı (17.11 kaynak denetimi; henüz uygulanmadı)
+## Beceri ağaçları: orijinal yapı (17.11 kaynak denetimi; sınıf ağacı kilidi uygulandı)
 Kaynak: `all_skilltree.godat` (ağaç → 6 beceri, yanındaki 1/2/3 = sütun) + `all_skill` (ad, açıklama) + sınıf yükseltme görevleri (`gorev_ham.json`, ek alandaki 1300xx sınıf ödülü).
 - Her sınıfın 4 ağacı var, her ağaçta 6 beceri:
 
@@ -93,7 +94,12 @@ Kaynak: `all_skilltree.godat` (ağaç → 6 beceri, yanındaki 1/2/3 = sütun) +
 - Sınıf yükseltme (orijinal metin 80343: "40'ta ve 80'de"):
   - 40'ta acemi → Savaşçı / Büyücü / Elçi (130004/130005/130011). Görevler: insan savaşçı 80223→80224 (Tom), elf savaşçı 80238→80239, büyücü 80225→80226 / 80240→80241, rahip 82938→82939 / 82941→82942.
   - 80'de iki yoldan biri. Görevler: Şövalye 80227→80229 (Dağgören 神器工匠) / elf 80242-80244, Berserker 80236→80237 (Altındalga 衰老的角斗士), Element 80245→80248, Gölge Büyücüsü 80233→80235 (暗血森林 黑魔道大师), Alev yolu 80230→80232; sonraki sürümde 灰斧城 83085-83093 (Kara Şövalye / Başbüyücü / Seçilmiş).
-- **Bizdeki fark:** yalnız acemi + sınıf ağacı var. Sınıf ağacı 40'taki sınıf yükseltmesi olmadan 10-17. seviyelerde açılıyor. Uzmanlık ağaçları ve ırk becerileri yok. Yeni orijinal pencerede (`n_skilltree`) 6 sekme yuvası var.
+- **Uygulanan (17.11, kullanıcı kararı "orijinal nasılsa öyle"):** acemi ağacı 1-39; **sınıf ağacı yalnız 40'taki sınıf yükseltme göreviyle açılır** (docs/04 › Sınıf yükseltme).
+  - `P.adv` (0 acemi, 1 sınıf yükseltildi). `TREES[sınıf][1].adv = 1`; sınıf ağacındaki becerilerde `adv: 1` ve `lv: 40`.
+  - `skLock(sk)` → `'adv' | 'lv' | null`, `skLockMsg(sk)`. `skillUp`, `useSkill`, beceri ağacı penceresi, kısayol (`40 ★`) ve eski beceri listesi bunu kullanır. Kilitli sınıf ağacı sekmesinde "Sınıf yükseltme görevini bitirince açılır." yazar.
+  - `classUp(n)` (görevin `adv` alanı): `P.adv = n`, efekt, yeni beceriler günlüğe. `clsName(P)`: `TR.cls0` (Acemi Savaşçı / Çırak Büyücü / Acemi Kutsal Elçi) ya da `TR.cls`. Karakter penceresi, karakter seçimi ve sunucu karakter listesi bunu gösterir.
+  - Eski kayıt (`fixSave`): sınıf yükseltilmemişse sınıf ağacındaki kademeler beceri puanı olarak geri verilir.
+  - Kalan (kapsam dışı): 80'deki uzmanlık ağaçları, ırk becerileri. Yeni orijinal pencerede (`n_skilltree`) 6 sekme yuvası var.
 - Not: APK 1020 bu tabloyu kaydırarak yanlış okumuş, kullanılmaz.
 
 ## Eşyalar ve dükkânlar
@@ -115,11 +121,12 @@ Panel yazıları seçili dilde: sekme adları, arama kutusu ve satırlar (`GT(tr
 Sekmeler (`#gtools` `v:maps|dg|pet`, `drawGmSys`, `gmX` in `ui.js`):
 - **Haritalar**: haritaya ışınlan (arama), NPC listesi.
 - **Zindanlar** (`Dungeon.GM`): her zindan/kopya için "Kapıya git", "İçeri gir" (seviye, ön görev, günlük sınır yok; sayaç artmaz); bu harita için "Boss'u öldür", "Canavarları öldür", "Son kata / başa", "Zindandan çık", "Günlük hakları sıfırla".
+- **Sınıf** (`ClassGM`, game.js): durum satırı ("Sınıfı yükselt", "Acemiye döndür": sınıf ağacı puanları geri + zincir sıfırlanır, "40 yap + ilk görev"); oyuncunun sınıf/ırk zincirindeki her görev için "Hazır yap", "Bitir" (öncekileri de bitmiş sayar), "Git" (görev yürüyüşü). Test: `tools/test/gm.js`, `tools/test/sinif.js`.
 - **Evcil** (`Pet.GM`):
   - Her tür için "Hayvanı ver" (doğrudan kuluçka, hak doluysa hak artar) ve "Yumurta + kutu".
   - Üstte "Pencereyi aç", "Seviyeme çek", "Dirilt + doyur + iyileştir", "Evcil eşyaları ver" (mama, iksir, diriltme, Sözleşme Taşı, İç Öz, kutular), "Acıktır" (aç hayvan savaşmaz testi), "Hepsini sil".
   - **Dönüşüm ağacı** satırı: "Sonraki biçim" / "Temel biçim" (`stage`), "3 rastgele beceri" (`skills`), "Dönüşüm malzemesi" (`tf`: yardımcı eşyalar, aynı türden 2 yardımcı hayvan, 20000 altın), "Dönüşüm penceresi" / "Beceri aktarma" (`petf` / `petfs`).
-Test: `tools/test/gm.js` panel düğmelerine gerçekten basar (görüntüler `OUT_zindan.png`, `OUT_evcil.png`, `OUT_panda.png`, `OUT_atesdevi.png`, `OUT_aktarma.png`; Ateş Devi'nin 8 biçimini sırayla geçer).
+Test: `tools/test/gm.js` panel düğmelerine gerçekten basar (görüntüler `OUT_zindan.png`, `OUT_evcil.png`, `OUT_panda.png`, `OUT_atesdevi.png`, `OUT_aktarma.png`, `OUT_sinif.png`; Ateş Devi'nin 8 biçimini sırayla geçer).
 
 ## Arayüz notları
 - Sol menü (`drawHub2`, `n_v5_menu`): `hubItems()` listesi 7'den uzunsa (GM) kaydırılır. `HUB.y` kaydırma (form birimi), `HUB.r` ekrandaki alan; `Win.drag` sürükleme ve `ui.js`'teki tekerlek olayı kaydırır; düğmeler 8-312 bandına kırpılır, aşağıda/yukarıda düğme varsa küçük ok çizilir. Menü kapalıyken açılınca başa döner. Test: `tools/test/menu.js`.
