@@ -44,3 +44,4 @@ Her commit'te buraya bir satır eklenir (tarih başlığı altında). Ayrıntı 
 
 ## 2026-11-17 · Hata düzeltmeleri
 - Satın alırken adet girilebiliyor (her yığılabilen eşyada; sayı klavyesi / bilgisayarda rakamlar); satarken de adet. NPC'lerin içinden geçilebiliyor.
+- Beceri ağaçları kaynak denetimi: her sınıfta acemi + sınıf + 2 uzmanlık ağacı (6'şar beceri), 40 ve 80'de sınıf yükseltme görevleri bulundu (henüz uygulanmadı).

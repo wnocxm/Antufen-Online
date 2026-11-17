@@ -79,6 +79,23 @@ Otomatik yol: `routeTo(sid)` sahneler arası (`scenePath`), `routeToNpc(cn)`, `w
 - **Çizim**: efekt resimleri siyah zemin üstünde; APK "glow" malzemesiyle ekler → bizde `Fx` sprite'ı `glow = true`, `globalCompositeOperation = 'lighter'`. Hangi animasyonun oynayacağı `fxAnim` (birden çok karesi olan animasyon; yönlüyse oyuncu yönüne göre).
 - `Fx(name, x, y, {anim, dir, z, follow, loop})`; mermi `f.proj = {to, cb, sp:9, vis}`.
 
+## Beceri ağaçları: orijinal yapı (17.11 kaynak denetimi; henüz uygulanmadı)
+Kaynak: `all_skilltree.godat` (ağaç → 6 beceri, yanındaki 1/2/3 = sütun) + `all_skill` (ad, açıklama) + sınıf yükseltme görevleri (`gorev_ham.json`, ek alandaki 1300xx sınıf ödülü).
+- Her sınıfın 4 ağacı var, her ağaçta 6 beceri:
+
+| Sınıf | Acemi (1-39) | Sınıf ağacı (40) | Uzmanlık A (80) | Uzmanlık B (80) |
+|---|---|---|---|---|
+| Savaşçı | 见习 150008 | 战士 150009 | 嗜血 150010 (Kara Şövalye 130006) | 狂暴 150011 (Berserker 130007) |
+| Büyücü | 学徒 150014 | 法师 150015 | 元素 150016 (Başbüyücü/Element 130008) | 奥术 150017 (Gölge Büyücüsü 130009) |
+| Rahip | 初级 150022 | 神使 150023 | 神圣 150024 (Seçilmiş 130012) | 暗影 150025 ("adsız sınıf" 130013; hiç çıkmamış) |
+
+- Irk ağaçları: insan 150019 (人类精神, 贪婪 +%10 altın), elf 150013 (精魂祝福, 生命萃取).
+- Sınıf yükseltme (orijinal metin 80343: "40'ta ve 80'de"):
+  - 40'ta acemi → Savaşçı / Büyücü / Elçi (130004/130005/130011). Görevler: insan savaşçı 80223→80224 (Tom), elf savaşçı 80238→80239, büyücü 80225→80226 / 80240→80241, rahip 82938→82939 / 82941→82942.
+  - 80'de iki yoldan biri. Görevler: Şövalye 80227→80229 (Dağgören 神器工匠) / elf 80242-80244, Berserker 80236→80237 (Altındalga 衰老的角斗士), Element 80245→80248, Gölge Büyücüsü 80233→80235 (暗血森林 黑魔道大师), Alev yolu 80230→80232; sonraki sürümde 灰斧城 83085-83093 (Kara Şövalye / Başbüyücü / Seçilmiş).
+- **Bizdeki fark:** yalnız acemi + sınıf ağacı var. Sınıf ağacı 40'taki sınıf yükseltmesi olmadan 10-17. seviyelerde açılıyor. Uzmanlık ağaçları ve ırk becerileri yok. Yeni orijinal pencerede (`n_skilltree`) 6 sekme yuvası var.
+- Not: APK 1020 bu tabloyu kaydırarak yanlış okumuş, kullanılmaz.
+
 ## Eşyalar ve dükkânlar
 - **Satın alma / satma adedi** (`win.js buyAsk`, `sellAsk`):
   - Ekipman tek tek, onay kutusuyla alınır.
