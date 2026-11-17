@@ -77,7 +77,7 @@ const Win = (() => {
     else if (h.id === 'm50761') numEdit();   // sayıya dokun: klavyeyle adet yaz
     else if (h.id === 'm52791') { numClose(); modal = null; m.onOk(m.n); }
   }
-  function open(name, o = {}) { cur = name; opt = o; if (name === 'map') { WM.mode = 'world'; WM.sel = null; wmData(); } if (name === 'npc') { D.q = null; SFX.play('request', 0.6); } if (name === 'task') { K.sel = null; K.sure = false; } if (name === 'menu') M.page = 0; if (name === 'shop') { H.tab = 0; H.sel = null; H.off = 0; } if (name === 'pet') { const L = Pet.list(), i = L.findIndex(x => x.uid === Game.P.petOn); if (i >= 0) PW.i = i; } if (name === 'petf') { TF.mode = o.mode || 'tf'; TF.main = o.main && Pet.resting(Pet.list().find(x => x.uid === o.main)) ? o.main : null; TF.mat = null; TF.a = [null, null]; } B.sel = null; B.sure = false; B.assign = false; B.page = 0; if (o.cat != null) B.cat = o.cat; SFX.play('menu_appear', 0.5); if (name === 'bag') questFlag('openBag'); }
+  function open(name, o = {}) { if (!cur) HUB.y = 0; cur = name; opt = o; if (name === 'map') { WM.mode = 'world'; WM.sel = null; wmData(); } if (name === 'npc') { D.q = null; SFX.play('request', 0.6); } if (name === 'task') { K.sel = null; K.sure = false; } if (name === 'menu') M.page = 0; if (name === 'shop') { H.tab = 0; H.sel = null; H.off = 0; } if (name === 'pet') { const L = Pet.list(), i = L.findIndex(x => x.uid === Game.P.petOn); if (i >= 0) PW.i = i; } if (name === 'petf') { TF.mode = o.mode || 'tf'; TF.main = o.main && Pet.resting(Pet.list().find(x => x.uid === o.main)) ? o.main : null; TF.mat = null; TF.a = [null, null]; } B.sel = null; B.sure = false; B.assign = false; B.page = 0; if (o.cat != null) B.cat = o.cat; SFX.play('menu_appear', 0.5); if (name === 'bag') questFlag('openBag'); }
   function close() { cur = null; opt = {}; modal = null; numClose(); }
   const isOpen = () => !!cur || !!modal;   // tek başına onay kutusu da (ör. zindan girişi) pencere sayılır
 
@@ -152,12 +152,23 @@ const Win = (() => {
     acts.forEach(([label, key], i) => { const id = btnIds[i]; if (!id) return; const r = nDraw(ctx, f, id, pressed === key, ''); Forms.label(ctx, label, r[0], r[1], r[2], r[3], '#f4ead0', 'center', 11); nHit(key, r[0], r[1], r[2], r[3]); });
   }
   // ---------------- Ana menü (NEW_FORM_V5_MENU): sol sütunda kırmızı düğmeler ----------------
-  const HUBB = [50223, 50224, 50225, 50226, 50227, 50228, 50229];
-  function hubItems() { return [['role', 'Karakter'], ['skill', 'Beceri'], ['bag', 'Çanta'], ['pet', 'Evcil'], ['task', 'Görev'], ['map', 'Harita'], ['sys', 'Sistem']]; }
+  const HUBB = [50223, 50224, 50225, 50226, 50227, 50228, 50229], HUBS = 43, HUBT = 8, HUBA = 312;   // düğmeler 43 birim arayla; görünen bant HUBT..HUBA
+  // Liste 7 düğmeden uzunsa (GM) sayfa gibi aşağı kaydırılır: parmakla sürükle ya da fare tekerleği. HUB.y kaydırma (form birimi), HUB.r ekrandaki alan.
+  const HUB = { y: 0, r: null };
+  function hubItems() { const L = [['role', 'Karakter'], ['skill', 'Beceri'], ['bag', 'Çanta'], ['pet', 'Evcil'], ['task', 'Görev'], ['map', 'Harita'], ['sys', 'Sistem']]; if (isGM()) L.push(['gm', 'GM']); return L; }
+  const hubShown = () => cur === 'sys' || cur === 'pet' || cur === 'map' || cur === 'hub';
   function drawHub2(ctx, vw, VH) {
-    nBegin(ctx, VH); const f = 'n_v5_menu', L = hubItems();
+    nBegin(ctx, VH); const f = 'n_v5_menu', L = hubItems(), max = Math.max(0, (L.length - HUBB.length) * HUBS);
+    HUB.y = clamp(HUB.y, 0, max); HUB.r = { x: NX, y: NY, w: 126 * NK, h: 320 * NK, k: NK, max };
     nDraw(ctx, f, 50222, 0); nHit('frame', 0, 0, 126, 320);
-    L.forEach(([k, n], i) => { const r = nDraw(ctx, f, HUBB[i], k === cur || pressed === 'hub:' + k, tx(n)); nHit('hub:' + k, r[0], r[1], r[2], r[3]); });
+    ctx.save(); ctx.beginPath(); ctx.rect(0, HUBT, 126, HUBA - HUBT); ctx.clip();
+    L.forEach(([k, n], i) => { const j = Math.min(i, HUBB.length - 1), dy = (i - j) * HUBS - HUB.y, c = nC(f, HUBB[j]), r = c.s[0].r;
+      const y0 = Math.max(r[1] + dy, HUBT), y1 = Math.min(r[1] + dy + r[3], HUBA); if (y1 - y0 < 2) return;
+      Forms.drawCtrl(ctx, c, k === cur || pressed === 'hub:' + k ? 1 : 0, 0, dy, tx(n)); if (y1 - y0 > 10) nHit('hub:' + k, r[0], y0, r[2], y1 - y0); });
+    ctx.restore();
+    // daha aşağıda / yukarıda düğme varsa küçük ok
+    const arrow = (y, up) => { ctx.fillStyle = 'rgba(255,214,120,.9)'; ctx.beginPath(); ctx.moveTo(57, y); ctx.lineTo(69, y); ctx.lineTo(63, up ? y - 6 : y + 6); ctx.closePath(); ctx.fill(); };
+    if (HUB.y < max) arrow(HUBA - 3, false); if (HUB.y > 0) arrow(HUBT + 9, true);
     const r = nDraw(ctx, f, 50230, pressed === 'close'); nHit('close', r[0] - 4, r[1], r[2] + 4, r[3]);
     nEnd(ctx);
   }
@@ -431,7 +442,6 @@ const Win = (() => {
     nText(ctx, Net.on ? 'Sunucuya otomatik kaydedilir.' : 'Oyun otomatik kaydedilir.', 113, 52, '#2a1a0a', 11, 'center', 200); nText(ctx, tx('Sürüm ' + VER), 113, 70, '#5a4020', 10, 'center');
     const rows = [['sfx', `${tx('Ses efektleri')}: ${SFX.opt.sfx ? on : off}`], ['mus', `${tx('Müzik')}: ${SFX.opt.music ? on : off}`], ['lang', `Dil / Language: ${LANG === 'tr' ? 'Türkçe' : 'English'}`], ['title', 'Giriş ekranına dön'], ['newc', Net.on ? 'Karakter değiştir' : 'Yeni karakter oluştur']];
     rows.forEach(([key, label], i) => nRow(ctx, f, DS[i], pressed === 's:' + key, label, 's:' + key));
-    if (isGM()) { nText(ctx, '⚙ GM', 113, 352, pressed === 's:gm' ? '#ffffff' : '#7a1c08', 13, 'center'); nHit('s:gm', 70, 338, 86, 28); }   // GM paneli (menüde yer kalmadı)
     nEnd(ctx);
   }
   // ---------------- Onay ve sayı kutuları (NEW_FORM_DIALOG_YESNO, NEW_FORM_SELNUM) ----------------
@@ -1044,7 +1054,9 @@ const Win = (() => {
     if (id === 50751) { if (!H.sel) return UI.toast('Listeden bir eşya seç.'); buyAsk(H.sel); return; }
   }
   // liste kaydırma (parmakla sürükleme)
-  function drag(dy, x, y, dx = 0) { if (cur !== 'shop') return; const RH = 53 * NK; H.acc += dy; while (H.acc <= -RH) { H.off++; H.acc += RH; } while (H.acc >= RH) { H.off--; H.acc -= RH; } if (H.off < 0) H.off = 0; }
+  function drag(dy, x, y, dx = 0) {
+    const R = HUB.r; if (R && hubShown() && x >= R.x && x < R.x + R.w && y >= R.y && y < R.y + R.h) { HUB.y = clamp(HUB.y - dy / R.k, 0, R.max); return; }   // sol menü
+    if (cur !== 'shop') return; const RH = 53 * NK; H.acc += dy; while (H.acc <= -RH) { H.off++; H.acc += RH; } while (H.acc >= RH) { H.off--; H.acc -= RH; } if (H.off < 0) H.off = 0; }
   // ---------------- Ölüm ekranı (FORM_DEADSELECT): üstte mesaj, altta seçenek satırları ----------------
   function drawDead(ctx, vw, VH) {
     const f = Forms.get('dead'), ox = Math.round((vw - f.w) / 2), oy = Math.round((VH - 226) / 2), P = Game.P;
@@ -1059,5 +1071,5 @@ const Win = (() => {
   function tapDead(id) { if (id === 52040) { close(); revive(); } }
   // testler için: açık penceredeki bir düğmeye kimliğiyle bas
   function tapId(id) { if (modal) { const h = (modal.hits || []).find(r => r.id === id); if (h) tapModal(h.x + h.w / 2, h.y + h.h / 2); return; } if (cur === 'petf') tapPetF(id); else if (cur === 'pet') tapPet2(id); }
-  return { ask, askNum, buyAsk, sellAsk, open, close, isOpen, draw, tap, tapId, drag, key, get cur() { return cur; }, PW, TF };
+  return { ask, askNum, buyAsk, sellAsk, open, close, isOpen, draw, tap, tapId, drag, key, get cur() { return cur; }, PW, TF, HUB };
 })();

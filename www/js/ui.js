@@ -32,6 +32,8 @@ const Input = (() => {
     const end = e => { if (winPtr && e.pointerId === winPtr.id) { const w = winPtr; winPtr = null; if (w.moved <= 6 && e.type === 'pointerup') Win.tap(w.x, w.y); return; }
       if (joy && e.pointerId === joy.id) joy = null; const s = pts.get(e.pointerId); if (s) { UI.cancelAssign(); pts.delete(e.pointerId); if (Math.hypot(e.clientX - s.x, e.clientY - s.y) < 12 && UI.mode === 'play' && !UI.panelOpen()) tapWorld(e.clientX, e.clientY); } };
     cv.addEventListener('pointerup', end); cv.addEventListener('pointercancel', end);
+    // fare tekerleği: açık penceredeki listeyi (sol menü, dükkân) kaydırır
+    cv.addEventListener('wheel', e => { if (!Win.isOpen()) return; const L = UI.toLogical(e.clientX, e.clientY); Win.drag(-e.deltaY * 0.6, L.x, L.y); e.preventDefault(); }, { passive: false });
     addEventListener('keydown', e => { if (e.target.tagName === 'INPUT') return; if (Win.isOpen() && Win.key(e)) { e.preventDefault(); return; } const k = e.key.length === 1 ? e.key.toLowerCase() : e.key; keys[k] = true;
       if (UI.mode !== 'play') return;
       if ('123456'.includes(k)) useSkill(+k - 1); if (k === 'q') useItem('hp1'); if (k === 'e') useItem('mp1');
@@ -357,7 +359,7 @@ const UI = (() => {
       title = 'Ayarlar';
       h = `<div class="iact"><button class="obtn" data-act="tsfx">Ses efektleri: ${SFX.opt.sfx ? 'Açık' : 'Kapalı'}</button><button class="obtn" data-act="tmus">Müzik: ${SFX.opt.music ? 'Açık' : 'Kapalı'}</button></div>
         <div class="iact"><button class="obtn" data-act="lang">${LANG === 'tr' ? 'Language: English' : 'Dil: Türkçe'}</button></div>
-        <div class="iact"><button class="obtn" data-act="totitle">Giriş ekranına dön</button><button class="obtn" data-act="newchar">Yeni karakter oluştur</button></div><p class="hint">Oyun otomatik kaydedilir. Sürüm 11172015</p>`;
+        <div class="iact"><button class="obtn" data-act="totitle">Giriş ekranına dön</button><button class="obtn" data-act="newchar">Yeni karakter oluştur</button></div><p class="hint">Oyun otomatik kaydedilir. Sürüm 11172046</p>`;
     }
     ptitle.textContent = tx(title); pbody.innerHTML = h; txDom(pbody);
   }

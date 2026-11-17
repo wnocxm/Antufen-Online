@@ -110,7 +110,8 @@ Kaynak: `all_skilltree.godat` (ağaç → 6 beceri, yanındaki 1/2/3 = sütun) +
 `isGM()`: çevrimdışı adı "GM" ile başlayan karakter; çevrimiçi `Net.admin` (sunucuda `node make-admin.js <kullanıcı>`).
 `gmLevel(lv)`, `gmGear()`, `gmHeal()`, `Game.god` (ölümsüz), `Game.fast` (×2,6 hız); GM paneli + NPC listesi (`#gm`), dünya haritasından ışınlanma. Sunucu "GM" önekli adı yönetici olmayana vermez.
 **Kural: her yeni sistem kendi GM komutlarıyla gelir** (modülde `GM` nesnesi + panelde sekme/düğme + `tools/test/gm.js`'e adım).
-Panel nasıl açılır: menü → Sistem → "⚙ GM" (menüde Evcil sekmesi yer aldığı için GM düğmesi oraya taşındı).
+Panel nasıl açılır: sol menünün (karakter menüsü) en altındaki **GM** düğmesi. 7 düğme ekranı doldurduğu için GM ilk açılışta görünmez; menü sayfa gibi parmakla yukarı sürüklenir (bilgisayarda fare tekerleği) ve GM gelir. GM olmayan karakterde menü 7 düğmedir, kaymaz.
+Panel yazıları seçili dilde: sekme adları, arama kutusu ve satırlar (`GT(tr, en)`); `DIL=en node tools/test/gm.js` çevrilmeden kalan Türkçe yazıları da listeler.
 Sekmeler (`#gtools` `v:maps|dg|pet`, `drawGmSys`, `gmX` in `ui.js`):
 - **Haritalar**: haritaya ışınlan (arama), NPC listesi.
 - **Zindanlar** (`Dungeon.GM`): her zindan/kopya için "Kapıya git", "İçeri gir" (seviye, ön görev, günlük sınır yok; sayaç artmaz); bu harita için "Boss'u öldür", "Canavarları öldür", "Son kata / başa", "Zindandan çık", "Günlük hakları sıfırla".
@@ -121,6 +122,7 @@ Sekmeler (`#gtools` `v:maps|dg|pet`, `drawGmSys`, `gmX` in `ui.js`):
 Test: `tools/test/gm.js` panel düğmelerine gerçekten basar (görüntüler `OUT_zindan.png`, `OUT_evcil.png`, `OUT_panda.png`, `OUT_atesdevi.png`, `OUT_aktarma.png`; Ateş Devi'nin 8 biçimini sırayla geçer).
 
 ## Arayüz notları
+- Sol menü (`drawHub2`, `n_v5_menu`): `hubItems()` listesi 7'den uzunsa (GM) kaydırılır. `HUB.y` kaydırma (form birimi), `HUB.r` ekrandaki alan; `Win.drag` sürükleme ve `ui.js`'teki tekerlek olayı kaydırır; düğmeler 8-312 bandına kırpılır, aşağıda/yukarıda düğme varsa küçük ok çizilir. Menü kapalıyken açılınca başa döner. Test: `tools/test/menu.js`.
 - Başlık ekranı orijinal ana menü (logo, kitap çerçevesi UIData_2033, sarı oklar): Devam Et / Yeni Karakter / Çevrimiçi / Dil.
 - HUD: çerçeveli minimap (`ui2/hud_frame.png`), 6 yuvarlak harf düğmesi (`ui2/hud_btn.png`): Karakter, Çanta, Beceri, Görev, Harita, Sohbet/Ayarlar.
 - Dünya haritası: `assets/wm/` (world.jpg, r1..r7.jpg bölge resimleri, `wm.json`): dünya → bölge → yerel; Otomatik Yol, NPC Listesi.

@@ -1,9 +1,9 @@
-// GM paneli: zindan ve evcil hayvan komutları (panel düğmelerine gerçekten basılır).  node tools/test/gm.js  (OUT=görüntü öneki)
+// GM paneli: zindan ve evcil hayvan komutları (panel düğmelerine gerçekten basılır).  node tools/test/gm.js  (OUT=görüntü öneki, DIL=en İngilizce)
 const { chromium } = require('playwright');
 (async () => {
   const b = await chromium.launch(); const p = await (await b.newContext({ viewport: { width: 780, height: 360 }, deviceScaleFactor: 2 })).newPage();
   const errs = []; p.on('pageerror', e => errs.push(e.message));
-  await p.addInitScript(() => { try { localStorage.setItem('anrufen_lang', 'tr'); } catch (e) {} });
+  await p.addInitScript((DIL) => { try { localStorage.setItem('anrufen_lang', DIL); } catch (e) {} }, process.env.DIL || 'tr');
   await p.goto(process.env.URL || 'http://localhost:8099/'); await p.waitForTimeout(1200); await p.keyboard.press('Enter');
   await p.click('[data-cls="牧师"]'); await p.fill('#cname', 'GMTest'); await p.click('#cstart');
   await p.waitForFunction(() => window.__G && window.__G.player, null, { timeout: 30000 });
@@ -31,5 +31,9 @@ const { chromium } = require('playwright');
   console.log('beceri+malzeme  ', JSON.stringify(await p.evaluate(() => ({ beceriler: Pet.skills(Pet.active()).map(Pet.skName), hayvan: Pet.list().length, lütuf: countItem('30164'), altın: Game.P.gold }))));
   await p.evaluate(() => { UI.closeAll(); Win.open('pet'); }); await p.waitForTimeout(1200); await p.screenshot({ path: O + '_atesdevi.png' });
   await open(); await p.click('[data-g="v:pet"]'); await p.waitForTimeout(300); await p.click('[data-x="pet:petfs"]'); await p.waitForTimeout(1000); await p.screenshot({ path: O + '_aktarma.png' });
+  // sekme adları ve arama kutusu seçili dilde mi; çevrilmeden kalan Türkçe yazılar (DIL=en)
+  await open(); await p.click('[data-g="v:dg"]'); await p.waitForTimeout(200);
+  console.log('sekmeler        ', JSON.stringify(await p.evaluate(() => [...document.querySelectorAll('#gtools button')].map(b => b.textContent).join(' | ') + ' · ' + document.querySelector('#gq').placeholder)));
+  if (process.env.DIL === 'en') console.log('çevrilmeyen     ', JSON.stringify(await p.evaluate(() => [...TX_MISS].slice(0, 40))));
   console.log('HATA', errs); await b.close();
 })();
