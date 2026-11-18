@@ -39,6 +39,10 @@ const { chromium } = require('playwright');
   const last = await p.evaluate(() => ClassGM.chain().filter(q => q.adv).map(q => q.id)[0]); await p.click(`[data-x="cls:done:${last}"]`); await p.waitForTimeout(200);
   console.log('sınıf: bitir ' + last, JSON.stringify(await sc()));
   await p.click('[data-x="cls:reset"]'); await p.waitForTimeout(200); console.log('sınıf: acemiye   ', JSON.stringify(await sc()));
+  // beceri ağaçları: doldur (80, ikinci yükseltme, 2. uzmanlık), bedava sıfırla
+  const sk = () => p.evaluate(() => ({ adv: Game.P.adv || 0, harcanan: Object.values(Game.P.sk).reduce((a, b) => a + b, 0), puan: Game.P.sp, ad: clsName() }));
+  await open(); await p.click('[data-g="v:cls"]'); await p.waitForTimeout(200); await p.click('[data-x="cls:fill:1"]'); await p.waitForTimeout(200); console.log('ağaçları doldur  ', JSON.stringify(await sk()));
+  await p.click('[data-x="cls:resetPts"]'); await p.waitForTimeout(200); console.log('puan sıfırla     ', JSON.stringify(await sk()));
   // sekme adları ve arama kutusu seçili dilde mi; çevrilmeden kalan Türkçe yazılar (DIL=en)
   await open(); await p.click('[data-g="v:dg"]'); await p.waitForTimeout(200);
   console.log('sekmeler        ', JSON.stringify(await p.evaluate(() => [...document.querySelectorAll('#gtools button')].map(b => b.textContent).join(' | ') + ' · ' + document.querySelector('#gq').placeholder)));

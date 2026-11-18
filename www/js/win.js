@@ -359,41 +359,90 @@ const Win = (() => {
     if (id === 'walk') { UI.closeAll(); if (K.mode === 'avail') routeToNpc(q.giver); else questWalk(q); return; }
     if (id === 'drop') ask(`${q.title}: ${tx('görev bırakılsın mı?')}`, () => { delete P.quests[q.id]; K.sel = null; UI.log(`${tx('Görev bırakıldı')}: ${q.title}`); save(); });
   }
-  // ---------------- Beceri ağacı (NEW_FORM_SKILLTREE): solda ağaçlar, ortada 3x3 yuva, sağda Yükselt / Kısayol ve açıklama ----------------
-  const S2TABS = [50396, 50397, 50398, 50399, 50400, 50872];
+  // ---------------- Beceri ağacı (NEW_FORM_SKILLTREE), APK'daki gibi: solda 6 sekme (acemi, sınıf, iki uzmanlık, ırk, yaşam); ortada
+  // 6 kademeli yuva (orta, sağ, sol, sağ, sol, sağ = ağaç kaydındaki sıra) ve ön koşul çizgileri; yuvada "Öğrenilmedi" ya da "Sv n";
+  // sağda seçili becerinin bilgisi + Yükselt / Kısayol; altta beceri puanı ve Puanları Sıfırla (Eğitim Kitabı). Kilitli ağaçlar da görünür.
+  const S2TABS = [50396, 50397, 50398, 50399, 50400, 50872], S2SLOT = [50402, 50403, 50404, 50405, 50406, 50407];
+  const lifeJobs = () => (SKD && SKD.life.jobs) || [];
+  function skillCells(P, tree) {
+    const C = CLS[P.cls];
+    if (tree.race) return (RACE_SK[P.race] || []).map((sk, i) => ({ sk, i }));
+    if (tree.life) return lifeJobs().map((j, i) => ({ job: j, i }));
+    return tree.cells.map(([id], i) => ({ sk: C.skills.find(k => k.id === id), i }));
+  }
   function drawSkill2(ctx, vw, VH) {
-    nBegin(ctx, VH); const f = 'n_skilltree', P = Game.P, C = CLS[P.cls], trees = TREES[P.cls], tree = trees[S.tree] || trees[0];
-    const byId = id => C.skills.find(k => k.id === id), selSk = S.sel && byId(S.sel), slot = nC(f, 50415), sr = slot.s[0].r; S._cell = {};
+    nBegin(ctx, VH); const f = 'n_skilltree', P = Game.P, trees = TREES[P.cls], tree = trees[S.tree] || trees[0], E = LANG === 'en';
+    S._cell = {};
     nDraw(ctx, f, 50408, 0); nHit('frame', 126, 0, 227, 320);
-    nTabs(ctx, f, 50394, S2TABS, trees.map(t => t.name), S.tree, null);
-    for (const [sid, col, row] of tree.cells) {
-      const sk = byId(sid); if (!sk) continue; const x = 148 + col * 64, y = 12 + row * 86, r = skRank(sk), key = 'sk:' + sid; S._cell[key] = sk;
-      Forms.drawCtrl(ctx, slot, sk.id === S.sel ? 1 : 0, x - sr[0], y - sr[1]);
-      if (!r) ctx.globalAlpha = 0.4; drawIcon(ctx, { ik: sk.ik || 'skill', icon: sk.icon }, x + 7, y + 7, 32); ctx.globalAlpha = 1;
-      nText(ctx, `${r}/${SK_MAX}`, x + 23, y + 52, r ? '#7a1c08' : skLock(sk) ? '#8a7a60' : '#2a1a0a', 10, 'center');
-      nText(ctx, sk.name, x + 23, y + 64, r ? '#2a1a0a' : '#7a6a50', 8.5, 'center', 66); nHit(key, x - 8, y, 62, 72);
+    nTabs(ctx, f, 50394, S2TABS, trees.map(t => t.race ? raceTree()[E ? 'en' : 'tr'] : t.name), S.tree, null);
+    const cells = skillCells(P, tree), R = i => nC(f, S2SLOT[i]).s[0].r;
+    // bağlantı çizgileri (APK'daki sabit desen: 1→3, 1→4, 3→5, 4→6; hep turuncu). Şartlar verideki ön koşuldan gelir, bilgi panelinde yazar.
+    const line = pts => { ctx.lineCap = 'butt'; ctx.lineJoin = 'miter'; for (const [w, c] of [[8, '#7a4a08'], [5, '#ffa400']]) { ctx.strokeStyle = c; ctx.lineWidth = w; ctx.beginPath(); pts.forEach(([x, y], k) => k ? ctx.lineTo(x, y) : ctx.moveTo(x, y)); ctx.stroke(); } };
+    if (!tree.race && !tree.life) for (const [i, j] of [[0, 2], [0, 3], [2, 4], [3, 5]]) {
+      const a = R(i), b = R(j), ax = a[0] + 23, ay = a[1] + 46, by = b[1] + 23;
+      if (Math.abs(ax - (b[0] + 23)) < 3) line([[ax, ay], [ax, b[1]]]);
+      else line([[ax, ay], [ax, by], [b[0] < a[0] ? b[0] + 46 : b[0], by]]);
     }
-    if (tree.adv && (P.adv || 0) < tree.adv) nText(ctx, 'Sınıf yükseltme görevini bitirince açılır.', 240, 268, '#a02010', 9.5, 'center', 200);   // orijinal: sınıf ağacı 40'taki görevle
-    nText(ctx, `${tx('Beceri puanı')}: ${P.sp || 0}`, 140, 298, (P.sp || 0) > 0 ? '#ffe070' : '#e8dcc0', 12, 'left');
-    if (selSk) {
-      nActions(ctx, f, 50401, [50410, 50411], [['Yükselt', 'up'], ['Kısayol', 'quick']]);
-      const r = skRank(selSk), L = [[selSk.name, '#7a1c08', 11], [`${tx('Kademe')} ${r}/${SK_MAX}${selSk.pas ? ' · ' + tx('edilgen') : ''}`, '#5a4020', 9.5]];
-      wrap(ctx, selSk.desc || '', 92, 9.5).forEach(l => L.push([l, '#2a1a0a', 9.5]));
-      if (!selSk.pas) L.push([`${selSk.mp} mana · ${selSk.cd} sn`, '#1a3a7a', 9.5]);
-      if (skLock(selSk)) L.push([skLockMsg(selSk), '#c02010', 9.5]);
-      L.slice(0, 14).forEach(([t, c, sz], i) => nText(ctx, t, 362, 118 + i * 12.5, c, sz, 'left', 94));
+    for (const c of cells) {
+      const r0 = R(c.i), x = r0[0], y = r0[1], key = 'sk:' + c.i; S._cell[key] = c;
+      Forms.drawCtrl(ctx, nC(f, S2SLOT[c.i]), S.sel === key ? 1 : 0, 0, 0);
+      let icon, ik, rank, lock;
+      if (c.job) { const t = (P.life && P.life[c.job.cn]) || 0, tier = c.job.tiers[Math.max(0, t - 1)]; icon = tier.icon; ik = tier.ik; rank = t; lock = !t; }
+      else { icon = c.sk.icon; ik = c.sk.ik; rank = skRank(c.sk); lock = !rank; }
+      drawIcon(ctx, { ik: ik || 'skill', icon }, x + 7, y + 7, 32);
+      if (lock) { ctx.fillStyle = 'rgba(0,0,0,.45)'; ctx.fillRect(x + 7, y + 7, 32, 32); }
+      ctx.font = '8px "Noto Sans", sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+      if (lock) { ctx.fillStyle = '#ff5a5a'; const w = E ? ['Not', 'Learned'] : ['Öğrenil-', 'medi']; ctx.fillText(w[0], x + 6, y + 9); ctx.fillText(w[1], x + 6, y + 19); }
+      else { ctx.fillStyle = '#000'; ctx.fillText((E ? 'Lv' : 'Sv') + rank, x + 9, y + 9); ctx.fillStyle = '#fff'; ctx.fillText((E ? 'Lv' : 'Sv') + rank, x + 8, y + 8); }
+      ctx.textBaseline = 'alphabetic';
+      nHit(key, x, y, 46, 46);
+    }
+    // ağacın kök şartı tutmuyorsa (sınıf yükseltmesi, önceki ağaca puan, seçilmiş öbür uzmanlık) yazılır
+    const root = cells[0] && cells[0].sk && !tree.race ? skLock(cells[0].sk) : null;
+    if (root && root[0] !== 'pre') nText(ctx, root[1], 240, 266, '#a02010', 9, 'center', 200);
+    if (tree.life) nText(ctx, T2('Meslekler eğitmenlerden öğrenilir.', 'Professions are learned from trainers.'), 240, 266, '#5a4020', 9, 'center', 200);
+    // alt çubuk: beceri puanı + Puanları Sıfırla
+    nText(ctx, `${tx('Beceri puanı')}: ${P.sp || 0}`, 205, 299, (P.sp || 0) > 0 ? '#ffe070' : '#e8dcc0', 12, 'center');
+    { const r = nDraw(ctx, f, 50430, pressed === 50430, T2('Puanları Sıfırla', 'Reset Points')); nHit(50430, r[0], r[1], r[2], r[3]); }
+    const c = S.sel && S._cell[S.sel];
+    if (c) {
+      const L = [];
+      if (c.job) {
+        const t = (P.life && P.life[c.job.cn]) || 0, tier = c.job.tiers[Math.max(0, t - 1)];
+        nDraw(ctx, f, 50401, 0); nHit('frame', 353, 0, 135, 320);
+        L.push([c.job[E ? 'en' : 'tr'], '#7a1c08', 11], [t ? tier[E ? 'en' : 'tr'][0] : T2('Öğrenilmedi', 'Not learned'), '#5a4020', 9.5]);
+        wrap(ctx, tier[E ? 'en' : 'tr'][1], 92, 9.5).forEach(l => L.push([l, '#2a1a0a', 9.5]));
+        if (t < 5) { L.push([T2('Sonraki kademe:', 'Next tier:'), '#5a4020', 9.5]); wrap(ctx, c.job.tiers[t][E ? 'en' : 'tr'][1], 92, 9.5).forEach(l => L.push([l, '#5a4020', 9.5])); }
+        L.slice(0, 20).forEach(([t2, col, sz], i) => nText(ctx, t2, 362, 30 + i * 12.5, col, sz, 'left', 94));
+      } else {
+        const sk = c.sk, r = skRank(sk), mx = sk.mx || 10;
+        if (!sk.race) nActions(ctx, f, 50401, [50410, 50411], [['Yükselt', 'up'], ['Kısayol', 'quick']]); else { nDraw(ctx, f, 50401, 0); nHit('frame', 353, 0, 135, 320); }
+        L.push([sk.name, '#7a1c08', 11], [`${tx('Kademe')} ${r}/${mx}${sk.pas ? ' · ' + tx('edilgen') : ''}`, '#5a4020', 9.5]);
+        wrap(ctx, skDesc(sk, r), 92, 9.5).forEach(l => L.push([l, '#2a1a0a', 9.5]));
+        if (r && r < mx) { const nx = skNextDiff(sk, r); if (nx) L.push([`${T2('Sonraki', 'Next')}: ${nx}`, '#1a3a7a', 9.5]); }
+        const lk = skLock(sk); if (lk) wrap(ctx, lk[1], 92, 9.5).forEach(l => L.push([l, '#c02010', 9.5]));
+        L.slice(0, 15).forEach(([t2, col, sz], i) => nText(ctx, t2, 362, sk.race ? 30 + i * 12.5 : 118 + i * 12.5, col, sz, 'left', 94));
+      }
     }
     { const r = nDraw(ctx, f, 50413, pressed === 50413); nHit(50413, r[0] - 4, r[1], r[2] + 4, r[3]); }
     nEnd(ctx);
+  }
+  // sonraki kademede değişen sayılar: "20→40, 5→6"
+  function skNextDiff(sk, r) {
+    const keys = [...(sk.d[LANG === 'en' ? 'en' : 'tr'][1].matchAll(/\{(\w+)\}/g))].map(m => m[1]).filter(k => sk.d.c[k]), out = [];
+    const fmt = v => Number.isInteger(v) ? String(v) : String(+v.toFixed(1));
+    for (const k of [...new Set(keys)]) { const a = skC(sk, k, r), b = skC(sk, k, r + 1); if (a !== b) out.push(`${fmt(a)}→${fmt(b)}`); }
+    return out.join(', ');
   }
   function tapSkill2(id) {
     const P = Game.P, C = CLS[P.cls];
     if (id === 50413) { close(); open('hub'); return; }
     if (S2TABS.includes(id)) { S.tree = S2TABS.indexOf(id); S.sel = null; SFX.play('skill_pageflip'); return; }
-    if (S._cell && S._cell[id]) { S.sel = S._cell[id].id; SFX.play('menusel', 0.6); return; }
-    const sk = S.sel && C.skills.find(k => k.id === S.sel); if (!sk) return;
+    if (id === 50430) { ask(T2('Bütün beceri puanları geri alınsın mı? (Eğitim Kitabı harcanır)', 'Reset all skill points? (uses a Training Book)'), () => skillReset(false)); return; }
+    if (S._cell && S._cell[id]) { S.sel = id; SFX.play('menusel', 0.6); return; }
+    const c = S.sel && S._cell && S._cell[S.sel], sk = c && c.sk; if (!sk) return;
     if (id === 'up') return skillUp(sk);
-    if (id === 'quick') { if (sk.pas) UI.toast('Edilgen beceriler kısayola konmaz.'); else if (!skRank(sk)) UI.toast('Önce beceriyi öğren.'); else UI.startAssign('s' + C.skills.indexOf(sk), sk.name); }
+    if (id === 'quick') { const i = C.skills.indexOf(sk); if (sk.pas || i < 0) UI.toast('Edilgen beceriler kısayola konmaz.'); else if (!skRank(sk)) UI.toast('Önce beceriyi öğren.'); else UI.startAssign('s' + i, sk.name); }
   }
   // ---------------- Dükkân (NEW_FORM_SHOP): solda sekmeler, ortada liste, altta altın ve Sat; seçilince sağda bilgi ve Satın Al ----------------
   const H2TABS = [50899, 50900, 50901, 50902, 50903], H2ROWS = [50334, 50335, 50336, 50337, 50338];
@@ -976,7 +1025,7 @@ const Win = (() => {
       after: (c, x, y, w, h) => {
         const sk = cell[c.id];
         if (sk) { const r = skRank(sk); if (!r) ctx.globalAlpha = 0.4; drawIcon(ctx, { ik: sk.ik || 'skill', icon: sk.icon }, x + 5, y + 5); ctx.globalAlpha = 1;
-          Forms.label(ctx, `${r}/${SK_MAX}`, x - 6, y + 35, 48, 11, r ? '#ffe070' : P.lv < sk.lv ? '#888' : '#ffffff', 'center', 9);
+          Forms.label(ctx, `${r}/${SK_MAX}`, x - 6, y + 35, 48, 11, r ? '#ffe070' : skLock(sk) ? '#888' : '#ffffff', 'center', 9);
           Forms.label(ctx, sk.name, x - 32, y + 45, 100, 11, r ? '#e8e0d0' : '#999', 'center', 8); hits.push({ id: c.id, x: x - 6, y: y - 2, w: 48, h: 52 }); }
         const qi = -1;
         if (qi >= 0) { const sl = P.quick[qi]; if (sl && sl[0] === 's') { const k = C.skills[+sl.slice(1)]; if (k) drawIcon(ctx, { ik: k.ik || 'skill', icon: k.icon }, x + 5, y + 5); } else if (sl) { const it = ITEMS[sl.slice(2)]; if (it) drawIcon(ctx, it, x + 5, y + 5); } hits.push({ id: c.id, x, y, w, h }); }
@@ -991,7 +1040,7 @@ const Win = (() => {
       const r = skRank(selSk), lines = [[selSk.name + (selSk.pas ? ' ' + tx('(edilgen)') : ''), '#ffd870', 12], [`${tx('Kademe')} ${r}/${SK_MAX}`, '#ffffff', 10]];
       wrap(ctx, selSk.desc || '', 140, 10).forEach(l => lines.push([l, '#d8d0c0', 10]));
       if (!selSk.pas) lines.push([`${selSk.mp} mana · ${selSk.cd} sn`, '#9fc8ff', 10]);
-      if (P.lv < selSk.lv) lines.push([`${selSk.lv}. seviye gerekir.`, '#ff6050', 10]);
+      if (skLock(selSk)) lines.push([skLockMsg(selSk), '#ff6050', 10]);
       const bw = 152, bh = lines.length * 13 + 10, bx = ox - 2 - bw, by = oy + 10 + 2 * 46 + 8; panel(ctx, bx, by, bw, bh);
       lines.forEach(([t, c, sz], i) => Forms.label(ctx, t, bx + 5, by + 5 + i * 13, bw - 10, 13, c, 'left', sz));
     }

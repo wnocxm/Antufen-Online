@@ -50,3 +50,10 @@ Her commit'te buraya bir satır eklenir (tarih başlığı altında). Ayrıntı 
 - 40. seviye sınıf yükseltmesi orijinal görevlerle (kullanıcı kararı: sınıf ağacı orijinal gibi yalnız bununla açılır): Acemilikten Çıkış (40'ta kendiliğinden), Ozan'da "Sınıf değiştirmek istiyorum!", her sınıf × ırk için orijinal zincir (iki eşyalı toplama, perinin iki seçenekli bitişi dahil), 40. seviye sınıf takımları ödül; Acemi Savaşçı/Çırak Büyücü/Acemi Kutsal Elçi adları; eski kayıtlarda sınıf ağacı puanı iade; GM paneline Sınıf sekmesi; sunucu listesinde sınıf.
 - Harita seviyesi bulgusu: dosya adındaki sayı seviye değil; Gümüşkartal Avlusu (91-97 → 41-43), Kışla/Depo, Sınav Odası orijinal görev deneyiminden düzeltildi (kaynak/seviye_tahmin.json). Diğer yanlış seviyeli sahneler listelendi.
 - Denge: sınıf ağacı 40'a çekilince rahip tabanı biraz güçlendirildi (seçkinde en çok ~%84 can); deneyim tablosu yeni görevlerle yeniden üretildi (görev payı %38,7).
+
+## 2026-11-18 · Bütün beceri ağaçları
+- Beceri penceresi APK'daki gibi: 6 sekme (acemi, sınıf, iki uzmanlık, ırk, Yaşam), kademeli 6 yuva, turuncu çizgiler, "Öğrenilmedi / Sv n", Puanları Sıfırla. Yüksek seviyeli ağaçlar da görünür (kullanıcı kararı: 55 sınırı içerik için, sistemler eksiksiz).
+- Orijinal beceri verisi bulundu ve kullanıldı: kademe sabitleri (skill_const_2nd.lua), ön koşullar (5. kademe), ağaç puan şartları (sınıf ağacı: acemiye 35, uzmanlık: sınıfa 40), uzmanlıkların birbirini dışlaması; 76 beceri, Türkçe/İngilizce açıklamalar kademe değerleriyle.
+- 24 uzmanlık becerisi ve 4 ırk becerisi çalışıyor (can emme, yansıtma, kanama, dönüşümler, totem, mana kalkanı…); 80'de ikinci sınıf yükseltmesi (Kara Şövalye / Başbüyücü / Seçilmiş).
+- Eğitim Kitabı (puan sıfırlama) beceri eğitmenlerinde; Yaşam Elementi (elf ırk becerisi).
+- Denge: orijinal sayılarla büyücü/rahip zayıfladı; sınıf vuruş çarpanları (1,25 / 1,7 / 1,75) ile 10-80 yeniden ölçüldü. GM Sınıf sekmesine ikinci yükseltme, bedava sıfırlama, ağaçları doldur.

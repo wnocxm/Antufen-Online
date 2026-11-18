@@ -64,80 +64,190 @@ const MON = {
   '☆饥饿的巨魔': { lv: 15, hp: 2200, atk: 48, xp: 700, rank: 1, n: 1 },
 };
 
-// Sınıf değerleri ve yetenekler (orijinal efekt ve simgelerle)
-// Beceriler orijinal beceri ağaçlarından (all_skilltree / all_skill): adlar, simgeler, efektler ve sesler orijinal.
-// Etkin beceriler önce (kısayol sırası), edilgenler (pas) sonra gelir.
+// Sınıf değerleri ve beceriler. Ağaçlar, adlar, simgeler, açıklamalar, en yüksek kademe, ön koşullar ve kademe sabitleri orijinal:
+// www/assets/skills.json (tools/beceriler.py ← all_skilltree, all_skill, skill_const_2nd.lua). Burada her becerinin oyundaki karşılığı durur:
+// `sn` orijinal numara; `f(K, s, p, t)` etkin becerinin o kademedeki sayıları (K('sabit') = kademe değeri), `pas(K, s)` edilgen,
+// `buff(K, s)` + `dur` güçlendirme, `heal(K, s)` şifa. Etkin beceriler önce (kısayol sırası), edilgenler sonra; yeni ağaçların becerileri
+// eskilerin arkasına eklendi (eski kayıtlardaki kısayol sırası bozulmasın). Sınıf taban değerleri (hp, atk… ve seviye artışları) bizim
+// dengemiz (orijinal sunucudaydı; docs/03 › Denge).
+const R100 = v => v / 100;
 const CLS = {
-  '战士': { hp: 1200, mp: 300, atk: 60, def: 40, ghp: 180, gmp: 30, gatk: 12, gdef: 8, range: 1.4, color: '红', melee: true, snd: 'skill_sword',
+  '战士': { hp: 1200, mp: 300, atk: 60, def: 40, ghp: 180, gmp: 30, gatk: 12, gdef: 8, dmgK: 1.25, range: 1.4, color: '红', melee: true, snd: 'skill_sword',
     skills: [
-      { id: 'w1', name: 'Temel Kılıç Ustalığı', icon: 1107, mp: 0, cd: 0.8, mult: 1.0, range: 1.6, fx: 'BLOOD', snd: 'skill_sword', lv: 1, desc: 'Yakın saldırı. Mana harcamaz.' },
-      { id: 'w2', name: 'Güçlü Savurma', icon: 1114, mp: 25, cd: 1.0, mult: 1.0, crit: 20, range: 1.6, self: '特效-刀光-红', hit: 'BLOOD', snd: 'skill_daoguang', add: [200, 220, 240, 260, 280, 300, 325, 350, 375, 400], lv: 3, desc: 'Güçlü yakın saldırı, kritik şansı yüksek.' },
-      { id: 'w3', name: 'Bıçak Fırlatma', icon: 1127, mp: 35, cd: 1.5, mult: 0.8, range: 6, proj: '特效-飞刀', hit: '特效-细碎爆炸', splash: 1.8, snd: 'skill_nife', snd2: 'skill_pilipala', add: [60, 70, 80, 90, 100, 120, 140, 160, 180, 200], lv: 6, desc: 'Uzaktan alan saldırısı.' },
-      { id: 'w4', name: 'Çifte Darbe', icon: 1112, mp: 45, cd: 5, mult: 0.65, hits: 2, range: 1.6, self: '特效-刀光', hit: '特效-大喷血', fx2: 'BLOOD', snd: 'skill_daoguang', pct: [330, 360, 390, 420, 450, 480, 510, 540, 570, 600], lv: 10, desc: 'Art arda iki vuruş.' },
-      { id: 'w5', name: 'Hız Patlaması', icon: 1103, mp: 30, cd: 20, buff: { spd: 0.25 }, dur: 5, fx: '特性-聚气', snd: 'skill_juqi', critT: [640, 680, 720, 760, 800, 840, 880, 920, 960, 1000], lv: 13, desc: '5 saniye %25 hızlı koşarsın, kritik şansın artar.' },
-      { id: 'w6', name: 'Ruh Yaran', icon: 1132, mp: 60, cd: 15, mult: 1.0, range: 5, self: '特效-刀光', hit: '特效-死亡标记', snd: 'skill_deathtag', pct: [420, 440, 460, 480, 500, 520, 540, 560, 580, 600], lv: 17, desc: 'Uzaktan karanlık saldırı.' },
-      { id: 'wp1', pas: { atk: 15 }, name: 'Silah Eğitimi', icon: 1136, lv: 2, desc: 'Saldırı artar.' },
-      { id: 'wp2', pas: { hpPct: 8 }, name: 'Gürbüzlük', icon: 1109, lv: 4, desc: 'Can sınırı +%8.' },
-      { id: 'wp3', pas: { dodge: 5 }, name: 'Çeviklik', icon: 1105, lv: 8, desc: 'Kaçınma +%5.' },
-      { id: 'wp4', pas: { def: 20, res: 20 }, name: 'Savunma Ustalığı', icon: 1063, lv: 11, desc: 'Savunma ve direnç artar.' },
-      { id: 'wp5', pas: { hpreg: 60 }, name: 'Hızlı İyileşme', icon: 1135, lv: 14, desc: 'Can yenilenmesi artar.' },
-      { id: 'wp6', pas: { dr: 8 }, name: 'Dayanıklılık Halesi', icon: 1110, lv: 18, desc: 'Alınan hasar −%8.' },
+      // acemi (见习 150008) ve sınıf (战士 150009) ağaçları
+      { id: 'w1', sn: 90020, mp: 0, cd: 0.8, range: 1.6, fx: 'BLOOD', snd: 'skill_sword', f: K => ({ mult: 1, add: K('add_phy') }) },
+      { id: 'w2', sn: 90095, mp: 25, cd: 1.0, range: 1.6, self: '特效-刀光-红', hit: 'BLOOD', snd: 'skill_daoguang', f: K => ({ mult: 1, add: K('add_phy'), crit: K('add_fatal') }) },
+      { id: 'w3', sn: 90021, mp: 35, cd: 1.5, range: 6, proj: '特效-飞刀', hit: '特效-细碎爆炸', splash: 1.8, snd: 'skill_nife', snd2: 'skill_pilipala', f: K => ({ mult: R100(K('phy_basic')), add: K('add_phy'), taunt: 1 }) },
+      { id: 'w4', sn: 90044, mp: 45, cd: 5, hits: 2, range: 1.6, self: '特效-刀光', hit: '特效-大喷血', fx2: 'BLOOD', snd: 'skill_daoguang', f: K => ({ mult: 1 + R100(K('add_phy_rate')), mult2: R100(K('add_holy_rate')) }) },
+      { id: 'w5', sn: 90084, mp: 30, cd: 20, dur: 5, fx: '特效-加速', snd: 'skill_juqi', buff: K => ({ spd: 0.25, nextCrit: K('next_attack_is_fatal_rate'), noSlow: 1 }) },
+      { id: 'w6', sn: 90105, mp: 60, cd: 15, range: 5, self: '特效-刀光', hit: '特效-死亡标记', snd: 'skill_deathtag', f: K => ({ mult: R100(K('add_phy_rate')), crit: K('add_fatal') }) },
+      { id: 'wp1', sn: 90022, pas: K => ({ atk: K('add_phy') }) },
+      { id: 'wp2', sn: 90042, pas: K => ({ hpPct: K('add_hp_max_rate') }) },
+      { id: 'wp3', sn: 90043, pas: K => ({ dodge: K('add_raw_jook_rate') }) },
+      { id: 'wp4', sn: 90040, pas: K => ({ def: K('add_def'), res: K('add_def') }) },
+      { id: 'wp5', sn: 90096, pas: K => ({ hpreg: K('hp_grow') }) },
+      { id: 'wp6', sn: 90104, pas: K => ({ dr: K('add_sorbdamage_rate') }) },
+      // uzmanlık: Kana Susamış (嗜血 150010)
+      { id: '90106', sn: 90106, mp: 300, cd: 15, dur: 10, fx: '特效-鲜血印记', snd: 'skill_juqi', buff: K => ({ leech: R100(K('add_hp_rate')) }) },
+      { id: '90113', sn: 90113, mp: 150, cd: 2, range: 1.6, self: '特效-刀光-红', hit: '特效-大喷血', snd: 'skill_daoguang', f: (K, s, p) => ({ mult: 0, add: p.hp * R100(K('dec_hp_rate')) * (skRankSn(90115) ? 1.05 : 1), pure: 1, refresh: '90106' }) },
+      { id: '90598', sn: 90598, mp: 200, cd: 10, dur: 6, fx: '特效-反击风暴', snd: 'skill_juqi', buff: () => ({ reflect: 0.1 }) },
+      { id: '90107', sn: 90107, pas: K => ({ healUp: K('add_resume_effect_rate') }) },
+      { id: '90119', sn: 90119, pas: K => ({ defToAtk: K('add_physical_attack_value') }) },
+      { id: '90115', sn: 90115, pas: () => ({}) },
+      // uzmanlık: Öfke (狂暴 150011)
+      { id: '90117', sn: 90117, mp: 120, cd: 1.5, range: 1.6, self: '特效-疾风斩', hit: '特效-刀光-红', fx2: 'BLOOD', snd: 'skill_daoguang', f: K => ({ mult: R100(K('phy_attack_factor')), add: K('add_phy_attack_value'), bleed: 1 }) },
+      { id: '90116', sn: 90116, mp: 200, cd: 4, range: 5, self: '特效-刀光', hit: '特效-七彩的刀光', fx2: 'BLOOD', snd: 'skill_deathtag', f: (K, s, p, t) => tearHit(K, s, p, t) },
+      { id: '90599', sn: 90599, mp: 150, cd: 10, dur: 6, fx: '特效-狂暴之怒', snd: 'skill_juqi', buff: () => ({ atk: 0.05, def: -0.05, noSlow: 1 }) },
+      { id: '90118', sn: 90118, pas: K => ({ despair: K('trigger_effect_rate') }) },
+      { id: '90121', sn: 90121, pas: K => ({ atkToDef: K('add_physical_defence_and_resist_value') }) },
+      { id: '90120', sn: 90120, pas: () => ({}) },
     ] },
-  '法师': { hp: 1000, mp: 800, atk: 70, def: 20, ghp: 140, gmp: 90, gatk: 14, gdef: 5, range: 6, color: '蓝', bolt: '特效-火球', boltHit: '特效-火爆炸', snd: 'skill_fire2',
+  '法师': { hp: 1000, mp: 800, atk: 70, def: 20, ghp: 140, gmp: 90, gatk: 14, gdef: 5, dmgK: 1.7, range: 6, color: '蓝', bolt: '特效-火球', boltHit: '特效-火爆炸', snd: 'skill_fire2',
     skills: [
-      { id: 'm1', name: 'Ateş Topu', icon: 1137, mp: 20, cd: 1.2, mult: 1.5, range: 7, proj: '特效-火球', hit: '特效-火爆炸', snd: 'skill_fireball', snd2: 'skill_bomb', add: [60, 65, 70, 75, 80, 90, 100, 110, 120, 130], lv: 1, desc: 'Uzaktan ateş büyüsü.' },
-      { id: 'm2', name: 'Dondurma', icon: 1132, mp: 30, cd: 0.9, mult: 1.5, crit: 15, range: 7, proj: '特效-冰球', hit: 'WATER_ATTACK', slow: 4, snd: 'skill_wind', snd2: 'skill_bubble', add: [80, 90, 100, 110, 120, 135, 150, 165, 180, 195], lv: 3, desc: 'Buz büyüsü; hedefi yavaşlatır.' },
-      { id: 'm3', name: 'Şifa', icon: 1135, mp: 60, cd: 20, fx: 'LIGHT_ATTACK', snd: 'skill_light', healT: [300, 320, 340, 370, 400, 460, 530, 610, 700, 800], lv: 6, desc: 'Kendi canını yeniler.' },
-      { id: 'm4', name: 'Alev Yakışı', icon: 1114, mp: 70, cd: 8, mult: 1.5, aoe: 2.4, projN: 3, fx: 'FIRE_ATTACK', hit: '特效-火爆炸', snd: 'skill_fireball2', snd2: 'skill_bomb', add: [400, 425, 450, 475, 500, 530, 570, 620, 680, 750], lv: 10, desc: 'Yakın çevrendeki düşmanları yakar.' },
-      { id: 'm5', name: 'Büyü Kalkanı', icon: 1134, mp: 80, cd: 30, buff: { def: 0.6, dr: 30 }, dur: 10, fx: '特效-法力盾', snd: 'skill_juqi', lv: 13, desc: '10 saniye alınan hasarı azaltır.' },
-      { id: 'm6', name: 'Kar Fırtınası', icon: 1101, mp: 90, cd: 12, mult: 0.0, range: 7, proj: '特效-冰球', hit: '特效-冰块碎裂', hitN: 10, splash: 2.6, slow: 4, snd: 'skill_wind', snd2: 'skill_ice', pct: [700, 725, 750, 775, 800, 840, 880, 920, 960, 1000], lv: 16, desc: 'Buz alan saldırısı.' },
-      { id: 'mp1', pas: { atk: 15 }, name: 'Büyü Çalışması', icon: 1133, lv: 2, desc: 'Büyü saldırısı artar.' },
-      { id: 'mp2', pas: { mpPct: 10 }, name: 'Mana Güçlendirme', icon: 1105, lv: 4, desc: 'Mana sınırı +%10.' },
-      { id: 'mp3', pas: { crit: 5 }, name: 'Mana Denetimi', icon: 1106, lv: 8, desc: 'İsabet ve kritik +%5.' },
-      { id: 'mp4', pas: { res: 30 }, name: 'Doğal Direnç', icon: 1108, lv: 11, desc: 'Tüm dirençler artar.' },
-      { id: 'mp5', pas: { mpreg: 60 }, name: 'Mana Yenilenmesi', icon: 1104, lv: 14, desc: 'Mana yenilenmesi artar.' },
-      { id: 'mp6', pas: { mpPct: 10 }, name: 'Mana Halesi', icon: 1111, lv: 19, desc: 'Mana sınırı +%10 daha.' },
+      // acemi (学徒 150014) ve sınıf (法师 150015) ağaçları
+      { id: 'm1', sn: 90122, mp: 20, cd: 1.2, range: 7, proj: '特效-火球', hit: '特效-火爆炸', snd: 'skill_fireball', snd2: 'skill_bomb', f: K => ({ mult: 1, add: K('add_fire') }) },
+      { id: 'm2', sn: 90123, mp: 30, cd: 0.9, range: 7, proj: '特效-冰球', hit: 'WATER_ATTACK', slow: 2, snd: 'skill_wind', snd2: 'skill_bubble', f: K => ({ mult: 1, add: K('add_water'), crit: K('add_fatal') }) },
+      { id: 'm3', sn: 90126, mp: 60, cd: 20, fx: 'LIGHT_ATTACK', snd: 'skill_light', heal: K => K('add_hp') },
+      { id: 'm4', sn: 90127, mp: 70, cd: 8, aoe: 2.4, projN: 3, fx: 'FIRE_ATTACK', hit: '特效-火爆炸', snd: 'skill_fireball2', snd2: 'skill_bomb', f: K => ({ mult: 1 + R100(K('add_fire_rate')), add: K('add_fire_val') }) },
+      { id: 'm5', sn: 90129, mp: 80, cd: 30, dur: 10, fx: '特效-法力盾', snd: 'skill_juqi', buff: K => ({ manaShield: R100(K('work_rate')), mpPerDmg: K('mp_trans_hp') }) },
+      { id: 'm6', sn: 90128, mp: 90, cd: 12, range: 7, proj: '特效-冰球', hit: '特效-冰块碎裂', hitN: 10, splash: 2.6, slow: 2, snd: 'skill_wind', snd2: 'skill_ice', f: K => ({ mult: R100(K('basic_attack_rate')), add: K('add_water') }) },
+      { id: 'mp1', sn: 90124, pas: K => ({ atk: K('add_mag') }) },
+      { id: 'mp2', sn: 90125, pas: K => ({ mpPct: K('add_mp_max_rate') }) },
+      { id: 'mp3', sn: 90097, pas: K => ({ acc: K('add_raw_shoot_rate') }) },
+      { id: 'mp4', sn: 90130, pas: K => ({ res: K('add_resist') }) },
+      { id: 'mp5', sn: 90098, pas: K => ({ mpreg: K('mp_grow') }) },
+      { id: 'mp6', sn: 90131, mp: 60, cd: 1, fx: '特效-治疗buff', snd: 'skill_light', dur: K => K('buff_duration') * 60, buff: K => ({ mpAdd: K('add_mp_max') }) },   // orijinalde etkin (eskiden edilgendi)
+      // uzmanlık: Element (元素 150016)
+      { id: '90132', sn: 90132, mp: 300, cd: 4, range: 7, proj: '特效-火球', hit: '特效-火爆炸', hitN: 3, splash: 2.2, snd: 'skill_fireball2', snd2: 'skill_bomb', f: K => ({ mult: R100(K('fire_attack_factor')), add: K('add_fire_attack_value'), burn: 1 }) },
+      { id: '90134', sn: 90134, mp: 300, cd: 4, aoe: 3, fx: '特效-冰霜新星', snd: 'skill_ice', f: K => ({ mult: R100(K('ice_attack_factor')) * (skRankSn(90135) ? 1.02 : 1), add: K('add_ice_attack_value'), slow: 2, freeze: skRankSn(90135) ? 10 : 0 }) },
+      { id: '90136', sn: 90136, mp: 0, cd: 15, dur: 6, fx: '特效-元素赐生', snd: 'skill_light', buff: K => ({ mpTick: R100(K('add_mp_rate')) / 2, dmgOut: skRankSn(90600) ? R100(skCSn(90600, 'magic_attack_dec_to_rate')) : 0.5, atk: skRankSn(90600) ? 0.05 : 0, hpTick: skRankSn(90600) ? 1 : 0 }) },
+      { id: '90133', sn: 90133, pas: K => ({ ccDmg: K('add_damage_rate') }) },
+      { id: '90135', sn: 90135, pas: () => ({}) },
+      { id: '90600', sn: 90600, pas: () => ({}) },
+      // uzmanlık: Gizem (奥术 150017)
+      { id: '90137', sn: 90137, mp: 0, cd: 1.5, range: 7, proj: '特效-黑暗火球', hit: '特效-火爆炸', snd: 'skill_fireball', snd2: 'skill_bomb', f: K => ({ mult: 1.2, arcane: 1 }), mpPct: K => R100(K('count_up_dec_mp_rate')) },
+      { id: '90140', sn: 90140, mp: 250, cd: 7.5, range: 7, fx: '特效-蓝火球', snd: 'skill_wind', f: (K, s) => ({ phantom: R100(K('copy_factor')), life: 5 + (skRankSn(90138) ? skCSn(90138, 'extra_lifetime') : 0) }) },
+      { id: '90139', sn: 90139, mp: 200, cd: 15, dur: 6, fx: '特效-加速', snd: 'skill_juqi', buff: K => Object.assign({ dodge: K('add_jook_rate') }, skRankSn(90601) && Math.random() < 0.1 ? { spd: 0.3, noSlow: 1 } : null) },
+      { id: '90141', sn: 90141, pas: K => ({ mpToAtk: K('add_magic_attack_value') }) },
+      { id: '90138', sn: 90138, pas: () => ({}) },
+      { id: '90601', sn: 90601, pas: () => ({}) },
     ] },
-  '牧师': { hp: 1050, mp: 700, atk: 60, def: 30, ghp: 165, gmp: 80, gatk: 13, gdef: 7, range: 5.5, color: '金', bolt: '特效-暗影冲击_红', boltHit: '特效-冲击爆炸', snd: 'skill_wind',
+  '牧师': { hp: 1050, mp: 700, atk: 60, def: 30, ghp: 165, gmp: 80, gatk: 13, gdef: 7, dmgK: 1.75, range: 5.5, color: '金', bolt: '特效-暗影冲击_红', boltHit: '特效-冲击爆炸', snd: 'skill_wind',
     skills: [
-      { id: 'p1', name: 'Gölge Darbesi', icon: 1062, mp: 18, cd: 1.0, mult: 1.5, range: 7, proj: '特效-暗影冲击_红', hit: '特效-冲击爆炸', snd: 'skill_wind', snd2: 'skill_bomb', add: [25, 28, 31, 35, 40, 46, 55, 65, 72, 80], lv: 1, desc: 'Uzaktan gölge saldırısı.' },
-      { id: 'p2', name: 'Çürüme', icon: 1066, mp: 30, cd: 6, mult: 0.3, dot: { n: 5 }, range: 7, fx: '特效-死亡标记', snd: 'skill_deathtag', dotT: [50, 60, 70, 80, 90, 100, 125, 150, 175, 200], lv: 3, desc: 'Hedefe lanet: 2 saniyede bir hasar verir.' },
-      { id: 'p3', name: 'İlahi Gözdağı', icon: 1094, mp: 50, cd: 15, mult: 0.5, aoe: 3, weak: 10, fx: '特效-神之威慑', snd: 'skill_juqi', lv: 6, desc: 'Çevredeki düşmanların savunmasını düşürür.' },
-      { id: 'p4', name: 'Şifa Pınarı', icon: 1100, ik: 'item', mp: 60, cd: 15, buff: { hotT: 1 }, hotT: [210, 217, 225, 232, 239, 263, 313, 368, 433, 452], dur: 8, fx: '特效-治疗之泉', snd: 'skill_light', lv: 10, desc: '8 saniye boyunca can yeniler.' },
-      { id: 'p5', name: 'Gölge Yakışı', icon: 1119, mp: 45, cd: 6, mult: 2.0, range: 7, hit: '特效-暗影灼烧_红', snd: 'skill_fire2', snd2: 'skill_bomb', lv: 13, desc: 'Karanlık ateşle yakar.' },
-      { id: 'p6', name: 'Kutsal Işık', icon: 1030, ik: 'item', mp: 70, cd: 3, fx: '特效-缓缓加红', snd: 'skill_light', healT: [465, 490, 540, 584, 628, 666, 704, 754, 866, 987], lv: 16, desc: 'Canını yeniler.' },
-      { id: 'p7', name: 'İlahi Öfke', icon: 1110, mp: 90, cd: 40, buff: { atk: 0.25, def: 0.25 }, dur: 20, fx: '特效-狂暴BUFF', snd: 'skill_relive', lv: 19, desc: 'Saldırı ve savunman 20 saniye artar.' },
-      { id: 'pp1', pas: { atk: 15 }, name: 'Sofu İradesi', icon: 1244, ik: 'item', lv: 2, desc: 'Büyü saldırısı artar.' },
-      { id: 'pp2', pas: { crit: 5 }, name: 'Zorbalık', icon: 1078, lv: 5, desc: 'Kritik şansı +%5.' },
-      { id: 'pp3', pas: { atk: 12 }, name: 'Can Sömürüsü', icon: 1122, lv: 8, desc: 'Çürüme güçlenir.' },
-      { id: 'pp4', pas: { hpreg: 40, mpreg: 40 }, name: 'İlahi Işık Dökümü', icon: 1065, lv: 11, desc: 'Can ve mana yenilenmesi artar.' },
-      { id: 'pp5', pas: { crit: 6 }, name: 'İlahi Ceza', icon: 1118, lv: 15, desc: 'Kritik şansı +%6.' },
+      // acemi (初级 150022) ve sınıf (神使 150023) ağaçları
+      { id: 'p1', sn: 90312, mp: 18, cd: 1.0, range: 7, proj: '特效-暗影冲击_红', hit: '特效-冲击爆炸', snd: 'skill_wind', snd2: 'skill_bomb', f: (K, s, p, t) => ({ mult: 1 + (t && t.dot && t.dot.corr ? R100(skCSn(90314, 'arrow_buff')) : 0), add: K('add_dark') }) },
+      { id: 'p2', sn: 90314, mp: 30, cd: 1, range: 7, fx: '特效-死亡标记', snd: 'skill_deathtag', f: () => ({ mult: 0, corrode: 1 }) },
+      { id: 'p3', sn: 90317, mp: 50, cd: 15, aoe: 3, fx: '特效-神之威慑', snd: 'skill_juqi', f: (K, s) => ({ mult: 0, weakDef: s.atk * R100(K('def_reduce_rate')), weakT: 10 }) },
+      { id: 'p4', sn: 90319, mp: 60, cd: 15, dur: 10, fx: '特效-治疗之泉', snd: 'skill_light', buff: (K, s) => ({ hotT: s.atk * 0.1 + K('hp_resume') }) },
+      { id: 'p5', sn: 90318, mp: 45, cd: 6, range: 7, hit: '特效-暗影灼烧_红', snd: 'skill_fire2', snd2: 'skill_bomb', f: (K, s, p, t) => burnHit(K, t) },
+      { id: 'p6', sn: 90321, mp: 70, cd: 3, fx: '特效-缓缓加红', snd: 'skill_light', heal: (K, s) => s.atk + K('heal_hp') },
+      { id: 'p7', sn: 90322, mp: 90, cd: 40, fx: '特效-神努buff', snd: 'skill_relive', dur: K => K('buff_duration'), buff: (K, s) => ({ atkAdd: s.atk * R100(K('add_attack_rate')), defAdd: s.atk * R100(K('add_defence_rate')) }) },
+      { id: 'pp1', sn: 90313, pas: K => ({ atk: K('add_magic_attack') }) },
+      { id: 'pp2', sn: 90315, pas: K => ({ crit: K('add_cruel_rate') }) },
+      { id: 'pp3', sn: 90316, pas: () => ({}) },
+      { id: 'pp4', sn: 90320, pas: () => ({}) },   // stats() can/mana sınırı bilindikten sonra ekler
+      { id: 'pp5', sn: 90323, pas: () => ({}) },
+      // uzmanlık: Kutsal (神圣 150024)
+      { id: '90602', sn: 90602, mp: 100, cd: 1, dur: 60, fx: '特性-聚气', snd: 'skill_juqi', toggle: 1, buff: K => ({ convert: K('convert_factor') }) },
+      { id: '90604', sn: 90604, mp: 300, cd: 5, aoe: 3, fx: '特效-细碎爆炸', snd: 'skill_light', f: K => ({ mult: R100(K('holy_damage_factor')), add: K('add_holy_damage_value'), novaHeal: 1, stun: skRankSn(90605) ? 10 : 0 }) },
+      { id: '90606', sn: 90606, mp: 200, cd: 20, dur: 3, fx: '特效-圣光壁垒', snd: 'skill_relive', buff: K => ({ dr: K('add_sorbdamage_rate') }) },
+      { id: '90603', sn: 90603, pas: K => ({ cheatDeath: K('trigger_effect_rate') }) },
+      { id: '90605', sn: 90605, pas: () => ({}) },
+      { id: '90607', sn: 90607, pas: () => ({}) },
+      // uzmanlık: Gölge (暗影 150025)
+      { id: '90608', sn: 90608, mp: 250, cd: 4, range: 7, proj: '特效-暗影冲击_红', hit: '特性-冰火爆炸', snd: 'skill_wind', snd2: 'skill_deathtag', f: K => ({ mult: R100(K('dark_damage_factor')), add: K('add_dark_damage_value'), corrode: 1 }) },
+      { id: '90610', sn: 90610, mp: 0, cd: 10, dur: 6, fx: '特效-黑暗契约', snd: 'skill_deathtag', buff: K => ({ mp2hp: R100(K('dec_mp_rate')) }) },
+      { id: '90613', sn: 90613, mp: 300, cd: 20, dur: 6, fx: '特效-黑暗降临', snd: 'skill_relive', buff: () => ({ atk: 0.3, drain: 0.01, noHeal: 1 }) },
+      { id: '90609', sn: 90609, pas: K => ({ seal: K('trigger_effect_rate') }) },
+      { id: '90612', sn: 90612, pas: K => ({ veil: K('trigger_effect_rate') }) },
+      { id: '90611', sn: 90611, pas: () => ({}) },
     ] },
 };
-if (LANG === 'en') for (const c of Object.values(CLS)) for (const sk of c.skills) { const e = EN_SKILL[sk.id]; if (e) { sk.name = e[0]; sk.desc = e[1]; } }
-// Orijinal beceri ağaçları (all_skilltree): her ağaçta 3 sütun; [beceri, sütun, satır]
-const TREES = {
-  '战士': [{ name: 'Acemi', cells: [['w1', 1, 0], ['wp1', 2, 0], ['wp3', 0, 1], ['wp2', 2, 1], ['w2', 0, 2], ['w3', 2, 2]] }, { name: 'Savaşçı', cells: [['w4', 1, 0], ['wp4', 2, 0], ['wp5', 0, 1], ['w5', 2, 1], ['wp6', 0, 2], ['w6', 2, 2]] }],
-  '法师': [{ name: 'Çırak', cells: [['m1', 1, 0], ['mp1', 2, 0], ['mp2', 0, 1], ['mp3', 2, 1], ['m3', 0, 2], ['m2', 2, 2]] }, { name: 'Büyücü', cells: [['m4', 1, 0], ['mp4', 2, 0], ['mp6', 0, 1], ['mp5', 2, 1], ['m5', 0, 2], ['m6', 2, 2]] }],
-  '牧师': [{ name: 'Başlangıç', cells: [['p1', 1, 0], ['pp1', 2, 0], ['p2', 0, 1], ['pp2', 2, 1], ['pp3', 0, 2], ['p3', 2, 2]] }, { name: 'Elçi', cells: [['p4', 1, 0], ['pp4', 2, 0], ['p5', 0, 1], ['p6', 2, 1], ['pp5', 0, 2], ['p7', 2, 2]] }],
+// ırk becerileri (人类 150019 / 精灵 150013): kademe 1, kendiliğinden; orijinal açıklama "seviyeyle artar" diyor, artış bizim
+const RACE_SK = {
+  '人类': [{ id: 'r90082', sn: 90082, pas: (K, s, L) => ({ def: 2 * L, mp: 5 * L }) }, { id: 'r90083', sn: 90083, pas: () => ({ goldUp: 10 }) }],
+  '精灵': [{ id: 'r90080', sn: 90080, pas: (K, s, L) => ({ res: 2 * L, hp: 8 * L }) }, { id: 'r90081', sn: 90081, pas: () => ({ lifeEl: 5 }) }],
 };
-// Sınıf ağacı (TREES[sınıf][1]) orijinalde 40. seviyedeki sınıf yükseltme göreviyle açılır (P.adv >= 1; docs/03 › Beceri ağaçları).
-// Acemi ağacı 1-39 içindir. Sınıf ağacındaki beceriler sınıf yükseltilince (40) öğrenilebilir.
-for (const [c, T] of Object.entries(TREES)) { T[1].adv = 1; for (const [sid] of T[1].cells) { const sk = CLS[c].skills.find(k => k.id === sid); if (sk) { sk.adv = 1; sk.lv = Math.max(sk.lv, 40); } } }
-const skLock = sk => { const P = Game.P; return sk.adv && (P.adv || 0) < sk.adv ? 'adv' : P.lv < sk.lv ? 'lv' : null; };
-const skLockMsg = sk => skLock(sk) === 'adv' ? tx('Sınıf yükseltme görevi gerekir (40. seviye).') : tx(`${sk.lv}. seviye gerekir.`);
-// sınıf adı: acemi (见习战士 / 法师学徒 / 见习神使) ya da yükseltilmiş sınıf
-const clsName = (P = Game.P) => tx(((P.adv || 0) >= 1 ? TR.cls : TR.cls0)[P.cls]);
-const SK_MAX = 10;   // orijinal beceri kayıtlarında en yüksek kademe 10
-const skRank = sk => (Game.P.sk && Game.P.sk[sk.id]) || 0;
-const skT = (sk, key) => { const t = sk[key]; return t ? t[Math.max(1, skRank(sk)) - 1] : 0; };   // orijinal kademe tablosundan değer
-const skMult = sk => (sk.add || sk.pct || sk.healT || sk.dotT || sk.hotT || sk.critT) ? 1 : 1 + 0.08 * (Math.max(1, skRank(sk)) - 1);         // orijinal tablolarda 1. kademeden 10. kademeye değerler yaklaşık 2 katına çıkıyor
+// ---------------- Beceri ağacı kuralları (orijinal) ----------------
+// Bir beceri öğrenilebilir: ön koşulu (önceki beceri en az şu kademede), ağacın kök şartı (sınıf yükseltmesi + önceki ağaca harcanmış puan;
+// örn. sınıf ağacı: acemi ağacına 35 puan, uzmanlık: sınıf ağacına 40 puan) ve iki uzmanlığın kökü birbirini dışlar. Seviye şartı yok;
+// puan seviye başına 1. Sıfırlama: Eğitim Kitabı (30092) ile bütün puanlar geri alınır.
+let SKD = null;   // skills.json
+const TREES = {};
+const SKBYSN = {};
+async function loadSkills() {
+  SKD = await fetch(vq(Assets.base + 'skills.json')).then(r => r.json());
+  const E = LANG === 'en';
+  for (const [c, C] of Object.entries(CLS)) {
+    for (const sk of C.skills) { const d = SKD.skills[sk.sn]; Object.assign(sk, { d, name: d[E ? 'en' : 'tr'][0], icon: d.icon, ik: d.ik || undefined, mx: d.mx, cls: c }); SKBYSN[sk.sn] = sk; }
+    TREES[c] = SKD.trees[c].map((t, k) => ({ id: t.id, name: t[E ? 'en' : 'tr'], tier: k, cells: t.cells.map(([sn, col]) => [SKBYSN[sn].id, col]) }));
+  }
+  for (const [r, L] of Object.entries(RACE_SK)) for (const sk of L) { const d = SKD.skills[sk.sn]; Object.assign(sk, { d, name: d[E ? 'en' : 'tr'][0], icon: d.icon, ik: d.ik || undefined, mx: 1, race: r }); SKBYSN[sk.sn] = sk; }
+  for (const c in TREES) TREES[c].push({ race: true, name: '', cells: [] }, { life: true, name: SKD.life[E ? 'en' : 'tr'], cells: [] });
+}
+const raceTree = (P = Game.P) => SKD.race[P.race];
+const skRank = sk => sk.race ? (sk.race === Game.P.race ? 1 : 0) : (Game.P.sk && Game.P.sk[sk.id]) || 0;
+const skRankSn = sn => { const sk = SKBYSN[sn]; return sk ? skRank(sk) : 0; };
+const skC = (sk, key, r) => { const t = sk.d && sk.d.c[key]; if (!t) return 0; const k = clamp(r != null ? r : Math.max(1, skRank(sk)), 1, t.length); return t[k - 1]; };
+const skCSn = (sn, key) => { const sk = SKBYSN[sn]; return sk ? skC(sk, key) : 0; };
+// ağaca harcanmış puan
+function treePts(treeId) { const P = Game.P, T = SKD && Object.values(SKD.trees).flat().find(t => t.id === treeId); if (!T) return 0; let n = 0; for (const [sn] of T.cells) n += (P.sk && P.sk[SKBYSN[sn].id]) || 0; return n; }
+const ADVCLS = { 130004: 1, 130005: 1, 130011: 1, 130006: 2, 130008: 2, 130012: 2 };
+// öğrenme şartı: null (öğrenilebilir) ya da [tür, açıklama]
+function skLock(sk) {
+  const P = Game.P, d = sk.d; if (!d) return null;
+  if (sk.race) return null;
+  const rt = d.root;
+  if (rt) {
+    const need = ADVCLS[rt.cls]; if (need && (P.adv || 0) < need) return ['adv', need === 1 ? tx('Sınıf yükseltme görevi gerekir (40. seviye).') : tx('İkinci sınıf yükseltmesi gerekir (80. seviye).')];
+    const have = treePts(rt.tree); if (have < rt.pts) { const T = Object.values(SKD.trees).flat().find(t => t.id === rt.tree); return ['pts', T_(`${T.tr} ağacına ${rt.pts} puan gerekir (şu an ${have}).`, `Requires ${rt.pts} points in ${T.en} (now ${have}).`)]; }
+    if (rt.excl && skRankSn(rt.excl)) { const o = SKBYSN[rt.excl]; return ['excl', T_(`${o.name} seçildi; bu uzmanlık alınamaz.`, `${o.name} was chosen; this specialization is closed.`)]; }
+  }
+  if (d.pre) { const pk = SKBYSN[d.pre[0]]; if (skRank(pk) < d.pre[1]) return ['pre', T_(`Önce ${pk.name} ${d.pre[1]}. kademe.`, `Requires ${pk.name} rank ${d.pre[1]}.`)]; }
+  return null;
+}
+const T_ = (a, b) => LANG === 'en' ? b : a;
+const skLockMsg = sk => { const L = skLock(sk); return L ? L[1] : ''; };
+// sınıf adı: acemi (见习战士 / 法师学徒 / 见习神使), 40'ta sınıf, 80'de ikinci sınıf (黑骑士 / 大魔导师 / 天选者)
+const clsName = (P = Game.P) => tx(((P.adv || 0) >= 2 ? TR.cls2 : (P.adv || 0) >= 1 ? TR.cls : TR.cls0)[P.cls]);
+const SK_MAX = 15;   // orijinal kayıtlarda en yüksek kademe 10 ya da 15 (sk.mx)
+// becerinin açıklaması: orijinal şablon, {sabit} kademe değeriyle doldurulur
+function skDesc(sk, r) {
+  const E = LANG === 'en', t = sk.d[E ? 'en' : 'tr'][1], rr = Math.max(1, r || skRank(sk)), mpv = typeof sk.mpPct === 'function' ? Math.round(sk.mpPct(k => skC(sk, k, rr)) * 100) + '%' : sk.mp;
+  const fmt = v => Number.isInteger(v) ? String(v) : String(+v.toFixed(1));
+  return t.replace(/\{(\w+)\}/g, (m, k) => k === 'cd' ? fmt(sk.cd || 0) : k === 'mp' ? String(mpv || 0) : fmt(skC(sk, k, rr)));
+}
 function skillUp(sk) {
   const P = Game.P, r = skRank(sk);
-  if (r >= SK_MAX) return UI.toast('Bu beceri en yüksek kademede.');
+  if (sk.race) return;
+  if (r >= (sk.mx || 10)) return UI.toast(T_('Bu beceri en yüksek kademede.', 'This skill is at its highest rank.'));
   if (skLock(sk)) return UI.toast(skLockMsg(sk));
   if ((P.sp || 0) < 1) return UI.toast('Beceri puanın yok. Seviye atlayınca puan kazanırsın.');
   P.sp--; P.sk[sk.id] = r + 1; SFX.play('skill_levelup'); UI.log(`${sk.name}: ${tx('kademe')} ${r + 1}`, 'q'); clampVitals(); save();
+}
+// puanları oyuncu gibi dağıt (GM "ağaçları doldur", tools/test/savas.js): her puan, öğrenilebilir beceriler arasında kademesi en düşük olana
+// (eşitse önceki ağaç / önceki yuva). spec: hangi uzmanlık (öbürü alınmaz).
+function skillAutoSpend(points, spec = 0) {
+  const P = Game.P, C = CLS[P.cls], T = TREES[P.cls], tr = [T[0], T[1], T[2 + spec]].map(t => t.cells.map(([id]) => C.skills.find(x => x.id === id)));
+  const pick = L => { let best = null; for (const sk of L) { const r = skRank(sk); if (r >= (sk.mx || 10) || skLock(sk)) continue; if (!best || r < skRank(best)) best = sk; } return best; };
+  const need = [SKBYSN[T[1].cells[0] && C.skills.find(x => x.id === T[1].cells[0][0]).sn], SKBYSN[C.skills.find(x => x.id === T[2 + spec].cells[0][0]).sn]].map(sk => sk && sk.d.root ? sk.d.root.pts : 0);
+  for (let n = 0; n < points; n++) {
+    // oyuncu gibi: önce bir sonraki ağacı açacak kadar (acemi 35, sınıf 40), sonra en üstteki açık ağaç, en son kalanlar
+    let best = null;
+    if ((P.adv || 0) >= 1 && treePts(T[0].id) < need[0]) best = pick(tr[0]);
+    else if ((P.adv || 0) >= 2 && treePts(T[1].id) < need[1]) best = pick(tr[1]) || pick(tr[0]);
+    if (!best) best = pick(tr[2]) || pick(tr[1]) || pick(tr[0]);
+    if (!best) { P.sp = (P.sp || 0) + points - n; break; }
+    P.sk[best.id] = skRank(best) + 1;
+  }
+}
+// puanları sıfırla: Eğitim Kitabı (训练之书 30092) harcanır; GM'de bedava
+function skillReset(free) {
+  const P = Game.P, spent = Object.values(P.sk || {}).reduce((a, b) => a + b, 0);
+  if (!spent) return UI.toast(T_('Harcanmış beceri puanı yok.', 'No skill points spent.'));
+  if (!free && !removeItem('30092')) return UI.toast(T_('Eğitim Kitabı gerekir (beceri eğitmeninde satılır).', 'Requires a Training Book (sold by the skill trainer).'));
+  P.sp = (P.sp || 0) + spent; P.sk = {}; Game.player.buffs = []; SFX.play('skill_levelup');
+  UI.log(T_(`Beceri puanları sıfırlandı: ${spent} puan geri geldi.`, `Skill points reset: ${spent} points returned.`), 'q'); clampVitals(); UI.refresh(); save();
 }
 const QUICK0 = ['s0', 's1', 's2', 's3', 's4', 's5', 'i:hp1', 'i:mp1'];
 const ITEMS = {
@@ -172,6 +282,7 @@ const SLOTS = [['weap', 'Silah'], ['head', 'Başlık'], ['body', 'Zırh'], ['bel
 const STATN = { atk: 'Saldırı', def: 'Savunma', hp: 'Can', mp: 'Mana', crit: 'Kritik %', dodge: 'Kaçınma %', hpreg: 'Can yenileme', mpreg: 'Mana yenileme', res: 'Büyü direnci' };
 let SHOPS = {};
 async function loadItems() {
+  await loadSkills();   // beceri ağaçları (skills.json)
   const D = await fetch(vq(Assets.base + 'items.json')).then(r => r.json());
   for (const [id, it] of Object.entries(D.items)) { it.ik = it.icon[0]; it.icon = it.icon[1]; if (it.slot) it.desc = it.desc || ''; if (LANG === 'en') { it.name = it.en || EN_ITEM[it.name] || it.name; it.desc = it.den || tx(it.desc); } ITEMS[id] = it; }
   if (LANG === 'en') { for (const k of ['hp1', 'hp2', 'mp1', 'mp2', 'growthBox', 'quest']) { ITEMS[k].name = tx(ITEMS[k].name); ITEMS[k].desc = tx(ITEMS[k].desc); } SLOTS.forEach(s => s[1] = tx(s[1])); for (const k in STATN) STATN[k] = tx(STATN[k]); for (const t of Object.values(D.shops)) t.forEach(x => x[0] = tx(x[0])); }
@@ -205,17 +316,39 @@ function randomGear(lv) {
 function save() { const P = Game.P; if (!P || !Game.player) return; P.scene = Game.sceneId; P.x = Game.player.x; P.y = Game.player.y; P.hp = Game.player.hp; P.mp = Game.player.mp; if (Net.on) return Net.save(P); try { localStorage.setItem(SAVE_KEY, JSON.stringify(P)); } catch (e) { } }
 function load() { try { return fixSave(JSON.parse(localStorage.getItem(SAVE_KEY))); } catch (e) { } return null; }
 // eski ya da sunucudan gelen kaydı tamamla
-function fixSave(s) { try { if (s && s.v === 1) { s.quests = s.quests || {}; s.done = s.done || {}; s.qitems = s.qitems || {}; s.flags = s.flags || {}; s.gear = s.gear || { weap: 0, body: 0, head: 0 }; if (!s.eq) { s.eq = Object.assign({}, STARTER[s.cls]); if (s.gear && s.gear.head) Object.assign(s.eq, { head: NEWBIE[s.cls][0], shoe: NEWBIE[s.cls][1] }); } if (s.sv !== 2) { s.sv = 2; s.quick = QUICK0.slice(); } if (!s.sk) { s.sk = {}; for (const k of CLS[s.cls].skills) if (s.lv >= k.lv && !k.adv) s.sk[k.id] = 1; s.sp = 1; } if (!(s.adv >= 1)) for (const k of CLS[s.cls].skills) if (k.adv && s.sk[k.id]) { s.sp = (s.sp || 0) + s.sk[k.id]; delete s.sk[k.id]; } return s; } } catch (e) { } return null; }
+function fixSave(s) { try { if (s && s.v === 1) { s.quests = s.quests || {}; s.done = s.done || {}; s.qitems = s.qitems || {}; s.flags = s.flags || {}; s.gear = s.gear || { weap: 0, body: 0, head: 0 }; if (!s.eq) { s.eq = Object.assign({}, STARTER[s.cls]); if (s.gear && s.gear.head) Object.assign(s.eq, { head: NEWBIE[s.cls][0], shoe: NEWBIE[s.cls][1] }); } if (s.sv !== 2) { s.sv = 2; s.quick = QUICK0.slice(); } if (!s.sk) { s.sk = {}; s.sk[CLS[s.cls].skills[0].id] = 1; s.sp = 1; } fixSkills(s); return s; } } catch (e) { } return null; }
 
+// kayıttaki becerileri orijinal kurallarla denetle: şartı tutmayan (ön koşul, ağaç puanı, sınıf, dışlayan uzmanlık) ya da kademesi aşan beceri
+// puanı geri verilir (eski kurallarla seviyeye göre alınmış beceriler)
+function fixSkills(s) {
+  if (!SKD) return; const P0 = Game.P; Game.P = s;
+  try {
+    for (let k = 0; k < 12; k++) { let ch = false;
+      for (const sk of CLS[s.cls].skills) { const r = s.sk[sk.id] || 0; if (!r) continue;
+        const over = Math.max(0, r - (sk.mx || 10)); if (over) { s.sk[sk.id] = r - over; s.sp = (s.sp || 0) + over; ch = true; }
+        const L = skLock(sk); if (L && !(sk.id === CLS[s.cls].skills[0].id && L[0] === 'pre')) { s.sp = (s.sp || 0) + s.sk[sk.id]; delete s.sk[sk.id]; ch = true; } }
+      if (!ch) break; }
+  } finally { Game.P = P0; }
+}
 function stats() {
   const P = Game.P, C = CLS[P.cls], L = P.lv - 1, g = P.gear;
   const s = { hp: C.hp + C.ghp * L, mp: C.mp + C.gmp * L, atk: C.atk + C.gatk * L, def: C.def + C.gdef * L, crit: 0, dodge: 0, hpreg: 0, mpreg: 0, res: 0 };
   for (const id of Object.values(P.eq || {})) { const it = id && ITEMS[id]; if (it && it.st) for (const k in it.st) s[k] = (s[k] || 0) + it.st[k]; }
   s.dr = 0; s.spd = 0; let hpPct = 0, mpPct = 0;
-  for (const sk of C.skills) { const r = (P.sk && P.sk[sk.id]) || 0; if (!sk.pas || !r) continue; const m = 0.6 + 0.4 * r; for (const k in sk.pas) { const v = Math.round(sk.pas[k] * m); if (k === 'hpPct') hpPct += v; else if (k === 'mpPct') mpPct += v; else s[k] = (s[k] || 0) + v; } }
-  s.hp *= 1 + hpPct / 100; s.mp *= 1 + mpPct / 100;
-  if (P.race === '精灵') { s.mp += 150; s.hp -= 50; } else { s.def += 20; }
-  for (const b of Game.player?.buffs || []) { if (b.buff.atk) s.atk *= 1 + b.buff.atk; if (b.buff.def) s.def *= 1 + b.buff.def; if (b.buff.spd) s.spd += b.buff.spd; if (b.buff.crit) s.crit += b.buff.crit; if (b.buff.dr) s.dr += b.buff.dr; if (b.buff.hpP) s.hp *= 1 + b.buff.hpP; if (b.buff.dodge) s.dodge += b.buff.dodge; if (b.buff.res) s.res += b.buff.res; }   // hpP/dodge/res: evcil hayvan haleleri
+  // edilgen beceriler (orijinal kademe sabitleri) ve ırk becerileri; yüzdeler ve dönüşümler en sonda
+  const X = {}, pasOf = sk => { const r = skRank(sk); if (!r || !sk.pas) return; const o = sk.pas(k => skC(sk, k), s, P.lv); for (const k in o) X[k] = (X[k] || 0) + o[k]; };
+  for (const sk of C.skills) pasOf(sk); for (const sk of RACE_SK[P.race] || []) pasOf(sk);
+  for (const k of ['atk', 'def', 'res', 'hp', 'mp', 'dodge', 'crit', 'hpreg', 'mpreg', 'dr']) if (X[k]) s[k] += X[k];
+  s.hp *= 1 + (X.hpPct || 0) / 100; s.mp *= 1 + (X.mpPct || 0) / 100;
+  for (const k of ['acc', 'healUp', 'ccDmg', 'despair', 'cheatDeath', 'seal', 'veil', 'goldUp', 'lifeEl']) s[k] = X[k] || 0;
+  // İlahi Işık Dökümü: can/mana sınırının yüzdesi (sınırlar hesaplandıktan sonra)
+  const pp4 = C.skills.find(k => k.sn === 90320); if (pp4 && skRank(pp4)) { const v = R100(skC(pp4, 'add_hp_resume_rate')); s.hpreg += s.hp * v; s.mpreg += s.mp * v; }
+  for (const b of Game.player?.buffs || []) { const B = b.buff; if (B.atk) s.atk *= 1 + B.atk; if (B.def) s.def *= 1 + B.def; if (B.def && B.def < 0) s.res *= 1 + B.def; if (B.spd) s.spd += B.spd; if (B.crit) s.crit += B.crit; if (B.dr) s.dr += B.dr; if (B.hpP) s.hp *= 1 + B.hpP; if (B.dodge) s.dodge += B.dodge; if (B.res) s.res += B.res;   // hpP/dodge/res: evcil hayvan haleleri de
+    if (B.atkAdd) s.atk += B.atkAdd; if (B.defAdd) { s.def += B.defAdd; s.res += B.defAdd; } if (B.mpAdd) s.mp += B.mpAdd; }
+  // dönüşümler: Kan Ruhu (savunma → saldırı), Çelik İrade (saldırı → savunma/direnç), Büyü Yankısı (mana → büyü saldırısı)
+  if (X.defToAtk) s.atk += s.def / 100 * X.defToAtk;
+  if (X.atkToDef) { s.def += s.atk / 100 * X.atkToDef; s.res += s.atk / 100 * X.atkToDef; }
+  if (X.mpToAtk) s.atk += s.mp / 500 * X.mpToAtk;
   for (const k in s) s[k] = Math.round(s[k]);
   return s;
 }
@@ -332,6 +465,7 @@ async function loadScene(sid, arrive) {
   for (const [id, nm] of sc.ents) { const info = D.cit[id] || D.mon[id]; if (info) { names.add(info[1]); if (info[2]) names.add(info[2]); } }
   for (const n of ['特效-血爆死亡', '特效-刀光', 'LEVELUP', '特效-火球', '特效-火爆炸', '特效-冰球', '特效-冰块碎裂', '特效-黑暗火球', '特效-蓝火球', '特效-大喷血', '特效-治疗buff', 'NPC-新手引导－1', 'NPC-新手引导－2']) names.add(n);
   for (const s of CLS[Game.P.cls].skills) for (const k of ['fx', 'proj', 'hit', 'self', 'fx2']) if (s[k]) names.add(s[k]);
+  for (const n of ['特效-冻结', '特效-抗性减少', '特效-漆黑之幕', '特效-神圣之盾']) names.add(n);   // beceri tetikleyicilerinin efektleri (dondurma, gözdağı, perde, kutsanmış beden)
   for (const k of ['bolt', 'boltHit']) if (CLS[Game.P.cls][k]) names.add(CLS[Game.P.cls][k]);
   await Assets.preload([...names]);
   Game.player && (Game.player = null);
@@ -416,21 +550,47 @@ async function gotoScene(sid, fromName, fixed, fromSid) {
 
 // ---------------- Savaş ----------------
 function dmgCalc(atk, def, mult, critB = 0, add = 0) { const base = (atk * mult + add) * rnd(0.92, 1.08); const d = Math.max(1, Math.round(base * 1000 / (1000 + def * 3))); const crit = Math.random() < 0.08 + critB / 100; return { d: crit ? Math.round(d * 1.8) : d, crit }; }
+// o: { crit, add, slow, pure (savunma tanımaz), bleed, burn, freeze, stun (olasılık %), critDmg, onCrit, tick (sürekli hasar: tetikleyiciler yok) }
 function hitMob(m, mult, o = {}) {
-  if (!m || m.dead) return;
-  const s = stats(); const r = dmgCalc(s.atk, m.def * (m.weakT > 0 ? 0.4 : 1), mult * (m.weakT > 0 ? 1.15 : 1), s.crit + (o.crit || 0), o.add || 0);
-  m.hp -= r.d; m.aggro = true; m.state = 'hurt'; m.animT = 0; m.stateT = 0.3; if (!(m.tauntT > 0)) m.foe = Game.player;
+  if (!m || m.dead) return 0;
+  const s = stats(), p = Game.player, B = {}; for (const b of p.buffs) for (const k in b.buff) if (typeof b.buff[k] === 'number') B[k] = (B[k] || 0) + b.buff[k];
+  // İlahi Gözdağı: savunma, büyü saldırısının yüzdesi kadar düşer; eski genel zayıflatma (evcil) savunmayı %60 düşürür
+  const def = m.weakT > 0 ? (m.weakDef ? Math.max(0, m.def - m.weakDef) : m.def * 0.4) : m.def;
+  let critB = s.crit + (o.crit || 0);
+  if (!o.tick && B.nextCrit) { if (Math.random() * 100 < B.nextCrit) critB = 1000; for (const b of p.buffs) delete b.buff.nextCrit; }   // Hız Patlaması: sonraki saldırı
+  const K0 = CLS[Game.P.cls].dmgK || 1;   // büyü gücü: büyücü/rahip vuruş çarpanı (bizim denge; orijinal hasar formülü sunucudaydı)
+  const r = dmgCalc(s.atk, o.pure ? 0 : def, mult * K0 * (m.weakT > 0 && !m.weakDef ? 1.15 : 1), critB, (o.add || 0) * K0);
+  let d = r.d;
+  if (r.crit && o.critDmg) d = Math.round(d * (1 + o.critDmg / 100));
+  if (s.ccDmg && (m.slowT > 0 || m.rootT > 0 || m.burn)) d = Math.round(d * (1 + s.ccDmg / 100));   // Element Ustalığı
+  if (B.dmgUp) d = Math.round(d * (1 + B.dmgUp / 100));   // Büyü Darbesi katları
+  if (B.dmgOut) d = Math.round(d * Math.min(1, B.dmgOut));   // Element Bağışı sırasında hasar düşer
+  d = Math.max(1, d);
+  m.hp -= d; m.aggro = true; m.state = 'hurt'; m.animT = 0; m.stateT = 0.3; if (!(m.tauntT > 0)) m.foe = Game.player;
   if (o.slow) m.slowT = o.slow;
-  UI.float(m, (r.crit ? '!' : '') + r.d, r.crit ? '#ffd040' : '#fff', r.crit ? 1.3 : 1);
+  UI.float(m, (r.crit ? '!' : '') + d, r.crit ? '#ffd040' : o.tick ? '#d8b0ff' : '#fff', r.crit ? 1.3 : 1);
+  if (!o.tick) {
+    if (B.leech) healPlayer(d * B.leech);   // Kan Damgası
+    if (o.bleed) { m.bleed = { n: Math.min(5, ((m.bleed && m.bleed.n) || 0) + 1), t: 10, tick: 2 }; }   // Testere Bıçak: en çok 5 kat
+    if (o.burn) m.burn = { t: 6, tick: 2 };   // Alev Darbesi: yanma (yığılmaz)
+    if (o.freeze && Math.random() * 100 < o.freeze) { m.rootT = 2; Game.fx.push(new Fx('特效-冻结', m.x, m.y)); }
+    const now = Game.time;
+    if (o.stun && Math.random() * 100 < o.stun && !(p.stunCd > now)) { m.stunT = 3; p.stunCd = now + 15; UI.float(m, T_('Sersem', 'Stun'), '#ffe070'); }
+    if (s.seal && Math.random() * 100 < s.seal && !(p.sealCd > now)) { m.sealT = 3; p.sealCd = now + 10; UI.float(m, T_('Mühür', 'Sealed'), '#c080ff'); }
+    if (s.despair && Math.random() * 100 < s.despair && !(p.despCd > now)) { m.despairT = 6; p.despCd = now + 15; }
+    if (r.crit && o.onCrit) o.onCrit(m);
+  }
   if (m.hp <= 0) killMob(m);
   if (Game.target === m) UI.target(m);
+  return d;
 }
 function killMob(m) {
   m.dead = true; m.deadT = 0; m.state = 'die'; m.respawnT = m.d.rank === 2 ? 90 : m.d.rank ? 40 : 15;
   if (Game.target === m) setTarget(null);
   const P = Game.P, diff = m.d.lv - P.lv, xp = Math.max(1, Math.round(mobXp(m.d.lv, m.d.rank || 0) * clamp(1 + diff * 0.1, 0.2, 1.5)));
   gainXp(xp); UI.float(m, '+' + xp + ' TP', '#9fe060');
-  const gold = irnd(m.d.lv, m.d.lv * 3) + (m.d.rank || 0) * 20; P.gold += gold; SFX.play('kill', 0.7); later(0.35, () => SFX.play('coin', 0.5)); UI.log(`${gold} altın alındı`, 'loot');
+  const st = stats(), gold = Math.round((irnd(m.d.lv, m.d.lv * 3) + (m.d.rank || 0) * 20) * (1 + (st.goldUp || 0) / 100)); P.gold += gold;
+  if (st.lifeEl && ITEMS['30127'] && Math.random() * 100 < st.lifeEl) addItem('30127', 1);   // gece elfi: Yaşam Özütü SFX.play('kill', 0.7); later(0.35, () => SFX.play('coin', 0.5)); UI.log(`${gold} altın alındı`, 'loot');
   if (Math.random() < 0.1) addItem(P.lv > 10 ? 'hp2' : 'hp1', 1);
   if (Math.random() < 0.06) addItem(P.lv > 10 ? 'mp2' : 'mp1', 1);
   if (m.d.rank && Math.random() < 0.6) { const g = randomGear(Math.max(1, m.d.lv + 2)); if (g) { addItem(g, 1, true); UI.log(`Ganimet: ${ITEMS[g].name}!`, 'q'); UI.toast(`Ganimet: ${ITEMS[g].name}`); } }
@@ -443,15 +603,27 @@ function hurtPlayer(m) {
   if (Game.god) return;   // GM: ölümsüzlük
   const p = Game.player; if (p.dead) return;
   const s = stats(); if (Math.random() < s.dodge / 100) { UI.float(p, 'Iska', '#cfcfcf'); return; }
-  const r = dmgCalc(m.atk || m.d.atk, s.def, 1); r.d = Math.max(1, Math.round(r.d * (1 - Math.min(60, s.dr) / 100)));
+  const r = dmgCalc(m.atk || m.d.atk, s.def, 1); r.d = Math.max(1, Math.round(r.d * (1 - Math.min(80, s.dr) / 100)));
+  const B = {}; for (const b of p.buffs) for (const k in b.buff) if (typeof b.buff[k] === 'number') B[k] = (B[k] || 0) + b.buff[k];
+  const now = Game.time;
+  // Büyücü Bedeni (90611): Karanlık Ahit sırasında %10 hasarı savuştur, hasar kadar mana
+  if (B.mp2hp && skRankSn(90611) && Math.random() < 0.1) { p.mp = Math.min(s.mp, p.mp + r.d); UI.float(p, T_('Savuşturuldu', 'Negated'), '#9fd0ff'); return; }
+  // Zifiri Perde (90612): Karanlık Ahit dışında, 15 saniyede bir, savunma ve dirençler 6 saniye artar
+  if (s.veil && !B.mp2hp && !(p.veilCd > now) && Math.random() * 100 < s.veil) { p.veilCd = now + 15; p.buffs.push({ id: 'veil', buff: { def: 0.5, res: Math.round(s.res * 0.5) }, t: 6 }); Game.fx.push(new Fx('特效-漆黑之幕', p.x, p.y, { follow: p })); }
+  // Büyü Kalkanı (90129): hasarın bir kısmı manadan düşer
+  if (B.manaShield) { const per = B.mpPerDmg || 1, want = Math.round(r.d * Math.min(1, B.manaShield)), can = Math.min(want, Math.floor(p.mp / per)); p.mp -= can * per; r.d -= can; }
+  // Karşı Saldırı Fırtınası (90598): fiziksel saldırının %10'u ile alınan hasardan küçük olanı yansır
+  if (B.reflect && r.d > 0 && !m.dead) { const back = Math.round(Math.min(s.atk * B.reflect, r.d)); if (back > 0) hitMob(m, 0, { add: back, pure: 1, tick: 1 }); }
+  if (r.d <= 0) return;
   p.hp -= r.d; p.combatT = 5; UI.float(p, '-' + r.d, '#ff5040'); UI.hurt();
+  // Kutsanmış Beden (90603): ölümcül darbeyi olasılıkla savuştur, biraz can
+  if (p.hp <= 0 && s.cheatDeath && Math.random() * 100 < s.cheatDeath) { p.hp = Math.round(s.hp * 0.2); Game.fx.push(new Fx('特效-神圣之盾', p.x, p.y, { follow: p })); UI.float(p, T_('Kutsandı', 'Blessed'), '#ffe070'); return; }
   if (p.hp <= 0) { p.hp = 0; p.dead = true; p.deadT = 0; p.state = 'dead'; SFX.play('kill', 0.5); UI.death(); setTarget(null); }
 }
 function gainXp(n) {
   const P = Game.P; P.xp += n;
   while (P.xp >= xpNeed(P.lv)) { P.xp -= xpNeed(P.lv); P.lv++; const s = stats(); Game.player.hp = s.hp; Game.player.mp = s.mp; Game.fx.push(new Fx('LEVELUP', Game.player.x, Game.player.y)); UI.levelUp(P.lv); SFX.play('levelup');
     P.sp = (P.sp || 0) + 1; UI.log('Beceri puanı kazandın! Beceriler ekranından harca.', 'q');
-    for (const sk of CLS[P.cls].skills) if (sk.lv === P.lv && !skLock(sk)) UI.log(`Yeni beceri: ${sk.name}`, 'q');
     autoQuests();
     const nq = questsUnlockedAt(P.lv); for (const q of nq) UI.log(`${tx('Yeni görev')}: ${q.title} · ${trName(q.giver)}`, 'q'); if (nq.length) UI.toast(`${nq.length} ${tx('yeni görev açıldı')}`); }
   UI.refresh();
@@ -468,39 +640,92 @@ function cycleTarget() {
 }
 function useSkill(i) {
   const P = Game.P, p = Game.player, C = CLS[P.cls], sk = C.skills[i]; if (!sk || sk.pas || p.dead) return;
-  if (!skRank(sk)) { const L = skLock(sk); UI.log(L === 'adv' ? `${sk.name}: ${skLockMsg(sk)}` : L ? `${sk.name} ${sk.lv}. seviyede açılır.` : 'Bu beceri henüz öğrenilmedi. Beceriler ekranından puan ver.'); return; }
-  const SM = skMult(sk);
+  if (!skRank(sk)) { const L = skLock(sk); UI.log(L ? `${sk.name}: ${L[1]}` : 'Bu beceri henüz öğrenilmedi. Beceriler ekranından puan ver.'); return; }
+  const K = k => skC(sk, k), s = stats();
   if ((p.cds[sk.id] || 0) > 0) return;
-  if (p.mp < sk.mp) { UI.log('Mana yetersiz!'); return; }
+  // Gölge Hükümdarı: şifa ve destek becerileri çalışmaz (orijinal)
+  if ((sk.heal || (sk.buff && sk.sn !== 90613)) && p.buffs.some(b => b.buff.noHeal)) { UI.log(T_('Gölge Hükümdarı etkinken şifa ve destek becerileri çalışmaz.', 'Healing and support skills do not work during Shadow Sovereign.')); return; }
+  // aç/kapa beceri (Kutsal Akış): etkinse kapanır
+  if (sk.toggle && p.buffs.some(b => b.id === sk.id)) { p.buffs = p.buffs.filter(b => b.id !== sk.id); UI.log(`${sk.name}: ${T_('kapandı', 'off')}`); p.cds[sk.id] = sk.cd; return; }
+  const arc = p.buffs.find(b => b.id === 'arcane');
+  const mpCost = sk.mpPct ? Math.max(1, Math.round(p.mp * sk.mpPct(K) * (1 + (arc ? arc.n : 0)))) : sk.mp;   // Büyü Darbesi: mananın yüzdesi, her katta artar
+  if (p.mp < mpCost) { UI.log('Mana yetersiz!'); return; }
   let t = Game.target && !Game.target.dead && Game.target.kind === 'mob' ? Game.target : null;
-  const needT = sk.mult && !sk.aoe;
+  const needT = sk.f && !sk.aoe;
   if (needT && !t) { t = nearestMob(8); if (t) setTarget(t, true); } else if (t) Game.engage = true;   // beceri kullanınca o hedefle dövüş sürer
   if (needT && !t) { UI.log('Hedef yok.'); return; }
   if (t && sk.range && Math.hypot(t.x - p.x, t.y - p.y) > sk.range + 0.3) { p.pending = i; p.path = null; return; }
-  p.pending = null; p.mp -= sk.mp; p.cds[sk.id] = sk.cd; p.combatT = 5; if (i === 0) p.atkT = Math.max(p.atkT, 0.9);
+  p.pending = null; p.mp -= mpCost; p.cds[sk.id] = sk.cd; p.combatT = 5; if (i === 0) p.atkT = Math.max(p.atkT, 0.9);
   if (t) p.dir = dirOf(t.x - p.x, t.y - p.y);
-  p.state = C.melee && sk.mult && (sk.range || 9) < 3 ? 'attack' : 'cast'; p.animT = 0; p.stateT = 0.5;
+  p.state = C.melee && sk.f && (sk.range || 9) < 3 ? 'attack' : 'cast'; p.animT = 0; p.stateT = 0.5;
   SFX.play(sk.snd);
+  const F = sk.f ? sk.f(K, s, p, t) || {} : {};
   const mobsNear = (x, y, r) => Game.ents.filter(m => m.kind === 'mob' && !m.dead && Math.hypot(m.x - x, m.y - y) <= r);
-  const MUL = (sk.mult || 0) + (sk.pct ? skT(sk, 'pct') / 1000 : 0);   // pct tablosu binde: saldırının yüzdesi
-  const o = { slow: sk.slow, crit: sk.crit, add: skT(sk, 'add') };
+  const o = { crit: F.crit || 0, add: F.add || 0, slow: F.slow || sk.slow, pure: F.pure, bleed: F.bleed, burn: F.burn, freeze: F.freeze, stun: F.stun, critDmg: F.critDmg, onCrit: F.onCrit };
+  const MUL = F.mult || 0;
+  // vuruşun ardından: Çürüme bırakma, hayal totemi, Kan Damgası'nı yenileme, Büyü Darbesi katı; başka bir saldırı becerisi Büyü Darbesi etkisini tüketir
+  const after = tg => {
+    if (F.corrode && tg && !tg.dead) applyCorrosion(tg);
+    if (F.phantom && tg) Game.phantom = { t: F.life, tick: 0, mult: F.phantom, tg };
+    if (F.refresh) { const b = p.buffs.find(x => x.id === F.refresh); if (b) b.t = Math.max(b.t, typeof SKBYSN[90106].dur === 'number' ? SKBYSN[90106].dur : 10); }
+    if (F.arcane) { const n = Math.min(3, (arc ? arc.n : 0) + 1); p.buffs = p.buffs.filter(b => b.id !== 'arcane'); p.buffs.push({ id: 'arcane', n, buff: { dmgUp: n * K('count_up_damage_rate') }, t: 3 }); }
+    else if (arc && sk.f && (MUL || o.add)) p.buffs = p.buffs.filter(b => b !== arc);
+  };
   const land = () => {
     if (sk.snd2) SFX.play(sk.snd2);
-    if (sk.splash) { const n = sk.hitN || 1; for (let k = 0; k < n; k++) later(k * 0.06, () => { const r = k ? Math.random() * 1.3 : 0, a = Math.random() * 6.283; Game.fx.push(new Fx(sk.hit, t.x + Math.cos(a) * r, t.y + Math.sin(a) * r)); }); for (const m of mobsNear(t.x, t.y, sk.splash)) hitMob(m, MUL * SM, o); }
-    else { hitMob(t, MUL * SM, o); const f = sk.hit || sk.fx; if (f) Game.fx.push(new Fx(f, t.x, t.y)); }
+    if (sk.splash) { const n = sk.hitN || 1; for (let k = 0; k < n; k++) later(k * 0.06, () => { const r = k ? Math.random() * 1.3 : 0, a = Math.random() * 6.283; Game.fx.push(new Fx(sk.hit, t.x + Math.cos(a) * r, t.y + Math.sin(a) * r)); }); for (const m of mobsNear(t.x, t.y, sk.splash)) hitMob(m, MUL, o); }
+    else if (MUL || o.add) { hitMob(t, MUL, o); const f = sk.hit || sk.fx; if (f) Game.fx.push(new Fx(f, t.x, t.y)); }
+    else { const f = sk.hit || sk.fx; if (f) Game.fx.push(new Fx(f, t.x, t.y)); }
     if (sk.fx2) Game.fx.push(new Fx(sk.fx2, t.x, t.y));
-    if (sk.hits === 2) later(0.28, () => { if (!t.dead) { hitMob(t, MUL * SM, o); SFX.play(sk.snd); } });
-    if (sk.dot && !t.dead) t.dot = { n: sk.dot.n, t: 2, mult: 0.1, add: skT(sk, 'dotT') };
+    if (sk.hits === 2) later(0.28, () => { if (!t.dead) { hitMob(t, F.mult2 != null ? F.mult2 : MUL, Object.assign({}, o, { add: F.mult2 != null ? 0 : o.add })); SFX.play(sk.snd); } });
+    after(t);
   };
   if (sk.self) Game.fx.push(new Fx(sk.self, p.x, p.y, { dir: p.dir }));
   later(0.25, () => {
-    if (sk.proj) shoot(sk.proj, p, t, land);
-    else if (sk.aoe) { const near = mobsNear(p.x, p.y, sk.aoe); if (!sk.projN || !near.length) Game.fx.push(new Fx(sk.fx, p.x, p.y)); if (sk.snd2 && !sk.projN) SFX.play(sk.snd2); for (const m of near) { hitMob(m, MUL * SM, o); if (sk.weak) m.weakT = sk.weak; if (sk.projN) { for (let k = 0; k < sk.projN; k++) later(k * 0.12, () => shoot(sk.fx, p, m, () => { if (sk.hit) Game.fx.push(new Fx(sk.hit, m.x, m.y)); if (k === 0 && sk.snd2) SFX.play(sk.snd2); }, true)); } else if (sk.hit) Game.fx.push(new Fx(sk.hit, m.x, m.y)); } }
-    else if (sk.mult) land();
-    else if (sk.heal || sk.healT) { const s = stats(); const h = Math.round(sk.healT ? skT(sk, 'healT') + s.atk : (s.hp * sk.heal + s.atk) * SM); p.hp = Math.min(s.hp, p.hp + h); UI.float(p, '+' + h, '#7bff8a'); Game.fx.push(new Fx(sk.fx, p.x, p.y, { follow: p })); }
-    else if (sk.buff) { p.buffs = p.buffs.filter(b => b.id !== sk.id); p.buffs.push({ id: sk.id, buff: Object.assign({}, sk.buff, sk.critT ? { crit: skT(sk, 'critT') / 10 } : null, sk.hotT ? { hotT: skT(sk, 'hotT') } : null), t: sk.dur }); Game.fx.push(new Fx(sk.fx, p.x, p.y, { follow: p })); UI.log(`${sk.name} etkin.`); }
+    if (sk.proj && t) shoot(sk.proj, p, t, land);
+    else if (sk.aoe) {
+      const near = mobsNear(p.x, p.y, sk.aoe); if (!sk.projN || !near.length) Game.fx.push(new Fx(sk.fx, p.x, p.y)); if (sk.snd2 && !sk.projN) SFX.play(sk.snd2);
+      let dealt = 0;
+      for (const m of near) {
+        if (MUL || o.add) dealt += hitMob(m, MUL, o);
+        if (F.weakDef) { m.weakT = F.weakT; m.weakDef = F.weakDef; Game.fx.push(new Fx('特效-抗性减少', m.x, m.y)); }
+        if (sk.projN) { for (let k = 0; k < sk.projN; k++) later(k * 0.12, () => { if (!m.dead) Game.fx.push(new Fx(sk.hit, m.x + rnd(-0.4, 0.4), m.y + rnd(-0.4, 0.4))); }); }
+      }
+      if (F.novaHeal && dealt) healPlayer(dealt);   // Kutsal Nova: verilen hasar kadar can
+      after(near[0]);
+    }
+    else if (sk.f) land();
+    else if (sk.heal) { healPlayer(Math.round(sk.heal(K, s)), sk.fx); }
+    else if (sk.buff) {
+      const dur = typeof sk.dur === 'function' ? sk.dur(K) : sk.dur;
+      p.buffs = p.buffs.filter(b => b.id !== sk.id); p.buffs.push({ id: sk.id, buff: sk.buff(K, s), t: dur });
+      Game.fx.push(new Fx(sk.fx, p.x, p.y, { follow: p })); UI.log(`${sk.name} etkin.`); clampVitals();
+    }
   });
   UI.refresh();
+}
+// şifa: Kana Hasret ile artar (alınan şifa); Gölge Hükümdarı sırasında şifa yok
+function healPlayer(h, fx) {
+  const p = Game.player, s = stats(); if (p.buffs.some(b => b.buff.noHeal)) return 0;
+  h = Math.round(h * (1 + (s.healUp || 0) / 100)); p.hp = Math.min(s.hp, p.hp + h); UI.float(p, '+' + h, '#7bff8a'); if (fx) Game.fx.push(new Fx(fx, p.x, p.y, { follow: p })); return h;
+}
+// Çürüme (90314): 10 saniye, 2 saniyede bir; Can Sömürüsü (90316) payı ve can emme
+function applyCorrosion(m) {
+  const er = skRankSn(90316) ? R100(skCSn(90316, 'add_erosion_damage_rate')) : 0;
+  m.dot = { n: 5, t: 2, mult: 0.1 * (1 + er), add: skCSn(90314, 'dur_dmg'), corr: 1, suck: skRankSn(90316) ? R100(skCSn(90316, 'suck_rate')) : 0 };
+}
+// Ağır Yarık (90116): Ölüm Kırımı (90120) can kaybıyla güçlendirir; kanamayı yutup kat başına ek hasar
+function tearHit(K, s, p, t) {
+  let mult = R100(K('phy_attack_factor'));
+  if (skRankSn(90120)) mult *= 1 + R100(skCSn(90120, 'add_tisi_damage_rate')) * Math.floor((1 - p.hp / s.hp) * 10);
+  if (t && t.bleed) { mult += 0.25 * t.bleed.n; if (!(skRankSn(90120) && Math.random() * 100 < skCSn(90120, 'not_del_bloodshed_buff_rate'))) t.bleed = null; }
+  return { mult, add: K('add_phy_attack_value') };
+}
+// Gölge Yakışı (90318): İlahi Ceza (90323) çürümüş hedefe kritik şansı ve hasarı artırır, kritik çürümeyi yutar
+function burnHit(K, t) {
+  const o = { mult: 1, add: K('add_dark') };
+  if (t && t.dot && t.dot.corr && skRankSn(90323)) Object.assign(o, { crit: skCSn(90323, 'fatal_rate'), critDmg: skCSn(90323, 'fatal_damage'), onCrit: m => { if (m.dot && m.dot.corr) m.dot = null; } });
+  return o;
 }
 function shoot(name, from, to, cb, vis) {
   const f = new Fx(name, from.x, from.y, { z: 30 }); f.proj = { to, cb, sp: 9, vis }; f.loop = 1; Game.fx.push(f);
@@ -651,7 +876,7 @@ function readyQuest(q) { Game.P.quests[q.id].ready = true; SFX.play('message'); 
 function completeQuest(q) {
   if (q.type === 'deliver') { if (giveCount(q) < q.count) return UI.toast(`${q.item}: ${giveCount(q)}/${q.count}`); takeGive(q); }
   const P = Game.P, r = q.reward; delete P.quests[q.id]; P.done[q.id] = true; SFX.play('finish_task');
-  if (r.gold) P.gold += r.gold; for (const [id, n] of rewardItems(q)) addItem(id, n);
+  if (r.gold) P.gold += Math.round(r.gold * (1 + (stats().goldUp || 0) / 100)); for (const [id, n] of rewardItems(q)) addItem(id, n);
   gainXp(r.xp || 0); UI.log(`Ödül: ${r.xp} TP${r.gold ? ', ' + r.gold + ' altın' : ''}`, 'q');
   if (q.adv) classUp(q.adv);
   UI.refresh(); save();
@@ -660,8 +885,7 @@ function completeQuest(q) {
 function classUp(n) {
   const P = Game.P; if ((P.adv || 0) >= n) return; P.adv = n;
   Game.fx.push(new Fx('LEVELUP', Game.player.x, Game.player.y)); SFX.play('levelup');
-  UI.toast(`${tx('Sınıf yükseltildi')}: ${clsName()}`); UI.log(`${tx('Sınıf yükseltildi')}: ${clsName()} · ${tx('sınıf beceri ağacı açıldı')}`, 'q');
-  for (const sk of CLS[P.cls].skills) if (sk.adv === n && !skLock(sk)) UI.log(`Yeni beceri: ${sk.name}`, 'q');
+  UI.toast(`${tx('Sınıf yükseltildi')}: ${clsName()}`); UI.log(`${tx('Sınıf yükseltildi')}: ${clsName()} · ${tx(n >= 2 ? 'uzmanlık ağaçları açıldı' : 'sınıf beceri ağacı açıldı')}`, 'q');
   UI.refresh(); save();
 }
 // seviyesi gelince kendiliğinden alınan görevler (orijinalde verensiz "gönderilen" görev: 80344 Acemilikten Çıkış)
@@ -670,7 +894,11 @@ function autoQuests() { for (const q of QUESTS) if (q.auto && questState(q) === 
 const ClassGM = {
   chain() { const P = Game.P; return QUESTS.filter(q => (q.cls === P.cls && (!q.race || q.race === P.race) && q.lvMin >= 40) || q.id === 80344).sort((a, b) => (a.id === 80344 ? -1 : b.id === 80344 ? 1 : 0) || chainDepth(a) - chainDepth(b)); },
   up() { classUp(1); },
-  reset() { const P = Game.P; P.adv = 0; for (const k of CLS[P.cls].skills) if (k.adv && P.sk[k.id]) { P.sp = (P.sp || 0) + P.sk[k.id]; delete P.sk[k.id]; } for (const q of this.chain()) { delete P.quests[q.id]; delete P.done[q.id]; } UI.refresh(); save(); },
+  up2() { classUp(1); classUp(2); },   // 80: ikinci sınıf yükseltmesi (uzmanlık ağaçları; 80 görevleri içerikle gelecek)
+  reset() { const P = Game.P; P.adv = 0; fixSkills(P); for (const q of this.chain()) { delete P.quests[q.id]; delete P.done[q.id]; } UI.refresh(); save(); },
+  resetPts() { skillReset(true); },
+  // ağaçları doldur: seviyeyi en az 80 yap, iki yükseltme, puanları oyuncu gibi dağıt; spec: 0 = ilk uzmanlık, 1 = ikinci
+  fill(spec = 0) { const P = Game.P; if (P.lv < 80) gmLevel(80); classUp(1); classUp(2); P.sk = {}; P.sp = 0; skillAutoSpend(P.lv + 1, spec); UI.refresh(); save(); },
   start() { const P = Game.P; if (P.lv < 40) gmLevel(40); autoQuests(); UI.refresh(); },
   ready(id) { const q = QBY[id], P = Game.P; if (!q || P.done[id]) return; for (let r = q.req; r && !P.done[r]; r = QBY[r] && QBY[r].req) { P.done[r] = true; delete P.quests[r]; } if (!P.quests[id]) acceptQuest(q); readyQuest(q); save(); },
   done(id) { const q = QBY[id]; if (!q || Game.P.done[id]) return; this.ready(id); if (q.type === 'deliver') return; completeQuest(q); },
@@ -785,7 +1013,17 @@ function update(dt) {
   if (!p.dead) {
     const regen = Game.scene.name === '观林镇' ? 0.03 : p.combatT > 0 ? 0.003 : 0.012;
     p.hp = Math.min(s.hp, p.hp + (s.hp * regen + s.hpreg * 0.1) * dt); p.mp = Math.min(s.mp, p.mp + (s.mp * regen * 1.3 + s.mpreg * 0.1) * dt);
-    for (const b of p.buffs) { if (b.buff.hot) p.hp = Math.min(s.hp, p.hp + s.hp * b.buff.hot * dt); if (b.buff.hotT) p.hp = Math.min(s.hp, p.hp + b.buff.hotT * dt); if (b.buff.motT) p.mp = Math.min(s.mp, p.mp + b.buff.motT * dt); }
+    const noHeal = p.buffs.some(b => b.buff.noHeal), hu = 1 + (s.healUp || 0) / 100;
+    for (const b of p.buffs) { const B = b.buff;
+      if (B.hot && !noHeal) p.hp = Math.min(s.hp, p.hp + s.hp * B.hot * hu * dt); if (B.hotT && !noHeal) p.hp = Math.min(s.hp, p.hp + B.hotT * hu * dt); if (B.motT) p.mp = Math.min(s.mp, p.mp + B.motT * dt);
+      if (B.mpTick) { const v = s.mp * B.mpTick * dt; p.mp = Math.min(s.mp, p.mp + v); if (B.hpTick && !noHeal) p.hp = Math.min(s.hp, p.hp + v); }   // Element Bağışı (+ Ruh Uyumu)
+      if (B.mp2hp) { const v = Math.min(p.mp, p.mp * B.mp2hp * dt); p.mp -= v; if (!noHeal) p.hp = Math.min(s.hp, p.hp + v * hu); }   // Karanlık Ahit
+      if (B.drain && (b.acc = (b.acc || 0) + dt) >= 1) { b.acc -= 1; for (const m of Game.ents) if (m.kind === 'mob' && !m.dead && Math.hypot(m.x - p.x, m.y - p.y) <= 3) hitMob(m, 0, { add: m.maxHp * B.drain, pure: 1, tick: 1 }); }   // Gölge Hükümdarı
+    }
+    const ph = Game.phantom;   // Büyü Hayali: saniyede bir, savunma tanımayan hasar
+    if (ph) { ph.t -= dt; ph.tick -= dt; const tg = Game.target && !Game.target.dead && Game.target.kind === 'mob' ? Game.target : ph.tg && !ph.tg.dead ? ph.tg : null;
+      if (ph.tick <= 0 && tg) { ph.tick = 1; shoot('特效-蓝火球', p, tg, () => hitMob(tg, ph.mult, { pure: 1, tick: 1 })); }
+      if (ph.t <= 0) Game.phantom = null; }
     const J = Input.joy();
     let moving = false;
     if (J) {
@@ -825,8 +1063,12 @@ function update(dt) {
     if (e.kind !== 'mob') continue;
     e.t += dt * TICK; e.animT = (e.animT || 0) + dt * TICK;
     if (e.dead) { e.deadT += dt; if ((e.respawnT -= dt) <= 0) { Object.assign(e, { dead: false, hp: e.maxHp, x: e.home.x, y: e.home.y, aggro: false, state: 'idle' }); } continue; }
-    e.atkT -= dt; e.slowT -= dt; if (e.weakT > 0) e.weakT -= dt;
-    if (e.dot && (e.dot.t -= dt) <= 0) { e.dot.t = 2; const D = e.dot; if (--D.n <= 0) e.dot = null; hitMob(e, D.mult, { add: D.add }); if (e.dead) continue; } if (e.stateT > 0) { e.stateT -= dt; if (e.stateT <= 0) e.state = 'idle'; }
+    e.atkT -= dt; e.slowT -= dt; if (e.weakT > 0) e.weakT -= dt; else if (e.weakDef) e.weakDef = 0;
+    if (e.bleed && (e.bleed.tick -= dt) <= 0) { e.bleed.tick = 2; e.bleed.t -= 2; hitMob(e, 0.08 * e.bleed.n, { tick: 1 }); if (e.bleed && e.bleed.t <= 0) e.bleed = null; if (e.dead) continue; }   // Testere Bıçak kanaması
+    if (e.burn && (e.burn.tick -= dt) <= 0) { e.burn.tick = 2; e.burn.t -= 2; hitMob(e, 0.15, { tick: 1 }); if (e.burn && e.burn.t <= 0) e.burn = null; if (e.dead) continue; }   // Alev Darbesi yanması
+    if (e.rootT > 0) e.rootT -= dt; if (e.sealT > 0) e.sealT -= dt; if (e.despairT > 0) e.despairT -= dt;
+    if (e.stunT > 0) { e.stunT -= dt; continue; }   // Kutsal Ceza: sersem (kıpırdamaz, saldırmaz)
+    if (e.dot && (e.dot.t -= dt) <= 0) { e.dot.t = 2; const D = e.dot; if (--D.n <= 0) e.dot = null; const dd = hitMob(e, D.mult, { add: D.add, tick: 1 }); if (D.suck && dd) healPlayer(dd * D.suck); if (e.dead) continue; } if (e.stateT > 0) { e.stateT -= dt; if (e.stateT <= 0) e.state = 'idle'; }
     const dp = Math.hypot(p.x - e.x, p.y - e.y), dh = Math.hypot(e.x - e.home.x, e.y - e.home.y);
     const sp = (e.slowT > 0 ? 1 : 2) * (e.d.rank ? 1.1 : 1);
     if (!e.aggro && !e.d.passive && !p.dead && dp < 3.5 && e.d.lv >= P.lv - 5) e.aggro = true;
@@ -836,8 +1078,9 @@ function update(dt) {
     // hedef: son vuran (evcil hayvan da olabilir); hayvan yoksa oyuncu
     const fo = e.foe && e.foe.kind === 'pet' && e.foe === Pet.ent ? e.foe : p, df = Math.hypot(fo.x - e.x, fo.y - e.y);
     if (e.aggro && !p.dead) {
-      if (df > 1.3) { stepTo(e, fo.x, fo.y, sp, dt, true); e.state = 'move'; }
-      else { e.dir = dirOf(fo.x - e.x, fo.y - e.y); if (e.atkT <= 0) { e.atkT = 1.6; e.state = 'attack'; e.animT = 0; e.stateT = 0.5; later(0.3, () => { if (e.dead || Math.hypot(fo.x - e.x, fo.y - e.y) >= 1.9) return; if (fo === p) hurtPlayer(e); else if (fo === Pet.ent) Pet.hurt(e); }); } else e.state = 'idle'; }
+      // donmuş (kök) canavar yürüyemez; mühürlü canavar saldıramaz
+      if (df > 1.3) { if (!(e.rootT > 0)) { stepTo(e, fo.x, fo.y, sp, dt, true); e.state = 'move'; } }
+      else { e.dir = dirOf(fo.x - e.x, fo.y - e.y); if (e.atkT <= 0 && !(e.sealT > 0)) { e.atkT = 1.6; e.state = 'attack'; e.animT = 0; e.stateT = 0.5; later(0.3, () => { if (e.dead || Math.hypot(fo.x - e.x, fo.y - e.y) >= 1.9) return; if (fo === p) hurtPlayer(e); else if (fo === Pet.ent) Pet.hurt(e); }); } else e.state = 'idle'; }
     } else {
       e.wanderT -= dt;
       if (e.wanderT <= 0) { e.wanderT = rnd(2, 6); e.wx = e.home.x + rnd(-3, 3); e.wy = e.home.y + rnd(-3, 3); if (Game.map.blocked(e.wx, e.wy)) e.wx = null; }

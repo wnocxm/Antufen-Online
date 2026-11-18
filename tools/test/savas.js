@@ -5,16 +5,17 @@ const { chromium } = require('playwright');
 const LVS = (process.env.LVS || '3,5,10,15,20,25,30,35,40,45,50,55').split(',').map(Number);
 const CLSS = (process.env.CLS || '战士,法师,牧师').split(',');
 const BOSS = (process.env.BOSS || '').split(';').filter(Boolean).map(x => x.split(':'));   // örn. BOSS='120278:★月夜狼王:30'
-const ADV = process.env.ADV != null ? +process.env.ADV : null;   // sınıf yükseltmesi (varsayılan: 40 ve üstü 1)
+const ADV = process.env.ADV != null ? +process.env.ADV : null;   // sınıf yükseltmesi (varsayılan: 40 ve üstü 1, 80 ve üstü 2)
+const SPEC = +(process.env.SPEC || 0);   // 80 sonrası uzmanlık (0/1)
 (async () => {
   const b = await chromium.launch();
   for (const cls of CLSS) {
     const p = await (await b.newContext({ viewport: { width: 780, height: 360 } })).newPage();
     const errs = []; p.on('pageerror', e => errs.push(e.message));
-    await p.goto(process.env.URL || 'http://localhost:8099/'); await p.waitForTimeout(1200); await p.keyboard.press('Enter');
+    await p.goto(process.env.URL || 'http://localhost:8099/'); await p.waitForTimeout(2500); await p.keyboard.press('Enter');
     await p.click(`[data-cls="${cls}"]`); await p.fill('#cname', 'Savas'); await p.click('#cstart');
     await p.waitForFunction(() => window.__G && window.__G.player, null, { timeout: 30000 });
-    const r = await p.evaluate(async ([LVS, BOSS, ADV]) => {
+    const r = await p.evaluate(async ([LVS, BOSS, ADV, SPEC]) => {
       const P = __G.P, S = Assets.D.scenes, q = () => {}; UI.log = q; UI.toast = q; SFX.play = q; save = q; UI.death = q; UI.float = q; UI.hurt = q; UI.levelUp = q;
       const C = CLS[P.cls], out = [];
       const spot = (L, elite) => { // seviyesi L'ye en yakın canavar
@@ -26,8 +27,8 @@ const ADV = process.env.ADV != null ? +process.env.ADV : null;   // sınıf yük
       const fight = (L, elite, fixed) => {
         const sp = fixed || spot(L, elite); if (!sp) return null;
         L = fixed ? L : elite ? Math.max(1, monDef(sp[1], sp[0]).lv - 1) : L; gmLevel(L); P.sk = {};
-        P.adv = ADV != null ? ADV : L >= 40 ? 1 : 0;   // 40'tan sonra sınıf yükseltilmiş sayılır (ADV=0: sınıf görevleri sırasında, yalnız acemi ağacı)
-        for (const sk of C.skills) if (!skLock(sk)) P.sk[sk.id] = clamp(Math.floor((L - sk.lv) / 4) + 1, 1, 10);
+        P.adv = ADV != null ? ADV : L >= 80 ? 2 : L >= 40 ? 1 : 0;   // 40'tan sonra sınıf yükseltilmiş sayılır (ADV=0: sınıf görevleri sırasında, yalnız acemi ağacı)
+        P.sp = 0; skillAutoSpend(L + 1, SPEC);   // seviye başına 1 puan + başlangıç puanı, oyuncu gibi dağıtılır (orijinal ağaç kuralları)
         gmGear(); const st = stats(); const pl = __G.player; pl.buffs = []; pl.cds = {}; pl.hp = st.hp; pl.mp = st.mp; pl.dead = false; pl.state = 'idle';
         Game.ents = Game.ents.filter(e => e.kind !== 'mob'); Game.fx = [];
         const m = new Mob(sp[1], pl.x + 1.2, pl.y); m.home = { x: m.x, y: m.y }; m.aggro = true; Game.ents.push(m); setTarget(m, true);
@@ -37,7 +38,7 @@ const ADV = process.env.ADV != null ? +process.env.ADV : null;   // sınıf yük
             const s2 = stats();
             // beceri seçimi: şifa (can %45 altı), sonra en güçlü saldırı becerisi; normal saldırı kendiliğinden
             for (let i = C.skills.length - 1; i >= 0; i--) { const sk = C.skills[i]; if (sk.pas || !P.sk[sk.id] || (pl.cds[sk.id] || 0) > 0 || pl.mp < sk.mp) continue;
-              const heal = sk.healT || sk.hotT; if (heal && pl.hp > s2.hp * 0.45) continue; if (!heal && !sk.mult && !sk.pct && !sk.aoe && !sk.buff) continue;
+              const heal = sk.heal || sk.sn === 90319; if (heal && pl.hp > s2.hp * 0.45) continue; if (!heal && !sk.f && !sk.buff) continue; if (sk.toggle || (sk.buff && pl.buffs.some(b => b.id === sk.id))) continue; if (sk.sn === 90314 && m.dot && m.dot.corr) continue;   // Çürüme sürerken yeniden atılmaz (oyuncu gibi)
               useSkill(i); casts++; break; }
           }
           if (fixed && pl.hp < st.hp * 0.35 && (pl.potT || 0) <= t && countItem(pot)) { useItem(pot); pots++; pl.potT = t + 10; }
@@ -49,7 +50,7 @@ const ADV = process.env.ADV != null ? +process.env.ADV : null;   // sınıf yük
       if (BOSS.length) { for (const [sid, nm, L] of BOSS) { await gotoScene(sid); const f = fight(+L, false, [Assets.D.scenes[sid], nm]); if (f) out.push(f); } return out; }
       for (const L of LVS) for (const el of [false, true]) { const f = fight(L, el); if (f) out.push(f); }
       return out;
-    }, [LVS, BOSS, ADV]);
+    }, [LVS, BOSS, ADV, SPEC]);
     console.log(`\n== ${cls} ==  Sv | canavar (sv) | canavar TP/saldırı | oyuncu TP/saldırı/savunma | süre sn | kaybedilen can % | sonuç | beceri`);
     for (const x of r) console.log([x.L + (x.elite ? '☆' : ''), `${x.mob} (${x.mlv})`, `${x.mhp}/${x.matk}`, `${x.php}/${x.patk}/${x.pdef}`, x.t, x.lost, x.win ? 'kazandı' : 'KAYBETTİ', x.casts, x.pots != null ? 'iksir ' + x.pots : ''].join(' | '));
     if (errs.length) console.log('HATA', errs.slice(0, 3));

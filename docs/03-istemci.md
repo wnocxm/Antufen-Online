@@ -69,6 +69,7 @@ Otomatik yol: `routeTo(sid)` sahneler arası (`scenePath`), `routeToNpc(cn)`, `w
   Sınıf tabanı: savaşçı 1200 TP (+180/sv), büyücü 1000 (+140), elçi 1050 (+150).
 - **Denge ölçümü**: `tools/test/denge.js` (RACE=人类|精灵, GRIND=0: kasmasız, varsayılan kasmalı; seviye seviye görev/hedef öldürme/kasma), `tools/test/savas.js` (her sınıf, seviyesindeki normal ve ☆ canavara karşı süre ve kayıp can). 1. tur sonucu: normal canavar 3-7 sn, %2-24 can; seçkin 11-33 sn, %7-82 can; bütün sınıflar potsuz kazanıyor.
   - 2. tur (17.11, sınıf ağacı 40'a çekilince): 10-39 arası yalnız acemi ağacı. Rahibin şifası 40'a kaldığı için seçkinlerde %96'ya çıkan kayıp, rahip tabanı `ghp 165, gatk 13, gdef 7` ile en çok ~%84'e indi; savaşçı seçkin ≤%62, büyücü ≤%74; 40 sonrası (sınıf ağacıyla) rahip seçkin %24-45. `ADV=0` ile sınıf görevi hedefleri 40'ta acemi ağacıyla: hepsi iksirsiz kazanılıyor (%36-59).
+  - 3. tur (18.11, orijinal beceri sayıları + gerçekçi puan dağıtımı): Beceri ağaçları › Denge.
 - Canavar seviyesi `monDef(ad, sahne)`: elle `MON` tablosu (sahne aralığına kıstırılır) ya da otomatik: sahnenin `lvr` aralığına göre; ☆ = seçkin (+1), ☆☆ = patron (+2). Deneyim `mobXp` (yukarıda).
 - Normal saldırı: savaşçı yakın dövüş; büyücü/elçi mermi (`C.bolt`) + çarpma efekti (`C.boltHit`) + `skill_bomb` sesi.
   Orijinal sınıf tablosuna göre normal saldırı = ilk beceri: büyücü 火球术 (火球→火爆炸), elçi 暗影冲击 (暗影冲击_红→冲击爆炸).
@@ -80,27 +81,35 @@ Otomatik yol: `routeTo(sid)` sahneler arası (`scenePath`), `routeToNpc(cn)`, `w
 - **Çizim**: efekt resimleri siyah zemin üstünde; APK "glow" malzemesiyle ekler → bizde `Fx` sprite'ı `glow = true`, `globalCompositeOperation = 'lighter'`. Hangi animasyonun oynayacağı `fxAnim` (birden çok karesi olan animasyon; yönlüyse oyuncu yönüne göre).
 - `Fx(name, x, y, {anim, dir, z, follow, loop})`; mermi `f.proj = {to, cb, sp:9, vis}`.
 
-## Beceri ağaçları: orijinal yapı (17.11 kaynak denetimi; sınıf ağacı kilidi uygulandı)
-Kaynak: `all_skilltree.godat` (ağaç → 6 beceri, yanındaki 1/2/3 = sütun) + `all_skill` (ad, açıklama) + sınıf yükseltme görevleri (`gorev_ham.json`, ek alandaki 1300xx sınıf ödülü).
-- Her sınıfın 4 ağacı var, her ağaçta 6 beceri:
+## Beceri ağaçları (orijinal; 18.11 bütün ağaçlar)
+**Veri:** `www/assets/skills.json` ← `tools/beceriler.py` (elle değiştirme). Kaynaklar orijinal Symbian istemcisi:
+- `all_skilltree.godat`: ağaç → 6 beceri ve sütunu; ırk ağaçları 2 beceri.
+- `all_skill.godat`: ad, açıklama şablonu, simge, en yüksek kademe (10/15), **ön koşul** (beceri + kademe), **ağacın kök şartı** (önceki ağaca harcanan puan + sınıf), dışlayan uzmanlık kökü, bekleme.
+- `kaynak/cikti/betik/clt_script/skill_const_2nd.lua` (GBK): her becerinin kademe sabitleri (`TABLE_SKILL_CONST[sn]`); dosyada eski tasarımlar da var, sonraki tanım öncekini ezer.
+- Çeviri: `kaynak/ceviri/beceriler.json` (ad + açıklama şablonu `{sabit}`, `{cd}`, `{mp}`; ağaç adları; 4 mesleğin 5 kademesi).
 
-| Sınıf | Acemi (1-39) | Sınıf ağacı (40) | Uzmanlık A (80) | Uzmanlık B (80) |
+| Sınıf | Acemi | Sınıf ağacı | Uzmanlık A | Uzmanlık B |
 |---|---|---|---|---|
-| Savaşçı | 见习 150008 | 战士 150009 | 嗜血 150010 (Kara Şövalye 130006) | 狂暴 150011 (Berserker 130007) |
-| Büyücü | 学徒 150014 | 法师 150015 | 元素 150016 (Başbüyücü/Element 130008) | 奥术 150017 (Gölge Büyücüsü 130009) |
-| Rahip | 初级 150022 | 神使 150023 | 神圣 150024 (Seçilmiş 130012) | 暗影 150025 ("adsız sınıf" 130013; hiç çıkmamış) |
+| Savaşçı | 见习 150008 | 战士 150009 | 嗜血 Kana Susamış 150010 | 狂暴 Öfke 150011 |
+| Büyücü | 学徒 150014 | 法师 150015 | 元素 Element 150016 | 奥术 Gizem 150017 |
+| Rahip | 初级 150022 | 神使 150023 | 神圣 Kutsal 150024 | 暗影 Gölge 150025 |
 
-- Irk ağaçları: insan 150019 (人类精神, 贪婪 +%10 altın), elf 150013 (精魂祝福, 生命萃取).
-- Sınıf yükseltme (orijinal metin 80343: "40'ta ve 80'de"):
-  - 40'ta acemi → Savaşçı / Büyücü / Elçi (130004/130005/130011). Görevler: insan savaşçı 80223→80224 (Tom), elf savaşçı 80238→80239, büyücü 80225→80226 / 80240→80241, rahip 82938→82939 / 82941→82942.
-  - 80'de iki yoldan biri. Görevler: Şövalye 80227→80229 (Dağgören 神器工匠) / elf 80242-80244, Berserker 80236→80237 (Altındalga 衰老的角斗士), Element 80245→80248, Gölge Büyücüsü 80233→80235 (暗血森林 黑魔道大师), Alev yolu 80230→80232; sonraki sürümde 灰斧城 83085-83093 (Kara Şövalye / Başbüyücü / Seçilmiş).
-- **Uygulanan (17.11, kullanıcı kararı "orijinal nasılsa öyle"):** acemi ağacı 1-39; **sınıf ağacı yalnız 40'taki sınıf yükseltme göreviyle açılır** (docs/04 › Sınıf yükseltme).
-  - `P.adv` (0 acemi, 1 sınıf yükseltildi). `TREES[sınıf][1].adv = 1`; sınıf ağacındaki becerilerde `adv: 1` ve `lv: 40`.
-  - `skLock(sk)` → `'adv' | 'lv' | null`, `skLockMsg(sk)`. `skillUp`, `useSkill`, beceri ağacı penceresi, kısayol (`40 ★`) ve eski beceri listesi bunu kullanır. Kilitli sınıf ağacı sekmesinde "Sınıf yükseltme görevini bitirince açılır." yazar.
-  - `classUp(n)` (görevin `adv` alanı): `P.adv = n`, efekt, yeni beceriler günlüğe. `clsName(P)`: `TR.cls0` (Acemi Savaşçı / Çırak Büyücü / Acemi Kutsal Elçi) ya da `TR.cls`. Karakter penceresi, karakter seçimi ve sunucu karakter listesi bunu gösterir.
-  - Eski kayıt (`fixSave`): sınıf yükseltilmemişse sınıf ağacındaki kademeler beceri puanı olarak geri verilir.
-  - Kalan (kapsam dışı): 80'deki uzmanlık ağaçları, ırk becerileri. Yeni orijinal pencerede (`n_skilltree`) 6 sekme yuvası var.
-- Not: APK 1020 bu tabloyu kaydırarak yanlış okumuş, kullanılmaz.
+**Orijinal kurallar** (`skLock(sk)` → `null | [tür, açıklama]`; tür `adv`, `pts`, `excl`, `pre`):
+- Seviye şartı yok; puan seviye başına 1 (+ başlangıçta 1).
+- Ön koşul: 3. ve 4. beceri 1.'nin, 5. beceri 3.'nün, 6. beceri 4.'nün **5. kademesini** ister. Uzmanlıklarda 2. beceri kökün 1. kademesini ister.
+- Sınıf ağacı: 40'taki sınıf yükseltmesi (`P.adv >= 1`, 130004/130005/130011) **ve acemi ağacına 35 puan**.
+- Uzmanlık: 80'deki ikinci yükseltme (`P.adv >= 2`, 黑骑士 Kara Şövalye 130006 / 大魔导师 Başbüyücü 130008 / 天选者 Seçilmiş 130012; iki uzmanlık da aynı sınıf) **ve sınıf ağacına 40 puan**. İki uzmanlığın kökü birbirini dışlar: birini öğrenen öbürünü alamaz.
+- Puanları sıfırlama: **Eğitim Kitabı** (训练之书 30092, Symbian fiyatı 8750 altın, beceri eğitmenlerinde: 技能训练师 Guanlin / Kâhin Tapınağı). `skillReset(free)`.
+- Irk ağacı (kendiliğinden, kademe 1): İnsan Ruhu (savunma +2×sv, mana +5×sv), Açgözlülük (altın +%10, görev altını dahil); Ruh Kutsaması (direnç +2×sv, can +8×sv), Yaşam Özütü (canavar %5 Yaşam Elementi 30127). Seviye artışları bizim (orijinal metin yalnız "seviyeyle artar" diyor). Eski düz ırk bonusu kaldırıldı.
+- Kayıt: `fixSkills(s)` şartı tutmayan ya da kademesi aşan becerinin puanını geri verir (eski kurallarla alınmış beceriler).
+
+**Pencere** (`drawSkill2`, `n_skilltree`, APK görüntüleri gibi): 6 sekme (acemi, sınıf, 2 uzmanlık, ırk, Yaşam); 6 kademeli yuva 50402-50407 (orta, sağ, sol, sağ, sol, sağ = ağaç kaydındaki sıra); turuncu çizgiler APK'daki sabit desen (1→3, 1→4, 3→5, 4→6); yuvada "Öğrenilmedi" / "Sv n"; kilitli ağaçta kök şartı yazar. Sağda seçili beceri: ad, kademe, açıklama (o kademenin değerleriyle, `skDesc`), "Sonraki: 20→40", şart (kırmızı), Yükselt / Kısayol. Altta beceri puanı ve **Puanları Sıfırla** (50430). Yaşam sekmesi 4 mesleği gösterir (`P.life[meslek]` kademe; öğrenme ve toplama sistemi sıradaki iş).
+
+**Motor** (`CLS[sınıf].skills`): her becerinin `sn`'si ve oyundaki karşılığı. `f(K, s, p, t)` etkin becerinin sayıları (`K('sabit')` o kademedeki değer), `pas(K, s, sv)` edilgen, `buff(K, s)` + `dur`, `heal(K, s)`. Eski 36 becerinin kimlikleri korundu (kısayollar bozulmasın); yeni uzmanlık becerileri sona eklendi (kimlik = orijinal numara). 法力光环 Mana Halesi orijinalde etkin (dakikalarca mana sınırı), artık etkin.
+- Yeni mekanikler: can emme (Kan Damgası), canın yüzdesi kadar saf hasar (İntikam Kılıcı), yansıtma (Karşı Saldırı Fırtınası), kanama katları ve yutma (Testere Bıçak / Ağır Yarık / Ölüm Kırımı), dönüşümler (savunma→saldırı, saldırı→savunma, mana→saldırı), yanma, dondurma/kök, yavaşlatma etkisi altına ek hasar, mana yüzdesiyle katlanan Büyü Darbesi, hayal totemi, mana kalkanı, mana→can (Karanlık Ahit), kanatlar (Gölge Hükümdarı: şifa/destek kapalı, çevreye % hasar), ölümcül darbeyi savuşturma, sersemletme, mühür (canavar saldıramaz), Zifiri Perde, şifa etkisi artışı.
+- Orijinalde PvE etkisi olmayanlar da var: isabet (Mana Denetimi; canavarların kaçınması yok), Umutsuzluk Gücü (canavar şifası yok), Mutlak Alan (takım yok), Kutsal Akış (hasar türü ayrımı yok).
+- **Denge** (orijinal sayılar + bizim sınıf tabanları): vuruş çarpanı `dmgK` savaşçı 1,25, büyücü 1,7, rahip 1,75 (eskiden büyücü/rahip becerilerinde ×1,5 vardı; orijinal "saldırı + ek" biçiminde). `tools/test/savas.js` puanları oyuncu gibi dağıtır (`skillAutoSpend`: acemi 35 → sınıf 40 → uzmanlık). 18.11 sonucu: 10-55 normal canavar 4-10 sn, seçkin 12-35 sn, kayıp can ≤%82 (büyücü 23☆ %81); 40-80 iki uzmanlıkla hepsi kazanıyor; zindan boss'ları 0-4 iksirle; 40. sınıf görevi hedefleri acemi ağacıyla iksirsiz.
+- Uzmanlık becerilerinin mana bedelleri bizim (orijinal değerler sunucudaydı); bekleme süreleri kayıttan.
 
 ## Eşyalar ve dükkânlar
 - **Satın alma / satma adedi** (`win.js buyAsk`, `sellAsk`):
@@ -121,7 +130,7 @@ Panel yazıları seçili dilde: sekme adları, arama kutusu ve satırlar (`GT(tr
 Sekmeler (`#gtools` `v:maps|dg|pet`, `drawGmSys`, `gmX` in `ui.js`):
 - **Haritalar**: haritaya ışınlan (arama), NPC listesi.
 - **Zindanlar** (`Dungeon.GM`): her zindan/kopya için "Kapıya git", "İçeri gir" (seviye, ön görev, günlük sınır yok; sayaç artmaz); bu harita için "Boss'u öldür", "Canavarları öldür", "Son kata / başa", "Zindandan çık", "Günlük hakları sıfırla".
-- **Sınıf** (`ClassGM`, game.js): durum satırı ("Sınıfı yükselt", "Acemiye döndür": sınıf ağacı puanları geri + zincir sıfırlanır, "40 yap + ilk görev"); oyuncunun sınıf/ırk zincirindeki her görev için "Hazır yap", "Bitir" (öncekileri de bitmiş sayar), "Git" (görev yürüyüşü). Test: `tools/test/gm.js`, `tools/test/sinif.js`.
+- **Sınıf** (`ClassGM`, game.js): durum satırı ("Sınıfı yükselt", "İkinci yükseltme (80)", "Acemiye döndür": şartı tutmayan beceriler geri + zincir sıfırlanır, "40 yap + ilk görev"); beceri ağaçları satırı ("Puanları sıfırla (bedava)", "Ağaçları doldur" 1./2. uzmanlık: en az 80, iki yükseltme, puanlar oyuncu gibi dağıtılır); oyuncunun sınıf/ırk zincirindeki her görev için "Hazır yap", "Bitir" (öncekileri de bitmiş sayar), "Git" (görev yürüyüşü). Test: `tools/test/gm.js`, `tools/test/sinif.js`.
 - **Evcil** (`Pet.GM`):
   - Her tür için "Hayvanı ver" (doğrudan kuluçka, hak doluysa hak artar) ve "Yumurta + kutu".
   - Üstte "Pencereyi aç", "Seviyeme çek", "Dirilt + doyur + iyileştir", "Evcil eşyaları ver" (mama, iksir, diriltme, Sözleşme Taşı, İç Öz, kutular), "Acıktır" (aç hayvan savaşmaz testi), "Hepsini sil".

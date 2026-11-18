@@ -51,6 +51,11 @@ N = {   # (TR, EN) — tüketimde (TR, EN, açıklama TR, açıklama EN, kullan�
     30126: ('Tapınak Dostu Nişanı', 'Temple Friend Badge', 'Gece elflerine yaptığın katkının belgesi. Eskiden yalnız soylulara verilirdi; şimdi gençleri toplamak için bakırdan bolca yapılıyor.', 'Proof of your service to the night elves. Once only for nobles, now made of copper in bulk to recruit the young.', None),
     31218: ('Sırlı Cam Süs', 'Glazed Ornament', 'Eski ustaların göz alıcı işi. Sözleşme Neşe Elçisi\'nde özel ödülle değiştirilir.', 'A dazzling work of ancient craftsmen. Exchanged for a special reward with the Contract Joy Envoy.', None),
 }
+# görev ödülü olmayan ama bir sistemin gerektirdiği eşyalar: kimlik → satan NPC'ler (beceri ağacı: docs/03 › Beceri ağaçları)
+EKSTRA = {30092: ['技能训练师（人类）', '技能训练师（夜精灵）'],   # 训练之书: beceri puanlarını sıfırlar (orijinal açıklama)
+          30127: []}                                          # 生命元素: gece elfi ırk becerisi Yaşam Özütü düşürür
+N[30092] = ('Eğitim Kitabı', 'Training Book', 'Bütün beceri puanlarını sıfırlar: beceri ağacında "Puanları Sıfırla"ya bas, kitap kendiliğinden harcanır.', 'Resets all skill points: press "Reset Points" in the skill tree; the book is used up automatically.', None)
+N[30127] = ('Yaşam Elementi', 'Life Element', 'Gece elfi büyücülerinin bulduğu büyüyle can çekişen yaratıklardan toplanan yaşam özü.', 'Life essence gathered from dying creatures with a spell invented by night elf mages.', None)
 PETN = {   # evcil hayvan eşyaları (pet.js useItem)
     30703: ('Ejderin Kurtuluşu', 'Dragon\'s Redemption', 'Değerli bir ilaç: can çekişen evcil hayvanı diriltir ve biraz can verir.', 'A precious medicine: revives a dying pet with a little HP.', {'petRevive': 0.3}),
     31137: ('Doğal Güç Biluo Meyvesi', 'Natural Strength Biluo Fruit', 'Evcil hayvanın fiziksel saldırı yeteneğini 10 artırır.', 'Raises your pet\'s physical attack talent by 10.', {'petGift': ['patk', 10]}),
@@ -65,6 +70,8 @@ def main():
     for i in ids:
         for x in (HAM.get(str(i)) or {}).get('items', []):
             if x[0] not in IT and x[0] != '30676': need.add(int(x[0]))
+    for i in EKSTRA:
+        if str(i) not in IT: need.add(i)
     # merdiven: (yuva, sınıf, nitelik) → [(seviye, değer)]
     lad = {}
     for v in IT.values():
@@ -99,6 +106,10 @@ def main():
             IT[str(i)] = it
         else: miss.append((i, '?'))
         added += 1
+    for i, npcs in EKSTRA.items():   # satıcılar
+        for n in npcs:
+            tabs = items['shops'].setdefault(n, [])
+            if not any(str(i) in t[1] for t in tabs): (tabs[0][1].append(str(i)) if tabs else tabs.append(['Eşya', [str(i)]]))
     json.dump(items, open('www/assets/items.json', 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))
     print('eklenen ödül eşyası', added, 'adı eksik', miss)
 

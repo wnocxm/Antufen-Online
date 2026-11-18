@@ -98,7 +98,8 @@ const TR = {
     '通灵学徒': 'Kâhin derin düşünceye daldığında tehlikeli ruhlar denizine iner; bizim görevimiz onu korumak.',
   },
   cls: { '战士': 'Savaşçı', '法师': 'Büyücü', '牧师': 'Kutsal Elçi' },
-  cls0: { '战士': 'Acemi Savaşçı', '法师': 'Çırak Büyücü', '牧师': 'Acemi Kutsal Elçi' },   // 40'taki sınıf yükseltmesinden önce (见习战士 / 法师学徒 / 见习神使)
+  cls0: { '战士': 'Acemi Savaşçı', '法师': 'Çırak Büyücü', '牧师': 'Acemi Kutsal Elçi' },
+  cls2: { '战士': 'Kara Şövalye', '法师': 'Başbüyücü', '牧师': 'Seçilmiş' },   // 80'deki ikinci sınıf yükseltmesi (黑骑士 / 大魔导师 / 天选者)   // 40'taki sınıf yükseltmesinden önce (见习战士 / 法师学徒 / 见习神使)
   race: { '人类': 'İnsan', '精灵': 'Gece Elfi' },
 };
 function trName(cn) { return TR.name[cn] || TR.scene[cn] || cn; }

@@ -245,7 +245,7 @@ const UI = (() => {
     if (sl[0] === 's') {
       const i = +sl.slice(1), sk = CLS[P.cls].skills[i]; if (!sk) return;
       const im = uiImg(`icon_res_${sk.ik || 'skill'}_${sk.icon}`); if (im.complete && im.naturalWidth) ctx.drawImage(im, x, y, 32, 32);
-      if (!skRank(sk)) { ctx.fillStyle = 'rgba(0,0,0,.7)'; ctx.fillRect(x, y, 32, 32); if (skLock(sk)) { ctx.textAlign = 'center'; ctx.font = '8px sans-serif'; text(skLock(sk) === 'adv' ? '40 ★' : 'Sv' + sk.lv, x + 16, y + 20, '#ccc'); } return; }
+      if (!skRank(sk)) { ctx.fillStyle = 'rgba(0,0,0,.7)'; ctx.fillRect(x, y, 32, 32); const L = skLock(sk); if (L) { ctx.textAlign = 'center'; ctx.font = '8px sans-serif'; text(L[0] === 'adv' ? '40 ★' : '🔒', x + 16, y + 20, '#ccc'); } return; }
       const cd = p.cds[sk.id] || 0; if (cd > 0) { ctx.fillStyle = 'rgba(0,0,0,.65)'; ctx.fillRect(x, y + 32 * (1 - cd / sk.cd), 32, 32 * cd / sk.cd); ctx.textAlign = 'center'; ctx.font = 'bold 11px sans-serif'; text(Math.ceil(cd), x + 16, y + 21, '#fff'); }
       if (p.mp < sk.mp) { ctx.fillStyle = 'rgba(0,30,120,.45)'; ctx.fillRect(x, y, 32, 32); }
     } else {
@@ -337,7 +337,7 @@ const UI = (() => {
       else h += `<p class="hint">Bir eşyaya dokun: bilgisini gör, kullan ya da giy.${shopNpc ? ' Satmak için de seçebilirsin.' : ''} Görev eşyaları (sarı çerçeve) görev bitince teslim edilir.</p>`;
     } else if (cur === 'skill') {
       title = 'Beceriler';
-      const row = (sk, i) => `<div class="skr ${skLock(sk) ? 'lock' : ''}"><img src="${Assets.base}ui/icon_res_${sk.ik || 'skill'}_${sk.icon}.png"><div><b>${sk.name}</b> <small>${sk.pas ? '(edilgen)' : ''}</small><br><small>${esc(sk.desc || '')}</small><br><small>${sk.pas ? '' : `${sk.mp} mana · ${sk.cd} sn · `}${P.lv < sk.lv ? sk.lv + '. seviyede açılır' : sk.pas ? 'Etkin' : 'Kısayol ' + (i + 1)}</small></div></div>`;
+      const row = (sk, i) => `<div class="skr ${skLock(sk) ? 'lock' : ''}"><img src="${Assets.base}ui/icon_res_${sk.ik || 'skill'}_${sk.icon}.png"><div><b>${sk.name}</b> <small>${sk.pas ? '(edilgen)' : ''}</small><br><small>${esc(skDesc(sk))}</small><br><small>${skLock(sk) ? esc(skLockMsg(sk)) : sk.pas ? 'Etkin' : 'Kısayol ' + (i + 1)}</small></div></div>`;
       const all = CLS[P.cls].skills; h = `<div class="skgrid">${all.map((sk, i) => row(sk, i)).join('')}</div>`;
     } else if (cur === 'quest') {
       title = 'Görevler';
@@ -359,7 +359,7 @@ const UI = (() => {
       title = 'Ayarlar';
       h = `<div class="iact"><button class="obtn" data-act="tsfx">Ses efektleri: ${SFX.opt.sfx ? 'Açık' : 'Kapalı'}</button><button class="obtn" data-act="tmus">Müzik: ${SFX.opt.music ? 'Açık' : 'Kapalı'}</button></div>
         <div class="iact"><button class="obtn" data-act="lang">${LANG === 'tr' ? 'Language: English' : 'Dil: Türkçe'}</button></div>
-        <div class="iact"><button class="obtn" data-act="totitle">Giriş ekranına dön</button><button class="obtn" data-act="newchar">Yeni karakter oluştur</button></div><p class="hint">Oyun otomatik kaydedilir. Sürüm 11172113</p>`;
+        <div class="iact"><button class="obtn" data-act="totitle">Giriş ekranına dön</button><button class="obtn" data-act="newchar">Yeni karakter oluştur</button></div><p class="hint">Oyun otomatik kaydedilir. Sürüm 11180457</p>`;
     }
     ptitle.textContent = tx(title); pbody.innerHTML = h; txDom(pbody);
   }
@@ -495,7 +495,9 @@ const UI = (() => {
     } else if (gmView === 'cls') {   // sınıf yükseltme (40): durum, zincirdeki görevler (ClassGM, game.js)
       const P = Game.P, SN = { done: GT('bitti', 'done'), ready: GT('hazır', 'ready'), active: GT('sürüyor', 'active'), new: GT('alınabilir', 'available'), soon: GT('seviye bekliyor', 'level too low'), locked: GT('kilitli', 'locked') };
       h += row(GT('Sınıf', 'Class'), `${clsName()} · ${GT('yükseltme', 'advancement')} ${P.adv || 0} · ${GT('Sv', 'Lv')} ${P.lv}`,
-        [['cls:up', GT('Sınıfı yükselt', 'Advance class')], ['cls:reset', GT('Acemiye döndür', 'Back to trainee')], ['cls:start', GT('40 yap + ilk görev', 'Set 40 + first quest')]]);
+        [['cls:up', GT('Sınıfı yükselt', 'Advance class')], ['cls:up2', GT('İkinci yükseltme (80)', 'Second advancement (80)')], ['cls:reset', GT('Acemiye döndür', 'Back to trainee')], ['cls:start', GT('40 yap + ilk görev', 'Set 40 + first quest')]]);
+      h += row(GT('Beceri ağaçları', 'Skill trees'), `${GT('puan', 'points')} ${P.sp || 0} · ${Object.values(P.sk || {}).reduce((a, b) => a + b, 0)} ${GT('harcanmış', 'spent')}`,
+        [['cls:resetPts', GT('Puanları sıfırla (bedava)', 'Reset points (free)')], ['cls:fill:0', GT('Ağaçları doldur (1. uzmanlık)', 'Fill trees (spec 1)')], ['cls:fill:1', GT('Ağaçları doldur (2. uzmanlık)', 'Fill trees (spec 2)')]]);
       for (const q of ClassGM.chain()) if (!v || (q.title + ' ' + q.id).toLocaleLowerCase('tr').includes(v))
         h += row(q.title + (q.adv ? ' ★' : ''), `${q.id} · ${trName(q.giver)} → ${trName(q.to)} · ${SN[questState(q)]}`, [[`cls:ready:${q.id}`, GT('Hazır yap', 'Make ready')], [`cls:done:${q.id}`, GT('Bitir', 'Complete')], [`cls:go:${q.id}`, GT('Git', 'Go')]]);
     } else {
@@ -516,7 +518,7 @@ const UI = (() => {
   function gmX(k) {
     const [a, b, c, d] = k.split(':');
     if (a === 'dg') { const G = Dungeon.GM; if (b === 'in' || b === 'door') { closeAll(); setTimeout(() => G[b === 'in' ? 'enter' : 'door'](c, +d), 200); return; } if (b === 'last') { closeAll(); G.lastFloor(); return; } if (b === 'leave') { closeAll(); G.leave(); return; } G[b](); }
-    if (a === 'cls') { const G = ClassGM; if (b === 'go') { closeAll(); setTimeout(() => questWalk(QBY[c]), 200); return; } if (b === 'ready' || b === 'done') G[b](+c); else G[b](); }
+    if (a === 'cls') { const G = ClassGM; if (b === 'go') { closeAll(); setTimeout(() => questWalk(QBY[c]), 200); return; } if (b === 'ready' || b === 'done' || b === 'fill') G[b](+c); else G[b](); }
     if (a === 'pet') { const G = Pet.GM; if (b === 'win') { closeAll(); Win.open('pet'); return; } if (b === 'petf' || b === 'petfs') { closeAll(); Win.open('petf', { mode: b === 'petf' ? 'tf' : 'sk' }); return; }
       if (b === 'give' || b === 'egg') G[b](c); else if (b === 'stage0') G.stage(0); else G[b](); }
     drawList();

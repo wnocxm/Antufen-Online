@@ -31,7 +31,7 @@ Oyun hazır: `window.__G && window.__G.player`. Konsoldan: `gmLevel(n)`, `loadSc
 - Yeni görsel/efekt görünmüyorsa: sürüm (`?v=`) artırıldı mı, ad `preload` listesinde mi (`loadScene` içindeki `names`).
 
 - `tools/test/adlar.js`: bütün haritalardaki adların TR/EN'de Çince kalmadığını denetler (beklenen: `cn: []`).
-- `tools/test/denge.js`: 1-55 deneyim benzetimi (RACE=人类|精灵, MAX, GRIND=0 kasmasız). Görevleri sırayla yapar, hedef için gereken canavarları ve kasmayı sayar; deneyim tablosu değişince görev payının ~%40 kaldığını buradan doğrula. `tools/test/savas.js`: sınıf × seviye dövüş benzetimi (gerçek `update` döngüsü, en iyi dükkân eşyası; 40 ve üstü sınıf yükseltilmiş sayılır, `ADV=0` ile yalnız acemi ağacı).
+- `tools/test/denge.js`: 1-55 deneyim benzetimi (RACE=人类|精灵, MAX, GRIND=0 kasmasız). Görevleri sırayla yapar, hedef için gereken canavarları ve kasmayı sayar; deneyim tablosu değişince görev payının ~%40 kaldığını buradan doğrula. `tools/test/savas.js`: sınıf × seviye dövüş benzetimi (gerçek `update` döngüsü, en iyi dükkân eşyası; 40 ve üstü sınıf, 80 ve üstü ikinci yükseltme sayılır, `ADV=0` ile yalnız acemi ağacı; puanlar oyuncu gibi dağıtılır, `SPEC=0|1` uzmanlık).
 - `tools/test/zindan.js`: zindan giriş/çıkış, kesilenlerin geri gelmemesi, boss sandığı, günlük sınır, ölüm. `BOSS=… node tools/test/savas.js`: boss dövüşleri.
 - `tools/test/zindan40.js`, `tools/test/zindan50.js`: 40 ve 50. seviye zindan grupları (ışınlanma, kapılar, ön görev, çok hedefli görev, boss'lar).
 - `tools/test/evcil.js`: kuluçka, savaş katkısı, besleme, ölüm/diriltme, yumurta düşmesi, rastgele beceri dağılımı, ağaç (8 biçim), dönüşüm, beceri aktarma, hale. Pencere görüntüleri: `_pencere`, `_taktik`, `_beceri`, `_agac`, `_donusum`.
@@ -41,6 +41,7 @@ Oyun hazır: `window.__G && window.__G.player`. Konsoldan: `gmLevel(n)`, `loadSc
 - `tools/test/yolbul.js`: görev yol bulma (alınmamış → veren, alınmış → canavarın haritası, varınca yanına yürür ama saldırmaz, hazır → ödülü veren).
 - `DIL=en node tools/test/gm.js`: GM paneli İngilizce; sekme adları ve çevrilmeyen yazılar yazdırılır.
 - `tools/test/alisveris.js`: adet girişi (dokunmatik sayı kutusu, bilgisayar rakamları, altın sınırı, satarken adet, ekipman onayı) ve NPC'nin içinden geçme.
+- `tools/test/beceri.js`: beceri ağaçları (6 sekme, ön koşul, sınıf ağacı 35 puan, uzmanlık 40 puan ve dışlama, Eğitim Kitabı ile sıfırlama, ırk becerileri, eski kayıt düzeltme, üç sınıfın iki uzmanlıkta bütün etkin becerileri). Görüntüler `_uzmanlik`, `_dislanan`.
 - `tools/test/sinif.js`: 40. seviye sınıf yükseltme (kendiliğinden gelen görev, Ozan'ın sınıf seçeneği, NPC konuşmalarıyla insan savaşçı zinciri, her sınıf/ırk giriş görevi, iki eşyalı toplama, perinin seçimli bitişi, sınıf ağacı kilidi, eski kayıtta puan iadesi). Görüntüler `_agac_kilitli`, `_agac_acik`, `_ozan`, `_tom`, `_peri`.
 - `tools/test/menu.js`: sol menü kaydırma (GM düğmesi sürükleyince / tekerlekle gelir, dokununca GM paneli; GM olmayanda kaymaz).
 - `tools/test/hedef.js`: hedef seçme saldırı başlatmaz; ikinci dokunuş ve saldırı düğmesi saldırır; yön tuşu bırakır.

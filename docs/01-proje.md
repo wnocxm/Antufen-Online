@@ -23,6 +23,7 @@ Kullanıcı ileride Unity'ye taşımayı düşünüyor; bunu kendi bilgisayarın
   Sonuç: İnsan = Guanlin, Koşanat, Karakol, Başkent, Dağgören, Büyü Akademisi, Trol Ormanı; Gece Elfi = Kâhin Tapınağı, Gözcü, Güneşgören (+ lonca terasları, Dinlenme Bölgesi), Yoğunsis, Sanatçılar Loncası;
   ortak = Altındalga Limanı, Adalet Meydanı, lağım, zindanlar ve zindan merkezleri (ör. Ruhyiyen Sefer Karakolu, 40). Zindanlar eklenince görevleri kendiliğinden ortak olur.
 - **Sınıf ağacı orijinal gibi** (17.11): 40'taki sınıf yükseltme görevinden önce açılmaz.
+- **55 sınırı içerik içindir, sistemler için değil** (18.11): bütün çekirdek sistemler (beceri ağaçları, uzmanlıklar, meslekler…) eksiksiz olacak; yüksek seviyeli olanlar da görünür ve GM'den denenebilir. 55 sınırı görevleri, hataları ve oyun yönetimini ölçmek içindir; içerik açıldıkça test edilir.
 - **Orijinal gibi bol kasma**: ilk ~16 seviye görevlerle; sonra deneyimin çoğu canavar kesmekten (1-55 ≈ 7-9 bin öldürme, ~20-25 saat).
 - Müzik: APK'daki 12 kaydedilmiş parça kullanılıyor (Symbian MIDI'leri yanlış geldi).
 
@@ -48,7 +49,9 @@ Sırada (kullanıcı onayladı):
 1. Denge 1. tur yapıldı (bkz. 03 › Denge). Kalan: insan yolunda 40-48 arası görev yok (yalnız kasma; büyük olasılıkla orijinalde 40. seviye ortak zindanlarla doluyordu); eşyalar (bölgelere göre), elle oynanış testi. (Harita adları ve sahnelerdeki 1519 NPC/canavar/nesne adı çevrildi.)
 
 Ertelenenler / bilinenler:
-- **40. seviye sınıf yükseltmesi ✔ (17.11)**: orijinal görevlerle; sınıf ağacı yalnız bununla açılır (kullanıcı kararı: orijinal gibi). Kalan: 80'deki uzmanlık ağaçları (kapsam dışı), ırk becerileri, mücevher/tarif/unvan.
+- **40. seviye sınıf yükseltmesi ✔ (17.11)**: orijinal görevlerle; sınıf ağacı yalnız bununla açılır (kullanıcı kararı: orijinal gibi).
+- **Bütün beceri ağaçları ✔ (18.11)**: acemi, sınıf, iki uzmanlık, ırk, Yaşam sekmesi; orijinal kurallar, sayılar ve açıklamalar (docs/03 › Beceri ağaçları). Uzmanlıklar 80'deki ikinci yükseltmeyle (sistem hazır, GM'den; 80 görevleri içerikle gelecek).
+- Sırada: **yaşam becerileri sistemi** (madencilik, arkeoloji, mücevher arıtma, parçalama: eğitmenden öğrenme, 120 toplama noktası, malzemeler); unvan, mücevher/tarif.
 - Harita seviyeleri: dosya adındaki sayı seviye değil; dünya haritasında olmayan bazı sahneler yanlış seviyede (docs/04 › Sınıf yükseltme › Seviye bulgusu). Sırada önerilen: bu sahneleri düzeltip 55 altına düşen görevlerini almak.
 - Zindan, binek ve çok hedefli görevler alınmadı.
 - Sunucu için VPS + alan adı + HTTPS gerekiyor (kullanıcı hazır olunca).

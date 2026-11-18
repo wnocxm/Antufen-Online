@@ -41,8 +41,9 @@ const { chromium } = require('playwright');
   await talk('汤姆'); await row('Yıldız|Star'); await p.screenshot({ path: O + '_tom.png' }); await row('Tamamla|Complete');
   log('SAVAŞÇI oldu', await st());
   log('ödül eşyaları', await p.evaluate(() => ['10097', '10095', '10098', '10100', '10101'].map(id => countItem(id))));
-  await p.evaluate(() => { const sk = CLS.战士.skills.find(k => k.id === 'w4'); Game.P.sp = Math.max(1, Game.P.sp); skillUp(sk); });
-  log('w4 öğrenildi', await p.evaluate(() => ({ w4: Game.P.sk.w4 || 0, kilit: skLock(CLS.战士.skills.find(k => k.id === 'w4')) })));
+  // sınıf ağacı: orijinal kural, acemi ağacına 35 puan da gerekir (tools/test/beceri.js)
+  await p.evaluate(() => { const P = Game.P, sk = CLS.战士.skills.find(k => k.id === 'w4'); P.sk = { w1: 1 }; P.sp = 40; skillAutoSpend(34); P.sp = 6; skillUp(sk); });
+  log('w4 öğrenildi (acemi 35)', await p.evaluate(() => ({ w4: Game.P.sk.w4 || 0, kilit: skLock(CLS.战士.skills.find(k => k.id === 'w4')) })));
   await p.evaluate(() => { UI.closeAll(); Win.open('skill'); Win.tapId(50397); }); await p.waitForTimeout(500); await p.screenshot({ path: O + '_agac_acik.png' });
   // 2) Ozan'ın giriş görevi: her sınıf ve ırk için
   log('giriş görevleri', await p.evaluate(() => { const P = Game.P, s0 = [P.cls, P.race], out = {};
