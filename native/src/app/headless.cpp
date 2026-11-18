@@ -18,6 +18,12 @@
 //   dagit <puan> <uzmanlık> [dosya]  kademeleri sıfırla, puanları oyuncu gibi dağıt (HTML skillAutoSpend); sonucu yaz
 //   beceri <sıra>                    beceri kullan (sınıfın beceri listesindeki sıra)
 //   zaman0                           oyun saati 0 (yalnız saat; animasyonlar kalır)
+//   olumsuz <0|1>                    GM ölümsüzlük (canavarlar vuramaz)
+//   otogorev                         seviyesi gelmiş kendiliğinden görevleri al (HTML autoQuests)
+//   gmbitir <no,no,…> <dosya>        GM: görevleri sırayla bitir (öncekileriyle; ödül, sınıf yükseltmesi); her birinden sonra durum satırı
+//   gorevseviye <dosya> [ters]       bütün görevlerin açılma seviyesi (liste sırasıyla ya da tersten hesaplanır): "numara:seviye" satırları
+//   gorevbot <adım> <dt> <iz.json>   görev botu (tools/test/cpp_gorev.js ile aynı kurallar): konuş, al, teslim et; hedefin haritasına
+//                                    geç, savaş ya da topla; her adımdan sonra iz satırı (sahne, seviye, deneyim, altın, çanta, görevler)
 //   savas <dt> <sn> <iz.json> [oto|beceri]  sabit adımla ilerlet; her saniye iz satırı; oto: hedef ölünce en yakını yeniden hedef al;
 //                                    beceri: oto + her adımda sıradaki hazır beceri (sırayla döner; bekleme bitmiş; menzil dışındaysa yürür)
 //   canavarlar <dosya.json|->        bütün canavarlar: ad, yer, yön, can, seviye, durum
@@ -25,7 +31,10 @@
 //   golge <0|1>                      ayak gölgeleri
 //   goruntu <dosya.png>              çiz ve PNG yaz
 //   durum <dosya.json|->             oyuncu, sahne, zaman (JSON)
+#include <algorithm>
+#include <climits>
 #include <cstdio>
+#include <map>
 #include <cstring>
 #include <fstream>
 #include <iostream>
@@ -46,6 +55,134 @@ static void out(const std::string& f, const std::string& text) {
 }
 static std::string num(double v) { char b[64]; std::snprintf(b, sizeof b, "%.17g", v); return b; }   // tam hassasiyet (karşılaştırma)
 
+// görev durumu (iz satırı): seviye, deneyim, altın, yükseltme, çanta, sürmekte olan görevler (sayaçlarıyla), bitmiş görevler
+static std::string questRec(World& w, const std::string& tag) {
+  std::string bag; for (const auto& b : w.P.bag) bag += (bag.empty() ? "" : ",") + b.first + ":" + std::to_string(b.second);
+  std::string qs; for (const auto& kv : w.P.quests) {
+    qs += (qs.empty() ? "" : ",") + std::to_string(kv.first) + ":" + std::to_string(kv.second.n) + (kv.second.ready ? "r" : "");
+    for (const auto& c : kv.second.c) if (c.second) qs += "/" + c.first + "=" + std::to_string(c.second);
+  }
+  std::string dn; for (int id : w.P.done) dn += (dn.empty() ? "" : ",") + std::to_string(id);
+  return "{\"etiket\":\"" + tag + "\",\"lv\":" + std::to_string(w.P.lv) + ",\"xp\":" + std::to_string(w.P.xp) + ",\"altin\":" + std::to_string(w.P.gold) +
+         ",\"ust\":" + std::to_string(w.P.adv) + ",\"canta\":\"" + bag + "\",\"gorev\":\"" + qs + "\",\"bitti\":\"" + dn + "\"}";
+}
+
+// ---------------- görev botu (tools/test/cpp_gorev.js'teki botla aynı kurallar; zarlar aynı sırada) ----------------
+static std::string questState(World& w, int qi) { return w.questState(qi); }
+static std::string questBot(World& w, const core::Json& D, int steps, double dt) {
+  std::map<int, int> tries; std::string tr = "[\n";
+  const auto& Q = w.quests().all();
+  auto dun = [&](const std::string& sid) { const core::Json& k = D["scenes"][sid]["kind"]; return k.isArr() && k[0].i() == 4; };
+  auto pickSc = [&](const std::vector<std::string>& L0, const std::string& scName) {
+    std::vector<std::string> L; for (const std::string& s : L0) if (!dun(s)) L.push_back(s);
+    if (!scName.empty()) { std::vector<std::string> F; for (const std::string& s : L) if (D["scenes"][s]["name"].str() == scName) F.push_back(s); if (!F.empty()) L = F; }
+    for (const std::string& s : L) if (s == w.sceneId) return s;
+    return L.empty() ? std::string() : L[0];
+  };
+  auto revive = [&]() { Player& p = w.player; if (p.dead) { p.dead = false; p.state = "idle"; p.deadT = 0; } const Stats s = w.stats(); p.hp = s.hp; p.mp = s.mp; };
+  // 1) bu haritadaki herkesle konuş: konuşma görevleri, teslim, yeni görev (değişiklik kalmayana dek); ışınlanma görevinde dur
+  auto talk = [&]() -> bool {
+    for (int pass = 0; pass < 10; pass++) {
+      bool ch = false;
+      for (size_t i = 0; i < w.ents.size(); i++) {
+        const Ent& e = w.ents[i]; if (e.kind != Ent::NPC || e.dummy || e.node || e.hidden || e.pickup) continue;
+        const std::string cn = e.name; w.interact(int(i));
+        for (int qi : w.questsFor(cn)) {
+          const Quest& q = Q[size_t(qi)]; const std::string st = questState(w, qi);
+          if (st == "ready" && q.to == cn) { const bool was = w.P.done.count(q.id); w.completeQuest(qi); if (!was && w.P.done.count(q.id)) ch = true; }
+          else if (st == "new" && q.giver == cn) { ch = true; w.dialogAccept(qi, cn); if (q.hasTp) return true; }
+        }
+      }
+      if (!ch) break;
+    }
+    return false;
+  };
+  for (int step = 0; step < steps; step++) {
+    std::string act = "konus";
+    if (!talk()) {
+      // 2) karar: teslim edilecek görev → alan kişi; sürmekte olan görev → hedefin haritası (savaş / toplama); yeni görev → veren kişi
+      const std::string cur = w.sceneId; std::string gs, gn, kind; int gid = 0; std::vector<std::string> names;
+      auto go = [&](const std::string& s, const std::string& nm) { gs = s; gn = nm; kind = "git"; };
+      for (size_t qi = 0; qi < Q.size(); qi++) { const Quest& q = Q[qi]; if (!w.P.quests.count(q.id) || questState(w, int(qi)) != "ready") continue; const std::string s = pickSc(w.quests().npcScenes(q.to), ""); if (!s.empty() && s != cur) { go(s, q.to); break; } }
+      if (kind.empty()) for (const Quest& q : Q) {
+        auto it = w.P.quests.find(q.id); if (it == w.P.quests.end() || it->second.ready || tries[q.id] >= 5) continue;
+        if (q.type == "special" && !q.flag.empty()) { kind = "bayrak"; gid = q.id; gn = q.flag; break; }   // çantayı aç, hedef değiştir… (düğmeye basmış gibi)
+        if (q.type == "deliver" && !q.give.empty() && w.giveCount(q) < q.count) { kind = "esya"; gid = q.id; gn = q.give[0]; break; }   // dükkândan almış gibi
+        if (q.type == "kill" || q.type == "collect") {
+          names.clear();
+          if (!q.targets.empty()) { for (const QTarget& x : q.targets) if (x.kind == QTarget::KILL || x.kind == QTarget::DROP) names.push_back(x.name); }
+          else if (!q.mobs.empty()) names = q.mobs; else names.push_back(q.target);
+          if (names.empty() || names[0].empty()) continue;
+          const std::string s = pickSc(w.quests().monScenes(names[0]), q.sc); if (s.empty()) continue;
+          const int ql = w.quests().sceneQLv(s); if (ql != INT_MIN && ql > w.P.lv + 2) continue;   // çok yüksek seviyeli harita
+          if (s != cur) go(s, names[0]); else { kind = "savas"; gid = q.id; }
+          break;
+        }
+        if (q.type == "talk" || (q.type == "pickup" && q.use)) { const std::string s = pickSc(w.quests().npcScenes(q.type == "talk" ? q.to : q.node), ""); if (!s.empty() && s != cur) { go(s, q.type == "talk" ? q.to : q.node); break; } continue; }
+        if (q.type == "pickup") { const std::string s = pickSc(w.quests().npcScenes(q.node), ""); if (s.empty()) continue; if (s != cur) go(s, q.node); else { kind = "topla"; gid = q.id; gn = q.node; } break; }
+      }
+      if (kind.empty()) for (size_t qi = 0; qi < Q.size(); qi++) if (questState(w, int(qi)) == "new") { const std::string s = pickSc(w.quests().npcScenes(Q[qi].giver), ""); if (!s.empty() && s != cur) { go(s, Q[qi].giver); break; } }
+      // 3) yapacak görev yok: seviye kas — açılmayı bekleyen en düşük seviyeli savaş görevinin canavarlarının haritasında 60 sn
+      if (kind.empty()) {
+        int bq = -1, bl = INT_MAX;
+        for (size_t qi = 0; qi < Q.size(); qi++) { const Quest& q = Q[qi]; if ((q.type != "kill" && q.type != "collect") || q.target.empty() || questState(w, int(qi)) != "soon") continue; const int l = w.quests().minLv(int(qi)); if (l < bl) { bl = l; bq = int(qi); } }
+        if (bq >= 0) { const std::string s = pickSc(w.quests().monScenes(Q[size_t(bq)].target), Q[size_t(bq)].sc); if (!s.empty()) { if (s != cur) go(s, Q[size_t(bq)].target); else { kind = "kas"; names.clear(); } } }
+      }
+      act = kind.empty() ? "yok" : kind;
+      if (kind == "git") {
+        bool f = false; int xy[2] = {0, 0};
+        for (const core::Json& e : D["scenes"][gs]["ents"].arr()) if (e[1].str() == gn) { xy[0] = e[2][0].i(); xy[1] = e[2][1].i(); f = true; break; }
+        if (f) w.loadScene(gs, xy); else w.loadScene(gs);
+        act += " " + gs;
+      } else if (kind == "savas" || kind == "kas") {   // savaş: görev hazır olana dek (en çok 90 sn); kas: 60 sn, her canavar
+        if (kind == "savas") tries[gid]++;
+        revive(); Player& p = w.player;
+        auto ok = [&](const std::string& nm) { return names.empty() || std::find(names.begin(), names.end(), nm) != names.end(); };
+        const int n = int((kind == "kas" ? 60 : 90) / dt + 0.5);
+        for (int k = 0; k < n; k++) {
+          if (kind == "savas") { auto it = w.P.quests.find(gid); if (it == w.P.quests.end() || it->second.ready) break; }
+          const int t = w.target();
+          if (t < 0 || w.ents[t].dead || w.ents[t].kind != Ent::MOB || !ok(w.ents[t].name)) {
+            int best = -1; double bd = 1e300;
+            for (size_t i = 0; i < w.ents.size(); i++) { const Ent& e = w.ents[i]; if (e.kind != Ent::MOB || e.dead || !ok(e.name)) continue; const double d = jsHypot(e.x - p.x, e.y - p.y); if (d < bd) { bd = d; best = int(i); } }
+            if (best >= 0) { w.setTarget(best, true); if (bd > 3) { p.x = w.ents[size_t(best)].x; p.y = w.ents[size_t(best)].y; } }   // uzaksa yanına (savaşta yol bulma yok)
+          }
+          w.update(dt);
+          if (p.dead) revive();
+        }
+        if (kind == "savas") act += " " + std::to_string(gid);
+      } else if (kind == "esya") {
+        tries[gid]++; const Quest& q = *w.quests().byId(gid); w.addItem(gn, q.count - w.giveCount(q)); act += " " + gn;
+      } else if (kind == "bayrak") {
+        tries[gid]++; w.questFlag(gn); act += " " + gn;
+      } else if (kind == "topla") {
+        tries[gid]++;
+        for (size_t i = 0; i < w.ents.size(); i++) {
+          auto it = w.P.quests.find(gid); if (it == w.P.quests.end() || it->second.ready) break;
+          const Ent& e = w.ents[i]; if (e.kind == Ent::NPC && e.name == gn && !e.hidden && e.pickup) w.interact(int(i));
+        }
+        auto it = w.P.quests.find(gid); if (it != w.P.quests.end() && !it->second.ready) for (int k = 0; k < int(21 / dt + 0.5); k++) w.update(dt);
+        act += " " + std::to_string(gid);
+      }
+    }
+    // iz satırı
+    std::string bag; for (const auto& b : w.P.bag) bag += (bag.empty() ? "" : ",") + b.first + ":" + std::to_string(b.second);
+    std::string qs; for (const auto& kv : w.P.quests) {
+      qs += (qs.empty() ? "" : ",") + std::to_string(kv.first) + ":" + std::to_string(kv.second.n) + (kv.second.ready ? "r" : "");
+      for (const auto& c : kv.second.c) if (c.second) qs += "/" + c.first + "=" + std::to_string(c.second);
+    }
+    std::string dn; for (int id : w.P.done) dn += (dn.empty() ? "" : ",") + std::to_string(id);
+    tr += std::string(step ? ",\n" : "") + "{\"adim\":" + std::to_string(step) + ",\"eylem\":\"" + act + "\",\"sahne\":\"" + w.sceneId + "\",\"lv\":" + std::to_string(w.P.lv) +
+          ",\"xp\":" + std::to_string(w.P.xp) + ",\"altin\":" + std::to_string(w.P.gold) + ",\"ust\":" + std::to_string(w.P.adv) + ",\"canta\":\"" + bag +
+          "\",\"gorev\":\"" + qs + "\",\"bitti\":\"" + dn + "\",\"x\":" + num(w.player.x) + ",\"y\":" + num(w.player.y) + "}";
+  }
+  // son: bütün kişilerin baş işaretleri (ad sırasıyla)
+  std::vector<std::string> cns; for (const auto* kv : core::jsOrder(D["scenes"])) for (const core::Json& e : kv->second["ents"].arr()) if (D["mon"][std::to_string(e[0].i())].isNull()) cns.push_back(e[1].str());
+  std::sort(cns.begin(), cns.end()); cns.erase(std::unique(cns.begin(), cns.end()), cns.end());
+  std::string marks; for (const std::string& cn : cns) { const char m = w.npcMark(cn); if (m) marks += cn + m + ","; }
+  return tr + "\n,{\"isaretler\":\"" + marks + "\"}]\n";
+}
+
 int main(int argc, char** argv) {
   if (argc != 2) { std::fprintf(stderr, "kullanım: anrufen_test <senaryo.txt|->\n"); return 2; }
   std::ifstream fin; std::istream* in = &std::cin;
@@ -63,7 +200,7 @@ int main(int argc, char** argv) {
         assets = Assets(); assets.load(vfs); bal = Balance(); bal.load(vfs, assets.D()); world = std::make_unique<World>(assets, bal);
         std::printf("veri: %s\n", vfs.describe().c_str());
       } else if (cmd == "tohum") { uint32_t sd; ss >> sd; rng().seed(sd); }
-      else if (cmd == "karakter") { std::string c, r, s; ss >> c >> r >> s; W().P = CharData(); W().setChar(c, r, s); }   // yeni karakter (Sv 1, altın 0, çanta boş)
+      else if (cmd == "karakter") { std::string c, r, s; ss >> c >> r >> s; W().P = CharData(); W().flags.clear(); W().setChar(c, r, s); }   // yeni karakter (Sv 1, altın 0, çanta boş)
       else if (cmd == "seviye") { int lv; ss >> lv; W().setLevel(lv); }
       else if (cmd == "doldur") { const Stats s = W().stats(); W().player.hp = s.hp; W().player.mp = s.mp; }
       else if (cmd == "sahne") {
@@ -101,6 +238,19 @@ int main(int argc, char** argv) {
         if (f.empty()) std::printf("beceriler %s · artan puan %d\n", o.c_str(), w.P.sp); else out(f, o + "\n");
       } else if (cmd == "beceri") { int i; ss >> i; W().useSkill(i); }
       else if (cmd == "zaman0") W().time = 0;
+      else if (cmd == "olumsuz") { int g; ss >> g; W().god = g != 0; }
+      else if (cmd == "otogorev") W().autoQuests();
+      else if (cmd == "gmbitir") {
+        std::string ids, f, o = "[\n"; ss >> ids >> f; World& w = W(); std::istringstream is(ids); std::string tok; int k = 0;
+        while (std::getline(is, tok, ',')) { w.gmQuestDone(std::stoi(tok)); o += std::string(k++ ? ",\n" : "") + questRec(w, tok); }
+        out(f, o + "\n]\n");
+      }
+      else if (cmd == "gorevseviye") {
+        std::string f, ters; ss >> f >> ters; Quests& Q = W().quests(); Q.resetLv(); const int n = int(Q.all().size());
+        if (ters == "ters") for (int i = n - 1; i >= 0; i--) Q.minLv(i); else for (int i = 0; i < n; i++) Q.minLv(i);
+        std::string o; for (int i = 0; i < n; i++) o += std::to_string(Q.all()[size_t(i)].id) + ":" + std::to_string(Q.minLv(i)) + "\n";
+        out(f, o);
+      } else if (cmd == "gorevbot") { int n; double dt; std::string f; ss >> n >> dt >> f; out(f, questBot(W(), assets.D(), n, dt)); }
       else if (cmd == "savas") {
         double dt, sec; std::string f, oto; ss >> dt >> sec >> f >> oto; World& w = W();
         const int steps = int(sec / dt + 0.5), per = int(1 / dt + 0.5); std::string tr = "[\n"; size_t rot = 0;

@@ -103,9 +103,9 @@ Eski taslak (80227-80248: 神器工匠 şövalye, 衰老的角斗士 çılgın s
    ```
    `seviye`: o şehirde verilen hedefsiz konuşma görevlerinin en düşük seviyesi (aynı adlı NPC başka şehirde de durunca seviye yanlış çıkmasın).
    Bekleme/bitiş metni "结束/完成/离开" gibi düğme yazısıysa anlamlı kısa bir cümle yaz. Bir görevin yapısı bütün `_kaynak` dosyalarında aranır; bir çeviri dosyası birden çok bölgeyi kapsayabilir.
-4. **Üret**: `python3 tools/gorev_ham.py && python3 tools/ceviri.py && python3 tools/gorevler.py && python3 tools/odul_esyalari.py`.
+4. **Üret**: `python3 tools/gorev_ham.py && python3 tools/ceviri.py && python3 tools/gorevler.py && python3 tools/odul_esyalari.py && node tools/gorev_cikar.js` (sonuncusu C++ istemcisinin görev verisi `www/assets/quests.json`).
 5. **Denetle** (`docs/06-test.md`): önce `node tools/test/gorev_denetim.js` (orijinalle alan alan), sonra `tools/test/qtest.js` (statik: veren/teslim/canavar/nokta haritada var mı + örnek zincir oynatma), `tools/test/qlv.js` (açılma seviyeleri). Seviyesi tuhaf çıkanları `seviyeler`/`zincir`/`atla` ile düzelt.
-6. **SQL**: `cd server && node import.js` (quests tablosu). Sonra sürüm + commit + push.
+6. **SQL**: `cd server && node import.js` (quests tablosu). C++ ile aynı mı: `node tools/test/cpp_gorev.js`. Sonra sürüm + commit + push.
 
 ## Bilinen tuzaklar
 - Aynı adlı NPC birden çok şehirde (驿站老板 postacı, 走私者, 奴隶商人…) → `hubLv` en düşük şehri alır → `seviye` kullan; postacı görevlerini ele.

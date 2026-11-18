@@ -1,17 +1,19 @@
 // Dünya: sahne, varlıklar (NPC, canavar), oyuncu, efektler, zamanlayıcılar, savaş (HTML'de game.js loadScene/update/hitMob/
 // hurtPlayer/killMob/gainXp/stats + ui.js drawWorld). Sıra ve hesaplar HTML ile birebir: iki sürüm aynı tohumla aynı sonucu verir
 // (tools/test/cpp_savas.js). Beceriler (useSkill), güçlendirmeler, süren etkiler (kanama, yanma, çürüme), Büyü Hayali burada;
-// beceri tanımları skills.cpp. Henüz yok (sonraki adımlar): görevler, evcil hayvan, zindan, arayüz.
+// beceri tanımları skills.cpp; görevler world_quests.cpp (veri quests.cpp). Henüz yok (sonraki adımlar): arayüz, eşya/dükkân, evcil hayvan, zindan.
 #pragma once
 #include <functional>
 #include <map>
 #include <memory>
+#include <set>
 #include <string>
 #include <vector>
 
 #include "engine/assets.h"
 #include "engine/balance.h"
 #include "engine/map.h"
+#include "engine/quests.h"
 #include "engine/rng.h"
 #include "engine/skills.h"
 
@@ -60,6 +62,9 @@ struct Player {
   Aura aura;
 };
 
+// görev ilerlemesi (HTML P.quests[id]): n sayaç, ready tamamlandı (teslim bekliyor), c çok hedefli/çok eşyalı sayaçlar
+struct QuestSt { int n = 0; bool ready = false; std::map<std::string, int> c; };
+
 // Karakter kaydı (HTML Game.P'nin bu adımda kullanılan kısmı)
 struct CharData {
   std::string cls = "战士", race = "人类", sex = "male";
@@ -67,6 +72,9 @@ struct CharData {
   std::map<std::string, int> sk;                         // beceri kademeleri (beceri numarası → kademe)
   std::map<std::string, std::string> eq;                 // yuva → eşya
   std::vector<std::pair<std::string, int>> bag;          // çanta (eklenme sırası)
+  std::map<int, QuestSt> quests;                         // alınmış görevler
+  std::set<int> done;                                    // bitmiş görevler
+  bool hasHome = false; std::string homeScene; bool homeXY = false; int homeX = 0, homeY = 0;   // ölünce doğulan yer (ışınlanma görevi)
 };
 
 struct Stats { double hp = 0, mp = 0, atk = 0, def = 0, crit = 0, dodge = 0, hpreg = 0, mpreg = 0, res = 0, dr = 0, spd = 0, goldUp = 0, lifeEl = 0,
@@ -102,6 +110,9 @@ class World {
   bool engaged() const { return engage_; }
   int nearestMob(double r) const;
   int countItem(const std::string& id) const;
+  void addItem(const std::string& id, int n = 1);
+  bool removeItem(const std::string& id, int n = 1);
+  bool itemExists(const std::string& id) const;        // HTML ITEMS[id] (eşya tablosu + iksirler, Gelişim Paketi, görev eşyası)
 
   // beceriler (HTML useSkill, skRank, skC, skLock, skillAutoSpend, skillReset)
   const std::vector<SkillDef>& skills() const { return bal_.skills.cls(P.cls); }
@@ -118,6 +129,33 @@ class World {
   void clampVitals();
   int healPlayer(double h, const std::string& fx = "");
   bool god = false, gmNoCd = false;               // GM: ölümsüzlük, beklemesiz + manasız beceri
+
+  // görevler (HTML game.js › Görevler; world_quests.cpp). qi: görev listesindeki sıra (Quests::all)
+  Quests& quests() { return bal_.quests; }
+  std::string questState(int qi);                 // done, ready, active, locked, soon, new
+  void acceptQuest(int qi);
+  bool completeQuest(int qi);                     // teslim görevinde eşya eksikse false
+  void questKill(const std::string& name);
+  void questFlag(const std::string& f);           // özel görevlerin bayrağı (çantayı aç, hedef değiştir, yumurta çıkar)
+  bool questUseItem(const std::string& id);       // görev eşyasını hedefteki canavara kullan
+  void classUp(int n);
+  void autoQuests();
+  std::vector<int> questsFor(const std::string& cn);   // kişinin konuşmasındaki görevler (HTML questsFor)
+  char npcMark(const std::string& cn);                 // başındaki işaret: '?' teslim, '!' yeni, 0 yok
+  int tpQuestOf(const std::string& cn);                // ışınlanma görevi (kişi oraya yeniden ışınlar)
+  void questTeleport(int qi);
+  void interact(int ent);                              // kişiye dokun (HTML interact): toplama, konuşma görevleri; arayüz konuşmayı açar
+  void dialogAccept(int qi, const std::string& cn);    // konuşmada "Kabul" (HTML win.js)
+  bool dialogComplete(int qi);                         // konuşmada "Tamamla"
+  void cycleTarget();                                  // sıradaki yakın canavarı hedef al
+  int giveCount(const Quest& q) const;
+  void gmQuestReady(int id);                           // GM: görevi (öncekileriyle) tamamlanmış say
+  void gmQuestDone(int id);                            // GM: görevi bitir, ödülünü al
+  std::set<std::string> flags;                         // HTML Game.flags (kayda girmez)
+  std::vector<std::string> log;                        // olay günlüğü (son 200; arayüz adımında ekrana, şimdilik konsola)
+  size_t logTotal = 0;                                 // bugüne dek yazılan olay sayısı (yeni olanları bulmak için)
+  void note(const std::string& s) { log.push_back(s); logTotal++; if (log.size() > 200) log.erase(log.begin()); }
+
   struct Phantom { bool on = false; double t = 0, tick = 0, mult = 0; int tg = -1, fx = 0; } phantom;   // Büyü Hayali (90140)
 
   std::string sceneId, sceneName;
@@ -157,8 +195,10 @@ class World {
   void killMob(int i);
   void hurtPlayer(int i);
   void gainXp(long long n);
-  void addItem(const std::string& id, int n = 1);
-  bool removeItem(const std::string& id, int n = 1);
+  void pickupNode(int ent);
+  void readyQuest(int qi);
+  bool tgAdd(int qi, QuestSt& st, const QTarget& x);
+  void takeGive(const Quest& q);
   std::string randomGear(int lv);
   void checkExits();
   void drawMob(Canvas& c, Ent& e, int X, int Y);

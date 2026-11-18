@@ -25,6 +25,8 @@ class Json {
   double num(double def = 0) const { return type_ == Type::Number ? num_ : def; }
   int i(int def = 0) const { return type_ == Type::Number ? int(num_) : def; }
   bool b(bool def = false) const { return type_ == Type::Bool ? bool_ : def; }
+  // JS doğruluğu (if (x)): null, false, 0, NaN ve "" yanlış; dizi ve nesne (boş da olsa) doğru
+  bool truthy() const { return type_ == Type::Bool ? bool_ : type_ == Type::Number ? (num_ != 0 && num_ == num_) : type_ == Type::String ? !str_.empty() : type_ != Type::Null; }
   const std::string& str() const { static const std::string e; return type_ == Type::String ? str_ : e; }
 
   size_t size() const { return type_ == Type::Array ? arr_.size() : type_ == Type::Object ? obj_.size() : 0; }
@@ -48,5 +50,9 @@ class Json {
   std::vector<std::pair<std::string, Json>> obj_;
   std::shared_ptr<std::unordered_map<std::string, size_t>> index_;   // nesnede ad → sıra
 };
+
+// JS nesnesinin anahtar sırası (Object.keys / for…in / Object.entries): tam sayı biçimli anahtarlar önce (artan), sonra ötekiler ekleme sırasıyla
+std::vector<const std::pair<std::string, Json>*> jsOrder(const Json& o);
+bool jsIntKey(const std::string& k);
 
 }  // namespace core

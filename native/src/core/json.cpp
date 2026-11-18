@@ -1,5 +1,6 @@
 #include "json.h"
 
+#include <algorithm>
 #include <cstdlib>
 #include <stdexcept>
 
@@ -90,5 +91,18 @@ const Json& Json::operator[](const std::string& key) const {
   auto it = index_->find(key); return it == index_->end() ? null() : obj_[it->second].second;
 }
 bool Json::has(const std::string& key) const { return type_ == Type::Object && index_ && index_->count(key); }
+
+bool jsIntKey(const std::string& k) {
+  if (k.empty() || k.size() >= 10) return false;
+  for (char c : k) if (c < '0' || c > '9') return false;
+  return k == "0" || k[0] != '0';
+}
+std::vector<const std::pair<std::string, Json>*> jsOrder(const Json& o) {
+  std::vector<const std::pair<std::string, Json>*> num, rest;
+  for (const auto& kv : o.obj()) (jsIntKey(kv.first) ? num : rest).push_back(&kv);
+  std::stable_sort(num.begin(), num.end(), [](auto* a, auto* b) { return std::stoll(a->first) < std::stoll(b->first); });
+  num.insert(num.end(), rest.begin(), rest.end());
+  return num;
+}
 
 }  // namespace core

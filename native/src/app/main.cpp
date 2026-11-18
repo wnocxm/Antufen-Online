@@ -2,7 +2,8 @@
 //   anrufen [--veri <klasör|paket.gdp>]… [--sahne <numara>] [--sinif 战士|法师|牧师] [--irk 人类|精灵] [--cinsiyet male|fema]
 //           [--seviye <n>] [--uzmanlik 0|1]   (seviye: puanlar oyuncu gibi dağıtılır; 40'ta sınıf, 80'de ikinci yükseltme; uzmanlık: hangisi)
 // Tuşlar: ok tuşları / WASD yürü, boşluk en yakın canavara saldır, 1-9 beceriler (sınıfın beceri sırası: acemi ve sınıf ağaçları,
-// sonra uzmanlık), F12 ekran görüntüsü (anrufen_ekran.png), Esc çıkış.
+// sonra uzmanlık), E en yakın kişiyle konuş (konuşma penceresi gelene dek: görevleri kendiliğinden alır ve teslim eder; olaylar
+// konsolda ve pencere başlığında), Tab sıradaki canavarı hedef al, F12 ekran görüntüsü (anrufen_ekran.png), Esc çıkış.
 // Veri verilmezse sırayla: veri/oyun.gdp, ../veri/oyun.gdp, ../../www/assets, ../../../www/assets, ../www/assets, www/assets.
 #include <SDL.h>
 
@@ -54,7 +55,7 @@ int main(int argc, char** argv) {
   SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");   // keskin pikseller (HTML imageSmoothingEnabled = false)
 
   Canvas canvas; SDL_Texture* tex = nullptr; int texW = 0, texH = 0;
-  Uint64 last = SDL_GetPerformanceCounter(); bool run = true;
+  Uint64 last = SDL_GetPerformanceCounter(); bool run = true; size_t shown = 0;
   while (run) {
     SDL_Event ev;
     while (SDL_PollEvent(&ev)) {
@@ -66,6 +67,21 @@ int main(int argc, char** argv) {
         if (t >= 0) world.setTarget(t, true);
       }
       if (ev.type == SDL_KEYDOWN && ev.key.keysym.sym >= SDLK_1 && ev.key.keysym.sym <= SDLK_9) world.useSkill(int(ev.key.keysym.sym - SDLK_1));
+      if (ev.type == SDL_KEYDOWN && ev.key.keysym.sym == SDLK_TAB) world.cycleTarget();
+      if (ev.type == SDL_KEYDOWN && ev.key.keysym.sym == SDLK_e) {   // en yakın kişi (2,5 kare): konuş, teslim et, yeni görevleri al
+        int best = -1; double bd = 2.5;
+        for (size_t i = 0; i < world.ents.size(); i++) { const Ent& e = world.ents[i]; if (e.kind != Ent::NPC || e.hidden) continue; const double d = jsHypot(e.x - world.player.x, e.y - world.player.y); if (d < bd) { bd = d; best = int(i); } }
+        if (best >= 0) {
+          const std::string cn = world.ents[size_t(best)].name; world.interact(best);
+          world.note(world.quests().name(cn) + ": " + world.quests().greet(cn));
+          for (int qi : world.questsFor(cn)) {
+            const Quest& q = world.quests().all()[size_t(qi)]; const std::string st = world.questState(qi);
+            if (st == "ready" && q.to == cn) world.dialogComplete(qi);
+            else if (st == "new" && q.giver == cn) { world.dialogAccept(qi, cn); if (q.hasTp) break; }
+            else if (st == "active") world.note(q.tr.title + ": " + q.tr.goal);
+          }
+        }
+      }
     }
     const Uint8* k = SDL_GetKeyboardState(nullptr);
     double x = 0, y = 0;
@@ -87,7 +103,9 @@ int main(int argc, char** argv) {
     }
     SDL_UpdateTexture(tex, nullptr, canvas.img.px.data(), cw * 4);
     SDL_RenderClear(ren); SDL_RenderCopy(ren, tex, nullptr, nullptr); SDL_RenderPresent(ren);
-    std::string title = "Anrufen Online · " + world.sceneName; SDL_SetWindowTitle(win, title.c_str());
+    for (size_t k = std::min(world.logTotal - shown, world.log.size()); k > 0; k--) std::printf("%s\n", world.log[world.log.size() - k].c_str());   // olay günlüğü (arayüz gelene dek konsolda)
+    shown = world.logTotal;
+    std::string title = "Anrufen Online · " + world.quests().name(world.sceneName) + (world.log.empty() ? "" : " · " + world.log.back()); SDL_SetWindowTitle(win, title.c_str());
   }
   if (tex) SDL_DestroyTexture(tex);
   SDL_DestroyRenderer(ren); SDL_DestroyWindow(win); SDL_Quit();

@@ -78,6 +78,21 @@ int main(int argc, char** argv) {
     CHECK(w.ents[t].hp < hp0 || w.ents[t].dead, "beceri: 0,25 sn sonra vurur");
     w.P.sk["w5"] = 1; w.player.cds.clear(); w.useSkill(4); for (int k = 0; k < 10; k++) w.update(1.0 / 30);   // Hız Patlaması: güçlendirme
     CHECK(!w.player.buffs.empty() && w.player.buffs[0].id == "w5" && w.stats().spd > 0, "beceri: güçlendirme etkin (hız)");
+    // görevler: veri, durum, alma, konuşma görevi, öldürme sayacı, teslim ve ödül, sınıf yükseltmesi
+    engine::Quests& Q = w.quests();
+    CHECK(Q.all().size() > 900 && Q.byId(80292) && Q.byId(80292)->giver == "点点我", "görev: veri yüklendi (Kayıt görevi)");
+    w.P = engine::CharData(); w.setChar("战士", "人类", "male"); w.flags.clear();
+    const int q1 = Q.indexOf(80292), q2 = Q.indexOf(80294);
+    CHECK(w.questState(q1) == "new" && w.questState(q2) == "locked", "görev: ilk görev yeni, sonraki kilitli");
+    w.setChar("战士", "精灵", "male"); CHECK(w.questState(q1) == "locked", "görev: ırk görevi öteki ırka kapalı"); w.setChar("战士", "人类", "male");
+    w.dialogAccept(q1, "点点我"); CHECK(w.questState(q1) == "ready", "görev: konuşma görevi alınınca hazır");
+    const long long g0 = w.P.gold; w.completeQuest(q1);
+    CHECK(w.P.done.count(80292) && w.P.gold > g0 && w.countItem("10002") == 1 && w.countItem("10005") == 0, "görev: teslim, altın ve sınıfa göre ödül eşyası");
+    w.acceptQuest(q2); w.questKill("鸭子");
+    CHECK(w.questState(q2) == "ready", "görev: öldürme sayacı (1 ördek)");
+    w.P.lv = 40; w.autoQuests(); CHECK(w.P.quests.count(80344), "görev: 40'ta kendiliğinden görev (Acemilikten Çıkış)");
+    for (const engine::Quest& q : Q.all()) if (q.adv == 1 && q.cls == "战士" && (q.race.empty() || q.race == "人类")) { w.gmQuestDone(q.id); break; }
+    CHECK(w.P.adv == 1, "görev: sınıf yükseltme görevi biter, sınıf ağacı açılır");
   }
   std::printf("motor testleri: %d geçti, %d kaldı\n", passed, failed);
   return failed ? 1 : 0;

@@ -8,18 +8,7 @@
 
 namespace engine {
 
-// JS nesnesinde tam sayı biçimli anahtarlar önce (artan), sonra diğerleri ekleme sırasıyla: Object.entries / for…in sırası
-static std::vector<const std::pair<std::string, core::Json>*> jsOrder(const core::Json& o) {
-  std::vector<const std::pair<std::string, core::Json>*> num, rest;
-  for (const auto& kv : o.obj()) {
-    const std::string& k = kv.first;
-    const bool isInt = !k.empty() && k.size() < 10 && std::all_of(k.begin(), k.end(), ::isdigit) && (k == "0" || k[0] != '0');
-    (isInt ? num : rest).push_back(&kv);
-  }
-  std::stable_sort(num.begin(), num.end(), [](auto* a, auto* b) { return std::stoll(a->first) < std::stoll(b->first); });
-  num.insert(num.end(), rest.begin(), rest.end());
-  return num;
-}
+using core::jsOrder;
 
 std::string lookFamily(const std::string& look) {
   // /^(怪物-[^-]+|[^-]+)(-.*)?$/ → $1
@@ -36,14 +25,14 @@ void Balance::load(const Vfs& vfs, const core::Json& D) {
   for (const auto& kv : B["MON"].obj()) {
     const core::Json& m = kv.second; auto d = std::make_unique<MonDef>();
     d->lv = m["lv"].i(0); d->rank = m["rank"].i(0); d->n = m["n"].i(0); d->wide = m["wide"].i(0); d->xp = (long long)m["xp"].num(0);
-    d->passive = m["passive"].b(); d->dummy = m["dummy"].b(); d->skip = m["skip"].b(); d->solo = m["solo"].i(0) != 0 || m["solo"].b();
+    d->passive = m["passive"].truthy(); d->dummy = m["dummy"].truthy(); d->skip = m["skip"].truthy(); d->solo = m["solo"].truthy();
     mon_[kv.first] = std::move(d);
   }
   for (const auto& kv : B["CLS"].obj()) {
     const core::Json& c = kv.second; ClassBase b;
     b.hp = c["hp"].num(); b.mp = c["mp"].num(); b.atk = c["atk"].num(); b.def = c["def"].num();
     b.ghp = c["ghp"].num(); b.gmp = c["gmp"].num(); b.gatk = c["gatk"].num(); b.gdef = c["gdef"].num();
-    b.dmgK = c["dmgK"].num(1); b.range = c["range"].num(1.4); b.melee = c["melee"].b(); b.bolt = c["bolt"].str(); b.boltHit = c["boltHit"].str(); b.snd = c["snd"].str();
+    b.dmgK = c["dmgK"].num(1); b.range = c["range"].num(1.4); b.melee = c["melee"].truthy(); b.bolt = c["bolt"].str(); b.boltHit = c["boltHit"].str(); b.snd = c["snd"].str();
     cls_[kv.first] = b;
   }
   const core::Json I = core::Json::parse(vfs.readText("items.json"));
@@ -62,9 +51,10 @@ void Balance::load(const Vfs& vfs, const core::Json& D) {
     if (!mobByName_.count(r.name)) mobByName_[r.name] = kv->first;
   }
   skills.load(vfs);
+  if (vfs.exists("quests.json")) quests.load(vfs, D);
   if (vfs.exists("pets.json")) {
     const core::Json P = core::Json::parse(vfs.readText("pets.json"));
-    for (const core::Json& s : P["species"].arr()) if (!s["apk"].b()) eggFam_.push_back({lookFamily(s["forms"][0]["look"].str()), s["egg"].str()});
+    for (const core::Json& s : P["species"].arr()) if (!s["apk"].truthy()) eggFam_.push_back({lookFamily(s["forms"][0]["look"].str()), s["egg"].str()});
   }
 }
 

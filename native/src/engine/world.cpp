@@ -364,8 +364,7 @@ int World::phantomFx() {
   f.loop = true; f.anim = player.dir; f.len = f.sp->ok() ? f.sp->animLen(f.anim) : 0; f.done = !f.sp->ok() || !f.len;
   return f.uid;
 }
-// JS nesne sırası: tam sayı biçimli anahtarlar önce (artan), sonra ötekiler eklenme sırasıyla
-static bool jsIntKey(const std::string& k) { return !k.empty() && k.size() < 10 && std::all_of(k.begin(), k.end(), ::isdigit) && (k == "0" || k[0] != '0'); }
+using core::jsIntKey;
 // süren etkinin görseli (HTML auraSync): etki sürdükçe efekt varlığın üstünde döner, bitince kalkar. want: anahtar → efekt adı
 void World::auraSync(int follow, Aura& A, const std::vector<std::pair<std::string, std::string>>& want0) {
   std::vector<std::pair<std::string, std::string>> want;
@@ -560,6 +559,7 @@ void World::killMob(int i) {
   if (random() < 0.06) addItem(P.lv > 10 ? "mp2" : "mp1");
   if (m.d->rank && random() < 0.6) { const std::string g = randomGear(std::max(1, m.d->lv + 2)); if (!g.empty()) addItem(g); }
   else if (!m.d->passive && random() < 0.025) { const std::string g = randomGear(std::max(1, m.d->lv)); if (!g.empty()) addItem(g); }
+  questKill(m.name);   // görev sayaçları ve toplama zarları (HTML'deki yerinde: ganimetten sonra, evcil yumurtasından önce)
   // evcil yumurtası: görünüş ailesi uyan tür varsa küçük olasılıkla (HTML Pet.dropEgg)
   if (const Balance::MobRec* info = bal_.mobInfo(m.name)) if (const std::string* egg = bal_.eggFor(info->look)) {
     const double ch = m.d->rank == 2 ? 0.25 : m.d->rank ? 0.03 : 0.004; if (random() < ch) addItem(*egg);
@@ -597,6 +597,9 @@ void World::gainXp(long long n) {
   while (P.xp >= bal_.xpNeed(P.lv)) {
     P.xp -= bal_.xpNeed(P.lv); P.lv++; const Stats s = stats(); player.hp = s.hp; player.mp = s.mp;
     pushFx("LEVELUP", player.x, player.y); P.sp++;
+    autoQuests();
+    // açılan görevler (HTML questsUnlockedAt: bütün görevlerin açılma seviyesi liste sırasıyla hesaplanır)
+    for (size_t qi = 0; qi < quests().all().size(); qi++) if (quests().minLv(int(qi)) == P.lv && questState(int(qi)) == "new") note("Yeni görev: " + quests().all()[qi].tr.title);
   }
 }
 
