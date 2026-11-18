@@ -3,3 +3,5 @@ android/
 ios/
 .DS_Store
 __pycache__/
+native/build/
+native/anahtar.txt

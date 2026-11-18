@@ -17,6 +17,7 @@ Bir konuya girmeden önce ilgili belgeyi oku; bir sistemi değiştirince belgesi
 | `docs/07-evcil.md` | Evcil hayvanlar: kaynaklar, aşamalar, nasıl çalışıyor |
 | `docs/08-gunluk.md` | **Değişiklik günlüğü**: tarih tarih kısa özet (her commit'te bir satır) |
 | `docs/06-test.md` | Yerel çalıştırma, Playwright test betikleri (`tools/test/`), sık hatalar |
+| `docs/09-cpp.md` | **C++ istemcisi** (`native/`): karar, yol haritası, derleme, godat biçimleri, şifreli paket, anahtar, araçlar |
 
 ## Her işte uyulacak kurallar
 
@@ -35,3 +36,6 @@ Bir konuya girmeden önce ilgili belgeyi oku; bir sistemi değiştirince belgesi
 - **APK kullanımı:** APK'dan orijinal görsel ve veri alınır; APK ekibinin Unity kodu, sunucu adresi, yönetici araçları alınmaz.
 - Yerel testten önce: `service postgresql start`, sunucu `cd server && PORT=8099 DATABASE_URL=postgres://anrufen:anrufen_dev@localhost:5432/anrufen node server.js` (arka planda). Ayrıntı `docs/06-test.md`.
 - `rm` ile göreli joker kullanma (güvenlik denetimi engeller).
+- **C++ geçişi (18.11):** yeni iş `native/` (C++17) içinde yapılır; `www/` HTML sürümü usta kopyadır, yalnız hata düzeltmesi alır. Eksik haritalar/zindanlar C++ sürümünde tamamlanır.
+  Derleme ve test: `cmake -S native -B native/build -G Ninja && cmake --build native/build && ctest --test-dir native/build`; `python3 tools/test/godat_esitlik.py`.
+  `native/anahtar.txt` (yayın anahtarı) asla commit edilmez.

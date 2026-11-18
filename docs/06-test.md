@@ -51,3 +51,7 @@ Oyun hazır: `window.__G && window.__G.player`. Konsoldan: `gmLevel(n)`, `loadSc
 - `tools/test/evcilgorev.js`: RACE=人类|精灵 Terbiyeci zinciri.
 - `tools/test/evcil_kolaj.js`: bütün türlerin 8 biçimi ve beceri simgeleri tek görselde (görsel denetim).
 - `tools/test/gorunus.js`: `LOOKS='ad1,ad2'` görünüşleri yan yana çizer (palet/görsel karşılaştırma).
+
+## C++ (`native/`, docs/09-cpp.md)
+- Derleme + birim testleri: `cmake -S native -B native/build -G Ninja && cmake --build native/build && ctest --test-dir native/build` (ya da `./native/build/test_godat`).
+- `python3 tools/test/godat_esitlik.py`: bütün godat dosyalarında C++ = Python, şifreli paket gidiş-dönüşü (`PAKET=0` yalnız okuma).
