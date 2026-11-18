@@ -1,7 +1,7 @@
 // Dünya: sahne, varlıklar (NPC, canavar), oyuncu, efektler, zamanlayıcılar, savaş (HTML'de game.js loadScene/update/hitMob/
 // hurtPlayer/killMob/gainXp/stats + ui.js drawWorld). Sıra ve hesaplar HTML ile birebir: iki sürüm aynı tohumla aynı sonucu verir
 // (tools/test/cpp_savas.js). Beceriler (useSkill), güçlendirmeler, süren etkiler (kanama, yanma, çürüme), Büyü Hayali burada;
-// beceri tanımları skills.cpp; görevler world_quests.cpp (veri quests.cpp). Henüz yok (sonraki adımlar): arayüz, eşya/dükkân, evcil hayvan, zindan.
+// beceri tanımları skills.cpp; görevler world_quests.cpp (veri quests.cpp); yol bulma world_nav.cpp; eşyalar world_items.cpp; zindanlar world_dungeon.cpp. Henüz yok: evcil hayvan.
 #pragma once
 #include <functional>
 #include <map>
@@ -33,6 +33,7 @@ struct Ent {
   Sprite* sp = nullptr;
   // NPC
   int anim = 0; bool pickup = false, hidden = false, dummy = false, node = false; double respawnT = 0;
+  std::string key; bool boss = false, prog = false;   // canavar: "sahne:kayıt:sıra" (zindan koşusunda kesilenler), zindan boss'u, ilerleme boss'u
   // canavar
   MonDef* d = nullptr;
   double hp = 0, maxHp = 0, atk = 0, def = 0, homeX = 0, homeY = 0;
@@ -79,6 +80,9 @@ struct CharData {
   std::set<int> done;                                    // bitmiş görevler
   bool hasHome = false; std::string homeScene; bool homeXY = false; int homeX = 0, homeY = 0;   // ölünce doğulan yer (ışınlanma görevi)
   std::map<std::string, int> life;                       // yaşam meslekleri (meslek → kademe; sistem sonraki adımda)
+  // zindan koşusu (HTML P.dun; yoksa on false): kesilen canavarlar bu koşuda doğmaz; günlük giriş sayacı (HTML P.dg)
+  struct Run { bool on = false; std::string id; int copy = 0; std::set<std::string> cleared; bool boss = false; } dun;
+  std::string dgDay; std::map<std::string, int> dgN;
 };
 
 struct Stats { double hp = 0, mp = 0, atk = 0, def = 0, crit = 0, dodge = 0, hpreg = 0, mpreg = 0, res = 0, dr = 0, spd = 0, goldUp = 0, lifeEl = 0,
@@ -94,6 +98,9 @@ struct DrawOpts { bool shadows = true, targetRing = true; };
 
 // HTML hitMob seçenekleri: pure savunma tanımaz, tick sürekli hasar (tetikleyiciler yok)
 struct HitOpt { double crit = 0, add = 0, slow = 0, freeze = 0, stun = 0, critDmg = 0; bool pure = false, bleed = false, burn = false, tick = false; std::function<void(Ent&)> onCrit; };
+
+// geçidin yanındaki varış bölgesi (HTML arrivalNear): çoğunlukla geçit+1 (tür 0); değilse geçide en yakın varış bölgesi
+const std::vector<int>* arrivalNear(const std::vector<std::vector<int>>& regs, int idx);
 
 class World {
  public:
@@ -145,6 +152,26 @@ class World {
   void openGrowthBox(const std::string& id);               // Gelişim Paketi: acemi ekipmanı + iksirler
   void assignQuick(const std::string& sl, int qi);          // kısayol halkasına yerleştir (aynısı başka yuvadaysa oradan kalkar)
   std::string clsName() const;                              // acemi / sınıf / ikinci sınıf adı
+  // zindanlar (HTML dungeon.js; world_dungeon.cpp)
+  const DungeonDef* dungeonOf(const std::string& sid, int* copy = nullptr) const;
+  bool dungeonDoor(int region);                             // alan haritasındaki kapı: şartlar, onay kutusu
+  void dungeonEnter(const DungeonDef& d, int copy);
+  void dungeonLeave(bool dead);                             // kapının dışına; koşu kapanır
+  int dungeonUsedToday(const DungeonDef& d) const;
+  std::vector<std::pair<std::string, const DungeonTp*>> dungeonTps(const std::string& cn) const;   // kişinin zindan ışınlanmaları
+  void dungeonTpGo(const DungeonTp& t);
+  std::string today;                                        // günlük sınır için gün (YYYY-MM-DD, UTC); boşsa saatten
+  // GM (HTML Dungeon.GM)
+  void gmDungeonEnter(const std::string& id, int copy);
+  void gmDungeonDoor(const std::string& id, int copy);
+  void gmDungeonBoss();
+  void gmDungeonClear();
+  void gmDungeonLast();
+  void gmDungeonReset() { P.dgDay.clear(); P.dgN.clear(); toast("Günlük zindan hakları sıfırlandı."); }
+  // arayüzden onay isteği (HTML Win.ask'i oyun kodundan çağırır): HUD onay kutusunu açar
+  std::string askText; std::function<void()> askYes;
+  void ask(const std::string& t, std::function<void()> yes) { askText = t; askYes = std::move(yes); }
+  double warnT = 0;                                         // uyarı bildirimini tekrarlamama (HTML Game.warnT)
   static std::string clsTr(const std::string& cls);        // Savaşçı, Büyücü, Kutsal Elçi
   static std::string raceTr(const std::string& race);      // İnsan, Gece Elfi
   void clampVitals();
@@ -231,14 +258,19 @@ class World {
   struct Timer { double t; std::function<void()> fn; };
   std::vector<Timer> timers_;
   int lastJoyDir_ = -1, target_ = -1, fxUid_ = 0;
-  bool goPending_ = false; std::string goSid_, goFrom_;   // geçitten geçiş (kare sonunda)
+  bool goPending_ = false; std::function<void()> goFn_;   // geçitten geçiş / zindandan çıkış (kare sonunda; HTML'de eşzamansız)
+  void dungeonOnLoad(const std::string& sid);
+  void dungeonTune(Ent& m);
+  void dungeonOnKill(Ent& m);
+  bool dungeonOnRevive();
+  std::pair<int, int> dungeonOutside(const DungeonCopy& c);
   bool engage_ = false;
 
   bool blocked(double fx, double fy) const;
   void later(double s, std::function<void()> fn) { timers_.push_back({s, std::move(fn)}); }
   template <class E> void moveEnt(E& e, double dx, double dy);
   template <class E> bool stepTo(E& e, double tx, double ty, double sp, double dt);
-  void spawnMob(const std::string& name, int x, int y);
+  void spawnMob(const std::string& name, int x, int y, const std::string& key = "");
   int pushFx(const std::string& name, double x, double y, int dir = -1, bool glow = true);
   Fx* fxByUid(int uid) { for (Fx& f : fx) if (f.uid == uid) return &f; return nullptr; }
   void shoot(const std::string& name, double fx, double fy, int to, std::function<void()> cb, bool vis);

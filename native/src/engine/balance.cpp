@@ -69,11 +69,34 @@ void Balance::load(const Vfs& vfs, const core::Json& D) {
     const core::Json& v = kv->second; if (!v.isArr() || !v.size()) continue;
     MobRec r{v[0].str(), v[1].str(), v[2].str()};
     if (v.size() > 2 && fx(r.look) && !fx(r.deathFx)) std::swap(r.look, r.deathFx);
+    for (const core::Json& f : v.arr()) if (f.str() == "instance_progress") r.prog = true;
     mobById_[kv->first] = r;
     if (!mobByName_.count(r.name)) mobByName_[r.name] = kv->first;
   }
+  // zindanlar; zindan haritalarının seviye aralığı tanımdan (HTML Dungeon.init, ilk harita yüklenmeden önce): canavar seviyeleri ve
+  // görevlerin açılma seviyesi bundan
+  if (vfs.exists("zindan.json")) {
+    const core::Json Z = core::Json::parse(vfs.readText("zindan.json"));
+    core::Json* scenes = const_cast<core::Json&>(D).mut("scenes");   // veri nesnesi Assets'te değiştirilebilir; burada yalnız lvr yazılır
+    for (const core::Json& z : Z["dungeons"].arr()) {
+      DungeonDef d; d.id = z["id"].str(); d.cn = z["cn"].str(); d.board = z["board"].str(); d.boss = z["boss"].str(); d.lv = z["lv"].i(); d.lvr0 = z["lvr"][0].i(); d.lvr1 = z["lvr"][1].i();
+      d.daily = z["daily"].i(); d.req = z["req"].i(); d.train = z["train"].truthy(); d.bossX = z["bossX"].num();
+      for (const core::Json& c : z["copies"].arr()) {
+        DungeonCopy k; k.doorScene = c["door"][0].str(); k.doorRegion = c["door"][1].i(); for (const core::Json& sc : c["scenes"].arr()) k.scenes.push_back(sc.str());
+        if (scenes) for (const std::string& sid : k.scenes) if (core::Json* S = scenes->mut(sid)) S->set("lvr", core::Json::array({core::Json::number(d.lvr0), core::Json::number(d.lvr1)}));
+        d.copies.push_back(std::move(k));
+      }
+      dungeons.push_back(std::move(d));
+    }
+    for (const auto& kv : Z["exit"].obj()) dungeonExit[kv.first] = {kv.second[0].str(), {kv.second[1].i(), kv.second[2].i()}};
+    for (const auto& kv : Z["tp"].obj()) { DungeonTp t; t.sid = kv.second["to"][0].str(); t.hasXY = kv.second["to"][1].isNum(); t.x = kv.second["to"][1].i(); t.y = kv.second["to"][2].i(); t.lv = kv.second["lv"].i(); t.label = kv.second["label"][0].str(); dungeonTp[kv.first] = t; }
+  }
   skills.load(vfs);
   if (vfs.exists("quests.json")) quests.load(vfs, D);
+  if (vfs.exists("zindan.json")) {   // pano sözleri (konuşma)
+    const core::Json Z = core::Json::parse(vfs.readText("zindan.json"));
+    for (const auto& kv : Z["greet"]["tr"].obj()) quests.addGreet(kv.first, kv.second.str(), Z["greet"]["en"][kv.first].str());
+  }
   if (vfs.exists("travel.json")) {
     const core::Json T = core::Json::parse(vfs.readText("travel.json"));
     for (const auto& kv : T["npc"].obj()) for (const core::Json& o : kv.second.arr()) {

@@ -90,6 +90,16 @@ const Json& Json::operator[](const std::string& key) const {
   if (type_ != Type::Object || !index_) return null();
   auto it = index_->find(key); return it == index_->end() ? null() : obj_[it->second].second;
 }
+Json* Json::mut(const std::string& key) {
+  if (type_ != Type::Object || !index_) return nullptr;
+  auto it = index_->find(key); return it == index_->end() ? nullptr : &obj_[it->second].second;
+}
+void Json::set(const std::string& key, Json v) {
+  if (type_ != Type::Object) return;
+  if (Json* p = mut(key)) { *p = std::move(v); return; }
+  index_ = std::make_shared<std::unordered_map<std::string, size_t>>(index_ ? *index_ : std::unordered_map<std::string, size_t>());   // paylaşılan dizini ayır
+  (*index_)[key] = obj_.size(); obj_.emplace_back(key, std::move(v));
+}
 bool Json::has(const std::string& key) const { return type_ == Type::Object && index_ && index_->count(key); }
 
 bool jsIntKey(const std::string& k) {

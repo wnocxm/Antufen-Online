@@ -53,6 +53,7 @@ class Quests {
   const std::vector<std::string>& monScenes(const std::string& name) const;
   const std::string& name(const std::string& cn, bool en = false) const;   // HTML trName
   const std::string& greet(const std::string& cn, bool en = false) const;
+  void addGreet(const std::string& cn, const std::string& tr, const std::string& en) { greet_[0][cn] = tr; greet_[1][cn] = en; }   // ek söz (zindan panoları)
   int sceneQLv(const std::string& sid) const;          // haritanın görev seviyesi (yoksa INT_MIN)
 
  private:

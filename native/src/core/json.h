@@ -1,4 +1,4 @@
-// Küçük JSON okuyucu (oyunun veri dosyaları için: data.json, ani.json, haritalar …). Yazma yok.
+// Küçük JSON okuyucu (oyunun veri dosyaları için: data.json, ani.json, haritalar …). Metne yazma yok; yüklemeden sonra değer yazılabilir (set).
 // Kullanım: core::Json v = core::Json::parse(metin); v["reg"]["特效-刀光"][0].str(); v["w"].num();
 #pragma once
 #include <cstdint>
@@ -39,6 +39,11 @@ class Json {
   const std::vector<std::pair<std::string, Json>>& obj() const { return obj_; }   // ekleme sırasıyla
 
   static const Json& null() { static const Json n; return n; }
+  // yazma (yükleme sonrası küçük düzeltmeler için): nesnedeki değer (yoksa nullptr); nesneye yaz (varsa yerine, yoksa sona)
+  Json* mut(const std::string& key);
+  void set(const std::string& key, Json v);
+  static Json number(double v) { Json j; j.type_ = Type::Number; j.num_ = v; return j; }
+  static Json array(std::vector<Json> a) { Json j; j.type_ = Type::Array; j.arr_ = std::move(a); return j; }
 
  private:
   friend class JsonParser;

@@ -168,6 +168,7 @@ void Hud::handle(World& w) {
     else if (r == "sys") { win.close(); win.open(w, "sys"); }
     else w.toast("Bu pencere yakında.");
   }
+  if (!w.askText.empty()) { win.ask(w.askText, w.askYes); w.askText.clear(); w.askYes = nullptr; }   // oyun kodunun onay isteği (zindan kapısı, sandık)
   if (!win.assignReq.empty()) { assign_ = win.assignReq; w.toastMsg = "Bir yuvaya dokun: " + win.assignName; w.toastT = 3; win.assignReq.clear(); win.close(); }
   if (w.dialogEnt >= 0) { win.close(); win.open(w, "npc", w.dialogEnt, w.dialogSay); w.dialogEnt = -1; w.dialogSay.clear(); }
   if (w.died) { w.died = false; win.close(); deathAt = now + 1.2; }

@@ -97,6 +97,7 @@ std::pair<std::string, std::vector<Win::Opt>> Win::npcOptions(World& w) {
     for (size_t i = 0; i < tv->size(); i++) { if ((*tv)[i].kind == "araba") car = true; if ((*tv)[i].kind == "tp" && int(i) != hint) { Opt e; e.t = "✦ " + w.travelLabel(npc_, (*tv)[i]); e.a = "tgo"; e.tv = int(i); o.push_back(e); } }
     if (car) { Opt e; e.t = "✦ Yolculuk (" + std::to_string(w.balance().travelCar) + " altın)"; e.a = "trv"; o.push_back(e); }
   }
+  for (const auto& d : w.dungeonTps(cn)) { Opt e; e.t = "✦ " + d.first; e.a = "dtp"; e.s = cn; o.push_back(e); }   // zindan merkezine/merkezden ışınlanma
   Opt b; b.t = "Hoşça kal"; b.a = "bye"; o.push_back(b);
   if (o.size() > 6) o.resize(6);
   return {txt, o};
@@ -146,6 +147,7 @@ void Win::tapNpc(World& w, const std::string& id) {
   if (e.a == "back") { dq_ = -1; return; }
   if (e.a == "say") { say_ = e.s; return; }
   if (e.a == "soon") { w.toast("Bu bölüm yakında."); return; }
+  if (e.a == "dtp") { close(); const auto L = w.dungeonTps(e.s); if (!L.empty()) w.dungeonTpGo(*L[0].second); return; }
   if (e.a == "shop") { const std::string cn = w.ents[size_t(n)].name; close(); openShop(w, cn); return; }
   if (e.a == "tp") { close(); w.questTeleport(e.qi); return; }
   if (e.a == "trv") { dtrv_ = 0; return; }

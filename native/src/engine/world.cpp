@@ -223,8 +223,8 @@ bool World::blocked(double fx, double fy) const {
   return extraBlock_[size_t(y) * map.w + x] == 1;
 }
 
-void World::spawnMob(const std::string& nm, int px, int py) {
-  Ent e; e.kind = Ent::MOB; e.name = nm; e.x = px; e.y = py;
+void World::spawnMob(const std::string& nm, int px, int py, const std::string& key) {
+  Ent e; e.kind = Ent::MOB; e.name = nm; e.x = px; e.y = py; e.key = key;
   e.t = random() * 20;   // HTML Ent: t = Math.random() * 20
   MonDef& d = bal_.monDef(nm, *scene_); e.d = &d;
   // canavar değerleri orijinalde sunucudaydı: seviyeden hesaplanır (seçkin ×3 can ×1,15 saldırı; boss ×18 / ×1,8)
@@ -233,6 +233,7 @@ void World::spawnMob(const std::string& nm, int px, int py) {
   e.atk = jsRound((48 + 27.0 * L + 0.15 * L * L) * soft * (rk == 2 ? 1.8 : rk ? 1.15 : 1)); e.def = 8.0 * L * (rk ? 1.5 : 1);
   e.hp = e.maxHp = mhp; e.homeX = px; e.homeY = py; e.state = "idle"; e.atkT = 0;
   e.wanderT = rnd(1, 4); e.aggro = false; e.slowT = 0;
+  dungeonTune(e);   // zindan: sınav canavarı zayıf, boss tek kişilik
   if (d.solo && rk == 2) { e.maxHp = e.hp = jsRound(e.hp * 8 / 18); e.atk = jsRound(e.atk / 1.8); }   // görev boss'u tek kişilik
   if (const Balance::MobRec* info = bal_.mobInfo(nm)) { e.sp = map.sprite(info->look); e.deathFx = info->deathFx; }
   e.dir = irnd(0, 3);
@@ -249,7 +250,10 @@ void World::loadScene(const std::string& sid, const int* arrive) {
   phantom.tg = -1;   // Büyü Hayali sürer, eski haritanın canavarını hedeflemez
   floats.clear(); zoneMsg = quests().name(sceneName); zoneT = 3; sceneGen++;
   goTarget = -1; dialogEnt = -1; if (!route.empty()) routeT = routeDelay;   // uçan sayılar eski haritanın varlıklarına bağlıydı; bölge adı duyurusu
+  dungeonOnLoad(sid);
+  int ei = -1;
   for (const core::Json& e : sc["ents"].arr()) {
+    ei++;
     const std::string id = std::to_string(e[0].i()), nm = e[1].str(); const int x = e[2][0].i(), y = e[2][1].i();
     const core::Json& info = D["cit"][id];
     if (info.isArr()) {
@@ -268,9 +272,11 @@ void World::loadScene(const std::string& sid, const int* arrive) {
     }
     const int cnt = d.n ? d.n : 5, wide = d.wide ? d.wide : 5;
     for (int i = 0; i < cnt; i++) {
+      const std::string key = sid + ":" + std::to_string(ei) + ":" + std::to_string(i);
+      if (P.dun.on && P.dun.cleared.count(key)) { int c = -1; const DungeonDef* dd = dungeonOf(sid, &c); if (dd && !dd->train) continue; }   // normal zindanda bu koşuda kesilmiş
       int px = x, py = y;
       for (int k = 0; k < 30; k++) { const double a = rnd(-wide, wide), b = rnd(-wide, wide); if (!blocked(x + a, y + b)) { px = int(jsRound(x + a)); py = int(jsRound(y + b)); break; } }
-      spawnMob(nm, px, py);
+      spawnMob(nm, px, py, key);
     }
   }
   // oyuncu: verilen yer, yoksa giriş bölgesinin (tür 0) ortası; geçilmezse giriş bölgesinin köşesi, o da olmazsa en yakın boş kare
@@ -295,30 +301,31 @@ void World::loadScene(const std::string& sid, const int* arrive) {
   arriveT = 1.5;
 }
 
+const std::vector<int>* arrivalNear(const std::vector<std::vector<int>>& regs, int idx) {
+  const std::vector<int>* ex = nullptr, *nx = nullptr, *r = nullptr;
+  for (const auto& g : regs) if (g[0] == idx && g[1] == 1) { ex = &g; break; }
+  if (!ex) for (const auto& g : regs) if (g[0] == idx) { ex = &g; break; }
+  for (const auto& g : regs) if (g[0] == idx + 1 && g[1] == 0) { nx = &g; break; }
+  if (nx || !ex) return nx ? nx : ex;
+  const double ax = (ex->at(2) + ex->at(4)) / 2.0, ay = (ex->at(3) + ex->at(5)) / 2.0; double bd = 1e9;
+  for (const auto& g : regs) if (g[1] == 0) { const double d = jsHypot((g[2] + g[4]) / 2.0 - ax, (g[3] + g[5]) / 2.0 - ay); if (d < bd) { bd = d; r = &g; } }
+  return r ? r : ex;
+}
+
 // geçitten geçiş (HTML gotoScene + arrivalNear): hedef sahnede bizim sahneye dönen geçidin yanındaki giriş bölgesi
 void World::gotoScene(const std::string& sid, const std::string& fromSid) {
   const core::Json& sc = as_.D()["scenes"][sid];
   GameMap tmp; tmp.load(as_, sc["map"].str());
   const auto& regs = tmp.regions; int backIdx = -1;
-  for (const core::Json& e : sc["exits"].arr()) if (std::to_string(e[2].i()) == fromSid || e[2].str() == fromSid) { backIdx = e[0].i(); break; }
+  for (const core::Json& e : sc["exits"].arr()) if (!fromSid.empty() && (std::to_string(e[2].i()) == fromSid || e[2].str() == fromSid)) { backIdx = e[0].i(); break; }
   const std::vector<int>* r = nullptr;
-  if (backIdx >= 0) {
-    const std::vector<int>* ex = nullptr, *nx = nullptr;
-    for (const auto& g : regs) if (g[0] == backIdx && g[1] == 1) { ex = &g; break; }
-    if (!ex) for (const auto& g : regs) if (g[0] == backIdx) { ex = &g; break; }
-    for (const auto& g : regs) if (g[0] == backIdx + 1 && g[1] == 0) { nx = &g; break; }
-    if (nx || !ex) r = nx ? nx : ex;
-    else {
-      const double ax = (ex->at(2) + ex->at(4)) / 2.0, ay = (ex->at(3) + ex->at(5)) / 2.0; double bd = 1e9;
-      for (const auto& g : regs) if (g[1] == 0) { const double d = jsHypot((g[2] + g[4]) / 2.0 - ax, (g[3] + g[5]) / 2.0 - ay); if (d < bd) { bd = d; r = &g; } }
-      if (!r) r = ex;
-    }
-  } else for (const auto& g : regs) if (g[1] == 0) { r = &g; break; }
+  if (backIdx >= 0) r = arrivalNear(regs, backIdx);
+  else for (const auto& g : regs) if (g[1] == 0) { r = &g; break; }
   if (r) { const int a[2] = {int(jsRound(((*r)[2] + (*r)[4]) / 2.0)), int(jsRound(((*r)[3] + (*r)[5]) / 2.0))}; loadScene(sid, a); }
   else loadScene(sid);
 }
 
-// HTML checkExits (zindan kapıları sonraki adımda). Geçiş kare sonunda yapılır: HTML'de gotoScene eşzamansızdır, kare eski haritada
+// HTML checkExits (zindan kapıları ve çıkışları, yanlış bağlı geçit). Geçiş kare sonunda yapılır: HTML'de gotoScene eşzamansızdır, kare eski haritada
 // biter (canavarlar o karede de güncellenir, zar atar), yeni harita sonra yüklenir.
 void World::checkExits() {
   if (arriveT > 0 || goPending_) return;
@@ -326,11 +333,18 @@ void World::checkExits() {
   for (const auto& r : map.regions) {
     if (r.size() < 6 || r[1] != 1) continue;
     if (cx >= r[2] && cx <= r[4] && cy >= r[3] && cy <= r[5]) {
-      for (const core::Json& e : (*scene_)["exits"].arr()) if (e[0].i() == r[0]) {
-        std::string sid = e[2].isStr() ? e[2].str() : e[2].isNum() ? std::to_string(e[2].i()) : "";
-        if (sid.empty() || !as_.D()["scenes"][sid].isObj()) return;
-        goPending_ = true; goSid_ = sid; goFrom_ = sceneId; return;
+      auto fx = bal_.dungeonExit.find(sceneId + ":" + std::to_string(r[0]));   // yanlış bağlı geçit (zindan merkezinin çıkışı)
+      if (fx != bal_.dungeonExit.end()) { const std::string sid = fx->second.first; const int a[2] = {fx->second.second.first, fx->second.second.second}; goPending_ = true; goFn_ = [this, sid, a] { loadScene(sid, a); }; return; }
+      const core::Json* ex = nullptr; for (const core::Json& e : (*scene_)["exits"].arr()) if (e[0].i() == r[0]) { ex = &e; break; }
+      if (!ex) { if (dungeonDoor(r[0])) return; continue; }   // bağlanmamış geçit: zindan kapısı olabilir
+      std::string sid = (*ex)[2].isStr() ? (*ex)[2].str() : (*ex)[2].isNum() ? std::to_string((*ex)[2].i()) : "";
+      if (sid.empty() || !as_.D()["scenes"][sid].isObj()) {
+        std::string target = (*ex)[1].str(); const size_t k = target.find("(入口)"); if (k != std::string::npos) target.erase(k, std::string("(入口)").size());
+        if (warnT <= 0) { toast(quests().name(target) + ": bu bölge henüz açılmadı"); warnT = 3; }
+        return;
       }
+      if (dungeonOf(sceneId) && !dungeonOf(sid)) { goPending_ = true; goFn_ = [this] { dungeonLeave(false); }; return; }   // zindandan alana: kapının dışına
+      const std::string from = sceneId; goPending_ = true; goFn_ = [this, sid, from] { gotoScene(sid, from); }; return;
     }
   }
 }
@@ -592,6 +606,7 @@ void World::killMob(int i) {
   if (m.d->rank && random() < 0.6) { const std::string g = randomGear(std::max(1, m.d->lv + 2)); if (!g.empty()) { addItem(g, 1, true); note("Ganimet: " + itemName(g) + "!", LOG_Q); toast("Ganimet: " + itemName(g)); } }
   else if (!m.d->passive && random() < 0.025) { const std::string g = randomGear(std::max(1, m.d->lv)); if (!g.empty()) { addItem(g, 1, true); note("Ganimet: " + itemName(g), LOG_LOOT); } }
   questKill(m.name);   // görev sayaçları ve toplama zarları (HTML'deki yerinde: ganimetten sonra, evcil yumurtasından önce)
+  dungeonOnKill(m);    // zindan: kesilen canavar bu koşuda doğmaz, son boss sandığı
   // evcil yumurtası: görünüş ailesi uyan tür varsa küçük olasılıkla (HTML Pet.dropEgg)
   if (const Balance::MobRec* info = bal_.mobInfo(m.name)) if (const std::string* egg = bal_.eggFor(info->look)) {
     const double ch = m.d->rank == 2 ? 0.25 : m.d->rank ? 0.03 : 0.004; if (random() < ch) { addItem(*egg, 1, true); toast("Ganimet: " + itemName(*egg) + "!"); note("Ganimet: " + itemName(*egg), LOG_Q); }
@@ -640,7 +655,7 @@ void World::gainXp(long long n) {
 
 // ---------------- güncelleme (HTML update) ----------------
 void World::update(double dt, double sx, double sy) {
-  time += dt; if (arriveT > 0) arriveT -= dt;
+  time += dt; if (arriveT > 0) arriveT -= dt; if (warnT > 0) warnT -= dt;
   for (int i = int(timers_.size()) - 1; i >= 0; i--) {   // zamanlayıcılar: sondan başa (HTML gibi; yeni eklenenler bu karede çalışmaz)
     if (size_t(i) >= timers_.size()) continue;
     timers_[i].t -= dt;
@@ -808,7 +823,7 @@ void World::update(double dt, double sx, double sy) {
   }
   fx.erase(std::remove_if(fx.begin(), fx.end(), [](const Fx& f) { return f.done; }), fx.end());
   camX = map.px(p.x, p.y); camY = map.py(p.x, p.y) - 40;   // kamera karaktere kilitli
-  if (goPending_) { goPending_ = false; const std::string sid = goSid_, from = goFrom_; gotoScene(sid, from); }   // geçit: kare bitti, yeni harita
+  if (goPending_) { goPending_ = false; auto fn = std::move(goFn_); goFn_ = nullptr; if (fn) fn(); }   // geçit: kare bitti, yeni harita
 }
 
 // ---------------- çizim (HTML drawWorld) ----------------

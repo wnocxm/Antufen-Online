@@ -19,6 +19,7 @@ class Assets {
  public:
   void load(const Vfs& vfs);
   const core::Json& D() const { return D_; }
+  core::Json& Dmut() { return D_; }   // yükleme sonrası düzeltme (zindan haritalarının seviye aralığı)
   const core::Json& reg(const std::string& name) const { return D_["reg"][name]; }
   const core::Json* ani(const std::string& key) const;   // ani.json["dosya_numara"]
   // paleti uygulanmış görsel sayfası (önbellekli); yoksa nullptr

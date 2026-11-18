@@ -179,6 +179,7 @@ Test: `tools/test/gm.js` panel düğmelerine gerçekten basar (görüntüler `OU
 - GM (Haritalar sekmesi üst satırı): ücretsiz yolculuk (`Game.gmFreeTravel`), en yakın yolculuk NPC'sine yürü, Bozbalta Şehri'ne git. Test: `tools/test/yolculuk.js`.
 
 ## Zindanlar (`www/js/dungeon.js`)
+- C++ sürümü aynı tanımları `www/assets/zindan.json`'dan okur (`node tools/zindan_cikar.js`; DUNGEONS / DUNGEON_EXIT / DUNGEON_TP / pano sözleri değişince yeniden çalıştır; docs/09).
 - `DUNGEONS`: `{id, cn, lv, lvr, train, daily, board, boss, copies:[{door:[alanSahnesi, geçitBölgesi], scenes:[…]}]}`. Irk başına ayrı kopya olabilir (Sınav Ormanı, Mehtap Korusu: insan + elf girişi).
 - **Kapılar**: alan haritalarındaki, geçit tablosunda karşılığı olmayan tür 1 bölgeler (APK geçit tablosu boş/kendine bağlamış). `checkExits` → `Dungeon.door(bölge)` → onay kutusu (`Win.ask`, pencere açık olmadan da çalışır) → `enter`.
 - **Koşu** `P.dun = {id, copy, cleared:{sahne:varlık:sıra}, boss, t}` kayıtta durur; harita yüklenince `onLoad` (zindandaysa koşu yoksa açar, dışarıdaysa kapatır). Normal zindanda kesilen canavar `cleared`a yazılır ve yeniden doğmaz (`skip`), sınav zindanında yeniden doğar.

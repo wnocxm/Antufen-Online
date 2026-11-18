@@ -49,6 +49,10 @@
 //   goruntu <dosya.png>              çiz ve PNG yaz
 //   durum <dosya.json|->             oyuncu, sahne, zaman (JSON)
 //   jpeg <girdi.jpg> <çıktı.png>     JPEG çözücü denetimi (tools/test/jpeg_esitlik.py)
+//   zindankapi <id> [kopya] · zindangir <id> [kopya]   GM: zindan kapısının önüne · doğrudan içeri (sayaç artmaz)
+//   kapi <bölge> · evet               kapı bölgesine basılmış say (onay kutusu sorulur) · onay kutusunda Tamam
+//   gmboss · gmtemizle · gmsonkat · gmsifirla · zindancik · dirilt · gun <YYYY-MM-DD> · isinla <kişi adı>
+//   geciste <bölge> <dt>             oyuncuyu geçidin ortasına koyup bir kare ilerlet · zindandurum <dosya|->  zindan durumu (JSON)
 //   esya <al|sat|giy|cikar|kullan|ekle|sil> <eşya|yuva> [adet]   eşya işlemi (HTML buyItem, sellItem, equip, unequip, useItem, addItem, removeItem)
 //   gmgear · altin <n>               GM: seviyeye uygun en iyi ekipman · altın
 //   beceriyukselt <beceri no> · becerisifirla <0|1>   beceri penceresinin Yükselt'i · Puanları Sıfırla (1: bedava)
@@ -81,6 +85,7 @@ using namespace engine;
 static void out(const std::string& f, const std::string& text) {
   if (f == "-") std::fputs(text.c_str(), stdout); else godat::writeFile(f, godat::Bytes(text.begin(), text.end()));
 }
+static std::string jq(const std::string& x) { std::string o = "\""; for (char c : x) { if (c == '"' || c == '\\') o += '\\'; o += c; } return o + "\""; }   // JSON dizgisi
 static std::string num(double v) { char b[64]; std::snprintf(b, sizeof b, "%.17g", v); return b; }   // tam hassasiyet (karşılaştırma)
 
 // görev durumu (iz satırı): seviye, deneyim, altın, yükseltme, çanta, sürmekte olan görevler (sayaçlarıyla), bitmiş görevler
@@ -327,6 +332,35 @@ int main(int argc, char** argv) {
       else if (cmd == "bekleme") { std::string id; double t; ss >> id >> t; W().player.cds[id] = t; }
       else if (cmd == "gorevver") { int id; ss >> id; W().P.quests[id] = QuestSt(); }   // görevi doğrudan alınmış say (test)
       else if (cmd == "jpeg") { std::string a, b; ss >> a >> b; godat::writeFile(b, core::encodePNG(core::decodeJPEG(godat::readFile(a)))); }   // JPEG → PNG (çözücü denetimi)
+      else if (cmd == "zindankapi") { std::string id; int c = 0; ss >> id >> c; W().gmDungeonDoor(id, c); }   // GM: zindan kapısının önüne
+      else if (cmd == "zindangir") { std::string id; int c = 0; ss >> id >> c; W().gmDungeonEnter(id, c); }    // GM: doğrudan içeri
+      else if (cmd == "kapi") { int r; ss >> r; W().warnT = 0; W().dungeonDoor(r); }                           // kapı bölgesine basılmış say
+      else if (cmd == "evet") { World& w = W(); if (!w.askText.empty()) { auto y = w.askYes; w.askText.clear(); w.askYes = nullptr; if (y) y(); } }   // onay kutusu: Tamam
+      else if (cmd == "gmboss") W().gmDungeonBoss();
+      else if (cmd == "gmtemizle") W().gmDungeonClear();
+      else if (cmd == "gmsonkat") W().gmDungeonLast();
+      else if (cmd == "gmsifirla") W().gmDungeonReset();
+      else if (cmd == "zindancik") { if (W().dungeonOf(W().sceneId)) W().dungeonLeave(false); }
+      else if (cmd == "dirilt") W().revive();
+      else if (cmd == "gun") ss >> W().today;
+      else if (cmd == "isinla") { std::string cn; ss >> cn; const auto L = W().dungeonTps(cn); if (!L.empty()) W().dungeonTpGo(*L[0].second); }
+      else if (cmd == "geciste") {   // oyuncuyu geçit bölgesinin ortasına koy, bir kare ilerlet (geçit denetimi)
+        int r; double dt; ss >> r >> dt; World& w = W();
+        for (const auto& g : w.map.regions) if (g.size() >= 6 && g[0] == r && g[1] == 1) { w.player.x = jsRound((g[2] + g[4]) / 2.0); w.player.y = jsRound((g[3] + g[5]) / 2.0); break; }
+        w.arriveT = 0; w.warnT = 0; w.update(dt);
+      }
+      else if (cmd == "zindandurum") {
+        std::string f; ss >> f; World& w = W(); auto q = jq;
+        std::string o = "{\"sahne\":" + q(w.sceneId) + ",\"x\":" + num(w.player.x) + ",\"y\":" + num(w.player.y) + ",\"dun\":";
+        if (w.P.dun.on) o += "[" + q(w.P.dun.id) + "," + std::to_string(w.P.dun.copy) + "," + std::to_string(w.P.dun.cleared.size()) + "," + (w.P.dun.boss ? "true" : "false") + "]"; else o += "null";
+        o += ",\"dg\":["; bool f1 = true; for (const auto& kv : w.P.dgN) { o += (f1 ? "" : ",") + std::string("[") + q(kv.first) + "," + std::to_string(kv.second) + "]"; f1 = false; }
+        o += "],\"altin\":" + std::to_string(w.P.gold) + ",\"canta\":[";
+        for (size_t i = 0; i < w.P.bag.size(); i++) o += (i ? "," : "") + std::string("[") + q(w.P.bag[i].first) + "," + std::to_string(w.P.bag[i].second) + "]";
+        o += "],\"mobs\":["; f1 = true;
+        for (const Ent& e : w.ents) if (e.kind == Ent::MOB) { o += (f1 ? "" : ",") + std::string("[") + q(e.name) + "," + num(e.hp) + "," + num(e.maxHp) + "," + num(e.atk) + "," + num(e.def) + "," + (e.boss ? "true" : "false") + "," + (e.dead ? "true" : "false") + "]"; f1 = false; }
+        o += "],\"ileti\":" + q(w.log.empty() ? std::string() : w.log.back().m) + ",\"bildirim\":" + q(w.toastMsg) + ",\"soru\":" + q(w.askText) + "}\n";
+        out(f, o);
+      }
       else if (cmd == "esya") {
         std::string op, id; int n = 1; ss >> op >> id >> n; if (!ss) n = 1; World& w = W();
         if (op == "al") w.buyItem(id, n); else if (op == "sat") w.sellItem(id, n); else if (op == "giy") w.equip(id); else if (op == "cikar") w.unequip(id);
@@ -347,7 +381,7 @@ int main(int argc, char** argv) {
         out(f, o);
       }
       else if (cmd == "karakterdurum") {
-        std::string f; ss >> f; World& w = W(); const Stats s = w.stats(); auto q = [](const std::string& x) { return "\"" + x + "\""; };
+        std::string f; ss >> f; World& w = W(); const Stats s = w.stats(); auto q = jq;
         std::string o = "{\"altin\":" + std::to_string(w.P.gold) + ",\"canta\":[";
         for (size_t i = 0; i < w.P.bag.size(); i++) o += (i ? "," : "") + std::string("[") + q(w.P.bag[i].first) + "," + std::to_string(w.P.bag[i].second) + "]";
         o += "],\"eq\":{"; bool fst = true; for (const auto& kv : w.P.eq) if (!kv.second.empty()) { o += (fst ? "" : ",") + q(kv.first) + ":" + q(kv.second); fst = false; }

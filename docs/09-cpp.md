@@ -12,7 +12,7 @@
 ## Yol haritası
 1. **godat kütüphanesi ✔ (18.11)**: orijinal okuma, GODAT3.0 şifreli paket, katmanlı yama, araçlar, testler.
 2. **Motor iskeleti + test modu ✔ (18.11)**: SDL2 depoda; veri paketi; sahne (zemin, nesneler, NPC'ler), oyuncu katmanları, kamera, 4 yönlü yürüme; ekransız test modu. HTML ile karşılaştırma: 6 sahnede çizim birebir (en kötü %0,018), 6 yönde yürüme aynı.
-3. Sistemler tek tek, her biri "aynı senaryo iki sürümde aynı sonuç" testiyle: **canavarlar + temel savaş ✔ (18.11)** → **beceri/efekt ✔ (18.11)** → **görev ✔ (18.11)** → arayüz: **oyun ekranı ✔ (18.11)**, **pencereler 1 + yol bulma ✔ (18.11)** (konuşma, görev listesi, ana menü, ölüm, onay), **pencereler 2 + eşya/dükkân ✔ (18.11)** (karakter, çanta, beceri ağacı, dükkân, adet kutusu) → **dünya haritası + ayarlar + NPC listesi ✔ (18.11)** → evcil → zindan → yolculuk → GM → ağ (mevcut sunucu).
+3. Sistemler tek tek, her biri "aynı senaryo iki sürümde aynı sonuç" testiyle: **canavarlar + temel savaş ✔ (18.11)** → **beceri/efekt ✔ (18.11)** → **görev ✔ (18.11)** → arayüz: **oyun ekranı ✔ (18.11)**, **pencereler 1 + yol bulma ✔ (18.11)** (konuşma, görev listesi, ana menü, ölüm, onay), **pencereler 2 + eşya/dükkân ✔ (18.11)** (karakter, çanta, beceri ağacı, dükkân, adet kutusu) → **dünya haritası + ayarlar + NPC listesi ✔ (18.11)** → **zindanlar ✔ (18.11)** → evcil → zindan → yolculuk → GM → ağ (mevcut sunucu).
 4. Paketleme: Android (GitHub otomatik derleme), iOS (Mac gerekir).
 
 ## Klasör ve derleme
@@ -113,16 +113,21 @@ cmake --build native/build --target veri        # www/assets → build/veri/oyun
 - **Bulgu (tarayıcı, yarıdan çok küçültme)**: Chrome görsel önbelleği (MipMapUtil) hedeften küçük olmayan en küçük **mip düzeyini** (her düzey 2×2 ortalama, önceden çarpılmış renk, toplam >> 2) kullanıp ondan çift doğrusal örnekliyor; kaynak bir **tuval** ise (harita zemini, HTML'de canvas) mip yok. C++ aynısını yapar (`Canvas::drawImage`, `Image::canvas`). Kıta haritası farkı %33,6'dan %0,44'e indi.
 - **HTML tuhaflığı (görüntü ona göre)**: dünya haritasının çerçevesi çizgi kalınlığı ayarlanmadan çiziliyor; o anda geçerli olan, oyun ekranı yazılarının dış çizgisinden kalan 2,5. C++ da 2,5 çizer.
 
+## Zindanlar (10. adım)
+- **Veri**: `www/assets/zindan.json` ← `tools/zindan_cikar.js` (www/js/dungeon.js'ten: 11 zindan, kopyaları ve kapıları, yanlış bağlı çıkış, 4 ışınlayıcı kişi, 14 pano sözü; dungeon.js değişince yeniden çalıştır). Yüklemede zindan haritalarının seviye aralığı tanımdan yazılır (HTML Dungeon.init gibi; canavar seviyeleri ve görevlerin açılma seviyesi bundan).
+- **`engine/world_dungeon.cpp`** (HTML dungeon.js): kapı (seviye, ön görev, günlük hak → onay kutusu; oyun kodunun onay isteği `World::ask` → HUD), giriş (günlük sayaç, koşu), koşu (normal zindanda kesilen canavar "sahne:kayıt:sıra" anahtarıyla bu koşuda doğmaz; sınav zindanında doğar), canavar ayarı (sınav: ×0,7 can ×0,6 saldırı ×0,5 savunma; boss ve orijinal ilerleme boss'u: ×8/18 can, ×1,2/1,8 saldırı, Baron ×1,3), son boss sandığı (40·sv altın, 1-2 ekipman, 3 iksir, 1,5 sn sonra "çıkılsın mı?"), çıkış geçidi / ölüm → kapının dışı, NPC ışınlanmaları (Levazımcı, Subay, Kâşif, Dağ Cücesi Bilgin; seviye şartı), Ruh Balkonu'nun yanlış bağlı çıkışı, "bu bölge henüz açılmadı" uyarısı. GM: `gmDungeonEnter/Door/Boss/Clear/Last/Reset` (panel GM adımında).
+- **`cpp_zindan.js`**: 41 adım (Mehtap Korusu üç giriş: temizleme, son kat ve geri, boss sandığı, çıkış, ölüm, günlük hak; düşük seviye; Sınav Ormanı; Alacakaranlık Vadisi ön görevi; ışınlayıcılar; yanlış bağlı çıkış; Ölüm Yabanı boss'u). 18.11: hepsi birebir aynı.
+
 ## Ekransız test modu (`anrufen_test <senaryo.txt|->`)
 Satır başına bir komut: `veri <klasör|paket.gdp>` · `tohum <sayı>` · `karakter <sınıf> <ırk> <cinsiyet>` (yeni karakter) · `seviye <n>` · `doldur` · `sahne <no> [x y]` · `konum <x> <y>` (denetimsiz) · `yon <0-3>` ·
 `hedef <yakın|sıra>` · `savas <dt> <sn> <iz.json> [oto|beceri]` (sabit adım, her saniye iz satırı; oto: en yakın canavarı hedef al; beceri: oto + sırayla dönen hazır beceri) · `canavarlar <dosya|->` ·
 `ust <0-2>` (sınıf yükseltmesi) · `beceriler <no=kademe,…|->` · `dagit <puan> <uzmanlık> [dosya]` (puanları oyuncu gibi dağıt) · `beceri <sıra>` · `zaman0` (yalnız oyun saati) ·
-`olumsuz <0|1>` (GM) · `otogorev` · `arayuz <0|1>` · `yazi <0|1>` · `halka <0|1>` · `ad <ad>` · `portre <kod>` · `hedefle <sıra>` · `bekleme <beceri> <sn>` · `can <oran>` · `mana <oran>` · `gorevver <no>` · `gorevhazir <no> [sayı]` · `esya <al|sat|giy|cikar|kullan|ekle|sil> <eşya|yuva> [adet]` · `gmgear` · `altin <n>` · `beceriyukselt <no>` · `becerisifirla <0|1>` · `kisayol <yuva> <sıra>` · `beceriyazilari <dosya>` · `karakterdurum <dosya|->` · `jpeg <girdi.jpg> <çıktı.png>` · `temizle` · `zemin <dosya>` · `gorevseviye <dosya> [ters]` · `gorevbot <adım> <dt> <iz.json>` (görev botu; kurallar cpp_gorev.js'te) · `gmbitir <no,…> <dosya>` (GM: görevleri bitir) ·
+`olumsuz <0|1>` (GM) · `otogorev` · `arayuz <0|1>` · `yazi <0|1>` · `halka <0|1>` · `ad <ad>` · `portre <kod>` · `hedefle <sıra>` · `bekleme <beceri> <sn>` · `can <oran>` · `mana <oran>` · `gorevver <no>` · `gorevhazir <no> [sayı]` · `esya <al|sat|giy|cikar|kullan|ekle|sil> <eşya|yuva> [adet]` · `gmgear` · `altin <n>` · `beceriyukselt <no>` · `becerisifirla <0|1>` · `kisayol <yuva> <sıra>` · `beceriyazilari <dosya>` · `karakterdurum <dosya|->` · `jpeg <girdi.jpg> <çıktı.png>` · `zindankapi <id> [kopya]` · `zindangir <id> [kopya]` · `kapi <bölge>` · `evet` · `gmboss` · `gmtemizle` · `gmsonkat` · `gmsifirla` · `zindancik` · `dirilt` · `gun <tarih>` · `isinla <kişi>` · `geciste <bölge> <dt>` · `zindandurum <dosya|->` · `temizle` · `zemin <dosya>` · `gorevseviye <dosya> [ters]` · `gorevbot <adım> <dt> <iz.json>` (görev botu; kurallar cpp_gorev.js'te) · `gmbitir <no,…> <dosya>` (GM: görevleri bitir) ·
 `pencere <ad|kapat> [varlık]` (bag, role, skill, shop <kişi>, map, sys da) · `ciz` · `dokun <x> <y>` · `konus <varlık>` · `yol <sx> <sy> <tx> <ty> <dosya>` (A* yolu dosyaya eklenir) · `rotagecikme <sn>` · `kisiyeyuru <varlık>` · `gorevyuru <no>` · `ilerle <dt> <sn> <dosya.json>` (kareleri ilerlet; harita varışları, son yer, hedef, açılan konuşma) ·
 `saat0` (zaman ve animasyon sayaçları 0) · `bekle <sn>` · `yuru <sag|sol|yukari|asagi|sag+yukari…> <sn>` (1/60 sn adımlar, tuşlar HTML'deki gibi) ·
 `ekran <g> <y>` · `golge <0|1>` · `goruntu <dosya.png>` · `durum <dosya.json|->`. Ben (Claude) C++ sürümünü bununla çalıştırıp görüntüsüne bakarak denetlerim.
 
-## HTML ile karşılaştırma (`node tools/test/cpp_karsilastir.js`, `cpp_savas.js`, `cpp_gorev.js`, `cpp_arayuz.js`, `cpp_pencere.js`, `cpp_yol.js`, `cpp_esya.js`)
+## HTML ile karşılaştırma (`node tools/test/cpp_karsilastir.js`, `cpp_savas.js`, `cpp_gorev.js`, `cpp_arayuz.js`, `cpp_pencere.js`, `cpp_yol.js`, `cpp_esya.js`, `cpp_zindan.js`)
 - `URL` verilmezse `www/` geçici bir statik sunucuyla açılır (çevrimdışı kip; oyun sunucusu gerekmez). HTML'de oyunun kendi çizim parçalarıyla aynı kare (640×360, zaman 0, canavarsız, gölgesiz, adsız) çizilir; C++ aynı senaryoyu çizer; `tools/test/goruntu_fark.py` piksel piksel karşılaştırır (kanal farkı > 3 = farklı; sınır %0,1). Yan yana + kırmızı farklar: `OUT/<ad>_fark.png`.
 - Sahneler: Guanlin (iki yer), elf acemi kampı, Altındalga Limanı, Bozbalta Şehri, Ruh Arafı; üç sınıf, iki ırk, iki cinsiyet, dört yön. 18.11: 0 / 0 / 1 / 0 / 41 / 11 piksel.
 - Yürüme: aynı kareden 6 tuş birleşimiyle 0,5 sn; konum, yön ve adım sayacı iki sürümde aynı.
@@ -177,6 +182,8 @@ Güncellemede oyuncu yalnız yeni yama paketini indirir (oyun tarafındaki yükl
 | `python3 tools/yazi_atlasi.py` | yazı tipleri → `www/assets/fonts/atlas.json` + PNG (C++ yazısı) |
 | `node tools/test/cpp_arayuz.js` | C++ ↔ HTML oyun ekranı (yukarıda) |
 | `node tools/test/cpp_pencere.js` | C++ ↔ HTML pencereler (yukarıda) |
+| `node tools/zindan_cikar.js` | dungeon.js → `www/assets/zindan.json` (C++ zindan verisi; dungeon.js değişince) |
+| `node tools/test/cpp_zindan.js` | C++ ↔ HTML zindanlar (yukarıda) |
 | `python3 tools/test/jpeg_esitlik.py` | C++ JPEG çözücüsü ↔ libjpeg-turbo (Pillow), www/assets altındaki bütün JPEG'ler |
 | `node tools/test/cpp_esya.js` | C++ ↔ HTML eşya ve beceri işlemleri, beceri yazıları (yukarıda) |
 | `node tools/test/cpp_yol.js` | C++ ↔ HTML yol bulma, kişiye yürüme, görev rotası (yukarıda) |

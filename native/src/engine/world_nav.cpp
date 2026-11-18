@@ -198,6 +198,7 @@ bool World::travelGo(int ei, const TravelOpt& x) {
 void World::revive() {
   Player& p = player; const Stats s = stats();
   p.dead = false; p.state = "idle"; p.hp = jsRound(s.hp * 0.5); p.mp = jsRound(s.mp * 0.5);
+  if (dungeonOnRevive()) return;   // zindanda öldüysen kapının dışında
   if (!P.hasHome && (P.done.count(80003) || P.quests.count(80003))) { P.hasHome = true; P.homeScene = "120005"; P.homeXY = true; P.homeX = 33; P.homeY = 20; }
   if (P.hasHome) {
     const double hp = p.hp, mp = p.mp;
