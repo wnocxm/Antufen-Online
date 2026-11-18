@@ -55,3 +55,4 @@ Oyun hazır: `window.__G && window.__G.player`. Konsoldan: `gmLevel(n)`, `loadSc
 ## C++ (`native/`, docs/09-cpp.md)
 - Derleme + birim testleri: `cmake -S native -B native/build -G Ninja && cmake --build native/build && ctest --test-dir native/build` (ya da `./native/build/test_godat`).
 - `python3 tools/test/godat_esitlik.py`: bütün godat dosyalarında C++ = Python, şifreli paket gidiş-dönüşü (`PAKET=0` yalnız okuma).
+- `native/build/anrufen_test <senaryo>`: ekransız test modu (komutlar docs/09). `node tools/test/cpp_karsilastir.js` (sunucu açık): C++ ↔ HTML 6 sahne çizim + 6 yön yürüme; çıkış kodu 0 = geçti.

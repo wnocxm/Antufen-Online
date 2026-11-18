@@ -36,6 +36,12 @@ void writeFile(const std::string& path, const Bytes& b) {
 
 uint32_t crc32(const Bytes& b) { return uint32_t(::crc32(0L, b.data(), uInt(b.size()))); }
 
+uint32_t pathId(const std::string& path) {
+  uint32_t h = 2166136261u;
+  for (unsigned char c : path) { h ^= c; h *= 16777619u; }
+  return h;
+}
+
 // Tek bir zlib akışını sonuna kadar açar; akış bitmeden veri biterse hata (Python zlib.decompress gibi: akıştan sonraki fazla bayt yok sayılır)
 static bool inflateStream(const uint8_t* src, size_t len, Bytes& out) {
   z_stream z{}; if (inflateInit(&z) != Z_OK) return false;
@@ -153,6 +159,11 @@ const Entry* Archive::find(uint32_t id) const {
   return nullptr;
 }
 
+const Entry* Archive::findName(const std::string& name) const {
+  for (auto it = entries_.rbegin(); it != entries_.rend(); ++it) if (it->name == name) return &*it;
+  return nullptr;
+}
+
 Bytes Archive::stored(const Entry& e) const { return Bytes(bytes_.begin() + e.offset, bytes_.begin() + e.offset + e.size); }
 
 // kaydın nonce'u: tuz, ilk 4 baytı numarayla XOR, 9. baytı 1 ile XOR (dizinin nonce'uyla hiç çakışmaz)
@@ -185,6 +196,12 @@ Bytes Archive::data(uint32_t id) const {
 void Packer::add(uint32_t id, const std::string& name, Bytes data) {
   for (PackRecord& r : records_) if (r.id == id) { r.name = name; r.data = std::move(data); return; }   // yama: aynı numaranın yerine geçer
   records_.push_back({id, name, std::move(data)});
+}
+
+void Packer::addFile(const std::string& name, Bytes data) {
+  const uint32_t id = pathId(name);
+  for (const PackRecord& r : records_) if (r.id == id && r.name != name) throw Error("numara çakışması: " + name + " / " + r.name);
+  add(id, name, std::move(data));
 }
 
 void Packer::addArchive(const Archive& a) { for (const Entry& e : a.entries()) add(e.id, e.name, a.data(e)); }

@@ -8,10 +8,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
 endif()
+# uyarılar yalnız kendi kodumuza (SDL'e değil)
 if(MSVC)
-  add_compile_options(/W4 /utf-8)
+  set(ANRUFEN_WARN /W4 /utf-8)
 else()
-  add_compile_options(-Wall -Wextra)
+  set(ANRUFEN_WARN -Wall -Wextra)
 endif()
 
 find_package(ZLIB REQUIRED)
@@ -49,7 +50,45 @@ target_link_libraries(godat_dump PRIVATE godat)
 add_executable(godat_pack src/tools/godat_pack.cpp)
 target_link_libraries(godat_pack PRIVATE godat)
 
+# Motor (pencereden bağımsız): PNG/JSON, sanal dosya sistemi, tuval, varlıklar, harita, dünya
+add_library(motor STATIC src/core/png.cpp src/core/json.cpp src/engine/vfs.cpp src/engine/canvas.cpp
+            src/engine/assets.cpp src/engine/map.cpp src/engine/world.cpp)
+target_include_directories(motor PUBLIC src)
+target_link_libraries(motor PUBLIC godat)
+
+# Ekransız test modu (SDL gerekmez): senaryo → ekran görüntüsü, durum
+add_executable(anrufen_test src/app/headless.cpp)
+target_link_libraries(anrufen_test PRIVATE motor)
+
+# Pencereli oyun: SDL2 kaynağı depoda (third_party/SDL2, sürüm ve kaynak: third_party/README.md)
+option(ANRUFEN_SDL "SDL2'yi derle ve pencereli oyunu kur" ON)
+if(ANRUFEN_SDL)
+  set(SDL_SHARED OFF CACHE BOOL "" FORCE)
+  set(SDL_STATIC ON CACHE BOOL "" FORCE)
+  set(SDL_TEST OFF CACHE BOOL "" FORCE)
+  set(SDL_TESTS OFF CACHE BOOL "" FORCE)
+  add_subdirectory(third_party/SDL2 EXCLUDE_FROM_ALL)
+  add_executable(anrufen WIN32 src/app/main.cpp)
+  target_link_libraries(anrufen PRIVATE motor SDL2::SDL2main SDL2::SDL2-static)
+endif()
+
+# Oyun veri paketi: www/assets → build/veri/oyun.gdp (şifreli; cmake --build … --target veri)
+add_custom_target(veri
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/veri
+  COMMAND godat_pack -o ${CMAKE_BINARY_DIR}/veri/oyun.gdp --dizin ${CMAKE_CURRENT_SOURCE_DIR}/../www/assets
+  DEPENDS godat_pack COMMENT "veri paketi: www/assets → veri/oyun.gdp")
+
+foreach(t godat godat_dump godat_pack motor anrufen_test)
+  target_compile_options(${t} PRIVATE ${ANRUFEN_WARN})
+endforeach()
+if(TARGET anrufen)
+  target_compile_options(anrufen PRIVATE ${ANRUFEN_WARN})
+endif()
+
 enable_testing()
 add_executable(test_godat tests/test_godat.cpp)
 target_link_libraries(test_godat PRIVATE godat)
 add_test(NAME godat COMMAND test_godat)
+add_executable(test_motor tests/test_motor.cpp)
+target_link_libraries(test_motor PRIVATE motor)
+add_test(NAME motor COMMAND test_motor ${CMAKE_CURRENT_SOURCE_DIR}/../www/assets)

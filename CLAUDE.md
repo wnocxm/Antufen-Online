@@ -37,5 +37,6 @@ Bir konuya girmeden önce ilgili belgeyi oku; bir sistemi değiştirince belgesi
 - Yerel testten önce: `service postgresql start`, sunucu `cd server && PORT=8099 DATABASE_URL=postgres://anrufen:anrufen_dev@localhost:5432/anrufen node server.js` (arka planda). Ayrıntı `docs/06-test.md`.
 - `rm` ile göreli joker kullanma (güvenlik denetimi engeller).
 - **C++ geçişi (18.11):** yeni iş `native/` (C++17) içinde yapılır; `www/` HTML sürümü usta kopyadır, yalnız hata düzeltmesi alır. Eksik haritalar/zindanlar C++ sürümünde tamamlanır.
-  Derleme ve test: `cmake -S native -B native/build -G Ninja && cmake --build native/build && ctest --test-dir native/build`; `python3 tools/test/godat_esitlik.py`.
+  Derleme ve test: `cmake -S native -B native/build -G Ninja && cmake --build native/build && ctest --test-dir native/build`; `python3 tools/test/godat_esitlik.py`;
+  ekransız test modu `native/build/anrufen_test <senaryo>`; HTML ile karşılaştırma `node tools/test/cpp_karsilastir.js` (sunucu açıkken). Her taşınan sistem bu karşılaştırmayla doğrulanır.
   `native/anahtar.txt` (yayın anahtarı) asla commit edilmez.

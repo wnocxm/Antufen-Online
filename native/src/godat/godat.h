@@ -40,6 +40,7 @@ class Archive {
   const std::string& signature() const { return signature_; }
   const std::vector<Entry>& entries() const { return entries_; }
   const Entry* find(uint32_t id) const;   // aynı numara birden çoksa sonuncusu (yama kuralı)
+  const Entry* findName(const std::string& name) const;
 
   Bytes stored(const Entry& e) const;     // dosyada duran baytlar (orijinalde sıkıştırılmış olabilir)
   Bytes data(const Entry& e) const;       // oyunun kullandığı açılmış içerik
@@ -66,6 +67,7 @@ class Packer {
  public:
   void add(uint32_t id, const std::string& name, Bytes data);
   void addArchive(const Archive& a);      // bir arşivin bütün kayıtlarını (açılmış hâliyle) ekler
+  void addFile(const std::string& name, Bytes data);   // veri paketi: numara = pathId(ad); başka ada ait numara çakışırsa hata
   size_t size() const { return records_.size(); }
   const std::vector<PackRecord>& records() const { return records_; }
   // encrypt=false: yalnız sıkıştırma (hata ayıklama için); salt: test için sabit tuz verilebilir
@@ -74,6 +76,9 @@ class Packer {
  private:
   std::vector<PackRecord> records_;
 };
+
+// Dosya yolundan kayıt numarası (FNV-1a 32): veri paketlerinde her dosya bir kayıttır, adı yolu, numarası bu
+uint32_t pathId(const std::string& path);
 
 Bytes readFile(const std::string& path);
 void writeFile(const std::string& path, const Bytes& b);
