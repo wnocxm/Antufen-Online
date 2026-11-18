@@ -12,6 +12,8 @@
 #include "engine/rng.h"
 #include "engine/vfs.h"
 #include "engine/world.h"
+#include "ui/font.h"
+#include "ui/hud.h"
 
 static int failed = 0, passed = 0;
 #define CHECK(cond, what) do { if (cond) { passed++; } else { failed++; std::printf("KALDI: %s (%s:%d)\n", what, __FILE__, __LINE__); } } while (0)
@@ -93,6 +95,16 @@ int main(int argc, char** argv) {
     w.P.lv = 40; w.autoQuests(); CHECK(w.P.quests.count(80344), "görev: 40'ta kendiliğinden görev (Acemilikten Çıkış)");
     for (const engine::Quest& q : Q.all()) if (q.adv == 1 && q.cls == "战士" && (q.race.empty() || q.race == "人类")) { w.gmQuestDone(q.id); break; }
     CHECK(w.P.adv == 1, "görev: sınıf yükseltme görevi biter, sınıf ağacı açılır");
+    // arayüz: yazı atlası, oyun ekranı, saldırı düğmesi, yürüme kolu
+    ui::Fonts fonts; fonts.load(vfs); ui::Hud hud(as, fonts);
+    CHECK(fonts.ok() && fonts.width("B", 10, "Kahraman") > 30 && fonts.width("B", 10, "ğüşİıöç") > 20, "yazı: atlas yüklendi, Türkçe harflerin genişliği var");
+    w.P = engine::CharData(); w.setChar("战士", "人类", "male"); w.loadScene("120018", at);
+    engine::Canvas hc; hc.resize(640, 360); w.draw(hc); hud.draw(hc, w, false);
+    hud.press(w, 1, 640 - 55, 305); hud.release(w, 1, 640 - 55, 305);
+    CHECK(w.target() >= 0 && w.engaged(), "arayüz: saldırı düğmesi en yakın canavarı hedef alır");
+    hud.press(w, 2, 114, 309); double jx, jy; hud.joy(jx, jy); hud.release(w, 2, 114, 309);
+    CHECK(jy > 6 && std::fabs(jx) < 1, "arayüz: yürüme kolu aşağı");
+    hud.press(w, 3, 640 - 95 + 40, 40); CHECK(hud.request == "map", "arayüz: küçük haritaya dokununca harita penceresi istenir");
   }
   std::printf("motor testleri: %d geçti, %d kaldı\n", passed, failed);
   return failed ? 1 : 0;

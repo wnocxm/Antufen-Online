@@ -37,10 +37,25 @@ void Balance::load(const Vfs& vfs, const core::Json& D) {
   }
   const core::Json I = core::Json::parse(vfs.readText("items.json"));
   for (const auto* kv : jsOrder(I["items"])) {
-    const core::Json& it = kv->second; Item x; x.id = kv->first; x.slot = it["slot"].str(); x.cls = it["cls"].str(); x.lv = it["lv"].i(0);
+    const core::Json& it = kv->second; Item x; x.id = kv->first; x.slot = it["slot"].str(); x.cls = it["cls"].str(); x.lv = it["lv"].i(0); x.name = it["name"].str(); x.en = it["en"].str();
+    x.ik = it["icon"][0].isStr() ? it["icon"][0].str() : "item"; x.icon = it["icon"][1].i();
+    const core::Json& u = it["use"];
+    if (u.isObj()) {
+      x.use = true; x.useHp = u["hp"].num(); x.useMp = u["mp"].num(); x.qt = u["qt"].truthy();
+      auto hot = [](const core::Json& h, Item::Hot& o) { if (h.isArr()) { o.res = h[0].str(); o.amt = h[1].num(); o.sec = h[2].num(); } };
+      hot(u["hot"], x.hot); hot(u["hot2"], x.hot2);
+    }
     for (const auto& s : it["st"].obj()) x.st[s.first] = s.second.num();
     itemIdx_[x.id] = items_.size(); items_.push_back(std::move(x));
   }
+  // oyunun kendi eşyaları (HTML game.js ITEMS; tablodakilerden sonra — JS nesne sırası: sayısal numaralar önce)
+  auto own = [&](const char* id, const char* nm, int icon, double hp, double mp, bool growth) {
+    Item x; x.id = id; x.name = nm; x.ik = "item"; x.icon = icon; x.useHp = hp; x.useMp = mp; x.use = hp || mp; x.growth = growth;
+    itemIdx_[x.id] = items_.size(); items_.push_back(std::move(x));
+  };
+  own("hp1", "Zayıf Can İksiri", 1019, 800, 0, false); own("hp2", "Can İksiri", 1020, 2000, 0, false);
+  own("mp1", "Zayıf Mana İksiri", 1026, 0, 800, false); own("mp2", "Mana İksiri", 1024, 0, 2000, false);
+  own("growthBox", "Gelişim Paketi", 1038, 0, 0, true); own("quest", "Görev Eşyası", 1125, 0, 0, false);
   // canavar kayıtları; veri düzeltmesi (HTML fixMonData): ☆☆【小胖】拉斯 kaydında görünüm ile ölüm efekti yer değiştirmiş
   auto fx = [](const std::string& s) { return s.rfind("特效-", 0) == 0; };
   for (const auto* kv : jsOrder(D["mon"])) {

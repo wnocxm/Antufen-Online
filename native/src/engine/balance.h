@@ -23,7 +23,13 @@ struct MonDef {
 
 struct ClassBase { double hp = 0, mp = 0, atk = 0, def = 0, ghp = 0, gmp = 0, gatk = 0, gdef = 0, dmgK = 1, range = 1.4; bool melee = false; std::string bolt, boltHit, snd; };
 
-struct Item { std::string id, slot, cls; int lv = 0; std::map<std::string, double> st; };
+// eşya (items.json + oyunun kendi iksirleri/paketi): ik/icon simge dosyası (icon_res_<ik>_<icon>); use: kullanılınca can/mana, yiyecek
+// (hot: [kaynak, miktar, sn]; hot2 ikinci kaynak), qt görev eşyası; growth Gelişim Paketi
+struct Item {
+  std::string id, slot, cls, name, en; int lv = 0, icon = 0; std::string ik; std::map<std::string, double> st;
+  bool use = false, qt = false, growth = false; double useHp = 0, useMp = 0;
+  struct Hot { std::string res; double amt = 0, sec = 0; } hot, hot2;
+};
 
 class Balance {
  public:

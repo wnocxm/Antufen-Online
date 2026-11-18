@@ -57,4 +57,5 @@ Oyun hazır: `window.__G && window.__G.player`. Konsoldan: `gmLevel(n)`, `loadSc
 - `python3 tools/test/godat_esitlik.py`: bütün godat dosyalarında C++ = Python, şifreli paket gidiş-dönüşü (`PAKET=0` yalnız okuma).
 - `native/build/anrufen_test <senaryo>`: ekransız test modu (komutlar docs/09). `node tools/test/cpp_karsilastir.js` (sunucu açık): C++ ↔ HTML 6 sahne çizim + 6 yön yürüme; çıkış kodu 0 = geçti.
 - `node tools/test/cpp_savas.js`: C++ ↔ HTML canavar yerleşimi + 26 senaryoda (18'i becerili) saniye saniye savaş izi (tohumlu zar); çıkış kodu 0 = geçti.
+- `node tools/test/cpp_arayuz.js`: C++ ↔ HTML oyun ekranı (HUD) 3 durumda: yazısız piksel (sınır %1,5) + yazılı yan yana (`/tmp/cpp_arayuz/<ad>_yazili_fark.png`).
 - `node tools/test/cpp_gorev.js` (`ADIM=80`): C++ ↔ HTML görevler: 945 görevin açılma seviyesi, 4 görev botu (her adım), 6 sınıf yükseltme zinciri. Karşılaştırma testlerinin hepsi oyun sunucusu olmadan (geçici statik sunucuyla, port 8097; aynı anda bir tane) çalışır.

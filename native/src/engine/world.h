@@ -68,7 +68,9 @@ struct QuestSt { int n = 0; bool ready = false; std::map<std::string, int> c; };
 // Karakter kaydı (HTML Game.P'nin bu adımda kullanılan kısmı)
 struct CharData {
   std::string cls = "战士", race = "人类", sex = "male";
+  std::string name = "Kahraman", face = "1001";            // ad, portre (ui/Portrait_<face>.png; ırk/cinsiyet + 001-008)
   int lv = 1, sp = 0, adv = 0; long long xp = 0, gold = 0;   // adv: sınıf yükseltmesi (1: 40, 2: 80)
+  std::vector<std::string> quick = {"s0", "s1", "s2", "s3", "s4", "s5", "i:hp1", "i:mp1"};   // kısayol halkası: [0] büyük düğme, s<n> beceri, i:<eşya>
   std::map<std::string, int> sk;                         // beceri kademeleri (beceri numarası → kademe)
   std::map<std::string, std::string> eq;                 // yuva → eşya
   std::vector<std::pair<std::string, int>> bag;          // çanta (eklenme sırası)
@@ -86,7 +88,7 @@ struct Fx {
   bool loop = false, done = false, proj = false, vis = false; int to = -1; double speed = 9; std::function<void()> cb;
 };
 
-struct DrawOpts { bool shadows = true; };
+struct DrawOpts { bool shadows = true, targetRing = true; };
 
 // HTML hitMob seçenekleri: pure savunma tanımaz, tick sürekli hasar (tetikleyiciler yok)
 struct HitOpt { double crit = 0, add = 0, slow = 0, freeze = 0, stun = 0, critDmg = 0; bool pure = false, bleed = false, burn = false, tick = false; std::function<void(Ent&)> onCrit; };
@@ -110,7 +112,7 @@ class World {
   bool engaged() const { return engage_; }
   int nearestMob(double r) const;
   int countItem(const std::string& id) const;
-  void addItem(const std::string& id, int n = 1);
+  void addItem(const std::string& id, int n = 1, bool quiet = false);   // quiet değilse günlüğe "Ad ×n"
   bool removeItem(const std::string& id, int n = 1);
   bool itemExists(const std::string& id) const;        // HTML ITEMS[id] (eşya tablosu + iksirler, Gelişim Paketi, görev eşyası)
 
@@ -152,9 +154,21 @@ class World {
   void gmQuestReady(int id);                           // GM: görevi (öncekileriyle) tamamlanmış say
   void gmQuestDone(int id);                            // GM: görevi bitir, ödülünü al
   std::set<std::string> flags;                         // HTML Game.flags (kayda girmez)
-  std::vector<std::string> log;                        // olay günlüğü (son 200; arayüz adımında ekrana, şimdilik konsola)
+  // arayüz olayları (HTML UI.log / toast / float / zone / levelUp / hurt): dünya yazar, arayüz (ui/hud.cpp) çizer ve süreleri işler
+  struct LogLine { std::string m; uint32_t c; };
+  static const uint32_t LOG = 0xe8e0d0, LOG_Q = 0xffd23a, LOG_LOOT = 0xe8e0c8;
+  std::vector<LogLine> log;                            // olay günlüğü (son 200)
   size_t logTotal = 0;                                 // bugüne dek yazılan olay sayısı (yeni olanları bulmak için)
-  void note(const std::string& s) { log.push_back(s); logTotal++; if (log.size() > 200) log.erase(log.begin()); }
+  void note(const std::string& s, uint32_t c = LOG) { log.push_back({s, c}); logTotal++; if (log.size() > 200) log.erase(log.begin()); }
+  struct FloatText { int ent; std::string txt; uint32_t c; float s, t; };   // ent: -2 oyuncu
+  std::vector<FloatText> floats;                       // uçan sayılar (hasar, şifa, deneyim)
+  void ufloat(int ent, const std::string& txt, uint32_t c, float s = 1) { floats.push_back({ent, txt, c, s, 0}); }
+  std::string toastMsg, zoneMsg; float toastT = 0, zoneT = 0, lvlT = 0, hurtT = 0; int lvlN = 0;
+  void toast(const std::string& m) { toastMsg = m; toastT = 2.5f; }
+  std::string itemName(const std::string& id) const;
+  void useItem(const std::string& id);
+  const Balance& balance() const { return bal_; }
+  Assets& assets() { return as_; }
 
   struct Phantom { bool on = false; double t = 0, tick = 0, mult = 0; int tg = -1, fx = 0; } phantom;   // Büyü Hayali (90140)
 
@@ -165,6 +179,7 @@ class World {
   Player player;
   CharData P;
   double time = 0, camX = 0, camY = 0, arriveT = 0;
+  int sceneGen = 0;   // her sahne yüklemesinde artar (arayüz önbellekleri: küçük harita)
 
  private:
   Assets& as_;

@@ -172,9 +172,30 @@ bool World::skillReset(bool free) {
 }
 
 int World::countItem(const std::string& id) const { for (const auto& b : P.bag) if (b.first == id) return b.second; return 0; }
-void World::addItem(const std::string& id, int n) {
-  for (auto& b : P.bag) if (b.first == id) { b.second += n; return; }
-  P.bag.push_back({id, n});
+// eşya adı (HTML ITEMS[id].name): eşya tablosu, ya da oyunun kendi iksirleri ve paketi
+std::string World::itemName(const std::string& id) const { const Item* it = bal_.item(id); return it ? it->name : id; }
+
+// eşya kullan (HTML useItem): iksir, yiyecek (süre boyunca yeniler), görev eşyası; kuşanma, Gelişim Paketi ve evcil eşyaları eşya adımında
+void World::useItem(const std::string& id) {
+  const Item* it = bal_.item(id); Player& p = player; const Stats s = stats();
+  if (!it || !countItem(id) || p.dead) return;
+  if (!it->slot.empty() || it->growth) { toast("Eşya penceresi yakında."); return; }
+  if (!it->use) return;
+  if (it->qt) { questUseItem(id); return; }
+  if (it->useHp) { if (p.hp >= s.hp) { note("Canın dolu."); return; } p.hp = std::min(s.hp, p.hp + it->useHp); ufloat(-2, "+" + std::to_string(int(it->useHp)), 0x7bff8a); }
+  if (it->useMp) { if (p.mp >= s.mp) { note("Manan dolu."); return; } p.mp = std::min(s.mp, p.mp + it->useMp); ufloat(-2, "+" + std::to_string(int(it->useMp)), 0x6fb7ff); }
+  for (const Item::Hot* h : {&it->hot, &it->hot2}) if (!h->res.empty()) {   // aynı türden yenisi eskisinin yerine geçer
+    const std::string k = h->res == "hp" ? "hotT" : "motT";
+    p.buffs.erase(std::remove_if(p.buffs.begin(), p.buffs.end(), [&](const Buff& b) { return b.buff.get(k) != 0; }), p.buffs.end());
+    Buff b; b.id = "food_" + h->res; b.buff = Vals{{k, h->amt / h->sec}}; b.t = h->sec; b.uid = ++fxUid_; p.buffs.push_back(std::move(b));
+    ufloat(-2, it->name, h->res == "hp" ? 0x7bff8a : 0x6fb7ff, 0.8f);
+  }
+  removeItem(id);
+}
+void World::addItem(const std::string& id, int n, bool quiet) {
+  bool f = false; for (auto& b : P.bag) if (b.first == id) { b.second += n; f = true; break; }
+  if (!f) P.bag.push_back({id, n});
+  if (!quiet) note(itemName(id) + " ×" + std::to_string(n), LOG_LOOT);
 }
 bool World::removeItem(const std::string& id, int n) {
   for (size_t i = 0; i < P.bag.size(); i++) if (P.bag[i].first == id) {
@@ -221,6 +242,7 @@ void World::loadScene(const std::string& sid, const int* arrive) {
   extraBlock_.assign(size_t(map.w) * map.h, 0);
   ents.clear(); fx.clear(); timers_.clear(); target_ = -1;   // HTML: Game.target = null (engage kalır)
   phantom.tg = -1;   // Büyü Hayali sürer, eski haritanın canavarını hedeflemez
+  floats.clear(); zoneMsg = quests().name(sceneName); zoneT = 3; sceneGen++;   // uçan sayılar eski haritanın varlıklarına bağlıydı; bölge adı duyurusu
   for (const core::Json& e : sc["ents"].arr()) {
     const std::string id = std::to_string(e[0].i()), nm = e[1].str(); const int x = e[2][0].i(), y = e[2][1].i();
     const core::Json& info = D["cit"][id];
@@ -421,14 +443,15 @@ int World::hitMob(int i, double mult, const HitOpt& o) {
   const int dd = int(std::max(1.0, d));
   m.hp -= dd; m.aggro = true; m.state = "hurt"; m.animT = 0; m.stateT = 0.3;
   if (o.slow) m.slowT = o.slow;
+  ufloat(i, (r.crit ? "!" : "") + std::to_string(dd), r.crit ? 0xffd040 : o.tick ? 0xd8b0ff : 0xffffff, r.crit ? 1.3f : 1);
   if (!o.tick) {
     if (leech) healPlayer(dd * leech);   // Kan Damgası
     if (o.bleed) { const int n = std::min(5, (m.bleed.on ? m.bleed.n : 0) + 1); m.bleed.on = true; m.bleed.n = n; m.bleed.t = 10; m.bleed.tick = 2; }   // Testere Bıçak: en çok 5 kat
     if (o.burn) { m.burn.on = true; m.burn.t = 6; m.burn.tick = 2; }   // Alev Darbesi: yanma (yığılmaz)
     if (o.freeze && random() * 100 < o.freeze) m.rootT = 2;
     const double now = time;
-    if (o.stun && random() * 100 < o.stun && !(p.stunCd > now)) { m.stunT = 3; p.stunCd = now + 15; }
-    if (s.seal && random() * 100 < s.seal && !(p.sealCd > now)) { m.sealT = 3; p.sealCd = now + 10; }
+    if (o.stun && random() * 100 < o.stun && !(p.stunCd > now)) { m.stunT = 3; p.stunCd = now + 15; ufloat(i, "Sersem", 0xffe070); }
+    if (s.seal && random() * 100 < s.seal && !(p.sealCd > now)) { m.sealT = 3; p.sealCd = now + 10; ufloat(i, "Mühür", 0xc080ff); }
     if (s.despair && random() * 100 < s.despair && !(p.despCd > now)) { m.despairT = 6; p.despCd = now + 15; }
     if (r.crit && o.onCrit) o.onCrit(m);
   }
@@ -439,7 +462,7 @@ int World::hitMob(int i, double mult, const HitOpt& o) {
 // şifa: Kana Hasret ile artar (alınan şifa); Gölge Hükümdarı sırasında şifa yok
 int World::healPlayer(double h, const std::string& fxName) {
   Player& p = player; const Stats s = stats(); if (anyBuff(p.buffs, "noHeal")) return 0;
-  const int v = int(jsRound(h * (1 + s.healUp / 100))); p.hp = std::min(s.hp, p.hp + v);
+  const int v = int(jsRound(h * (1 + s.healUp / 100))); p.hp = std::min(s.hp, p.hp + v); ufloat(-2, "+" + std::to_string(v), 0x7bff8a);
   if (!fxName.empty()) { const int i = pushFx(fxName, p.x, p.y); fx[i].follow = -2; }
   return v;
 }
@@ -551,18 +574,19 @@ void World::killMob(int i) {
   if (target_ == i) setTarget(-1);
   const double diff = m.d->lv - P.lv;
   const long long xp = (long long)std::max(1.0, jsRound(bal_.mobXp(m.d->lv, m.d->rank) * clampd(1 + diff * 0.1, 0.2, 1.5)));
-  gainXp(xp);
+  gainXp(xp); ufloat(i, "+" + std::to_string(xp) + " TP", 0x9fe060);
   const Stats st = stats();
-  P.gold += (long long)jsRound((irnd(m.d->lv, m.d->lv * 3) + m.d->rank * 20) * (1 + st.goldUp / 100));
+  const long long gold = (long long)jsRound((irnd(m.d->lv, m.d->lv * 3) + m.d->rank * 20) * (1 + st.goldUp / 100)); P.gold += gold;
+  note(std::to_string(gold) + " altın alındı", LOG_LOOT);
   if (st.lifeEl && bal_.item("30127") && random() * 100 < st.lifeEl) addItem("30127");   // gece elfi: Yaşam Elementi
   if (random() < 0.1) addItem(P.lv > 10 ? "hp2" : "hp1");
   if (random() < 0.06) addItem(P.lv > 10 ? "mp2" : "mp1");
-  if (m.d->rank && random() < 0.6) { const std::string g = randomGear(std::max(1, m.d->lv + 2)); if (!g.empty()) addItem(g); }
-  else if (!m.d->passive && random() < 0.025) { const std::string g = randomGear(std::max(1, m.d->lv)); if (!g.empty()) addItem(g); }
+  if (m.d->rank && random() < 0.6) { const std::string g = randomGear(std::max(1, m.d->lv + 2)); if (!g.empty()) { addItem(g, 1, true); note("Ganimet: " + itemName(g) + "!", LOG_Q); toast("Ganimet: " + itemName(g)); } }
+  else if (!m.d->passive && random() < 0.025) { const std::string g = randomGear(std::max(1, m.d->lv)); if (!g.empty()) { addItem(g, 1, true); note("Ganimet: " + itemName(g), LOG_LOOT); } }
   questKill(m.name);   // görev sayaçları ve toplama zarları (HTML'deki yerinde: ganimetten sonra, evcil yumurtasından önce)
   // evcil yumurtası: görünüş ailesi uyan tür varsa küçük olasılıkla (HTML Pet.dropEgg)
   if (const Balance::MobRec* info = bal_.mobInfo(m.name)) if (const std::string* egg = bal_.eggFor(info->look)) {
-    const double ch = m.d->rank == 2 ? 0.25 : m.d->rank ? 0.03 : 0.004; if (random() < ch) addItem(*egg);
+    const double ch = m.d->rank == 2 ? 0.25 : m.d->rank ? 0.03 : 0.004; if (random() < ch) { addItem(*egg, 1, true); toast("Ganimet: " + itemName(*egg) + "!"); note("Ganimet: " + itemName(*egg), LOG_Q); }
   }
   if (!m.deathFx.empty()) pushFx(m.deathFx, m.x, m.y);
 }
@@ -571,12 +595,12 @@ void World::hurtPlayer(int i) {
   if (god) return;   // GM: ölümsüzlük
   Player& p = player; if (p.dead) return;
   Ent& m = ents[i];
-  const Stats s = stats(); if (random() < s.dodge / 100) return;   // ıska
+  const Stats s = stats(); if (random() < s.dodge / 100) { ufloat(-2, "Iska", 0xcfcfcf); return; }   // ıska
   Dmg r = dmgCalc(m.atk, s.def, 1); r.d = int(std::max(1.0, jsRound(r.d * (1 - std::min(80.0, s.dr) / 100))));
   const double mp2hp = buffSum(p.buffs, "mp2hp"), manaShield = buffSum(p.buffs, "manaShield"), mpPerDmg = buffSum(p.buffs, "mpPerDmg"), reflect = buffSum(p.buffs, "reflect");
   const double now = time;
   // Büyücü Bedeni (90611): Karanlık Ahit sırasında %10 hasarı savuştur, hasar kadar mana
-  if (mp2hp && skRankSn(90611) && random() < 0.1) { p.mp = std::min(s.mp, p.mp + r.d); return; }
+  if (mp2hp && skRankSn(90611) && random() < 0.1) { p.mp = std::min(s.mp, p.mp + r.d); ufloat(-2, "Savuşturuldu", 0x9fd0ff); return; }
   // Zifiri Perde (90612): Karanlık Ahit dışında, 15 saniyede bir, savunma ve dirençler 6 saniye artar (güçlendirme 210192)
   if (s.veil && !mp2hp && !(p.veilCd > now) && random() * 100 < s.veil) {
     p.veilCd = now + 15; Buff b; b.id = "veil"; b.buff = Vals{{"def", 0.5}, {"res", jsRound(s.res * 0.5)}}; b.t = 6; b.fx = "特效-漆黑之幕"; b.uid = ++fxUid_; p.buffs.push_back(std::move(b));
@@ -586,9 +610,9 @@ void World::hurtPlayer(int i) {
   // Karşı Saldırı Fırtınası (90598): fiziksel saldırının %10'u ile alınan hasardan küçük olanı yansır
   if (reflect && r.d > 0 && !m.dead) { const double back = jsRound(std::min(s.atk * reflect, double(r.d))); if (back > 0) { HitOpt o; o.add = back; o.pure = true; o.tick = true; hitMob(i, 0, o); } }
   if (r.d <= 0) return;
-  p.hp -= r.d; p.combatT = 5;
+  p.hp -= r.d; p.combatT = 5; ufloat(-2, "-" + std::to_string(r.d), 0xff5040); hurtT = 0.4f;
   // Kutsanmış Beden (90603): ölümcül darbeyi olasılıkla savuştur, biraz can
-  if (p.hp <= 0 && s.cheatDeath && random() * 100 < s.cheatDeath) { p.hp = jsRound(s.hp * 0.2); return; }
+  if (p.hp <= 0 && s.cheatDeath && random() * 100 < s.cheatDeath) { p.hp = jsRound(s.hp * 0.2); ufloat(-2, "Kutsandı", 0xffe070); return; }
   if (p.hp <= 0) { p.hp = 0; p.dead = true; p.deadT = 0; p.state = "dead"; setTarget(-1); }
 }
 
@@ -596,10 +620,13 @@ void World::gainXp(long long n) {
   P.xp += n;
   while (P.xp >= bal_.xpNeed(P.lv)) {
     P.xp -= bal_.xpNeed(P.lv); P.lv++; const Stats s = stats(); player.hp = s.hp; player.mp = s.mp;
-    pushFx("LEVELUP", player.x, player.y); P.sp++;
+    pushFx("LEVELUP", player.x, player.y); lvlN = P.lv; lvlT = 2.5f; P.sp++;
+    note("Beceri puanı kazandın! Beceriler ekranından harca.", LOG_Q);
     autoQuests();
     // açılan görevler (HTML questsUnlockedAt: bütün görevlerin açılma seviyesi liste sırasıyla hesaplanır)
-    for (size_t qi = 0; qi < quests().all().size(); qi++) if (quests().minLv(int(qi)) == P.lv && questState(int(qi)) == "new") note("Yeni görev: " + quests().all()[qi].tr.title);
+    int nq = 0;
+    for (size_t qi = 0; qi < quests().all().size(); qi++) if (quests().minLv(int(qi)) == P.lv && questState(int(qi)) == "new") { note("Yeni görev: " + quests().all()[qi].tr.title + " · " + quests().name(quests().all()[qi].giver), LOG_Q); nq++; }
+    if (nq) toast(std::to_string(nq) + " yeni görev açıldı");
   }
 }
 
@@ -810,13 +837,16 @@ void World::draw(Canvas& c, const DrawOpts& o) {
     if (it.kind == 0) { const MapObj& ob = map.objs[it.i]; ob.sp->draw(c, ob.anim, tt, int(ob.X - ox), int(ob.Y - oy)); continue; }
     const double ex2 = it.kind == 1 ? ents[it.i].x : player.x, ey2 = it.kind == 1 ? ents[it.i].y : player.y;
     const int X = int(jsRound(map.px(ex2, ey2) - ox)), Y = int(jsRound(map.py(ex2, ey2) - oy));
+    // hedef halkası (canavar kırmızı, kişi yeşil) ve ayak gölgesi kesirli konumda, kenarı yumuşak (HTML ctx.ellipse)
+    const double Xf = map.px(ex2, ey2) - ox, Yf = map.py(ex2, ey2) - oy;
+    if (o.targetRing && it.kind == 1 && int(it.i) == target_) c.strokeEllipse(float(Xf), float(Yf), 15, 7, 1.5f, ents[it.i].kind == Ent::NPC ? 0x58e048 : 0xe03020);
     if (it.kind == 1) {
       Ent& e = ents[it.i];
-      if (o.shadows && !(e.kind == Ent::NPC && e.hidden)) c.shadow(X, Y, 11, 5, 0.35f);
+      if (o.shadows && !(e.kind == Ent::NPC && e.hidden)) c.fillEllipse(float(Xf), float(Yf), 11, 5, 0x000000, 0.35f);
       if (e.kind == Ent::MOB) drawMob(c, e, X, Y);
       else if (!e.hidden && e.sp && e.sp->ok()) e.sp->draw(c, std::min(e.anim, e.sp->animCount() - 1), e.t, X, Y);
     } else {
-      if (o.shadows) c.shadow(X, Y, 11, 5, 0.35f);
+      if (o.shadows) c.fillEllipse(float(Xf), float(Yf), 11, 5, 0x000000, 0.35f);
       drawPlayer(c, X, Y);
     }
   }

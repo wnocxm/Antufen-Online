@@ -7,11 +7,7 @@
 
 namespace engine {
 
-bool World::itemExists(const std::string& id) const {
-  if (bal_.item(id)) return true;
-  for (const char* k : {"hp1", "hp2", "mp1", "mp2", "growthBox", "quest"}) if (id == k) return true;
-  return false;
-}
+bool World::itemExists(const std::string& id) const { return bal_.item(id) != nullptr; }
 
 // HTML questState: done · ready (teslim bekliyor) · active · locked (ırk, sınıf, önkoşul, yükseltme) · soon (seviye yetmiyor) · new
 std::string World::questState(int qi) {
@@ -43,13 +39,13 @@ void World::acceptQuest(int qi) {
   QuestSt st; st.ready = q.type == "talk"; P.quests[q.id] = st;
   for (const auto& a : q.accItems) if (!countItem(a.first)) addItem(a.first, a.second);
   if (q.type == "special" && flags.count(q.flag)) P.quests[q.id].ready = true;
-  note("Görev alındı: " + q.tr.title);
+  note("Görev alındı: " + q.tr.title, LOG_Q);
 }
 
 void World::readyQuest(int qi) {
   const Quest& q = quests().all()[size_t(qi)];
   P.quests[q.id].ready = true;
-  note("Görev tamamlandı: " + q.tr.title + " · " + quests().name(q.to) + " ile konuş.");
+  toast("Görev tamamlandı: " + q.tr.title); note(q.tr.title + " tamam. " + quests().name(q.to) + " ile konuş.", LOG_Q);
 }
 
 // çok hedefli görevin bir sayacını artır; hepsi dolunca görev hazır
@@ -107,12 +103,12 @@ bool World::questUseItem(const std::string& id) {
     if (!x) continue;
     { auto c = it->second.c.find(x->key()); if ((c == it->second.c.end() ? 0 : c->second) >= x->n) continue; }
     const int t = target_;
-    if (t < 0 || ents[t].dead || ents[t].name != x->name) { note("Önce " + quests().name(x->name) + " hedef al."); return false; }
-    if (jsHypot(ents[t].x - player.x, ents[t].y - player.y) > 6) { note("Çok uzak."); return false; }
+    if (t < 0 || ents[t].dead || ents[t].name != x->name) { toast("Önce " + quests().name(x->name) + " hedef al."); return false; }
+    if (jsHypot(ents[t].x - player.x, ents[t].y - player.y) > 6) { toast("Çok uzak."); return false; }
     const int f = pushFx("特效-治疗buff", ents[t].x, ents[t].y); fx[f].follow = t;
     removeItem(id); tgAdd(int(qi), it->second, *x); return true;
   }
-  note("Bunu şimdi kullanamazsın.");
+  toast("Bunu şimdi kullanamazsın.");
   return false;
 }
 
@@ -125,7 +121,7 @@ void World::questFlag(const std::string& f) {
 // görevi teslim et: altın (ırk becerisiyle artar), eşyalar (sınıfa göre), deneyim, sınıf yükseltmesi
 bool World::completeQuest(int qi) {
   const Quest& q = quests().all()[size_t(qi)];
-  if (q.type == "deliver") { if (giveCount(q) < q.count) { note(q.tr.item + ": " + std::to_string(giveCount(q)) + "/" + std::to_string(q.count)); return false; } takeGive(q); }
+  if (q.type == "deliver") { if (giveCount(q) < q.count) { toast(q.tr.item + ": " + std::to_string(giveCount(q)) + "/" + std::to_string(q.count)); return false; } takeGive(q); }
   P.quests.erase(q.id); P.done.insert(q.id);
   if (q.gold) P.gold += (long long)jsRound(q.gold * (1 + stats().goldUp / 100));
   for (const Quest::RItem& it : q.items) {
@@ -133,7 +129,7 @@ bool World::completeQuest(int qi) {
     addItem(it.id, it.n);
   }
   gainXp(q.xp);
-  note("Görev bitti: " + q.tr.title + " · " + std::to_string(q.xp) + " TP, " + std::to_string(q.gold) + " altın");
+  if (q.xp || q.gold) note("Ödül: " + std::to_string(q.xp) + " TP" + (q.gold ? ", " + std::to_string(q.gold) + " altın" : ""), LOG_Q);
   if (q.adv) classUp(q.adv);
   return true;
 }
@@ -142,13 +138,13 @@ bool World::completeQuest(int qi) {
 void World::classUp(int n) {
   if (P.adv >= n) return;
   P.adv = n; pushFx("LEVELUP", player.x, player.y);
-  note(n >= 2 ? "Sınıf yükseltildi: uzmanlık ağaçları açıldı" : "Sınıf yükseltildi: sınıf beceri ağacı açıldı");
+  toast("Sınıf yükseltildi"); note(n >= 2 ? "Sınıf yükseltildi · uzmanlık ağaçları açıldı" : "Sınıf yükseltildi · sınıf beceri ağacı açıldı", LOG_Q);
 }
 
 // seviyesi gelince kendiliğinden alınan görevler (orijinalde verensiz "gönderilen" görev: 80344 Acemilikten Çıkış)
 void World::autoQuests() {
   const auto& Q = quests().all();
-  for (size_t qi = 0; qi < Q.size(); qi++) if (Q[qi].auto_ && questState(int(qi)) == "new") acceptQuest(int(qi));
+  for (size_t qi = 0; qi < Q.size(); qi++) if (Q[qi].auto_ && questState(int(qi)) == "new") { acceptQuest(int(qi)); toast("Yeni görev: " + Q[qi].tr.title); }
 }
 
 std::vector<int> World::questsFor(const std::string& cn) {

@@ -40,7 +40,7 @@ const MULBERRY = `(a => () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imu
   await p.goto(URL); await p.waitForTimeout(2500); await p.keyboard.press('Enter');
   await p.click('[data-cls="战士"]'); await p.fill('#cname', 'GMKarsilastir'); await p.click('#cstart');
   await p.waitForFunction(() => window.__G && window.__G.player, null, { timeout: 30000 });
-  const scen = ['veri www/assets', 'golge 0', 'ekran 640 360', `sahne ${await p.evaluate(() => Game.sceneId)}`];
+  const scen = ['veri www/assets', 'golge 0', 'halka 0', 'ekran 640 360', `sahne ${await p.evaluate(() => Game.sceneId)}`];
   await p.evaluate(() => { window.__upd = window.update; window.update = () => {}; SFX.play = () => {}; });   // döngü durur: canavarlar yerinde kalır
   for (const [ad, sid, x, y, dir, cls, race, sex] of CASES) {
     await p.evaluate(([M, seed]) => { Math.random = eval(M)(seed); }, [MULBERRY, 7]);

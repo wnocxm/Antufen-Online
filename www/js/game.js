@@ -633,7 +633,8 @@ function killMob(m) {
   const P = Game.P, diff = m.d.lv - P.lv, xp = Math.max(1, Math.round(mobXp(m.d.lv, m.d.rank || 0) * clamp(1 + diff * 0.1, 0.2, 1.5)));
   gainXp(xp); UI.float(m, '+' + xp + ' TP', '#9fe060');
   const st = stats(), gold = Math.round((irnd(m.d.lv, m.d.lv * 3) + (m.d.rank || 0) * 20) * (1 + (st.goldUp || 0) / 100)); P.gold += gold;
-  if (st.lifeEl && ITEMS['30127'] && Math.random() * 100 < st.lifeEl) addItem('30127', 1);   // gece elfi: Yaşam Özütü SFX.play('kill', 0.7); later(0.35, () => SFX.play('coin', 0.5)); UI.log(`${gold} altın alındı`, 'loot');
+  SFX.play('kill', 0.7); later(0.35, () => SFX.play('coin', 0.5)); UI.log(`${gold} altın alındı`, 'loot');   // (bir yorumun arkasında kalıp çalışmıyordu; 18.11)
+  if (st.lifeEl && ITEMS['30127'] && Math.random() * 100 < st.lifeEl) addItem('30127', 1);   // gece elfi: Yaşam Özütü
   if (Math.random() < 0.1) addItem(P.lv > 10 ? 'hp2' : 'hp1', 1);
   if (Math.random() < 0.06) addItem(P.lv > 10 ? 'mp2' : 'mp1', 1);
   if (m.d.rank && Math.random() < 0.6) { const g = randomGear(Math.max(1, m.d.lv + 2)); if (g) { addItem(g, 1, true); UI.log(`Ganimet: ${ITEMS[g].name}!`, 'q'); UI.toast(`Ganimet: ${ITEMS[g].name}`); } }

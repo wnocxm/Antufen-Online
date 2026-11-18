@@ -29,6 +29,15 @@
 //   canavarlar <dosya.json|->        bütün canavarlar: ad, yer, yön, can, seviye, durum
 //   ekran <genişlik> <yükseklik>     tuval boyu (varsayılan 640×360)
 //   golge <0|1>                      ayak gölgeleri
+//   halka <0|1>                      hedef halkası (varsayılan 1; dünya karşılaştırmasında 0)
+//   arayuz <0|1>                     görüntüde oyun ekranı (HUD, adlar, uçan sayılar) da çizilsin mi (varsayılan 0)
+//   yazi <0|1>                       yazılar çizilsin mi (piksel karşılaştırmasında 0: tarayıcının yazı çizimi birebir olamaz)
+//   ad <ad> · portre <kod>           karakterin adı ve portresi (ui/Portrait_<kod>.png)
+//   hedefle <sıra>                   hedef seç, saldırmadan (HTML setTarget)
+//   bekleme <beceri> <sn>            beceri bekleme süresi (kısayol karartması)
+//   gorevver <no>                    görevi doğrudan alınmış say (yan etkisiz; test)
+//   temizle                          arayüz olaylarını sil (günlük, uçan sayılar, duyurular)
+//   can <oran> · mana <oran>         oyuncunun canı/manası (azami değerin oranı)
 //   goruntu <dosya.png>              çiz ve PNG yaz
 //   durum <dosya.json|->             oyuncu, sahne, zaman (JSON)
 #include <algorithm>
@@ -47,6 +56,8 @@
 #include "engine/canvas.h"
 #include "engine/vfs.h"
 #include "engine/world.h"
+#include "ui/font.h"
+#include "ui/hud.h"
 
 using namespace engine;
 
@@ -188,7 +199,8 @@ int main(int argc, char** argv) {
   std::ifstream fin; std::istream* in = &std::cin;
   if (std::string(argv[1]) != "-") { fin.open(argv[1]); if (!fin) { std::fprintf(stderr, "senaryo açılamadı: %s\n", argv[1]); return 2; } in = &fin; }
   Vfs vfs; Assets assets; Balance bal; std::unique_ptr<World> world; Canvas canvas; canvas.resize(640, VH);
-  DrawOpts opts; std::string line; int ln = 0;
+  DrawOpts opts; std::string line; int ln = 0; bool hudOn = false;
+  ui::Fonts fonts; std::unique_ptr<ui::Hud> hud;
   auto W = [&]() -> World& { if (!world) throw godat::Error("önce veri"); return *world; };
   try {
     while (std::getline(*in, line)) {
@@ -198,6 +210,7 @@ int main(int argc, char** argv) {
         std::string p; ss >> p;
         if (p.size() > 4 && p.substr(p.size() - 4) == ".gdp") vfs.mountPack(p); else vfs.mountDir(p);
         assets = Assets(); assets.load(vfs); bal = Balance(); bal.load(vfs, assets.D()); world = std::make_unique<World>(assets, bal);
+        fonts.load(vfs); hud = std::make_unique<ui::Hud>(assets, fonts);
         std::printf("veri: %s\n", vfs.describe().c_str());
       } else if (cmd == "tohum") { uint32_t sd; ss >> sd; rng().seed(sd); }
       else if (cmd == "karakter") { std::string c, r, s; ss >> c >> r >> s; W().P = CharData(); W().flags.clear(); W().setChar(c, r, s); }   // yeni karakter (Sv 1, altın 0, çanta boş)
@@ -287,8 +300,20 @@ int main(int argc, char** argv) {
         out(f, o + "\n]\n");
       } else if (cmd == "ekran") { int w, h; ss >> w >> h; canvas.resize(w, h); }
       else if (cmd == "golge") { int g; ss >> g; opts.shadows = g != 0; }
+      else if (cmd == "zemin") { std::string f; ss >> f; godat::writeFile(f, core::encodePNG(W().map.ground)); std::printf("zemin OX %d\n", W().map.OX); }   // harita zemini (hata ayıklama)
+      else if (cmd == "halka") { int g; ss >> g; opts.targetRing = g != 0; }
+      else if (cmd == "arayuz") { int g; ss >> g; hudOn = g != 0; }
+      else if (cmd == "yazi") { int g; ss >> g; fonts.enabled = g != 0; }
+      else if (cmd == "ad") { std::string a; std::getline(ss >> std::ws, a); W().P.name = a; }
+      else if (cmd == "portre") ss >> W().P.face;
+      else if (cmd == "hedefle") { int i; ss >> i; W().setTarget(i); }
+      else if (cmd == "bekleme") { std::string id; double t; ss >> id >> t; W().player.cds[id] = t; }
+      else if (cmd == "gorevver") { int id; ss >> id; W().P.quests[id] = QuestSt(); }   // görevi doğrudan alınmış say (test)
+      else if (cmd == "temizle") { World& w = W(); w.log.clear(); w.floats.clear(); w.zoneT = w.toastT = w.lvlT = w.hurtT = 0; }
+      else if (cmd == "can") { double k; ss >> k; W().player.hp = W().stats().hp * k; }
+      else if (cmd == "mana") { double k; ss >> k; W().player.mp = W().stats().mp * k; }
       else if (cmd == "goruntu") {
-        std::string f; ss >> f; W().draw(canvas, opts); godat::writeFile(f, core::encodePNG(canvas.img));
+        std::string f; ss >> f; W().draw(canvas, opts); if (hudOn) hud->draw(canvas, W(), false); godat::writeFile(f, core::encodePNG(canvas.img));
         std::printf("görüntü %s (%dx%d)\n", f.c_str(), canvas.w(), canvas.h());
       } else if (cmd == "durum") {
         std::string f; ss >> f; const Player& p = W().player; const Stats s = W().stats();
