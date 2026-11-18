@@ -78,6 +78,8 @@ Otomatik yol: `routeTo(sid)` sahneler arası (`scenePath`), `routeToNpc(cn)`, `w
 ## Beceriler ve efektler
 - `CLS[cls].skills[]`: `{id, sn, mp, cd, range, f(K,s,p,t), pas, buff, dur, heal, toggle}` + efekt alanları (aşağıda). Kademe değerleri `skills.json`'dan (`K('sabit')`).
 - `useSkill(i)`: `self` oyuncuda; 0,25 sn sonra `proj` mermisi (`shoot`) → `land()` (hasar + `hit`), `aoe` (oyuncu çevresi), şifa, buff. GM beklemesiz kipte (`Game.gmNoCd`) bekleme/mana yok.
+- **C++ karşılığı** `native/src/engine/skills.cpp` (aynı sıra, aynı sayılar): burada bir beceri değişirse orada da değişmeli; `node tools/test/cpp_savas.js` iki sürümü karşılaştırır (docs/09).
+- `stats()` hız oranını (`spd`, ör. 0,25) yuvarlamaz (18.11 düzeltmesi: önceden hız güçlendirmeleri 0'a iniyordu). Harita değişince Büyü Hayali hedefi bırakır.
 - **Efekt alanları** (her biri orijinal tablodan; `tools/test/efekt.js` hepsini oyunda çeker):
   - `self` / `selfN` / `selfR`: oyuncudaki efekt, kaç kez, kaç piksel saçılarak (`fxBurst`). Yakın dövüşte (`p.state === 'attack'`) 2 kare (2/TICK sn) geç başlar: kılıç izi hareketin inişine denk gelir.
   - `proj` / `projN`: uçan mermi ve sayısı (0,12 sn arayla). `hit` / `hitN` / `hitR`: hedefteki çarpma; çok mermide her mermi kendi payını patlatır (`ceil(hitN/projN)`). `splash`: hasar alanı (kare); görsel saçılma `hitR` ile ayrı.

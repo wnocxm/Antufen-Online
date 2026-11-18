@@ -13,7 +13,13 @@
 //   bekle <sn>                       girdisiz ilerlet (1/60 sn adımlarla)
 //   yuru <sag|sol|yukari|asagi> <sn> o tuşlar basılıyken ilerlet (sag+yukari gibi birleşik de olur)
 //   hedef <yakın|sıra>               en yakın canavarı (8 kare) ya da varlık sırasındakini hedef al ve saldır
-//   savas <dt> <sn> <iz.json> [oto]  sabit adımla ilerlet; her saniye iz satırı; oto: hedef ölünce en yakını yeniden hedef al
+//   ust <0|1|2>                      sınıf yükseltmesi (1: 40. seviye, 2: 80. seviye)
+//   beceriler <no=kademe,…|->        beceri kademeleri (- boş)
+//   dagit <puan> <uzmanlık> [dosya]  kademeleri sıfırla, puanları oyuncu gibi dağıt (HTML skillAutoSpend); sonucu yaz
+//   beceri <sıra>                    beceri kullan (sınıfın beceri listesindeki sıra)
+//   zaman0                           oyun saati 0 (yalnız saat; animasyonlar kalır)
+//   savas <dt> <sn> <iz.json> [oto|beceri]  sabit adımla ilerlet; her saniye iz satırı; oto: hedef ölünce en yakını yeniden hedef al;
+//                                    beceri: oto + her adımda sıradaki hazır beceri (sırayla döner; bekleme bitmiş; menzil dışındaysa yürür)
 //   canavarlar <dosya.json|->        bütün canavarlar: ad, yer, yön, can, seviye, durum
 //   ekran <genişlik> <yükseklik>     tuval boyu (varsayılan 640×360)
 //   golge <0|1>                      ayak gölgeleri
@@ -82,20 +88,44 @@ int main(int argc, char** argv) {
       } else if (cmd == "hedef") {
         std::string h; ss >> h; const int i = h == "yakın" || h == "yakin" ? W().nearestMob(8) : std::stoi(h);
         W().setTarget(i, true); std::printf("hedef %d %s\n", i, i >= 0 ? W().ents[i].name.c_str() : "(yok)");
-      } else if (cmd == "savas") {
+      } else if (cmd == "ust") ss >> W().P.adv;
+      else if (cmd == "beceriler") {
+        std::string l; ss >> l; W().P.sk.clear();
+        std::istringstream ls(l == "-" ? "" : l); std::string tok;
+        while (std::getline(ls, tok, ',')) { const size_t e = tok.find('='); if (e != std::string::npos) W().P.sk[tok.substr(0, e)] = std::stoi(tok.substr(e + 1)); }
+        W().clampVitals();
+      } else if (cmd == "dagit") {
+        int n, spec; std::string f; ss >> n >> spec >> f; World& w = W();
+        w.P.sk.clear(); w.P.sp = 0; w.skillAutoSpend(n, spec);
+        std::string o; for (const auto& kv : w.P.sk) o += (o.empty() ? "" : ",") + kv.first + "=" + std::to_string(kv.second);   // anahtar sırasıyla
+        if (f.empty()) std::printf("beceriler %s · artan puan %d\n", o.c_str(), w.P.sp); else out(f, o + "\n");
+      } else if (cmd == "beceri") { int i; ss >> i; W().useSkill(i); }
+      else if (cmd == "zaman0") W().time = 0;
+      else if (cmd == "savas") {
         double dt, sec; std::string f, oto; ss >> dt >> sec >> f >> oto; World& w = W();
-        const int steps = int(sec / dt + 0.5), per = int(1 / dt + 0.5); std::string tr = "[\n";
+        const int steps = int(sec / dt + 0.5), per = int(1 / dt + 0.5); std::string tr = "[\n"; size_t rot = 0;
         for (int k = 1; k <= steps; k++) {
-          if (oto == "oto" && (w.target() < 0 || w.ents[w.target()].dead)) { const int m = w.nearestMob(8); if (m >= 0) w.setTarget(m, true); }
+          if ((oto == "oto" || oto == "beceri") && (w.target() < 0 || w.ents[w.target()].dead)) { const int m = w.nearestMob(8); if (m >= 0) w.setTarget(m, true); }
+          Player& p = w.player;
+          if (oto == "beceri" && !p.dead && p.pending < 0 && p.state != "attack" && p.state != "cast") {
+            const auto& L = w.skills();
+            for (size_t j = 0; j < L.size(); j++) {   // sırayla döner: bir önceki kullanılandan sonraki ilk hazır beceri
+              const size_t i = (rot + j) % L.size(); const SkillDef& sk = L[i]; if (sk.passive() || !w.skRank(sk)) continue;
+              auto c = p.cds.find(sk.id); if (c != p.cds.end() && c->second > 0) continue;
+              w.useSkill(int(i)); c = p.cds.find(sk.id);
+              if ((c != p.cds.end() && c->second > 0) || p.pending >= 0) { rot = i + 1; break; }
+            }
+          }
           w.update(dt);
           if (k % per == 0) {
             int alive = 0; double sx = 0, sy = 0; for (const Ent& e : w.ents) if (e.kind == Ent::MOB) { alive += !e.dead; sx += e.x; sy += e.y; }
             std::string bag; for (const auto& b : w.P.bag) bag += (bag.empty() ? "" : ",") + b.first + ":" + std::to_string(b.second);
-            const int t = w.target();
+            const int t = w.target(); double mh = 0; for (const Ent& e : w.ents) if (e.kind == Ent::MOB) mh += e.hp;
+            std::string guc; for (const Buff& b : w.player.buffs) guc += (guc.empty() ? "" : ",") + b.id;
             tr += std::string(k > per ? ",\n" : "") + "{\"s\":" + num(k * dt) + ",\"hp\":" + num(w.player.hp) + ",\"mp\":" + num(w.player.mp) + ",\"lv\":" + std::to_string(w.P.lv) +
                   ",\"xp\":" + std::to_string(w.P.xp) + ",\"altin\":" + std::to_string(w.P.gold) + ",\"x\":" + num(w.player.x) + ",\"y\":" + num(w.player.y) +
                   ",\"hedef\":" + std::to_string(t) + ",\"hedefCan\":" + num(t >= 0 ? w.ents[t].hp : -1) + ",\"canli\":" + std::to_string(alive) +
-                  ",\"canavarX\":" + num(sx) + ",\"canavarY\":" + num(sy) + ",\"olu\":" + (w.player.dead ? "true" : "false") + ",\"canta\":\"" + bag + "\"}";
+                  ",\"canavarX\":" + num(sx) + ",\"canavarY\":" + num(sy) + ",\"olu\":" + (w.player.dead ? "true" : "false") + ",\"canta\":\"" + bag + "\",\"canavarCan\":" + num(mh) + ",\"guc\":\"" + guc + "\"}";
           }
         }
         out(f, tr + "\n]\n");

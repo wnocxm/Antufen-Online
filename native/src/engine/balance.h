@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "core/json.h"
+#include "engine/skills.h"
 #include "engine/vfs.h"
 
 namespace engine {
@@ -37,6 +38,7 @@ class Balance {
   const MobRec* mobById(const std::string& id) const;
   const MobRec* mobInfo(const std::string& name) const;       // adı eşleşen ilk kayıt (numara sırası; HTML Game.mobInfo)
   const std::string* eggFor(const std::string& look) const;    // canavarın görünüş ailesine uyan evcil türün yumurtası
+  Skills skills;                                               // beceriler (skills.json + skills.cpp)
 
  private:
   const core::Json* D_ = nullptr;

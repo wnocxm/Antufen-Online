@@ -63,6 +63,21 @@ int main(int argc, char** argv) {
     bool killed = false;
     for (int k = 0; k < 600 && !killed; k++) { if (w.target() < 0) { const int m = w.nearestMob(8); if (m >= 0) w.setTarget(m, true); } w.update(1.0 / 30); for (const auto& e : w.ents) killed |= e.dead; }
     CHECK(killed && w.P.gold > 0 && w.P.xp > 0, "savaş: canavar öldü, deneyim ve altın geldi");
+    // beceriler: tablo, ağaç kuralları, edilgenler, kullanım (bekleme, mana), güçlendirme
+    int act = 0, pas = 0; for (const char* c : {"战士", "法师", "牧师"}) for (const auto& sk : bal.skills.cls(c)) (sk.passive() ? pas : act)++;
+    CHECK(act == 38 && pas == 34 && bal.skills.bySn(90082) && bal.skills.trees("法师").size() == 4, "beceri: 3 sınıf × 24 beceri (38 etkin), ırk becerileri, 4 ağaç");
+    w.P = engine::CharData(); w.setChar("战士", "人类", "male"); w.setLevel(30); const engine::Stats s0 = w.stats();
+    w.P.sk.clear(); w.P.sp = 0; w.skillAutoSpend(31, 0);
+    CHECK(w.P.sk.count("w1") && !w.P.sk.count("w4") && !w.P.sk.count("90106"), "beceri: 40 altında yalnız acemi ağacı (sınıf ağacı kilitli)");
+    CHECK(w.stats().atk > s0.atk && w.stats().hp > s0.hp, "beceri: edilgenler saldırı ve canı artırır");
+    w.loadScene("120018", at); const engine::Stats s1 = w.stats(); w.player.mp = s1.mp;
+    const int t = w.nearestMob(30); w.setTarget(t, true); w.player.x = w.ents[t].x - 1; w.player.y = w.ents[t].y;
+    w.useSkill(1);   // Öç Bıçağı (w2): 25 mana, 1 sn bekleme
+    CHECK(w.player.mp == s1.mp - 25 && w.player.cds["w2"] == 1.0 && w.player.state == "attack", "beceri: kullanınca mana düşer, bekleme başlar");
+    const double hp0 = w.ents[t].hp; for (int k = 0; k < 12; k++) w.update(1.0 / 30);
+    CHECK(w.ents[t].hp < hp0 || w.ents[t].dead, "beceri: 0,25 sn sonra vurur");
+    w.P.sk["w5"] = 1; w.player.cds.clear(); w.useSkill(4); for (int k = 0; k < 10; k++) w.update(1.0 / 30);   // Hız Patlaması: güçlendirme
+    CHECK(!w.player.buffs.empty() && w.player.buffs[0].id == "w5" && w.stats().spd > 0, "beceri: güçlendirme etkin (hız)");
   }
   std::printf("motor testleri: %d geçti, %d kaldı\n", passed, failed);
   return failed ? 1 : 0;

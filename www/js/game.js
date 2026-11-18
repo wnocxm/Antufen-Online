@@ -353,7 +353,7 @@ function stats() {
   if (X.defToAtk) s.atk += s.def / 100 * X.defToAtk;
   if (X.atkToDef) { s.def += s.atk / 100 * X.atkToDef; s.res += s.atk / 100 * X.atkToDef; }
   if (X.mpToAtk) s.atk += s.mp / 500 * X.mpToAtk;
-  for (const k in s) s[k] = Math.round(s[k]);
+  for (const k in s) if (k !== 'spd') s[k] = Math.round(s[k]);   // hız oranı (0,25 gibi) yuvarlanmaz: yoksa hız güçlendirmeleri 0'a iniyordu
   return s;
 }
 function look() {
@@ -512,6 +512,7 @@ async function loadScene(sid, arrive) {
   Game.player && (Game.player = null);
   Game.map = map; Game.scene = sc; Game.sceneId = sid; Game.target = null; Game.ents = []; Game.fx = []; Game.floats = [];
   timers.length = 0;   // önceki haritanın bekleyen işleri (canavar darbesi, beceri vuruşu) yeni haritada çalışmasın (C++ karşılaştırmasında bulundu)
+  if (Game.phantom) Game.phantom.tg = null;   // Büyü Hayali sürer ama eski haritanın canavarını hedeflemez (C++ ile aynı)
   map.build();
   Dungeon.onLoad(sid);
   // NPC'ler ve canavarlar

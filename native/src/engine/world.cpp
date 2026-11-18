@@ -44,7 +44,7 @@ void World::setLevel(int lv) {   // HTML gmLevel
   const Stats s = stats(); player.hp = s.hp; player.mp = s.mp;
 }
 
-// HTML stats(): sınıf tabanı + seviye artışı + ekipman + ırk becerileri (beceri ağaçları ve güçlendirmeler sonraki adımda)
+// HTML stats(): sınıf tabanı + seviye artışı + ekipman + edilgen beceriler ve ırk becerileri + güçlendirmeler + dönüşümler; hepsi yuvarlanır
 Stats World::stats() const {
   const ClassBase& C = bal_.cls(P.cls); const int L = P.lv - 1;
   Stats s; s.hp = C.hp + C.ghp * L; s.mp = C.mp + C.gmp * L; s.atk = C.atk + C.gatk * L; s.def = C.def + C.gdef * L;
@@ -56,17 +56,133 @@ Stats World::stats() const {
       else if (k == "crit") s.crit += v; else if (k == "dodge") s.dodge += v; else if (k == "hpreg") s.hpreg += v; else if (k == "mpreg") s.mpreg += v; else if (k == "res") s.res += v;
     }
   }
-  // ırk becerileri (kademe 1, kendiliğinden): insan savunma 2×Sv, mana 5×Sv, altın %10; gece elfi direnç 2×Sv, can 8×Sv, Yaşam Elementi %5
-  if (P.race == "人类") { s.def += 2 * P.lv; s.mp += 5 * P.lv; s.goldUp = 10; }
-  else if (P.race == "精灵") { s.res += 2 * P.lv; s.hp += 8 * P.lv; s.lifeEl = 5; }
-  for (double* v : {&s.hp, &s.mp, &s.atk, &s.def, &s.crit, &s.dodge, &s.hpreg, &s.mpreg, &s.res, &s.dr, &s.spd, &s.goldUp, &s.lifeEl}) *v = jsRound(*v);
+  s.dr = 0; s.spd = 0;
+  // edilgen beceriler (orijinal kademe sabitleri) ve ırk becerileri; yüzdeler ve dönüşümler en sonda
+  Vals X;
+  auto pasOf = [&](const SkillDef& sk) {
+    if (!skRank(sk) || !sk.pas) return;
+    SkCtx c{const_cast<World&>(*this), sk, s, P.lv, nullptr};
+    for (const auto& kv : sk.pas(c).v) X.add(kv.first, kv.second);
+  };
+  for (const SkillDef& sk : skills()) pasOf(sk);
+  for (const SkillDef& sk : bal_.skills.race(P.race)) pasOf(sk);
+  const std::pair<const char*, double*> adds[] = {{"atk", &s.atk}, {"def", &s.def}, {"res", &s.res}, {"hp", &s.hp}, {"mp", &s.mp}, {"dodge", &s.dodge},
+                                                  {"crit", &s.crit}, {"hpreg", &s.hpreg}, {"mpreg", &s.mpreg}, {"dr", &s.dr}};
+  for (const auto& a : adds) { const double x = X.get(a.first); if (x) *a.second += x; }
+  s.hp *= 1 + X.get("hpPct") / 100; s.mp *= 1 + X.get("mpPct") / 100;
+  s.acc = X.get("acc"); s.healUp = X.get("healUp"); s.ccDmg = X.get("ccDmg"); s.despair = X.get("despair"); s.cheatDeath = X.get("cheatDeath");
+  s.seal = X.get("seal"); s.veil = X.get("veil"); s.goldUp = X.get("goldUp"); s.lifeEl = X.get("lifeEl");
+  // İlahi Işık Dökümü (90320): can/mana sınırının yüzdesi (sınırlar hesaplandıktan sonra)
+  for (const SkillDef& sk : skills()) if (sk.sn == 90320) { if (skRank(sk)) { const double v = skC(sk, "add_hp_resume_rate") / 100; s.hpreg += s.hp * v; s.mpreg += s.mp * v; } break; }
+  for (const Buff& b : player.buffs) {
+    const Vals& B = b.buff; double a;
+    if ((a = B.get("atk"))) s.atk *= 1 + a;
+    if ((a = B.get("def"))) { s.def *= 1 + a; if (a < 0) s.res *= 1 + a; }
+    if ((a = B.get("spd"))) s.spd += a;
+    if ((a = B.get("crit"))) s.crit += a;
+    if ((a = B.get("dr"))) s.dr += a;
+    if ((a = B.get("hpP"))) s.hp *= 1 + a;     // hpP/dodge/res: evcil hayvan haleleri de
+    if ((a = B.get("dodge"))) s.dodge += a;
+    if ((a = B.get("res"))) s.res += a;
+    if ((a = B.get("atkAdd"))) s.atk += a;
+    if ((a = B.get("defAdd"))) { s.def += a; s.res += a; }
+    if ((a = B.get("mpAdd"))) s.mp += a;
+  }
+  // dönüşümler: Kan Ruhu (savunma → saldırı), Çelik İrade (saldırı → savunma/direnç), Büyü Yankısı (mana → büyü saldırısı)
+  if (const double v = X.get("defToAtk")) s.atk += s.def / 100 * v;
+  if (const double v = X.get("atkToDef")) { s.def += s.atk / 100 * v; s.res += s.atk / 100 * v; }
+  if (const double v = X.get("mpToAtk")) s.atk += s.mp / 500 * v;
+  // hız oranı (0,25 gibi) yuvarlanmaz (HTML'de de; önceden yuvarlanıp hız güçlendirmeleri 0'a iniyordu)
+  for (double* v : {&s.hp, &s.mp, &s.atk, &s.def, &s.crit, &s.dodge, &s.hpreg, &s.mpreg, &s.res, &s.dr, &s.goldUp, &s.lifeEl,
+                    &s.acc, &s.healUp, &s.ccDmg, &s.despair, &s.cheatDeath, &s.seal, &s.veil}) *v = jsRound(*v);
   return s;
+}
+
+void World::clampVitals() { const Stats s = stats(); player.hp = std::min(player.hp, s.hp); player.mp = std::min(player.mp, s.mp); }
+
+// ---------------- beceri kademeleri ve ağaç kuralları (HTML skRank, skC, skLock, treePts, skillUp, skillAutoSpend, skillReset) ----------------
+int World::skRank(const SkillDef& sk) const {
+  if (!sk.race.empty()) return sk.race == P.race ? 1 : 0;
+  auto it = P.sk.find(sk.id); return it == P.sk.end() ? 0 : it->second;
+}
+// kademe sabiti: becerinin kademesindeki değer (öğrenilmemişse 1. kademe); r verilirse o kademe
+double World::skC(const SkillDef& sk, const std::string& key, int r) const {
+  if (!sk.d) return 0;
+  const core::Json& t = (*sk.d)["c"][key];
+  if (!t.isArr() || !t.size()) return 0;
+  const int k = int(clampd(r >= 0 ? r : std::max(1, skRank(sk)), 1, double(t.size())));
+  return t[k - 1].num();
+}
+int World::skRankSn(int sn) const { const SkillDef* sk = bal_.skills.bySn(sn); return sk ? skRank(*sk) : 0; }
+double World::skCSn(int sn, const std::string& key) const { const SkillDef* sk = bal_.skills.bySn(sn); return sk ? skC(*sk, key) : 0; }
+int World::treePts(int treeId) const {
+  const SkillTree* T = bal_.skills.tree(treeId); if (!T) return 0;
+  int n = 0; for (const auto& c : T->cells) { auto it = P.sk.find(c.first->id); if (it != P.sk.end()) n += it->second; } return n;
+}
+// sınıf yükseltmesi gereken kökler (orijinal sınıf numaraları): 1 = 40. seviye, 2 = 80. seviye
+static int advNeed(int cls) { switch (cls) { case 130004: case 130005: case 130011: return 1; case 130006: case 130008: case 130012: return 2; default: return 0; } }
+std::string World::skLock(const SkillDef& sk) const {
+  if (!sk.d || !sk.race.empty()) return "";
+  const core::Json& rt = (*sk.d)["root"];
+  if (rt.isObj()) {
+    const int need = advNeed(rt["cls"].i()); if (need && P.adv < need) return "adv";
+    if (treePts(rt["tree"].i()) < rt["pts"].i()) return "pts";
+    if (rt["excl"].i() && skRankSn(rt["excl"].i())) return "excl";
+  }
+  const core::Json& pre = (*sk.d)["pre"];
+  if (pre.isArr()) { const SkillDef* pk = bal_.skills.bySn(pre[0].i()); if (pk && skRank(*pk) < pre[1].i()) return "pre"; }
+  return "";
+}
+bool World::skillUp(const SkillDef& sk) {
+  const int r = skRank(sk);
+  if (!sk.race.empty() || r >= (sk.mx ? sk.mx : 10) || !skLock(sk).empty() || P.sp < 1) return false;
+  P.sp--; P.sk[sk.id] = r + 1; clampVitals(); return true;
+}
+// her puan, öğrenilebilir beceriler arasında kademesi en düşük olana (eşitse önceki ağaç / önceki yuva); oyuncu gibi önce bir sonraki
+// ağacı açacak kadar (acemi 35, sınıf 40), sonra en üstteki açık ağaç. spec: hangi uzmanlık (öbürü alınmaz)
+void World::skillAutoSpend(int points, int spec) {
+  const auto& T = bal_.skills.trees(P.cls); if (T.size() < size_t(3 + spec)) return;
+  std::vector<const SkillDef*> tr[3];
+  const SkillTree* src[3] = {&T[0], &T[1], &T[2 + spec]};
+  for (int k = 0; k < 3; k++) for (const auto& c : src[k]->cells) tr[k].push_back(c.first);
+  auto pick = [&](const std::vector<const SkillDef*>& L) -> const SkillDef* {
+    const SkillDef* best = nullptr;
+    for (const SkillDef* sk : L) { const int r = skRank(*sk); if (r >= (sk->mx ? sk->mx : 10) || !skLock(*sk).empty()) continue; if (!best || r < skRank(*best)) best = sk; }
+    return best;
+  };
+  auto rootPts = [](const SkillTree& t) { if (t.cells.empty()) return 0; const core::Json& r = (*t.cells[0].first->d)["root"]; return r.isObj() ? r["pts"].i() : 0; };
+  const int need0 = rootPts(T[1]), need1 = rootPts(T[2 + spec]);
+  for (int n = 0; n < points; n++) {
+    const SkillDef* best = nullptr;
+    if (P.adv >= 1 && treePts(T[0].id) < need0) best = pick(tr[0]);
+    else if (P.adv >= 2 && treePts(T[1].id) < need1) { best = pick(tr[1]); if (!best) best = pick(tr[0]); }
+    if (!best) best = pick(tr[2]);
+    if (!best) best = pick(tr[1]);
+    if (!best) best = pick(tr[0]);
+    if (!best) { P.sp += points - n; break; }
+    P.sk[best->id] = skRank(*best) + 1;
+  }
+}
+// puanları sıfırla: Eğitim Kitabı (30092 ya da 30788) harcanır; GM'de bedava
+bool World::skillReset(bool free) {
+  int spent = 0; for (const auto& kv : P.sk) spent += kv.second;
+  if (!spent) return false;
+  if (!free && !removeItem("30092") && !removeItem("30788")) return false;
+  P.sp += spent; P.sk.clear(); player.buffs.clear(); clampVitals(); return true;
 }
 
 int World::countItem(const std::string& id) const { for (const auto& b : P.bag) if (b.first == id) return b.second; return 0; }
 void World::addItem(const std::string& id, int n) {
   for (auto& b : P.bag) if (b.first == id) { b.second += n; return; }
   P.bag.push_back({id, n});
+}
+bool World::removeItem(const std::string& id, int n) {
+  for (size_t i = 0; i < P.bag.size(); i++) if (P.bag[i].first == id) {
+    if (P.bag[i].second < n) return false;
+    P.bag[i].second -= n; if (P.bag[i].second <= 0) P.bag.erase(P.bag.begin() + long(i));
+    return true;
+  }
+  return false;
 }
 std::string World::randomGear(int lv) {
   std::vector<const Item*> pool;
@@ -104,6 +220,7 @@ void World::loadScene(const std::string& sid, const int* arrive) {
   map.load(as_, sc["map"].str());
   extraBlock_.assign(size_t(map.w) * map.h, 0);
   ents.clear(); fx.clear(); timers_.clear(); target_ = -1;   // HTML: Game.target = null (engage kalır)
+  phantom.tg = -1;   // Büyü Hayali sürer, eski haritanın canavarını hedeflemez
   for (const core::Json& e : sc["ents"].arr()) {
     const std::string id = std::to_string(e[0].i()), nm = e[1].str(); const int x = e[2][0].i(), y = e[2][1].i();
     const core::Json& info = D["cit"][id];
@@ -215,14 +332,64 @@ template <class E> bool World::stepTo(E& e, double tx, double ty, double sp, dou
 }
 
 // ---------------- efektler ----------------
-int World::pushFx(const std::string& name, double x, double y, int dir) {
-  Fx f; f.sp = map.sprite(name); f.sp->glow = true; f.x = x; f.y = y;
+int World::pushFx(const std::string& name, double x, double y, int dir, bool glow) {
+  Fx f; f.sp = map.sprite(name); f.sp->glow = glow; f.x = x; f.y = y; f.name = name; f.uid = ++fxUid_;
   f.anim = fxAnim(*f.sp, dir >= 0 ? dir : player.dir);
   f.len = f.sp->ok() ? f.sp->animLen(f.anim) : 0; f.done = !f.sp->ok() || !f.len;
   fx.push_back(std::move(f)); return int(fx.size()) - 1;
 }
 void World::shoot(const std::string& name, double sx, double sy, int to, std::function<void()> cb, bool vis) {
   const int i = pushFx(name, sx, sy); Fx& f = fx[i]; f.z = 30; f.proj = true; f.to = to; f.cb = std::move(cb); f.vis = vis; f.loop = true;
+}
+// Orijinal efekt tablosundaki "sayı + yarıçap" (HTML fxBurst): efekt n kez, ilki tam ortada, ötekiler r piksellik daire içinde rastgele
+// (yer düzlemi: dikeyde yarı) ve kısa aralıklarla (toplam en çok ~0,6 sn) oynar
+void World::fxBurst(const std::string& name, double x, double y, int n, double r, int dir, double delay) {
+  if (name.empty()) return;
+  if (!n) n = 1;
+  const double gap = std::min(0.06, 0.6 / n);
+  for (int k = 0; k < n; k++) {
+    auto go = [this, name, x, y, k, r, dir]() {
+      const double a = random() * 6.283, d = k && r ? std::sqrt(random()) * r : 0;
+      const int i = pushFx(name, x, y, dir); fx[i].ox = std::cos(a) * d; fx[i].oy = std::sin(a) * d * 0.5;
+    };
+    const double dl = delay + k * gap;
+    if (dl > 0) later(dl, go); else go();
+  }
+}
+// çağrılan nesne (Gözdağı Totemi, Şifa Pınarı): yere konur, süresi boyunca durur
+void World::totemAt(const std::string& name, double x, double y, double life) { const int i = pushFx(name, x, y); fx[i].loop = true; fx[i].life = life; }
+// Büyü Hayali: "hayal totemi" oyuncunun yanına dikilir (canavar görseli, ışık değil: 0-3 duruş, 8-11 saldırı)
+int World::phantomFx() {
+  const int i = pushFx("怪物-魔法幻象", player.x - 1, player.y + 0.3, -1, false); Fx& f = fx[i];
+  f.loop = true; f.anim = player.dir; f.len = f.sp->ok() ? f.sp->animLen(f.anim) : 0; f.done = !f.sp->ok() || !f.len;
+  return f.uid;
+}
+// JS nesne sırası: tam sayı biçimli anahtarlar önce (artan), sonra ötekiler eklenme sırasıyla
+static bool jsIntKey(const std::string& k) { return !k.empty() && k.size() < 10 && std::all_of(k.begin(), k.end(), ::isdigit) && (k == "0" || k[0] != '0'); }
+// süren etkinin görseli (HTML auraSync): etki sürdükçe efekt varlığın üstünde döner, bitince kalkar. want: anahtar → efekt adı
+void World::auraSync(int follow, Aura& A, const std::vector<std::pair<std::string, std::string>>& want0) {
+  std::vector<std::pair<std::string, std::string>> want;
+  for (const auto& w : want0) { bool f = false; for (auto& x : want) if (x.first == w.first) { x.second = w.second; f = true; } if (!f) want.push_back(w); }
+  std::stable_sort(want.begin(), want.end(), [](const auto& a, const auto& b) {
+    const bool ia = jsIntKey(a.first), ib = jsIntKey(b.first);
+    if (ia != ib) return ia;
+    return ia && std::stoll(a.first) < std::stoll(b.first); });
+  const double ex = follow == -2 ? player.x : ents[follow].x, ey = follow == -2 ? player.y : ents[follow].y;
+  for (const auto& w : want) {
+    int* slot = nullptr; for (auto& a : A) if (a.first == w.first) slot = &a.second;
+    Fx* f = slot ? fxByUid(*slot) : nullptr;
+    if (!f || f->done || f->name != w.second) {
+      if (f) f->done = true;
+      const int i = pushFx(w.second, ex, ey); fx[i].follow = follow; fx[i].loop = true;
+      if (slot) *slot = fx[i].uid; else A.push_back({w.first, fx[i].uid});
+    }
+  }
+  for (size_t k = 0; k < A.size();) {
+    bool keep = false; for (const auto& w : want) if (w.first == A[k].first) keep = true;
+    if (keep) { k++; continue; }
+    if (Fx* f = fxByUid(A[k].second)) f->done = true;
+    A.erase(A.begin() + long(k));
+  }
 }
 
 // ---------------- savaş ----------------
@@ -233,15 +400,150 @@ World::Dmg World::dmgCalc(double atk, double def, double mult, double critB, dou
   return {crit ? int(jsRound(d * 1.8)) : d, crit};
 }
 
-int World::hitMob(int i, double mult) {   // HTML hitMob (normal saldırı; beceri seçenekleri sonraki adımda)
+static double buffSum(const std::vector<Buff>& L, const char* k) { double v = 0; for (const Buff& b : L) v += b.buff.get(k); return v; }
+static bool anyBuff(const std::vector<Buff>& L, const char* k) { for (const Buff& b : L) if (b.buff.get(k)) return true; return false; }
+
+// HTML hitMob: savunma, kritik, güçlendirmeler, tetiklenen etkiler (kanama, yanma, donma, sersemletme, mühür, umutsuzluk)
+int World::hitMob(int i, double mult, const HitOpt& o) {
   Ent& m = ents[i]; if (m.dead) return 0;
-  const Stats s = stats(); const double K0 = bal_.cls(P.cls).dmgK;
+  const Stats s = stats(); Player& p = player;
+  const double nextCrit = buffSum(p.buffs, "nextCrit"), leech = buffSum(p.buffs, "leech"), dmgUp = buffSum(p.buffs, "dmgUp"), dmgOut = buffSum(p.buffs, "dmgOut");
+  // İlahi Gözdağı: savunma, büyü saldırısının yüzdesi kadar düşer; eski genel zayıflatma (evcil) savunmayı %60 düşürür
   const double def = m.weakT > 0 ? (m.weakDef ? std::max(0.0, m.def - m.weakDef) : m.def * 0.4) : m.def;
-  const Dmg r = dmgCalc(s.atk, def, mult * K0 * (m.weakT > 0 && !m.weakDef ? 1.15 : 1), s.crit, 0);
-  const int d = std::max(1, r.d);
-  m.hp -= d; m.aggro = true; m.state = "hurt"; m.animT = 0; m.stateT = 0.3;
+  double critB = s.crit + o.crit;
+  if (!o.tick && nextCrit) { if (random() * 100 < nextCrit) critB = 1000; for (Buff& b : p.buffs) b.buff.del("nextCrit"); }   // Hız Patlaması: sonraki saldırı
+  const double K0 = bal_.cls(P.cls).dmgK;   // büyü gücü: sınıf vuruş çarpanı (bizim denge)
+  const Dmg r = dmgCalc(s.atk, o.pure ? 0 : def, mult * K0 * (m.weakT > 0 && !m.weakDef ? 1.15 : 1), critB, o.add * K0);
+  double d = r.d;
+  if (r.crit && o.critDmg) d = jsRound(d * (1 + o.critDmg / 100));
+  if (s.ccDmg && (m.slowT > 0 || m.rootT > 0 || m.burn.on)) d = jsRound(d * (1 + s.ccDmg / 100));   // Element Ustalığı
+  if (dmgUp) d = jsRound(d * (1 + dmgUp / 100));                  // Büyü Darbesi katları
+  if (dmgOut) d = jsRound(d * std::min(1.0, dmgOut));             // Element Bağışı sırasında hasar düşer
+  const int dd = int(std::max(1.0, d));
+  m.hp -= dd; m.aggro = true; m.state = "hurt"; m.animT = 0; m.stateT = 0.3;
+  if (o.slow) m.slowT = o.slow;
+  if (!o.tick) {
+    if (leech) healPlayer(dd * leech);   // Kan Damgası
+    if (o.bleed) { const int n = std::min(5, (m.bleed.on ? m.bleed.n : 0) + 1); m.bleed.on = true; m.bleed.n = n; m.bleed.t = 10; m.bleed.tick = 2; }   // Testere Bıçak: en çok 5 kat
+    if (o.burn) { m.burn.on = true; m.burn.t = 6; m.burn.tick = 2; }   // Alev Darbesi: yanma (yığılmaz)
+    if (o.freeze && random() * 100 < o.freeze) m.rootT = 2;
+    const double now = time;
+    if (o.stun && random() * 100 < o.stun && !(p.stunCd > now)) { m.stunT = 3; p.stunCd = now + 15; }
+    if (s.seal && random() * 100 < s.seal && !(p.sealCd > now)) { m.sealT = 3; p.sealCd = now + 10; }
+    if (s.despair && random() * 100 < s.despair && !(p.despCd > now)) { m.despairT = 6; p.despCd = now + 15; }
+    if (r.crit && o.onCrit) o.onCrit(m);
+  }
   if (m.hp <= 0) killMob(i);
-  return d;
+  return dd;
+}
+
+// şifa: Kana Hasret ile artar (alınan şifa); Gölge Hükümdarı sırasında şifa yok
+int World::healPlayer(double h, const std::string& fxName) {
+  Player& p = player; const Stats s = stats(); if (anyBuff(p.buffs, "noHeal")) return 0;
+  const int v = int(jsRound(h * (1 + s.healUp / 100))); p.hp = std::min(s.hp, p.hp + v);
+  if (!fxName.empty()) { const int i = pushFx(fxName, p.x, p.y); fx[i].follow = -2; }
+  return v;
+}
+// Çürüme (90314): 10 saniye, 2 saniyede bir; Can Sömürüsü (90316) payı ve can emme
+void World::applyCorrosion(Ent& m) {
+  const double er = skRankSn(90316) ? skCSn(90316, "add_erosion_damage_rate") / 100 : 0;
+  m.dot.on = true; m.dot.n = 5; m.dot.t = 2; m.dot.mult = 0.1 * (1 + er); m.dot.add = skCSn(90314, "dur_dmg"); m.dot.corr = true;
+  m.dot.suck = skRankSn(90316) ? skCSn(90316, "suck_rate") / 100 : 0;
+}
+
+// HTML useSkill: i, sınıfın beceri listesindeki sıra (kısayol). Menzil dışındaysa hedefe yürür (pending), oraya varınca kullanır.
+void World::useSkill(int i) {
+  const auto& SL = skills(); if (i < 0 || i >= int(SL.size())) return;
+  const SkillDef* sk = &SL[size_t(i)]; Player& p = player;
+  if (sk->passive() || p.dead || !skRank(*sk)) return;
+  const Stats s = stats();
+  if (gmNoCd) { p.cds.clear(); p.mp = s.mp; }
+  { auto c = p.cds.find(sk->id); if (c != p.cds.end() && c->second > 0) return; }
+  // Gölge Hükümdarı: şifa ve destek becerileri çalışmaz (orijinal)
+  if ((sk->heal || (sk->buff && sk->sn != 90613)) && anyBuff(p.buffs, "noHeal")) return;
+  // aç/kapa beceri (Kutsal Akış): etkinse kapanır
+  if (sk->toggle) {
+    bool on = false; for (const Buff& b : p.buffs) if (b.id == sk->id) on = true;
+    if (on) { p.buffs.erase(std::remove_if(p.buffs.begin(), p.buffs.end(), [&](const Buff& b) { return b.id == sk->id; }), p.buffs.end()); p.cds[sk->id] = sk->cd; return; }
+  }
+  int arcUid = -1, arcN = 0; for (const Buff& b : p.buffs) if (b.id == "arcane") { arcUid = b.uid; arcN = b.n; break; }
+  SkCtx c0{*this, *sk, s, P.lv, nullptr};
+  const double mpCost = sk->mpPct ? std::max(1.0, jsRound(p.mp * sk->mpPct(c0) * (1 + arcN))) : sk->mp;   // Büyü Darbesi: mananın yüzdesi, her katta artar
+  if (p.mp < mpCost) return;
+  int t = target_ >= 0 && !ents[target_].dead && ents[target_].kind == Ent::MOB ? target_ : -1;
+  const bool needT = sk->f && !sk->aoe;
+  if (needT && t < 0) { t = nearestMob(8); if (t >= 0) setTarget(t, true); } else if (t >= 0) engage_ = true;   // beceri kullanınca o hedefle dövüş sürer
+  if (needT && t < 0) return;
+  if (t >= 0 && sk->range && jsHypot(ents[t].x - p.x, ents[t].y - p.y) > sk->range + 0.3) { p.pending = i; return; }
+  p.pending = -1; p.mp -= mpCost; p.cds[sk->id] = sk->cd; p.combatT = 5; if (i == 0) p.atkT = std::max(p.atkT, 0.9);
+  if (t >= 0) p.dir = dirOf(ents[t].x - p.x, ents[t].y - p.y);
+  p.state = bal_.cls(P.cls).melee && sk->f && (sk->range ? sk->range : 9) < 3 ? "attack" : "cast"; p.animT = 0; p.stateT = 0.5;
+  SkCtx c1{*this, *sk, s, P.lv, t >= 0 ? &ents[size_t(t)] : nullptr};
+  const auto F = std::make_shared<SkF>(sk->f ? sk->f(c1) : SkF());
+  HitOpt o; o.crit = F->crit; o.add = F->add; o.slow = F->slow ? F->slow : sk->slow; o.pure = F->pure; o.bleed = F->bleed; o.burn = F->burn;
+  o.freeze = F->freeze; o.stun = F->stun; o.critDmg = F->critDmg; o.onCrit = F->onCrit;
+  const double MUL = F->mult;
+  // vuruşun ardından: Çürüme bırakma, hayal totemi, Kan Damgası'nı yenileme, Büyü Darbesi katı; başka bir saldırı becerisi Büyü Darbesi etkisini tüketir
+  auto after = [this, sk, F, MUL, o, arcUid, arcN](int tg) {
+    Player& p = player;
+    if (F->corrode && tg >= 0 && !ents[tg].dead) applyCorrosion(ents[tg]);
+    if (F->phantom && tg >= 0) {
+      if (phantom.on) if (Fx* f = fxByUid(phantom.fx)) f->done = true;
+      phantom.on = true; phantom.t = F->life; phantom.tick = 0; phantom.mult = F->phantom; phantom.tg = tg; phantom.fx = phantomFx();
+    }
+    if (!F->refresh.empty()) for (Buff& b : p.buffs) if (b.id == F->refresh) { const SkillDef* r = bal_.skills.bySn(90106); b.t = std::max(b.t, r && r->dur ? r->dur : 10); break; }
+    if (F->arcane) {
+      const int n = std::min(3, arcN + 1);
+      p.buffs.erase(std::remove_if(p.buffs.begin(), p.buffs.end(), [](const Buff& b) { return b.id == "arcane"; }), p.buffs.end());
+      Buff b; b.id = "arcane"; b.n = n; b.buff = Vals{{"dmgUp", n * skC(*sk, "count_up_damage_rate")}}; b.t = 3; b.uid = ++fxUid_; p.buffs.push_back(std::move(b));
+    } else if (arcUid >= 0 && sk->f && (MUL || o.add)) {
+      p.buffs.erase(std::remove_if(p.buffs.begin(), p.buffs.end(), [arcUid](const Buff& b) { return b.uid == arcUid; }), p.buffs.end());
+    }
+  };
+  // vuruş efekti: hitN kez hitR px içinde; birden çok mermide (projN) her mermi kendi payını patlatır
+  const int PN = sk->projN ? sk->projN : 1, hitN = sk->hitN ? sk->hitN : 1, per = (hitN + PN - 1) / PN;
+  auto hitFx = [this, sk, t](int n) { fxBurst(!sk->hit.empty() ? sk->hit : sk->fx, ents[t].x, ents[t].y, n, sk->hitR); };
+  auto mobsNear = [this](double x, double y, double r) { std::vector<int> v; for (size_t k = 0; k < ents.size(); k++) { const Ent& m = ents[k]; if (m.kind == Ent::MOB && !m.dead && jsHypot(m.x - x, m.y - y) <= r) v.push_back(int(k)); } return v; };
+  auto land = [this, sk, F, MUL, o, t, per, hitFx, mobsNear, after]() {
+    hitFx(per);
+    if (sk->splash) { for (int m : mobsNear(ents[t].x, ents[t].y, sk->splash)) hitMob(m, MUL, o); }
+    else if (MUL || o.add) hitMob(t, MUL, o);
+    if (!sk->fx2.empty()) pushFx(sk->fx2, ents[t].x, ents[t].y);
+    if (sk->hits == 2) later(0.28, [this, F, MUL, o, t]() { if (!ents[t].dead) { HitOpt o2 = o; o2.add = F->hasMult2 ? 0 : o.add; hitMob(t, F->hasMult2 ? F->mult2 : MUL, o2); } });
+    after(t);
+  };
+  // oyuncudaki efekt; yakın dövüşte kılıç izi saldırı hareketinin inişine denk gelsin diye 2 kare sonra
+  if (!sk->self.empty()) fxBurst(sk->self, p.x, p.y, sk->selfN, sk->selfR, p.dir, p.state == "attack" ? 2.0 / TICK : 0);
+  later(0.25, [this, sk, F, MUL, o, t, s, PN, per, hitN, hitFx, mobsNear, after, land]() {
+    Player& p = player;
+    if (!sk->proj.empty() && t >= 0) {
+      shoot(sk->proj, p.x, p.y, t, land, false);
+      for (int k = 1; k < PN; k++) later(k * 0.12, [this, sk, t, k, per, hitN, hitFx]() { shoot(sk->proj, player.x, player.y, t, [hitFx, k, per, hitN]() { hitFx(std::min(per, hitN - k * per)); }, true); });
+    } else if (sk->aoe) {
+      const std::vector<int> near = mobsNear(p.x, p.y, sk->aoe);
+      if (!sk->fx.empty()) pushFx(sk->fx, p.x, p.y);
+      if (!sk->totem.empty()) totemAt(sk->totem, p.x, p.y, F->weakT ? F->weakT : 10);
+      int dealt = 0;
+      for (int m : near) {
+        if (MUL || o.add) dealt += hitMob(m, MUL, o);
+        if (F->weakDef) { ents[m].weakT = F->weakT; ents[m].weakDef = F->weakDef; }
+      }
+      if (F->novaHeal && dealt) healPlayer(dealt);   // Kutsal Nova: verilen hasar kadar can
+      after(near.empty() ? -1 : near[0]);
+    } else if (sk->f) land();
+    else if (sk->heal) { SkCtx c{*this, *sk, s, P.lv, nullptr}; healPlayer(jsRound(sk->heal(c)), sk->fx); }
+    else if (sk->buff) {
+      SkCtx c{*this, *sk, s, P.lv, nullptr};
+      const double dur = sk->durF ? sk->durF(c) : sk->dur;
+      Buff b; b.id = sk->id; b.buff = sk->buff(c); b.t = dur; b.fx = sk->bfx; b.uid = ++fxUid_;
+      // Şifa Pınarı: pınar yere konur, yalnızca yanındayken iyileştirir
+      if (!sk->totem.empty()) { b.hasAt = true; b.atX = p.x; b.atY = p.y; b.atR = 3; totemAt(sk->totem, p.x, p.y, dur); }
+      p.buffs.erase(std::remove_if(p.buffs.begin(), p.buffs.end(), [sk](const Buff& x) { return x.id == sk->id; }), p.buffs.end());
+      p.buffs.push_back(std::move(b));
+      if (!sk->fx.empty()) { const int k = pushFx(sk->fx, p.x, p.y); fx[k].follow = -2; }
+      clampVitals();
+    }
+  });
 }
 
 void World::killMob(int i) {
@@ -266,11 +568,27 @@ void World::killMob(int i) {
 }
 
 void World::hurtPlayer(int i) {
+  if (god) return;   // GM: ölümsüzlük
   Player& p = player; if (p.dead) return;
+  Ent& m = ents[i];
   const Stats s = stats(); if (random() < s.dodge / 100) return;   // ıska
-  Dmg r = dmgCalc(ents[i].atk, s.def, 1); r.d = int(std::max(1.0, jsRound(r.d * (1 - std::min(80.0, s.dr) / 100))));
+  Dmg r = dmgCalc(m.atk, s.def, 1); r.d = int(std::max(1.0, jsRound(r.d * (1 - std::min(80.0, s.dr) / 100))));
+  const double mp2hp = buffSum(p.buffs, "mp2hp"), manaShield = buffSum(p.buffs, "manaShield"), mpPerDmg = buffSum(p.buffs, "mpPerDmg"), reflect = buffSum(p.buffs, "reflect");
+  const double now = time;
+  // Büyücü Bedeni (90611): Karanlık Ahit sırasında %10 hasarı savuştur, hasar kadar mana
+  if (mp2hp && skRankSn(90611) && random() < 0.1) { p.mp = std::min(s.mp, p.mp + r.d); return; }
+  // Zifiri Perde (90612): Karanlık Ahit dışında, 15 saniyede bir, savunma ve dirençler 6 saniye artar (güçlendirme 210192)
+  if (s.veil && !mp2hp && !(p.veilCd > now) && random() * 100 < s.veil) {
+    p.veilCd = now + 15; Buff b; b.id = "veil"; b.buff = Vals{{"def", 0.5}, {"res", jsRound(s.res * 0.5)}}; b.t = 6; b.fx = "特效-漆黑之幕"; b.uid = ++fxUid_; p.buffs.push_back(std::move(b));
+  }
+  // Büyü Kalkanı (90129): hasarın bir kısmı manadan düşer
+  if (manaShield) { const double per = mpPerDmg ? mpPerDmg : 1, want = jsRound(r.d * std::min(1.0, manaShield)), can = std::min(want, std::floor(p.mp / per)); p.mp -= can * per; r.d -= int(can); }
+  // Karşı Saldırı Fırtınası (90598): fiziksel saldırının %10'u ile alınan hasardan küçük olanı yansır
+  if (reflect && r.d > 0 && !m.dead) { const double back = jsRound(std::min(s.atk * reflect, double(r.d))); if (back > 0) { HitOpt o; o.add = back; o.pure = true; o.tick = true; hitMob(i, 0, o); } }
   if (r.d <= 0) return;
   p.hp -= r.d; p.combatT = 5;
+  // Kutsanmış Beden (90603): ölümcül darbeyi olasılıkla savuştur, biraz can
+  if (p.hp <= 0 && s.cheatDeath && random() * 100 < s.cheatDeath) { p.hp = jsRound(s.hp * 0.2); return; }
   if (p.hp <= 0) { p.hp = 0; p.dead = true; p.deadT = 0; p.state = "dead"; setTarget(-1); }
 }
 
@@ -292,14 +610,42 @@ void World::update(double dt, double sx, double sy) {
   }
   Player& p = player; const Stats s = stats(); const ClassBase& C = bal_.cls(P.cls);
   const double px0 = p.x, py0 = p.y; p.animT += dt * TICK; p.combatT -= dt; p.atkT -= dt;
+  for (auto& c : p.cds) c.second = std::max(0.0, c.second - dt);
+  for (Buff& b : p.buffs) b.t -= dt;
+  p.buffs.erase(std::remove_if(p.buffs.begin(), p.buffs.end(), [](const Buff& b) { return !(b.t > 0); }), p.buffs.end());
+  { std::vector<std::pair<std::string, std::string>> w; if (!p.dead) for (const Buff& b : p.buffs) if (!b.fx.empty()) w.push_back({b.id, b.fx}); auraSync(-2, p.aura, w); }   // güçlendirme görselleri
   if (p.stateT > 0) { p.stateT -= dt; if (p.stateT <= 0) p.state = "idle"; }
   if (p.dead) p.deadT += dt;
   if (!p.dead) {
     const double regen = sceneName == "观林镇" ? 0.03 : p.combatT > 0 ? 0.003 : 0.012;
     p.hp = std::min(s.hp, p.hp + (s.hp * regen + s.hpreg * 0.1) * dt); p.mp = std::min(s.mp, p.mp + (s.mp * regen * 1.3 + s.mpreg * 0.1) * dt);
+    const bool noHeal = anyBuff(p.buffs, "noHeal"); const double hu = 1 + s.healUp / 100;
+    for (size_t bi = 0; bi < p.buffs.size(); bi++) {
+      Buff& b = p.buffs[bi]; const Vals& B = b.buff;
+      if (b.hasAt && jsHypot(p.x - b.atX, p.y - b.atY) > b.atR) continue;   // yere konmuş etki (Şifa Pınarı): uzaktayken işlemez
+      double v;
+      if ((v = B.get("hot")) && !noHeal) p.hp = std::min(s.hp, p.hp + s.hp * v * hu * dt);
+      if ((v = B.get("hotT")) && !noHeal) p.hp = std::min(s.hp, p.hp + v * hu * dt);
+      if ((v = B.get("motT"))) p.mp = std::min(s.mp, p.mp + v * dt);
+      if ((v = B.get("mpTick"))) { const double g = s.mp * v * dt; p.mp = std::min(s.mp, p.mp + g); if (B.get("hpTick") && !noHeal) p.hp = std::min(s.hp, p.hp + g); }   // Element Bağışı (+ Ruh Uyumu)
+      if ((v = B.get("mp2hp"))) { const double g = std::min(p.mp, p.mp * v * dt); p.mp -= g; if (!noHeal) p.hp = std::min(s.hp, p.hp + g * hu); }   // Karanlık Ahit
+      if ((v = B.get("drain")) && (b.acc += dt) >= 1) {   // Gölge Hükümdarı
+        b.acc -= 1; const double drain = v;
+        for (size_t k = 0; k < ents.size(); k++) { Ent& m = ents[k]; if (m.kind == Ent::MOB && !m.dead && jsHypot(m.x - p.x, m.y - p.y) <= 3) { HitOpt o; o.add = m.maxHp * drain; o.pure = true; o.tick = true; hitMob(int(k), 0, o); } }
+      }
+    }
+    if (phantom.on) {   // Büyü Hayali: saniyede bir, savunma tanımayan hasar
+      Phantom& ph = phantom; ph.t -= dt; ph.tick -= dt;
+      const int tg = target_ >= 0 && !ents[target_].dead && ents[target_].kind == Ent::MOB ? target_ : ph.tg >= 0 && !ents[ph.tg].dead ? ph.tg : -1;
+      if (!fxByUid(ph.fx)) ph.fx = phantomFx();   // harita değişince yeniden
+      Fx* f = fxByUid(ph.fx); const double fxX = f->x, fxY = f->y;
+      f->anim = (tg >= 0 ? dirOf(ents[tg].x - fxX, ents[tg].y - fxY) : p.dir) + (ph.tick < 0.4 && tg >= 0 ? 8 : 0);   // hedefe bakar; atarken saldırı hareketi
+      if (ph.tick <= 0 && tg >= 0) { ph.tick = 1; const double mult = ph.mult; shoot("特效-蓝火球", fxX, fxY, tg, [this, tg, mult]() { HitOpt o; o.pure = true; o.tick = true; hitMob(tg, mult, o); }, false); }
+      if (ph.t <= 0) { if (Fx* g = fxByUid(ph.fx)) g->done = true; ph.on = false; }
+    }
     bool moving = false;
     if (sx || sy) {
-      engage_ = false;
+      engage_ = false; p.pending = -1;
       // ekrandaki yöne en yakın karo ekseni (açılar 27,6° / 152,4° / 207,6° / 332,4°); sınırda titremesin diye son yöne küçük öncelik
       const double ang = std::atan2(sy, sx); int best = 0; double bd = 9;
       for (int i = 0; i < 4; i++) {
@@ -314,7 +660,10 @@ void World::update(double dt, double sx, double sy) {
       lastJoyDir_ = -1;
       if (p.state != "attack" && p.state != "cast") {
         const int ti = target_;
-        if (engage_ && ti >= 0 && ents[ti].kind == Ent::MOB && !ents[ti].dead) {
+        if (p.pending >= 0 && ti >= 0 && !ents[ti].dead) {   // menzil dışında kalan beceri: yaklaş, menzile girince kullan
+          const SkillDef& sk = skills()[size_t(p.pending)]; Ent& t = ents[ti];
+          if (jsHypot(t.x - p.x, t.y - p.y) <= sk.range) useSkill(p.pending); else { stepTo(p, t.x, t.y, RUN * (1 + s.spd), dt); moving = true; }
+        } else if (engage_ && ti >= 0 && ents[ti].kind == Ent::MOB && !ents[ti].dead) {
           Ent& t = ents[ti]; const double d = jsHypot(t.x - p.x, t.y - p.y);
           // 4 yönlü yürüyüşte engelli karede takılırsa ve yeterince yakınsa olduğu yerden vurur
           const bool stuck = p.hasChase && p.chaseD - d < 0.005 && d <= C.range + 0.6; p.chaseD = d; p.hasChase = true;
@@ -343,12 +692,37 @@ void World::update(double dt, double sx, double sy) {
     Ent& e = ents[i];
     if (e.kind == Ent::NPC) { e.t += dt * TICK * 0.8; if (e.hidden && (e.respawnT -= dt) <= 0) e.hidden = false; continue; }
     e.t += dt * TICK; e.animT += dt * TICK;
-    if (e.dead) { e.deadT += dt; if ((e.respawnT -= dt) <= 0) { e.dead = false; e.hp = e.maxHp; e.x = e.homeX; e.y = e.homeY; e.aggro = false; e.state = "idle"; } continue; }
+    if (e.dead) {
+      if (!e.aura.empty()) auraSync(int(i), e.aura, {});
+      e.deadT += dt; if ((e.respawnT -= dt) <= 0) { e.dead = false; e.hp = e.maxHp; e.x = e.homeX; e.y = e.homeY; e.aggro = false; e.state = "idle"; } continue;
+    }
     e.atkT -= dt; e.slowT -= dt; if (e.weakT > 0) e.weakT -= dt; else if (e.weakDef) e.weakDef = 0;
+    // zayıflatma görselleri (orijinal all_buff): yavaşlama 特效-缓缓加蓝, Tanrı Gözdağı 特效-抗性衰减buff, donma 特效-冻结
+    { std::vector<std::pair<std::string, std::string>> w;
+      if (e.slowT > 0) w.push_back({"slow", "特效-缓缓加蓝"});
+      if (e.weakT > 0 && e.weakDef) w.push_back({"weak", "特效-抗性衰减buff"});
+      if (e.rootT > 0) w.push_back({"root", "特效-冻结"});
+      if (!e.aura.empty() || !w.empty()) auraSync(int(i), e.aura, w); }
+    if (e.bleed.on && (e.bleed.tick -= dt) <= 0) {   // Testere Bıçak kanaması
+      e.bleed.tick = 2; e.bleed.t -= 2; HitOpt o; o.tick = true; hitMob(int(i), 0.08 * e.bleed.n, o);
+      if (e.bleed.on && e.bleed.t <= 0) e.bleed.on = false;
+      if (e.dead) continue;
+    }
+    if (e.burn.on && (e.burn.tick -= dt) <= 0) {     // Alev Darbesi yanması
+      e.burn.tick = 2; e.burn.t -= 2; HitOpt o; o.tick = true; hitMob(int(i), 0.15, o);
+      if (e.burn.on && e.burn.t <= 0) e.burn.on = false;
+      if (e.dead) continue;
+    }
     if (e.rootT > 0) e.rootT -= dt;
     if (e.sealT > 0) e.sealT -= dt;
     if (e.despairT > 0) e.despairT -= dt;
-    if (e.stunT > 0) { e.stunT -= dt; continue; }
+    if (e.stunT > 0) { e.stunT -= dt; continue; }   // Kutsal Ceza: sersem (kıpırdamaz, saldırmaz)
+    if (e.dot.on && (e.dot.t -= dt) <= 0) {          // Çürüme
+      e.dot.t = 2; const double mult = e.dot.mult, add = e.dot.add, suck = e.dot.suck; if (--e.dot.n <= 0) e.dot.on = false;
+      HitOpt o; o.add = add; o.tick = true; const int dd = hitMob(int(i), mult, o);
+      if (suck && dd) healPlayer(dd * suck);
+      if (e.dead) continue;
+    }
     if (e.stateT > 0) { e.stateT -= dt; if (e.stateT <= 0) e.state = "idle"; }
     const double dp = jsHypot(p.x - e.x, p.y - e.y), dh = jsHypot(e.x - e.homeX, e.y - e.homeY);
     const double sp = (e.slowT > 0 ? 1 : 2) * (e.d->rank ? 1.1 : 1);

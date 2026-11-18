@@ -61,6 +61,7 @@ void Balance::load(const Vfs& vfs, const core::Json& D) {
     mobById_[kv->first] = r;
     if (!mobByName_.count(r.name)) mobByName_[r.name] = kv->first;
   }
+  skills.load(vfs);
   if (vfs.exists("pets.json")) {
     const core::Json P = core::Json::parse(vfs.readText("pets.json"));
     for (const core::Json& s : P["species"].arr()) if (!s["apk"].b()) eggFam_.push_back({lookFamily(s["forms"][0]["look"].str()), s["egg"].str()});

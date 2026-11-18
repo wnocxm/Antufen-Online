@@ -1,6 +1,7 @@
 // Dünya: sahne, varlıklar (NPC, canavar), oyuncu, efektler, zamanlayıcılar, savaş (HTML'de game.js loadScene/update/hitMob/
 // hurtPlayer/killMob/gainXp/stats + ui.js drawWorld). Sıra ve hesaplar HTML ile birebir: iki sürüm aynı tohumla aynı sonucu verir
-// (tools/test/cpp_savas.js). Henüz yok (sonraki adımlar): beceriler, güçlendirmeler, görevler, evcil hayvan, zindan, arayüz.
+// (tools/test/cpp_savas.js). Beceriler (useSkill), güçlendirmeler, süren etkiler (kanama, yanma, çürüme), Büyü Hayali burada;
+// beceri tanımları skills.cpp. Henüz yok (sonraki adımlar): görevler, evcil hayvan, zindan, arayüz.
 #pragma once
 #include <functional>
 #include <map>
@@ -12,11 +13,14 @@
 #include "engine/balance.h"
 #include "engine/map.h"
 #include "engine/rng.h"
+#include "engine/skills.h"
 
 namespace engine {
 
 const double RUN = 4.2, CELL_PX = 30, STRIDE = 66;   // koşu hızı (kare/sn), adım ölçüsü (HTML game.js)
 const int VH = 360;                                   // mantıksal ekran yüksekliği (HTML ui.js)
+
+using Aura = std::vector<std::pair<std::string, int>>;   // süren etkinin görseli: anahtar → efekt numarası (Fx::uid)
 
 // NPC ve canavarlar tek listede, oluşturulma sırasıyla (HTML Game.ents): zar atışları bu sırayla yapılır
 struct Ent {
@@ -33,7 +37,14 @@ struct Ent {
   std::string state = "idle", deathFx;
   double atkT = 0, wanderT = 0, slowT = 0, animT = 0, stateT = 0, deadT = 0, rootT = 0, sealT = 0, stunT = 0, despairT = 0, tauntT = 0, weakT = 0, weakDef = 0;
   bool aggro = false, dead = false, hasW = false; double wx = 0, wy = 0; char ax = 0;
+  struct { bool on = false; int n = 0; double t = 0, tick = 0; } bleed;                    // Testere Bıçak kanaması (en çok 5 kat)
+  struct { bool on = false; double t = 0, tick = 0; } burn;                                // Alev Darbesi yanması
+  struct { bool on = false; int n = 0; double t = 0, mult = 0, add = 0, suck = 0; bool corr = false; } dot;   // Çürüme
+  Aura aura;
 };
+
+// güçlendirme / süren etki (HTML p.buffs öğesi): at varsa yalnız o yerin yakınında işler (Şifa Pınarı)
+struct Buff { std::string id; Vals buff; double t = 0; std::string fx; bool hasAt = false; double atX = 0, atY = 0, atR = 0; int n = 0, uid = 0; double acc = 0; };   // uid: aynı öğe mi (JS nesne kimliği)
 
 struct Player {
   double x = 0, y = 0, t = 0, animT = 0, hp = 0, mp = 0, atkT = 0, combatT = 0, stateT = 0, deadT = 0, chaseD = 0;
@@ -42,24 +53,35 @@ struct Player {
   std::string state = "idle";
   Look look;
   Paperdoll doll;
+  std::vector<Buff> buffs;
+  std::map<std::string, double> cds;   // beceri bekleme süreleri
+  int pending = -1;                    // menzile girince kullanılacak beceri
+  double stunCd = -1e300, sealCd = -1e300, despCd = -1e300, veilCd = -1e300;   // tetiklenen etkilerin bekleme sonu (oyun saati)
+  Aura aura;
 };
 
 // Karakter kaydı (HTML Game.P'nin bu adımda kullanılan kısmı)
 struct CharData {
   std::string cls = "战士", race = "人类", sex = "male";
-  int lv = 1, sp = 0; long long xp = 0, gold = 0;
+  int lv = 1, sp = 0, adv = 0; long long xp = 0, gold = 0;   // adv: sınıf yükseltmesi (1: 40, 2: 80)
+  std::map<std::string, int> sk;                         // beceri kademeleri (beceri numarası → kademe)
   std::map<std::string, std::string> eq;                 // yuva → eşya
   std::vector<std::pair<std::string, int>> bag;          // çanta (eklenme sırası)
 };
 
-struct Stats { double hp = 0, mp = 0, atk = 0, def = 0, crit = 0, dodge = 0, hpreg = 0, mpreg = 0, res = 0, dr = 0, spd = 0, goldUp = 0, lifeEl = 0; };
+struct Stats { double hp = 0, mp = 0, atk = 0, def = 0, crit = 0, dodge = 0, hpreg = 0, mpreg = 0, res = 0, dr = 0, spd = 0, goldUp = 0, lifeEl = 0,
+                acc = 0, healUp = 0, ccDmg = 0, despair = 0, cheatDeath = 0, seal = 0, veil = 0; };
 
 struct Fx {
-  Sprite* sp = nullptr; double x = 0, y = 0, t = 0, z = 0, ox = 0, oy = 0, life = -1; int anim = 0, len = 0, follow = -1;   // follow: -2 oyuncu, ≥0 varlık
+  Sprite* sp = nullptr; double x = 0, y = 0, t = 0, z = 0, ox = 0, oy = 0, life = -1; int anim = 0, len = 0, follow = -1, uid = 0;   // follow: -2 oyuncu, ≥0 varlık
+  std::string name;
   bool loop = false, done = false, proj = false, vis = false; int to = -1; double speed = 9; std::function<void()> cb;
 };
 
 struct DrawOpts { bool shadows = true; };
+
+// HTML hitMob seçenekleri: pure savunma tanımaz, tick sürekli hasar (tetikleyiciler yok)
+struct HitOpt { double crit = 0, add = 0, slow = 0, freeze = 0, stun = 0, critDmg = 0; bool pure = false, bleed = false, burn = false, tick = false; std::function<void(Ent&)> onCrit; };
 
 class World {
  public:
@@ -81,6 +103,23 @@ class World {
   int nearestMob(double r) const;
   int countItem(const std::string& id) const;
 
+  // beceriler (HTML useSkill, skRank, skC, skLock, skillAutoSpend, skillReset)
+  const std::vector<SkillDef>& skills() const { return bal_.skills.cls(P.cls); }
+  void useSkill(int i);
+  int skRank(const SkillDef& sk) const;
+  double skC(const SkillDef& sk, const std::string& key, int r = -1) const;
+  int skRankSn(int sn) const;
+  double skCSn(int sn, const std::string& key) const;
+  int treePts(int treeId) const;
+  std::string skLock(const SkillDef& sk) const;   // boş: öğrenilebilir; değilse tür: adv, pts, excl, pre
+  bool skillUp(const SkillDef& sk);
+  void skillAutoSpend(int points, int spec = 0);  // puanları oyuncu gibi dağıt (GM "ağaçları doldur")
+  bool skillReset(bool free);
+  void clampVitals();
+  int healPlayer(double h, const std::string& fx = "");
+  bool god = false, gmNoCd = false;               // GM: ölümsüzlük, beklemesiz + manasız beceri
+  struct Phantom { bool on = false; double t = 0, tick = 0, mult = 0; int tg = -1, fx = 0; } phantom;   // Büyü Hayali (90140)
+
   std::string sceneId, sceneName;
   GameMap map;
   std::vector<Ent> ents;
@@ -96,7 +135,7 @@ class World {
   std::vector<uint8_t> extraBlock_;
   struct Timer { double t; std::function<void()> fn; };
   std::vector<Timer> timers_;
-  int lastJoyDir_ = -1, target_ = -1;
+  int lastJoyDir_ = -1, target_ = -1, fxUid_ = 0;
   bool engage_ = false;
 
   bool blocked(double fx, double fy) const;
@@ -104,15 +143,22 @@ class World {
   template <class E> void moveEnt(E& e, double dx, double dy);
   template <class E> bool stepTo(E& e, double tx, double ty, double sp, double dt);
   void spawnMob(const std::string& name, int x, int y);
-  int pushFx(const std::string& name, double x, double y, int dir = -1);
+  int pushFx(const std::string& name, double x, double y, int dir = -1, bool glow = true);
+  Fx* fxByUid(int uid) { for (Fx& f : fx) if (f.uid == uid) return &f; return nullptr; }
   void shoot(const std::string& name, double fx, double fy, int to, std::function<void()> cb, bool vis);
+  void fxBurst(const std::string& name, double x, double y, int n, double r, int dir = -1, double delay = 0);
+  void totemAt(const std::string& name, double x, double y, double life);
+  int phantomFx();
+  void auraSync(int follow, Aura& A, const std::vector<std::pair<std::string, std::string>>& want);
+  void applyCorrosion(Ent& m);
   struct Dmg { int d; bool crit; };
   Dmg dmgCalc(double atk, double def, double mult, double critB = 0, double add = 0);
-  int hitMob(int i, double mult);
+  int hitMob(int i, double mult, const HitOpt& o = HitOpt());
   void killMob(int i);
   void hurtPlayer(int i);
   void gainXp(long long n);
   void addItem(const std::string& id, int n = 1);
+  bool removeItem(const std::string& id, int n = 1);
   std::string randomGear(int lv);
   void checkExits();
   void drawMob(Canvas& c, Ent& e, int X, int Y);

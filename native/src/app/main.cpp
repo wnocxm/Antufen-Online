@@ -1,10 +1,13 @@
 // anrufen: pencereli oyun (SDL2). Tuval 360 piksel yüksekliğinde çizilir (HTML'deki gibi), pencereye büyütülür.
 //   anrufen [--veri <klasör|paket.gdp>]… [--sahne <numara>] [--sinif 战士|法师|牧师] [--irk 人类|精灵] [--cinsiyet male|fema]
-// Tuşlar: ok tuşları / WASD yürü, boşluk en yakın canavara saldır, F12 ekran görüntüsü (anrufen_ekran.png), Esc çıkış.
+//           [--seviye <n>] [--uzmanlik 0|1]   (seviye: puanlar oyuncu gibi dağıtılır; 40'ta sınıf, 80'de ikinci yükseltme; uzmanlık: hangisi)
+// Tuşlar: ok tuşları / WASD yürü, boşluk en yakın canavara saldır, 1-9 beceriler (sınıfın beceri sırası: acemi ve sınıf ağaçları,
+// sonra uzmanlık), F12 ekran görüntüsü (anrufen_ekran.png), Esc çıkış.
 // Veri verilmezse sırayla: veri/oyun.gdp, ../veri/oyun.gdp, ../../www/assets, ../../../www/assets, ../www/assets, www/assets.
 #include <SDL.h>
 
 #include <algorithm>
+#include <cstdlib>
 #include <cstdio>
 #include <cstring>
 #include <filesystem>
@@ -20,11 +23,12 @@
 using namespace engine;
 
 int main(int argc, char** argv) {
-  std::vector<std::string> data; std::string scene = "120005"; Look look;
+  std::vector<std::string> data; std::string scene = "120005"; Look look; int level = 1, spec = 0;
   for (int i = 1; i + 1 < argc; i += 2) {
     std::string k = argv[i], v = argv[i + 1];
     if (k == "--veri") data.push_back(v); else if (k == "--sahne") scene = v;
     else if (k == "--sinif") look.cls = v; else if (k == "--irk") look.race = v; else if (k == "--cinsiyet") look.sex = v;
+    else if (k == "--seviye") level = std::atoi(v.c_str()); else if (k == "--uzmanlik") spec = std::atoi(v.c_str()) ? 1 : 0;
   }
   // veri aranır: oyunun yanındaki paket (Visual Studio programı build/Release içine koyar), sonra geliştirme klasörü
   if (data.empty()) for (const char* p : {"veri/oyun.gdp", "../veri/oyun.gdp", "../../www/assets", "../../../www/assets", "../www/assets", "www/assets"})
@@ -36,6 +40,10 @@ int main(int argc, char** argv) {
   } catch (const std::exception& e) { std::fprintf(stderr, "Veri yüklenemedi: %s\n", e.what()); return 1; }
   rng().seed(uint32_t(SDL_GetPerformanceCounter()));
   World world(assets, bal); world.setChar(look.cls, look.race, look.sex);
+  if (level > 1) {   // GM "ağaçları doldur" gibi: yükseltmeler seviyeye göre, puanlar oyuncu gibi
+    world.setLevel(level); world.P.adv = level >= 80 ? 2 : level >= 40 ? 1 : 0;
+    world.P.sk.clear(); world.P.sp = 0; world.skillAutoSpend(world.P.lv + 1, spec);
+  }
   try { world.loadScene(scene); } catch (const std::exception& e) { std::fprintf(stderr, "Sahne yüklenemedi: %s\n", e.what()); return 1; }
 
   if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) != 0) { std::fprintf(stderr, "SDL: %s\n", SDL_GetError()); return 1; }
@@ -57,6 +65,7 @@ int main(int argc, char** argv) {
         int t = world.target(); if (t < 0 || world.ents[t].dead) t = world.nearestMob(8);
         if (t >= 0) world.setTarget(t, true);
       }
+      if (ev.type == SDL_KEYDOWN && ev.key.keysym.sym >= SDLK_1 && ev.key.keysym.sym <= SDLK_9) world.useSkill(int(ev.key.keysym.sym - SDLK_1));
     }
     const Uint8* k = SDL_GetKeyboardState(nullptr);
     double x = 0, y = 0;
