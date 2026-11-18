@@ -154,8 +154,23 @@ void Hud::quick(World& w, int i) {
 }
 
 // ---------------- HUD (HTML drawHud) ----------------
+// HUD isteği ve dünyadan gelenler: pencere aç, kişiye yürü/konuş, ölüm penceresi
+void Hud::handle(World& w) {
+  if (!request.empty()) {
+    const std::string r = request; request.clear();
+    if (r.rfind("talk:", 0) == 0) w.talkTo(std::atoi(r.c_str() + 5));
+    else if (r == "hub") win.open(w, "hub");
+    else if (r == "quest") win.open(w, "task");
+    else w.toast("Bu pencere yakında (arayüz 2. parça).");
+  }
+  if (w.dialogEnt >= 0) { win.close(); win.open(w, "npc", w.dialogEnt, w.dialogSay); w.dialogEnt = -1; w.dialogSay.clear(); }
+  if (w.died) { w.died = false; win.close(); deathAt = now + 1.2; }
+  if (deathAt >= 0 && now >= deathAt) { deathAt = -1; if (w.player.dead) win.open(w, "dead"); }
+}
+
 void Hud::draw(engine::Canvas& c, World& w, bool advance) {
-  vw_ = float(c.w()); hud_.clear();
+  vw_ = float(c.w()); hud_.clear(); win.safeL = safeL;
+  handle(w);
   const float VH = float(engine::VH);
   // yeni günlük satırları zaman damgasıyla
   { const size_t nw = std::min(w.logTotal - seen_, w.log.size()); for (size_t k = w.log.size() - nw; k < w.log.size(); k++) logs_.push_back({w.log[k].m, w.log[k].c, now}); seen_ = w.logTotal; if (logs_.size() > 30) logs_.erase(logs_.begin(), logs_.end() - 30); }
@@ -261,10 +276,12 @@ void Hud::draw(engine::Canvas& c, World& w, bool advance) {
   if (w.lvlT > 0) { w.lvlT -= step; text(c, "S", 28, "Seviye " + std::to_string(w.lvlN), vw_ / 2, 160, 0xffe080, CENTER, std::min(1.f, w.lvlT)); }
   if (w.hurtT > 0) { w.hurtT -= step; c.fillRadial(vw_ / 2, VH / 2, VH * 0.3f, vw_ * 0.6f, 0xa00000, 0, std::max(0.f, w.hurtT)); }
   if (p.dead) c.fillRect(0, 0, vw_, VH, 0x280000, 0.45f);
+  win.draw(c, w, advance ? 1.f / 60 : 0);
 }
 
 // ---------------- dokunma ----------------
 bool Hud::press(World& w, int id, float x, float y) {
+  if (win.isOpen()) { wp_ = {true, id, x, y, 0, x, y}; return true; }   // pencere açıkken: bırakınca dokunuş sayılır (kaydırma değilse)
   for (int i = int(hud_.size()) - 1; i >= 0; i--) { const Hit& h = hud_[size_t(i)]; if (x >= h.x && x <= h.x + h.w && y >= h.y && y <= h.y + h.h) { auto fn = h.fn; fn(); return true; } }
   if (x < std::max(vw_ * 0.33f, 240.f) && y > engine::VH * 0.4f && !joy_.on) {   // yürüme kolu: sol alt bölgede herhangi bir yerden başlar
     float dx = x - rockerX(), dy = y - rockerY(); const float l = std::hypot(dx, dy); if (l > 48) { dx = dx / l * 48; dy = dy / l * 48; }
@@ -274,9 +291,11 @@ bool Hud::press(World& w, int id, float x, float y) {
   return false;
 }
 void Hud::move(int id, float x, float y) {
+  if (wp_.on && id == wp_.id) { wp_.moved += std::fabs(y - wp_.ly) + std::fabs(x - wp_.lx); wp_.lx = x; wp_.ly = y; return; }
   if (joy_.on && id == joy_.id) { float dx = x - joy_.ox, dy = y - joy_.oy; const float l = std::hypot(dx, dy); if (l > 48) { dx = dx / l * 48; dy = dy / l * 48; } joy_.dx = dx; joy_.dy = dy; }
 }
 void Hud::release(World& w, int id, float x, float y) {
+  if (wp_.on && id == wp_.id) { const WinPtr p = wp_; wp_.on = false; if (p.moved <= 6) win.tap(w, p.x, p.y); return; }
   if (joy_.on && id == joy_.id) joy_.on = false;
   for (size_t i = 0; i < taps_.size(); i++) if (taps_[i].id == id) { const Tap t = taps_[i]; taps_.erase(taps_.begin() + long(i)); if (std::hypot(x - t.x, y - t.y) < 12) tapWorld(w, x, y); break; }
 }

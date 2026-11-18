@@ -190,13 +190,15 @@ void World::pickupNode(int ei) {
     if (it->second.n >= q.count) readyQuest(int(qi));
     return;
   }
+  dialogEnt = ei; dialogSay = quests().greet(n.name);   // görev yok: kişinin sözü (HTML UI.say)
 }
 
 // kişiye dokun (HTML interact): toplama noktası, görev nesnesi; "kullan/ver" ve konuşma görevleri tamamlanır; sonra konuşma penceresi
 void World::interact(int ei) {
   Ent& e = ents[size_t(ei)]; if (e.kind != Ent::NPC) return;
   player.dir = dirOf(e.x - player.x, e.y - player.y);
-  if (e.node || e.dummy) return;   // maden/kalıntı ve sergi (yaşam becerileri sonra)
+  if (e.node) { dialogEnt = ei; dialogSay = "Bu bir toplama noktası. Madencilik ve toplama meslekleri yakında eklenecek."; return; }
+  if (e.dummy) { dialogEnt = ei; dialogSay = quests().name(e.name) + ": eğitim alanı sergisi."; return; }
   if (e.pickup) { pickupNode(ei); return; }
   const auto& Q = quests().all();
   for (size_t qi = 0; qi < Q.size(); qi++) {   // hedefi bir kişi olan "kullan/ver" görevleri (iksiri Gary'ye içir)
@@ -207,6 +209,7 @@ void World::interact(int ei) {
     auto it = P.quests.find(Q[qi].id);
     if (it != P.quests.end() && !it->second.ready && Q[qi].type == "talk" && Q[qi].to == e.name) it->second.ready = true;
   }
+  dialogEnt = ei; dialogSay.clear();   // konuşma penceresi (HTML UI.dialog)
 }
 
 // konuşmada "Kabul": ışınlanma görevinde oraya gidilir; görevi veren aynı zamanda alansa konuşma görevi hemen hazır

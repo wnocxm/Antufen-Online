@@ -58,6 +58,7 @@ struct Player {
   std::vector<Buff> buffs;
   std::map<std::string, double> cds;   // beceri bekleme süreleri
   int pending = -1;                    // menzile girince kullanılacak beceri
+  bool pathOn = false; std::vector<std::pair<int, int>> path;   // yürünecek yol (HTML p.path; pathOn false = null)
   double stunCd = -1e300, sealCd = -1e300, despCd = -1e300, veilCd = -1e300;   // tetiklenen etkilerin bekleme sonu (oyun saati)
   Aura aura;
 };
@@ -130,7 +131,30 @@ class World {
   bool skillReset(bool free);
   void clampVitals();
   int healPlayer(double h, const std::string& fx = "");
-  bool god = false, gmNoCd = false;               // GM: ölümsüzlük, beklemesiz + manasız beceri
+  bool god = false, gmNoCd = false, fast = false, gmFreeTravel = false;   // GM: ölümsüzlük, beklemesiz + manasız beceri, hızlı koşu, ücretsiz yolculuk
+
+  // yol bulma ve yürüme (HTML findPath, walkToEnt, talkTo, routeTo/routeStep, questWalk; world_nav.cpp)
+  bool findPath(double sx, double sy, double tx, double ty, std::vector<std::pair<int, int>>& out, int maxIter = 5000) const;   // false: yol yok (HTML null)
+  bool findPathTo(double tx, double ty);           // oyuncu için: yol varsa yürü (path), yoksa false
+  void walkToEnt(int ent);                         // kişiye yürü, varınca konuş
+  void talkTo(int ent);                            // yakınsa konuş, uzaksa yürü
+  void routeTo(const std::string& sid);            // haritalar arası: geçitlerden (gerekirse yolculuk kişisiyle) hedef haritaya
+  void routeStep();
+  void routeToNpc(const std::string& cn);
+  void questWalk(int qi);                          // görev "Yol Bul"
+  std::vector<std::string> scenePath(const std::string& from, const std::string& to, bool tv = false) const;
+  std::vector<std::string> routePath(const std::string& from, const std::string& to) const { auto p = scenePath(from, to); return p.empty() ? scenePath(from, to, true) : p; }
+  std::string npcSceneNear(const std::string& cn) const;
+  std::string monSceneNear(const std::string& name, const std::string& scName) const;
+  int goTarget = -1, routeQuest = 0; std::string route, routeNpc, travelHint; double routeT = -1, routeDelay = 0.4;   // routeT: varışta yola devam (HTML setTimeout 400; testte 0)
+  // yolculuk (arabacı, ışınlayıcı)
+  const std::vector<TravelOpt>* travelOf(int ent) const;
+  int travelCost(int ent, const TravelOpt& x) const;
+  std::string travelLabel(int ent, const TravelOpt& x) const;
+  bool travelGo(int ent, const TravelOpt& x);
+  void revive();                                   // ölünce: can/mananın yarısıyla evde (ya da haritanın girişinde) doğ
+  // arayüze istekler: konuşma penceresi (kişi; say doluysa yalnız söz), ölüm penceresi
+  int dialogEnt = -1; std::string dialogSay; bool died = false;
 
   // görevler (HTML game.js › Görevler; world_quests.cpp). qi: görev listesindeki sıra (Quests::all)
   Quests& quests() { return bal_.quests; }
@@ -189,6 +213,7 @@ class World {
   struct Timer { double t; std::function<void()> fn; };
   std::vector<Timer> timers_;
   int lastJoyDir_ = -1, target_ = -1, fxUid_ = 0;
+  bool goPending_ = false; std::string goSid_, goFrom_;   // geçitten geçiş (kare sonunda)
   bool engage_ = false;
 
   bool blocked(double fx, double fy) const;

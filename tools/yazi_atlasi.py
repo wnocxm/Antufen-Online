@@ -26,10 +26,11 @@ FAM = {
     'Nb': (DJ + 'DejaVuSans-Bold.ttf', None, None),
 }
 # boylar (HTML'de kullanılanlar ve pencerelerin label boyu + 1)
+HALF = lambda a, b: [x / 2 for x in range(int(a * 2), int(b * 2) + 1)]   # yarım boy adımlarıyla (pencereler ekrana ölçeklenir)
 SIZES = {
-    'B': [7, 8, 8.5, 9, 9.5, 10, 11, 12, 13, 14, 15],
-    'Bb': [7, 8, 8.5, 9, 9.5, 10, 11, 12, 13, 14, 15],
-    'H': [9, 9.5, 10, 11, 12, 13, 14, 15, 16],
+    'B': HALF(7, 18),
+    'Bb': HALF(7, 18),
+    'H': HALF(9, 20),
     'S': [13, 14, 17, 18, 20, 28],
     'N': [6, 7, 8, 9, 10, 11, 12],                         # kısayol yuvası içindeki kilit/bekleme yazıları yuvanın ölçeğiyle büyür
     'Nb': [8, 9, 10, 11, 12, 13, 14, 16, 17],
@@ -92,7 +93,13 @@ def build(fam, size):
         px, py = pos[cp]
         if im: atlas.paste(im, (px, py))
         g[str(cp)] = [px, py, w, h, l, t, round(adv, 4)]
-    # harf çifti aralıkları (yerleşim kitaplığı kerning uygular): aynı yazı tipi dosyasındaki çiftler
+    return atlas, {'size': size, 'asc': asc, 'desc': desc, 'g': g}
+
+
+def kerning(fam):
+    """Harf çifti aralıkları em cinsinden (40 px'te ölçülür; yazıda boyla çarpılır): aynı yazı tipi dosyasındaki çiftler."""
+    lat, ext, _ = FAM[fam]; S = 40
+    fl = ImageFont.truetype(lat, S); fe = ImageFont.truetype(ext, S) if ext else None
     k = {}
     for a in KERN:
         for b2 in KERN:
@@ -101,14 +108,15 @@ def build(fam, size):
             fbb = fl if in_latin(b2) or not fe else fe
             if fa is not fbb: continue
             d = fa.getlength(ca + cb) - fa.getlength(ca) - fa.getlength(cb)
-            if abs(d) >= 0.05: k[ca + cb] = round(d, 3)
-    return atlas, {'size': size, 'asc': asc, 'desc': desc, 'g': g, 'k': k}
+            if abs(d) >= 0.2: k[ca + cb] = round(d / S, 4)
+    return k
 
 
 def main():
     os.makedirs(OUT, exist_ok=True)
-    out = {}
+    out = {}; kern = {}
     for fam, sizes in SIZES.items():
+        kern[fam] = kerning(fam)
         for s in sizes:
             key = f'{fam}_{s:g}'
             atlas, meta = build(fam, s)
@@ -116,7 +124,7 @@ def main():
             meta['png'] = f'fonts/atlas/{key}.png'
             out[key] = meta
     with open(FD + '/atlas.json', 'w', encoding='utf-8') as f:
-        json.dump({'kaynak': 'tools/yazi_atlasi.py (elle düzenleme)', 'yuzler': out}, f, ensure_ascii=False, separators=(',', ':'))
+        json.dump({'kaynak': 'tools/yazi_atlasi.py (elle düzenleme)', 'kern': kern, 'yuzler': out}, f, ensure_ascii=False, separators=(',', ':'))
     tot = sum(os.path.getsize(f'{OUT}/{k}.png') for k in out)
     print(f'atlas: {len(out)} yüz, {sum(len(v["g"]) for v in out.values())} harf, PNG {tot // 1024} KB, json {os.path.getsize(FD + "/atlas.json") // 1024} KB')
 

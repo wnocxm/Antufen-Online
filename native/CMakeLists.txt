@@ -64,8 +64,8 @@ target_link_libraries(godat_pack PRIVATE godat)
 
 # Motor (pencereden bağımsız): PNG/JSON, sanal dosya sistemi, tuval, varlıklar, harita, dünya
 add_library(motor STATIC src/core/png.cpp src/core/json.cpp src/engine/vfs.cpp src/engine/canvas.cpp
-            src/engine/assets.cpp src/engine/map.cpp src/engine/balance.cpp src/engine/skills.cpp src/engine/quests.cpp src/engine/world.cpp src/engine/world_quests.cpp
-            src/ui/font.cpp src/ui/hud.cpp)
+            src/engine/assets.cpp src/engine/map.cpp src/engine/balance.cpp src/engine/skills.cpp src/engine/quests.cpp src/engine/world.cpp src/engine/world_quests.cpp src/engine/world_nav.cpp
+            src/ui/font.cpp src/ui/hud.cpp src/ui/forms.cpp src/ui/win.cpp)
 target_include_directories(motor PUBLIC src)
 target_link_libraries(motor PUBLIC godat)
 

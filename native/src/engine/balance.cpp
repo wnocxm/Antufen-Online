@@ -48,6 +48,9 @@ void Balance::load(const Vfs& vfs, const core::Json& D) {
     for (const auto& s : it["st"].obj()) x.st[s.first] = s.second.num();
     itemIdx_[x.id] = items_.size(); items_.push_back(std::move(x));
   }
+  for (const auto& kv : I["shops"].obj()) shops.insert(kv.first);
+  for (const auto& hp : std::vector<std::pair<std::string, std::string>>{{"道具商人（人类）", "道具商人（夜精灵）"}, {"武器商人（人类）", "武器商人（夜精灵）"}, {"防具商人（人类）", "防具商人（夜精灵）"}, {"饰品商人（人类）", "饰品商人（夜精灵）"}})
+    if (shops.count(hp.first)) shops.insert(hp.second);   // gece elfi tüccarları aynı listeleri satar
   // oyunun kendi eşyaları (HTML game.js ITEMS; tablodakilerden sonra — JS nesne sırası: sayısal numaralar önce)
   auto own = [&](const char* id, const char* nm, int icon, double hp, double mp, bool growth) {
     Item x; x.id = id; x.name = nm; x.ik = "item"; x.icon = icon; x.useHp = hp; x.useMp = mp; x.use = hp || mp; x.growth = growth;
@@ -67,6 +70,15 @@ void Balance::load(const Vfs& vfs, const core::Json& D) {
   }
   skills.load(vfs);
   if (vfs.exists("quests.json")) quests.load(vfs, D);
+  if (vfs.exists("travel.json")) {
+    const core::Json T = core::Json::parse(vfs.readText("travel.json"));
+    for (const auto& kv : T["npc"].obj()) for (const core::Json& o : kv.second.arr()) {
+      TravelOpt t; t.kind = o[0].str(); t.name = o[1].str(); t.sid = o[2].isNum() ? std::to_string(o[2].i()) : o[2].str(); t.hasXY = o[3].isNum(); t.x = o[3].i(); t.y = o[4].i();
+      travel[kv.first].push_back(t);
+    }
+    travelCar = T["cost"]["araba"].i(100);
+    for (const auto& kv : T["ucret"].obj()) travelFee[kv.first] = kv.second.i();
+  }
   if (vfs.exists("pets.json")) {
     const core::Json P = core::Json::parse(vfs.readText("pets.json"));
     for (const core::Json& s : P["species"].arr()) if (!s["apk"].truthy()) eggFam_.push_back({lookFamily(s["forms"][0]["look"].str()), s["egg"].str()});

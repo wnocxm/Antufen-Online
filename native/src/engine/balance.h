@@ -3,6 +3,7 @@
 #pragma once
 #include <map>
 #include <memory>
+#include <set>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -31,6 +32,9 @@ struct Item {
   struct Hot { std::string res; double amt = 0, sec = 0; } hot, hot2;
 };
 
+// yolculuk seçeneği (travel.json ← tools/seyahat.py): arabacı / ışınlayıcı → şehir adı, hedef sahne, varış yeri
+struct TravelOpt { std::string kind, name, sid; bool hasXY = false; int x = 0, y = 0; };
+
 class Balance {
  public:
   void load(const Vfs& vfs, const core::Json& D);
@@ -47,6 +51,9 @@ class Balance {
   const std::string* eggFor(const std::string& look) const;    // canavarın görünüş ailesine uyan evcil türün yumurtası
   Skills skills;                                               // beceriler (skills.json + skills.cpp)
   Quests quests;                                               // görevler (quests.json)
+  std::unordered_map<std::string, std::vector<TravelOpt>> travel;   // kişi kaydı numarası → yolculuk seçenekleri
+  std::set<std::string> shops;   // dükkânı olan kişiler (items.json shops; gece elfi tüccarları insan eşlerinin listesiyle)
+  int travelCar = 100; std::unordered_map<std::string, int> travelFee;   // arabacı ücreti; kişiye özel ücret (ad → altın)
 
  private:
   const core::Json* D_ = nullptr;

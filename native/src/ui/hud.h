@@ -12,12 +12,14 @@
 #include "engine/canvas.h"
 #include "engine/world.h"
 #include "ui/font.h"
+#include "ui/forms.h"
+#include "ui/win.h"
 
 namespace ui {
 
 class Hud {
  public:
-  Hud(engine::Assets& as, Fonts& f) : as_(as), font_(f) {}
+  Hud(engine::Assets& as, Fonts& f, Forms& forms) : win(forms), as_(as), font_(f) {}
   // dünya çizildikten sonra: adlar, işaretler, uçan sayılar, sonra HUD. advance: arayüz sayaçları (HTML'de kare başına 1/60) ilerlesin mi
   void draw(engine::Canvas& c, engine::World& w, bool advance = true);
   double now = 0;   // arayüz saati (sn): mesajların kaybolması
@@ -28,8 +30,10 @@ class Hud {
   void release(engine::World& w, int id, float x, float y);
   // yürüme kolunun ekrandaki yön vektörü (World::update'e); yoksa 0, 0
   void joy(double& sx, double& sy) const;
-  std::string request;   // açılmak istenen pencere (karakter, çanta, beceri, görev, harita, ayarlar) — pencereler gelene dek
+  std::string request;   // HUD düğmesinin isteği (hub, quest, char, bag, skill, map, sys, talk:<varlık>); çizimde işlenir
   float safeL = 0, safeR = 0;
+  Win win;               // pencereler (konuşma, görev listesi, ana menü, ölüm, onay)
+  void closeAll() { win.close(); }
 
  private:
   engine::Assets& as_;
@@ -40,6 +44,9 @@ class Hud {
   struct Joy { bool on = false; int id = -1; float ox = 0, oy = 0, dx = 0, dy = 0; } joy_;
   struct Tap { int id; float x, y; };
   std::vector<Tap> taps_;
+  struct WinPtr { bool on = false; int id = -1; float x = 0, y = 0, moved = 0, lx = 0, ly = 0; } wp_;   // pencere açıkken dokunuş
+  double deathAt = -1;   // ölüm penceresi bu saatte açılır (HTML UI.death: 1,2 sn sonra)
+  void handle(engine::World& w);
   struct Log { std::string m; uint32_t c; double t; };
   std::vector<Log> logs_; size_t seen_ = 0;
   int mmGen_ = -1; core::Image mm_;

@@ -4,8 +4,8 @@
 // Dokunma / fare: oyun ekranı (HUD) düğmeleri, sol altta ejderha = yürüme kolu, dünyada canavara dokun (ikinci dokunuş saldırır),
 // kişiye dokun (ikinci dokunuş ya da sağ alttaki konuşma düğmesi konuşur), sağ alt halka: saldırı, beceriler, iksirler.
 // Tuşlar (HTML gibi): ok tuşları / WASD yürü, boşluk saldır, 1-6 beceri, Q can iksiri, E mana iksiri, Tab hedef değiştir,
-// F12 ekran görüntüsü (anrufen_ekran.png), Esc çıkış. Pencereler (karakter, çanta, beceri, görev, harita, konuşma) sonraki adımda;
-// o zamana dek kişiyle konuşmak görevleri kendiliğinden alıp teslim eder.
+// F12 ekran görüntüsü (anrufen_ekran.png), Esc pencereyi kapatır / çıkış. Pencereler: konuşma, görev listesi, ana menü, ölüm (karakter,
+// çanta, beceri, harita, ayarlar sonraki adımda).
 // Veri verilmezse sırayla: veri/oyun.gdp, ../veri/oyun.gdp, ../../www/assets, ../../../www/assets, ../www/assets, www/assets.
 #include <SDL.h>
 
@@ -23,24 +23,10 @@
 #include "engine/vfs.h"
 #include "engine/world.h"
 #include "ui/font.h"
+#include "ui/forms.h"
 #include "ui/hud.h"
 
 using namespace engine;
-
-// kişiyle konuş (konuşma penceresi gelene dek): yakınsa dokun, teslim edilecekleri teslim et, yeni görevleri al
-static void talk(World& w, int ei) {
-  if (ei < 0 || ei >= int(w.ents.size())) return;
-  const Ent& e = w.ents[size_t(ei)];
-  if (jsHypot(e.x - w.player.x, e.y - w.player.y) >= 2) { w.toast("Kişiye yaklaş."); return; }
-  const std::string cn = e.name; w.interact(ei);
-  w.note(w.quests().name(cn) + ": " + w.quests().greet(cn));
-  for (int qi : w.questsFor(cn)) {
-    const Quest& q = w.quests().all()[size_t(qi)]; const std::string st = w.questState(qi);
-    if (st == "ready" && q.to == cn) w.dialogComplete(qi);
-    else if (st == "new" && q.giver == cn) { w.dialogAccept(qi, cn); if (q.hasTp) break; }
-    else if (st == "active") w.note(q.tr.title + ": " + q.tr.goal);
-  }
-}
 
 int main(int argc, char** argv) {
   std::vector<std::string> data; std::string scene = "120005", name = "Kahraman"; Look look; int level = 1, spec = 0;
@@ -68,7 +54,9 @@ int main(int argc, char** argv) {
   }
   world.addItem("hp1", 5, true); world.addItem("mp1", 3, true);   // yeni karakterin çantası (HTML newSave)
   try { world.loadScene(scene); } catch (const std::exception& e) { std::fprintf(stderr, "Sahne yüklenemedi: %s\n", e.what()); return 1; }
-  ui::Hud hud(assets, fonts);
+  ui::Forms forms(assets, fonts);
+  try { forms.load(vfs); } catch (const std::exception& e) { std::fprintf(stderr, "Ekran tanımları yüklenemedi: %s\n", e.what()); return 1; }
+  ui::Hud hud(assets, fonts, forms);
 
   SDL_SetHint(SDL_HINT_TOUCH_MOUSE_EVENTS, "0");   // dokunma ayrıca işlenir (fareye çevrilmesin)
   if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) != 0) { std::fprintf(stderr, "SDL: %s\n", SDL_GetError()); return 1; }
@@ -82,19 +70,13 @@ int main(int argc, char** argv) {
   Uint64 last = SDL_GetPerformanceCounter(); bool run = true; size_t shown = 0;
   // pencere koordinatı → mantıksal tuval koordinatı
   auto logical = [&](float wx, float wy, float& x, float& y) { int ww, wh; SDL_GetWindowSize(win, &ww, &wh); x = wx * float(canvas.w()) / float(std::max(1, ww)); y = wy * float(VH) / float(std::max(1, wh)); };
-  auto handleRequest = [&]() {
-    if (hud.request.empty()) return;
-    const std::string r = hud.request; hud.request.clear();
-    if (r.rfind("talk:", 0) == 0) talk(world, std::atoi(r.c_str() + 5));
-    else world.toast("Pencereler yakında (arayüz 2. parça).");
-  };
   while (run) {
     SDL_Event ev;
     while (SDL_PollEvent(&ev)) {
       if (ev.type == SDL_QUIT) run = false;
       if (ev.type == SDL_KEYDOWN) {
         const SDL_Keycode k = ev.key.keysym.sym;
-        if (k == SDLK_ESCAPE) run = false;
+        if (k == SDLK_ESCAPE) { if (hud.win.isOpen()) hud.closeAll(); else run = false; }
         if (k == SDLK_F12) godat::writeFile("anrufen_ekran.png", core::encodePNG(canvas.img));
         if (k == SDLK_SPACE) { int t = world.target(); if (t < 0 || world.ents[size_t(t)].kind != Ent::MOB || world.ents[size_t(t)].dead) t = world.nearestMob(9); if (t >= 0) world.setTarget(t, true); else world.note("Yakında hedef yok."); }
         if (k >= SDLK_1 && k <= SDLK_6) world.useSkill(int(k - SDLK_1));
@@ -111,7 +93,6 @@ int main(int argc, char** argv) {
         if (ev.type == SDL_FINGERDOWN) hud.press(world, id, x, y); else if (ev.type == SDL_FINGERMOTION) hud.move(id, x, y); else hud.release(world, id, x, y);
       }
     }
-    handleRequest();
     const Uint8* k = SDL_GetKeyboardState(nullptr);
     double sx = 0, sy = 0; hud.joy(sx, sy);
     if (!sx && !sy) {   // klavye: ekran yönünde birim vektör (HTML Input.joy)

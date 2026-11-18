@@ -36,6 +36,14 @@
 //   hedefle <sıra>                   hedef seç, saldırmadan (HTML setTarget)
 //   bekleme <beceri> <sn>            beceri bekleme süresi (kısayol karartması)
 //   gorevver <no>                    görevi doğrudan alınmış say (yan etkisiz; test)
+//   gorevhazir <no> [sayı]           görevi teslime hazır say (test)
+//   pencere <hub|npc|task|dead|kapat> [varlık]  pencere aç (npc: kişinin varlık sırası) ya da kapat
+//   ciz                              kareyi çiz (dosyaya yazmadan; dokunma bölgeleri için)
+//   dokun <x> <y>                    ekrana dokun (pencere açıksa pencereye, değilse HUD'a ya da dünyaya)
+//   konus <varlık>                   kişiye konuş (yakınsa konuşma penceresi, uzaksa yürür)
+//   yol <sx> <sy> <tx> <ty> <dosya>  A* yolu (HTML findPath); dosyaya bir satır ekler: "x,y x,y …" ya da "yok"
+//   kisiyeyuru <varlık> · gorevyuru <no>   kişiye yürü (varınca konuşur) · görevin "Yol Bul"u (haritalar arası)
+//   ilerle <dt> <sn> <dosya>         sabit adımla ilerlet; harita değişince varış yeri, sonda son durum (JSON)
 //   temizle                          arayüz olaylarını sil (günlük, uçan sayılar, duyurular)
 //   can <oran> · mana <oran>         oyuncunun canı/manası (azami değerin oranı)
 //   goruntu <dosya.png>              çiz ve PNG yaz
@@ -57,6 +65,7 @@
 #include "engine/vfs.h"
 #include "engine/world.h"
 #include "ui/font.h"
+#include "ui/forms.h"
 #include "ui/hud.h"
 
 using namespace engine;
@@ -200,7 +209,7 @@ int main(int argc, char** argv) {
   if (std::string(argv[1]) != "-") { fin.open(argv[1]); if (!fin) { std::fprintf(stderr, "senaryo açılamadı: %s\n", argv[1]); return 2; } in = &fin; }
   Vfs vfs; Assets assets; Balance bal; std::unique_ptr<World> world; Canvas canvas; canvas.resize(640, VH);
   DrawOpts opts; std::string line; int ln = 0; bool hudOn = false;
-  ui::Fonts fonts; std::unique_ptr<ui::Hud> hud;
+  ui::Fonts fonts; std::unique_ptr<ui::Forms> forms; std::unique_ptr<ui::Hud> hud;
   auto W = [&]() -> World& { if (!world) throw godat::Error("önce veri"); return *world; };
   try {
     while (std::getline(*in, line)) {
@@ -210,7 +219,7 @@ int main(int argc, char** argv) {
         std::string p; ss >> p;
         if (p.size() > 4 && p.substr(p.size() - 4) == ".gdp") vfs.mountPack(p); else vfs.mountDir(p);
         assets = Assets(); assets.load(vfs); bal = Balance(); bal.load(vfs, assets.D()); world = std::make_unique<World>(assets, bal);
-        fonts.load(vfs); hud = std::make_unique<ui::Hud>(assets, fonts);
+        fonts.load(vfs); forms = std::make_unique<ui::Forms>(assets, fonts); forms->load(vfs); hud = std::make_unique<ui::Hud>(assets, fonts, *forms);
         std::printf("veri: %s\n", vfs.describe().c_str());
       } else if (cmd == "tohum") { uint32_t sd; ss >> sd; rng().seed(sd); }
       else if (cmd == "karakter") { std::string c, r, s; ss >> c >> r >> s; W().P = CharData(); W().flags.clear(); W().setChar(c, r, s); }   // yeni karakter (Sv 1, altın 0, çanta boş)
@@ -309,6 +318,29 @@ int main(int argc, char** argv) {
       else if (cmd == "hedefle") { int i; ss >> i; W().setTarget(i); }
       else if (cmd == "bekleme") { std::string id; double t; ss >> id >> t; W().player.cds[id] = t; }
       else if (cmd == "gorevver") { int id; ss >> id; W().P.quests[id] = QuestSt(); }   // görevi doğrudan alınmış say (test)
+      else if (cmd == "gorevhazir") { int id, n = 0; ss >> id >> n; QuestSt q; q.n = n; q.ready = true; W().P.quests[id] = q; }   // görev teslime hazır (test)
+      else if (cmd == "pencere") { std::string n; int e = -1; ss >> n >> e; hud->win.close(); if (n != "kapat") hud->win.open(W(), n, e); }
+      else if (cmd == "ciz") { W().draw(canvas, opts); hud->draw(canvas, W(), false); }
+      else if (cmd == "dokun") { float x, y; ss >> x >> y; hud->press(W(), 1, x, y); hud->release(W(), 1, x, y); hud->win.clearPressed(); hud->draw(canvas, W(), false); }
+      else if (cmd == "konus") { int e; ss >> e; W().talkTo(e); hud->draw(canvas, W(), false); }
+      else if (cmd == "yol") {
+        double a, b2, c2, d; std::string f; ss >> a >> b2 >> c2 >> d >> f; std::vector<std::pair<int, int>> P2; std::string o;
+        if (W().findPath(a, b2, c2, d, P2)) { for (const auto& q : P2) o += (o.empty() ? "" : " ") + std::to_string(q.first) + "," + std::to_string(q.second); if (o.empty()) o = "-"; } else o = "yok";
+        std::ofstream(f, std::ios::app) << o << "\n";
+      } else if (cmd == "rotagecikme") ss >> W().routeDelay;   // varıştan sonra yola devam gecikmesi (HTML setTimeout 400; testte 0)
+      else if (cmd == "kisiyeyuru") { int e; ss >> e; W().walkToEnt(e); }
+      else if (cmd == "gorevyuru") { int id; ss >> id; W().questWalk(W().quests().indexOf(id)); }
+      else if (cmd == "ilerle") {
+        double dt, sec; std::string f; ss >> dt >> sec >> f; World& w = W(); std::string o = "{\"varis\":[", last = w.sceneId; int dialog = -1;
+        const int n = int(sec / dt + 0.5); bool first = true;
+        for (int k = 0; k < n; k++) {
+          w.update(dt);
+          if (w.dialogEnt >= 0) { dialog = w.dialogEnt; w.dialogEnt = -1; }
+          if (w.sceneId != last) { last = w.sceneId; o += std::string(first ? "" : ",") + "[\"" + w.sceneId + "\"," + num(w.player.x) + "," + num(w.player.y) + "]"; first = false; }
+        }
+        o += "],\"sahne\":\"" + w.sceneId + "\",\"x\":" + num(w.player.x) + ",\"y\":" + num(w.player.y) + ",\"hedef\":" + std::to_string(w.target()) + ",\"konusma\":" + std::to_string(dialog) + "}\n";
+        out(f, o);
+      }
       else if (cmd == "temizle") { World& w = W(); w.log.clear(); w.floats.clear(); w.zoneT = w.toastT = w.lvlT = w.hurtT = 0; }
       else if (cmd == "can") { double k; ss >> k; W().player.hp = W().stats().hp * k; }
       else if (cmd == "mana") { double k; ss >> k; W().player.mp = W().stats().mp * k; }

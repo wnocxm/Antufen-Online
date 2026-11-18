@@ -27,8 +27,8 @@ void Fonts::load(const engine::Vfs& vfs) {
     Face f; f.key = kv.first; const core::Json& m = kv.second;
     f.size = float(m["size"].num()); f.asc = m["asc"].i(); f.desc = m["desc"].i(); f.png = m["png"].str();
     for (const auto& g : m["g"].obj()) { const core::Json& a = g.second; Glyph G{a[0].i(), a[1].i(), a[2].i(), a[3].i(), a[4].i(), a[5].i(), float(a[6].num())}; f.g[uint32_t(std::stoul(g.first))] = G; }
-    for (const auto& k : m["k"].obj()) { const auto cp = utf8(k.first); if (cp.size() == 2) f.kern[(uint64_t(cp[0]) << 32) | cp[1]] = float(k.second.num()); }
     const std::string fam = kv.first.substr(0, kv.first.find('_'));
+    for (const auto& k : J["kern"][fam].obj()) { const auto cp = utf8(k.first); if (cp.size() == 2) f.kern[(uint64_t(cp[0]) << 32) | cp[1]] = float(k.second.num()) * f.size; }   // em × boy
     byFam_[fam].push_back({f.size, kv.first});
     faces_[kv.first] = std::move(f);
   }

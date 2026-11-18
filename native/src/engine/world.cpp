@@ -242,7 +242,8 @@ void World::loadScene(const std::string& sid, const int* arrive) {
   extraBlock_.assign(size_t(map.w) * map.h, 0);
   ents.clear(); fx.clear(); timers_.clear(); target_ = -1;   // HTML: Game.target = null (engage kalır)
   phantom.tg = -1;   // Büyü Hayali sürer, eski haritanın canavarını hedeflemez
-  floats.clear(); zoneMsg = quests().name(sceneName); zoneT = 3; sceneGen++;   // uçan sayılar eski haritanın varlıklarına bağlıydı; bölge adı duyurusu
+  floats.clear(); zoneMsg = quests().name(sceneName); zoneT = 3; sceneGen++;
+  goTarget = -1; dialogEnt = -1; if (!route.empty()) routeT = routeDelay;   // uçan sayılar eski haritanın varlıklarına bağlıydı; bölge adı duyurusu
   for (const core::Json& e : sc["ents"].arr()) {
     const std::string id = std::to_string(e[0].i()), nm = e[1].str(); const int x = e[2][0].i(), y = e[2][1].i();
     const core::Json& info = D["cit"][id];
@@ -312,8 +313,10 @@ void World::gotoScene(const std::string& sid, const std::string& fromSid) {
   else loadScene(sid);
 }
 
-void World::checkExits() {   // HTML checkExits (zindan kapıları sonraki adımda)
-  if (arriveT > 0) return;
+// HTML checkExits (zindan kapıları sonraki adımda). Geçiş kare sonunda yapılır: HTML'de gotoScene eşzamansızdır, kare eski haritada
+// biter (canavarlar o karede de güncellenir, zar atar), yeni harita sonra yüklenir.
+void World::checkExits() {
+  if (arriveT > 0 || goPending_) return;
   const int cx = int(jsRound(player.x)), cy = int(jsRound(player.y));
   for (const auto& r : map.regions) {
     if (r.size() < 6 || r[1] != 1) continue;
@@ -321,7 +324,7 @@ void World::checkExits() {   // HTML checkExits (zindan kapıları sonraki adım
       for (const core::Json& e : (*scene_)["exits"].arr()) if (e[0].i() == r[0]) {
         std::string sid = e[2].isStr() ? e[2].str() : e[2].isNum() ? std::to_string(e[2].i()) : "";
         if (sid.empty() || !as_.D()["scenes"][sid].isObj()) return;
-        const std::string from = sceneId; gotoScene(sid, from); return;
+        goPending_ = true; goSid_ = sid; goFrom_ = sceneId; return;
       }
     }
   }
@@ -613,7 +616,7 @@ void World::hurtPlayer(int i) {
   p.hp -= r.d; p.combatT = 5; ufloat(-2, "-" + std::to_string(r.d), 0xff5040); hurtT = 0.4f;
   // Kutsanmış Beden (90603): ölümcül darbeyi olasılıkla savuştur, biraz can
   if (p.hp <= 0 && s.cheatDeath && random() * 100 < s.cheatDeath) { p.hp = jsRound(s.hp * 0.2); ufloat(-2, "Kutsandı", 0xffe070); return; }
-  if (p.hp <= 0) { p.hp = 0; p.dead = true; p.deadT = 0; p.state = "dead"; setTarget(-1); }
+  if (p.hp <= 0) { p.hp = 0; p.dead = true; p.deadT = 0; p.state = "dead"; setTarget(-1); died = true; }   // arayüz 1,2 sn sonra ölüm penceresini açar
 }
 
 void World::gainXp(long long n) {
@@ -638,6 +641,7 @@ void World::update(double dt, double sx, double sy) {
     timers_[i].t -= dt;
     if (timers_[i].t <= 0) { auto fn = std::move(timers_[i].fn); timers_.erase(timers_.begin() + i); fn(); }
   }
+  if (routeT >= 0 && (routeT -= dt) <= 0) { routeT = -1; routeStep(); }   // varışta otomatik yola devam (HTML setTimeout(routeStep, 400))
   Player& p = player; const Stats s = stats(); const ClassBase& C = bal_.cls(P.cls);
   const double px0 = p.x, py0 = p.y; p.animT += dt * TICK; p.combatT -= dt; p.atkT -= dt;
   for (auto& c : p.cds) c.second = std::max(0.0, c.second - dt);
@@ -674,8 +678,9 @@ void World::update(double dt, double sx, double sy) {
       if (ph.t <= 0) { if (Fx* g = fxByUid(ph.fx)) g->done = true; ph.on = false; }
     }
     bool moving = false;
-    if (sx || sy) {
-      engage_ = false; p.pending = -1;
+    const double run = RUN * (1 + s.spd) * (fast ? 2.6 : 1);   // koşu hızı (GM hızlı: ×2,6)
+    if (sx || sy) {   // yön kolu: yolu, bekleyen beceriyi, kişiye/haritaya yürüyüşü ve saldırıyı bırakır
+      engage_ = false; p.pending = -1; p.pathOn = false; p.path.clear(); goTarget = -1; route.clear(); routeNpc.clear(); routeQuest = 0;
       // ekrandaki yöne en yakın karo ekseni (açılar 27,6° / 152,4° / 207,6° / 332,4°); sınırda titremesin diye son yöne küçük öncelik
       const double ang = std::atan2(sy, sx); int best = 0; double bd = 9;
       for (int i = 0; i < 4; i++) {
@@ -684,7 +689,7 @@ void World::update(double dt, double sx, double sy) {
         if (d < bd) { bd = d; best = i; }
       }
       lastJoyDir_ = best;
-      const double sp = RUN * (1 + s.spd) * dt;
+      const double sp = run * dt;
       moveEnt(p, DIR4[best][0] * sp, DIR4[best][1] * sp); p.dir = dirOf(DIR4[best][0], DIR4[best][1]); moving = true;
     } else {
       lastJoyDir_ = -1;
@@ -692,12 +697,12 @@ void World::update(double dt, double sx, double sy) {
         const int ti = target_;
         if (p.pending >= 0 && ti >= 0 && !ents[ti].dead) {   // menzil dışında kalan beceri: yaklaş, menzile girince kullan
           const SkillDef& sk = skills()[size_t(p.pending)]; Ent& t = ents[ti];
-          if (jsHypot(t.x - p.x, t.y - p.y) <= sk.range) useSkill(p.pending); else { stepTo(p, t.x, t.y, RUN * (1 + s.spd), dt); moving = true; }
-        } else if (engage_ && ti >= 0 && ents[ti].kind == Ent::MOB && !ents[ti].dead) {
+          if (jsHypot(t.x - p.x, t.y - p.y) <= sk.range) useSkill(p.pending); else { stepTo(p, t.x, t.y, run, dt); moving = true; }
+        } else if (engage_ && ti >= 0 && ents[ti].kind == Ent::MOB && !ents[ti].dead && !p.pathOn) {
           Ent& t = ents[ti]; const double d = jsHypot(t.x - p.x, t.y - p.y);
           // 4 yönlü yürüyüşte engelli karede takılırsa ve yeterince yakınsa olduğu yerden vurur
           const bool stuck = p.hasChase && p.chaseD - d < 0.005 && d <= C.range + 0.6; p.chaseD = d; p.hasChase = true;
-          if (d > C.range && !stuck) { stepTo(p, t.x, t.y, RUN * (1 + s.spd), dt); moving = true; }
+          if (d > C.range && !stuck) { stepTo(p, t.x, t.y, run, dt); moving = true; }
           else if (p.atkT <= 0) {
             p.atkT = 1.1; p.combatT = 5; p.dir = dirOf(t.x - p.x, t.y - p.y);
             if (C.melee) {
@@ -709,13 +714,20 @@ void World::update(double dt, double sx, double sy) {
             }
           }
         }
+        if (p.pathOn && !p.path.empty()) {   // yol boyunca yürü; bitince hedef kişi 2,2 kare içindeyse konuş
+          if (stepTo(p, p.path[0].first, p.path[0].second, run, dt)) p.path.erase(p.path.begin());
+          moving = true;
+          if (p.path.empty()) {
+            p.pathOn = false;
+            if (goTarget >= 0) { const int n = goTarget; goTarget = -1; if (jsHypot(ents[size_t(n)].x - p.x, ents[size_t(n)].y - p.y) < 2.2) interact(n); }
+          }
+        }
       }
     }
     if (p.state == "idle" || p.state == "move") p.state = moving ? "move" : "idle";
     const double went = jsHypot(p.x - px0, p.y - py0) * CELL_PX;
     if (p.state == "move") p.t += went * 8 / STRIDE; else p.t += dt * TICK;
-    const std::string before = sceneId; checkExits();
-    if (sceneId != before) return;   // sahne değişti: bu karenin geri kalanı yeni sahnede işlemez
+    checkExits();
   }
   // NPC'ler ve canavarlar (oluşturulma sırasıyla)
   for (size_t i = 0; i < ents.size(); i++) {
@@ -791,6 +803,7 @@ void World::update(double dt, double sx, double sy) {
   }
   fx.erase(std::remove_if(fx.begin(), fx.end(), [](const Fx& f) { return f.done; }), fx.end());
   camX = map.px(p.x, p.y); camY = map.py(p.x, p.y) - 40;   // kamera karaktere kilitli
+  if (goPending_) { goPending_ = false; const std::string sid = goSid_, from = goFrom_; gotoScene(sid, from); }   // geçit: kare bitti, yeni harita
 }
 
 // ---------------- çizim (HTML drawWorld) ----------------
