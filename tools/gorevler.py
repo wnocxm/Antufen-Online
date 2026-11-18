@@ -115,7 +115,7 @@ for f in sorted(glob.glob('kaynak/ceviri/gorevler/*.json')):
         s0 = Y2.get(i) or YAPI.get(i); c = C['gorevler'][str(i)]
         if not s0: print('  yapı yok:', i); continue
         if i in have or i in skip or not c: continue
-        q = {k: s0[k] for k in ('id', 'giver', 'to', 'type', 'target', 'targets', 'node', 'count', 'sc', 'chance', 'req', 'rw', 'cls', 'adv', 'auto', 'mobs', 'drops') if k in s0}   # cls: yalnız o sınıf, adv: sınıf yükseltir, auto: seviyede kendiliğinden alınır, mobs/drops: çok eşyalı toplama (sinif_kaynak.json)
+        q = {k: s0[k] for k in ('id', 'giver', 'to', 'type', 'target', 'targets', 'node', 'count', 'sc', 'chance', 'req', 'rw', 'cls', 'adv', 'advMin', 'accItems', 'auto', 'mobs', 'drops') if k in s0}   # cls: yalnız o sınıf, adv: sınıf yükseltir, advMin: en az bu yükseltme (80 zinciri), accItems: alınca verilen görev eşyası, auto: seviyede kendiliğinden alınır, mobs/drops: çok eşyalı toplama (sinif_kaynak.json)
         if str(i) in C.get('zincir', {}): q['req'] = C['zincir'][str(i)]   # elle verilen zincir bağı
         if str(i) in C.get('sahneler', {}): q['sc'] = C['sahneler'][str(i)]   # hedefin asıl haritası (araç yanlış seçtiyse)
         if str(i) in C.get('teslim', {}): q.update(type='deliver', give=C['teslim'][str(i)], count=1)   # eşya getirme (çantadaki eşya teslim edilir)

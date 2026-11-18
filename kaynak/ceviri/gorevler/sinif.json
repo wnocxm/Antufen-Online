@@ -1,68 +1,611 @@
 {
- "bolge": "Sınıf yükseltme (40)",
- "not": "Orijinal 40. seviye sınıf yükseltme görevleri (ham kayıt b=4, ek alanda 130004 Savaşçı / 130005 Büyücü / 130011 Kutsal Elçi). 80344 40. seviyede kendiliğinden gelir; Ozan sınıfa ve ırka göre giriş görevini verir. Son görev (adv) sınıf ağacını açar. 80. seviye uzmanlık görevleri kapsam dışı (55 sonrası). Yapı: sinif_kaynak.json. docs/04 › Sınıf yükseltme.",
+ "bolge": "Sınıf yükseltme (40 ve 80)",
+ "not": "Orijinal sınıf yükseltme görevleri (ham kayıt b=4). 40: ek alanda 130004 Savaşçı / 130005 Büyücü / 130011 Kutsal Elçi; 80344 40. seviyede kendiliğinden gelir; Ozan sınıfa ve ırka göre giriş görevini verir; son görev (adv 1) sınıf ağacını açar. 80: Bozbalta Şehri zinciri (130006 Kara Şövalye / 130008 Büyük Büyü Üstadı / 130012 Seçilmiş; Ozan ve Jessie metinleri bu üçünü anlatır); giriş görevini Bozbalta'daki NPC verir (advMin 1), son görev (adv 2) uzmanlık ağaçlarını açar. Eski taslak zincirler (80227-80248: şövalye, çılgın savaşçı, element/gölge büyücüsü; ağaçsız 130007/130009 sınıfları) ve 80345 alınmadı (docs/04).",
  "kaynak": "sinif_kaynak.json",
- "irklar": {"80343": "人类", "80346": "精灵", "80569": "人类", "80223": "人类", "80224": "人类", "80571": "精灵", "80238": "精灵", "80239": "精灵",
-   "80570": "人类", "80225": "人类", "80226": "人类", "80572": "精灵", "80240": "精灵", "80241": "精灵", "82940": "人类", "82941": "人类", "82942": "人类", "81965": "精灵", "82938": "精灵", "82939": "精灵"},
- "zincir": {"80569": 80344, "80571": 80344, "80570": 80344, "80572": 80344, "82940": 80344, "81965": 80344, "82938": 81965, "82939": 82938, "82941": 82940, "82942": 82941},
- "seviye_kesin": true,
- "seviyeler": {"80344": 40, "80569": 40, "80571": 40, "80570": 40, "80572": 40, "82940": 40, "81965": 40, "80223": 40, "80224": 40, "80238": 40, "80239": 40, "80225": 40, "80226": 40, "80240": 40, "80241": 40, "82941": 40, "82942": 40, "82938": 40, "82939": 40},
- "hedefler": {
-   "80344": ["Altındalga Limanı'ndaki Ozan ile konuş.", "Talk to the Bard in Goldwave Harbor."],
-   "80225": ["Işınlanma Koridoru'ndaki (Tarikat Üssü) uçan canavarlardan 5 Tören Malzemesi ve 1 Büyülü Mum topla, Arma Büyücüsü'ne getir.", "Collect 5 Ritual Materials and 1 Magic Candle from the flying monsters in the Teleport Corridor (Cult Base) and bring them to the Heraldry Mage."],
-   "80239": ["Savaşçılar Loncası Başkanı'nın yanındaki geçitten Sınav Odası'na gir, 5 sınayıcıyı (☆Dehşet Bıçağı) yen ve 5 Şan Zinciri getir.", "Enter the Trial Chamber through the portal beside the Warrior Guild Master, defeat the 5 testers (☆Terror Blade) and bring 5 Chains of Glory."]
+ "irklar": {
+  "80343": "人类",
+  "80346": "精灵",
+  "80569": "人类",
+  "80223": "人类",
+  "80224": "人类",
+  "80571": "精灵",
+  "80238": "精灵",
+  "80239": "精灵",
+  "80570": "人类",
+  "80225": "人类",
+  "80226": "人类",
+  "80572": "精灵",
+  "80240": "精灵",
+  "80241": "精灵",
+  "82940": "人类",
+  "82941": "人类",
+  "82942": "人类",
+  "81965": "精灵",
+  "82938": "精灵",
+  "82939": "精灵",
+  "83085": "ortak",
+  "83086": "ortak",
+  "83087": "ortak",
+  "83088": "ortak",
+  "83089": "ortak",
+  "83090": "ortak",
+  "83091": "ortak",
+  "83092": "ortak",
+  "83093": "ortak"
  },
- "esyalar": {"80225": [["Tören Malzemesi", "Büyülü Mum"], ["Ritual Material", "Magic Candle"]]},
+ "zincir": {
+  "80569": 80344,
+  "80571": 80344,
+  "80570": 80344,
+  "80572": 80344,
+  "82940": 80344,
+  "81965": 80344,
+  "82938": 81965,
+  "82939": 82938,
+  "82941": 82940,
+  "82942": 82941
+ },
+ "seviye_kesin": true,
+ "seviyeler": {
+  "80344": 40,
+  "80569": 40,
+  "80571": 40,
+  "80570": 40,
+  "80572": 40,
+  "82940": 40,
+  "81965": 40,
+  "80223": 40,
+  "80224": 40,
+  "80238": 40,
+  "80239": 40,
+  "80225": 40,
+  "80226": 40,
+  "80240": 40,
+  "80241": 40,
+  "82941": 40,
+  "82942": 40,
+  "82938": 40,
+  "82939": 40,
+  "83085": 80,
+  "83086": 80,
+  "83087": 80,
+  "83088": 80,
+  "83089": 80,
+  "83090": 80,
+  "83091": 80,
+  "83092": 80,
+  "83093": 80
+ },
+ "hedefler": {
+  "80344": [
+   "Altındalga Limanı'ndaki Ozan ile konuş.",
+   "Talk to the Bard in Goldwave Harbor."
+  ],
+  "80225": [
+   "Işınlanma Koridoru'ndaki (Tarikat Üssü) uçan canavarlardan 5 Tören Malzemesi ve 1 Büyülü Mum topla, Arma Büyücüsü'ne getir.",
+   "Collect 5 Ritual Materials and 1 Magic Candle from the flying monsters in the Teleport Corridor (Cult Base) and bring them to the Heraldry Mage."
+  ],
+  "80239": [
+   "Savaşçılar Loncası Başkanı'nın yanındaki geçitten Sınav Odası'na gir, 5 sınayıcıyı (☆Dehşet Bıçağı) yen ve 5 Şan Zinciri getir.",
+   "Enter the Trial Chamber through the portal beside the Warrior Guild Master, defeat the 5 testers (☆Terror Blade) and bring 5 Chains of Glory."
+  ],
+  "83085": [
+   "Bozbalta Şehri'ndeki Kara Şövalye Komutanı ile yeniden konuş, Kara Şövalye sınavını kabul et.",
+   "Talk to the Black Knight Commander in Greyaxe City again and accept the Black Knight trial."
+  ],
+  "83086": [
+   "Ruh Arafı'nda 10 ☆Ölümsüz Şövalye öldür ve onlardan 10 Güç Titreşimi Parçası al; Kara Şövalye Komutanı'na dön.",
+   "Kill 10 ☆Undying Knights in Soul Purgatory and take 10 Power Resonance Shards from them; return to the Black Knight Commander."
+  ],
+  "83087": [
+   "Andecano Tahtı'nda ☆☆【Çılgın Sayıklayan】Andecano'dan bir yığın arıtılmış ham taş al, Kara Şövalye Komutanı'na getir.",
+   "Take a heap of smelted ore from ☆☆【Mad Dreamtalker】Andecano in Andecano Throne and bring it to the Black Knight Commander."
+  ],
+  "83088": [
+   "Bozbalta Şehri'ndeki Büyük Büyü Üstadı Rehberi ile yeniden konuş, Büyük Büyü Üstadı sınavını kabul et.",
+   "Talk to the Grand Magister Guide in Greyaxe City again and accept the Grand Magister trial."
+  ],
+  "83089": [
+   "Ruh Arafı'nda 10 ☆Toz Canavarı öldür, onların bölgesindeki Tozlu Büyü İletken Kristal Sandık'tan bir torba kristal al; Büyük Büyü Üstadı Rehberi'ne getir.",
+   "Kill 10 ☆Dust Fiends in Soul Purgatory and take a bag of crystals from the Dusty Mana Crystal Chest in their lair; bring it to the Grand Magister Guide."
+  ],
+  "83090": [
+   "Andecano Tahtı'nda ☆☆【Çılgın Sayıklayan】Andecano'yu öldür, Büyük Büyü Üstadı Rehberi'ne bildir.",
+   "Kill ☆☆【Mad Dreamtalker】Andecano in Andecano Throne and report to the Grand Magister Guide."
+  ],
+  "83091": [
+   "Bozbalta Şehri'ndeki Dindar Seçilmiş ile yeniden konuş, Seçilmiş sınavını kabul et.",
+   "Talk to the Devout Chosen in Greyaxe City again and accept the trial of the Chosen."
+  ],
+  "83093": [
+   "Ruh Arafı'nda 10 ☆Ruh Gezgini öldür, Dindar Seçilmiş'e bildir.",
+   "Kill 10 ☆Soul Wanderers in Soul Purgatory and report to the Devout Chosen."
+  ],
+  "83092": [
+   "Andecano Tahtı'nda ☆☆【Çılgın Sayıklayan】Andecano'yu hedef al ve çantadaki Büyü Emici Küre'yi kullan, sonra onu öldür; Dindar Seçilmiş'e bildir.",
+   "In Andecano Throne target ☆☆【Mad Dreamtalker】Andecano and use the Mana-Draining Orb from your bag, then kill him; report to the Devout Chosen."
+  ]
+ },
+ "esyalar": {
+  "80225": [
+   [
+    "Tören Malzemesi",
+    "Büyülü Mum"
+   ],
+   [
+    "Ritual Material",
+    "Magic Candle"
+   ]
+  ]
+ },
  "secim": {
-   "80226": {
-     "tr": [["Onu yarala, kanını al", "Periye bir bıçak sapladın ve kanını armana sürdün. “Güç için her yolu mubah saydın; büyücü olsan da bir gün daha büyük bir şiddetin altında kalacaksın!” Peri seni lanetliyor, ama artık fazla yaşamayacak. Büyücü oldun."],
-            ["Bırak gitsin", "“Doğa Ana bize gücün hem güçlü hem merhametli olanlara ait olması gerektiğini öğretir... Armanı ormanın büyüsüyle kutsayacağım, dostum; artık olağanüstü bir büyücüsün.” Büyücü oldun."]],
-     "en": [["Wound her and take her blood", "You stab the fairy and smear her blood on your crest. “You would do anything for power. Even as a mage, one day a greater violence will bury you!” The fairy curses you, but she will not live much longer. You have become a Mage."],
-            ["Let her go", "“Mother Nature teaches us that power should belong to those who are both strong and merciful... I will bless your crest with the magic of the forest, my friend; you are now a remarkable mage.” You have become a Mage."]]
-   }
+  "80226": {
+   "tr": [
+    [
+     "Onu yarala, kanını al",
+     "Periye bir bıçak sapladın ve kanını armana sürdün. “Güç için her yolu mubah saydın; büyücü olsan da bir gün daha büyük bir şiddetin altında kalacaksın!” Peri seni lanetliyor, ama artık fazla yaşamayacak. Büyücü oldun."
+    ],
+    [
+     "Bırak gitsin",
+     "“Doğa Ana bize gücün hem güçlü hem merhametli olanlara ait olması gerektiğini öğretir... Armanı ormanın büyüsüyle kutsayacağım, dostum; artık olağanüstü bir büyücüsün.” Büyücü oldun."
+    ]
+   ],
+   "en": [
+    [
+     "Wound her and take her blood",
+     "You stab the fairy and smear her blood on your crest. “You would do anything for power. Even as a mage, one day a greater violence will bury you!” The fairy curses you, but she will not live much longer. You have become a Mage."
+    ],
+    [
+     "Let her go",
+     "“Mother Nature teaches us that power should belong to those who are both strong and merciful... I will bless your crest with the magic of the forest, my friend; you are now a remarkable mage.” You have become a Mage."
+    ]
+   ]
+  }
  },
  "gorevler": {
-  "80343": {"tr": ["Kariyer", "Şimdilik daha yolun başında bir acemisin, ama durmadan çalışırsan güçlü bir maceracı olabilirsin. Bunu merak ediyorsan Jessie'ye sor! En iyi o bilir!", "Jessie'ye sor; bu işleri en iyi o bilir.", "Evet: 40. ve 80. seviyede kendi sınıfının yükseltme görevini alabilirsin. Acemi Savaşçı 40'ta Savaşçı olur; Çırak Büyücü Büyücü, Acemi Kutsal Elçi de Kutsal Elçi olur. 80'de ise Savaşçı Kara Şövalye, Büyücü Başbüyücü, Kutsal Elçi de Seçilmiş olabilir! Bu güçlü sınıflar için çalış!"],
-            "en": ["Career", "You may be a fresh rookie for now, but with hard work you can still become a mighty adventurer. If you want to know more, ask Jessie! She knows best!", "Ask Jessie; she knows all about it.", "Yes: at level 40 and level 80 you can take your class's advancement quest. A Trainee Warrior becomes a Warrior at 40, a Mage Apprentice becomes a Mage, and a Trainee Priest becomes a Priest. At 80 a Warrior can become a Black Knight, a Mage an Archmage, and a Priest one of the Chosen! Work hard for these mighty classes!"]},
-  "80346": {"tr": ["Kariyer", "Şimdilik daha yolun başında bir acemisin, ama durmadan çalışırsan güçlü bir maceracı olabilirsin. Bunu merak ediyorsan Tapınak Öğretmeni'ne sor! En iyi o bilir!", "Tapınak Öğretmeni'ne sor; bu işleri en iyi o bilir.", "Evet: 40. ve 80. seviyede kendi sınıfının yükseltme görevini alabilirsin. Acemi Savaşçı 40'ta Savaşçı olur; Çırak Büyücü Büyücü, Acemi Kutsal Elçi de Kutsal Elçi olur. 80'de ise Savaşçı Kara Şövalye, Büyücü Başbüyücü, Kutsal Elçi de Seçilmiş olabilir! Bu güçlü sınıflar için çalış!"],
-            "en": ["Career", "You may be a fresh rookie for now, but with hard work you can still become a mighty adventurer. If you want to know more, ask the Temple Teacher! He knows best!", "Ask the Temple Teacher; he knows all about it.", "Yes: at level 40 and level 80 you can take your class's advancement quest. A Trainee Warrior becomes a Warrior at 40, a Mage Apprentice becomes a Mage, and a Trainee Priest becomes a Priest. At 80 a Warrior can become a Black Knight, a Mage an Archmage, and a Priest one of the Chosen! Work hard for these mighty classes!"]},
-  "80344": {"tr": ["Ömür Boyu Başarı: Acemilikten Çıkış", "Acemilikten çıkma zamanın geldi. Altındalga Limanı'ndaki Ozan sana ileri sınıfları anlatır ve sınıf yükseltme görevini verir; onunla konuş.", "Altındalga Limanı'ndaki Ozan ile konuş.", "40. seviyeye ulaştın! Güçlüsün, deneyimlisin! Artık gerçek bir savaşçı, büyücü ya da kutsal elçi olabilirsin. Benimle konuşup “Sınıf değiştirmek istiyorum!” dersen sana uygun ileri sınıfın görevini veririm."],
-            "en": ["Lifetime Achievement: No Longer a Rookie", "It's time to leave the rookie days behind. The Bard in Goldwave Harbor can tell you about the advanced classes and give you your class advancement quest; talk to him.", "Talk to the Bard in Goldwave Harbor.", "You've reached level 40! Strong enough, experienced enough! You can now become a true warrior, mage or priest. Talk to me and say “I want to change my class!” and I'll give you the quest for the advanced class that suits you."]},
-  "80569": {"tr": ["Çocuğun Dileği", "Sınıf değiştirmek mi istiyorsun? Guanlin Kasabası'na git ve derdine düşmüş küçük Tom'a yardım et.", "Tom, Guanlin Kasabası'nda seni bekliyor.", "Hı? Yardıma ihtiyacım olduğunu nereden bildin? Çok şaşırtıcı."],
-            "en": ["A Boy's Wish", "You want to change your class? Go to Guanlin Town and help little Tom, who is troubled.", "Tom is waiting for you in Guanlin Town.", "Huh? How did you know I needed help? That's amazing."]},
-  "80223": {"tr": ["Kayıp Eşya", "Ben... Jessie'ye alacağım yüzüğü kaybettim! Bütün bir yaz harçlık biriktirip o yaldızlı yüzüğü almıştım... bir de ormanda zar zor bulduğum o güzel taşı! Jessie'nin doğum gününde ona verip onu sevdiğimi söyleyecektim! Ama dün Başkent Batısı'nda dolaşırken birden Karagece... o kocaman kara köpek fırladı... hu hu hu.", "Hu hu hu... Böyle giderse Jessie kesin Mike'ın hediyesini sever, ben kaybettim, hu hu.", "Teşekkürler... ama... yüzükteki o güzel taş... artık yok.", "Tom'un Yüzüğü"],
-            "en": ["The Lost Ring", "I... I lost the ring I got for Jessie! I saved a whole summer's pocket money for that gilded ring... and the pretty stone I found in the woods after so much searching! I was going to give it to Jessie on her birthday and tell her I love her! But yesterday, while I was wandering in Capital West, suddenly Blacknight... that huge black dog jumped out... boo hoo.", "Boo hoo... Now Jessie will surely like Mike's present, I've lost, boo hoo.", "Thank you... but... the pretty stone on the ring... it's gone.", "Tom's Ring"]},
-  "80224": {"tr": ["Yıldız Dileği", "Bir ay önce Gümüşkartal Şehri'nin derinliklerine bir kayan yıldız düştü. Jessie, o yıldızı ona bulursam her dileğimi kabul edeceğine söz verdi! Ona evlenme teklif edeceğim! Lütfen yardım et, hâlâ vakit var! Yıldız Gümüşkartal Avlusu'na düşmüş olmalı; belki bir Şato Uşağı bulup saklamıştır... Sen onu geri alabilirsin, değil mi?", "Geç mi kaldık yoksa...", "Büyü dolu Yıldız Taşı'nı çocuğa verdin. Minnetle sana bakıyor, heyecandan ne diyeceğini bilemiyor. Beceriksizce taşı yüzüğe takıyor, yüzüğü havaya kaldırıp gülerek rüyalarının sevgilisine, başka bir afacana koşuyor. Onun sevgisini emmiş gibi yıldızın parçası parlamaya başlıyor, gökteki yıldızlarla birlikte ışıldıyor. Seni kutsadılar; kalbindeki güzel şeyleri koruyacak güce sahip olduğunu hissediyorsun. Artık gerçek bir Savaşçısın.", "Yıldız Taşı"],
-            "en": ["Star Wish", "A month ago a shooting star fell deep inside Silver Eagle City. Jessie promised to grant me any wish if I find that star for her! I'm going to propose to her! Please help me, there's still time! The star must have fallen into the Silver Eagle Courtyard; maybe a Castle Attendant picked it up and hid it... You can get it back, can't you?", "Is it too late...", "You hand the magical Star Stone to the boy. He looks at you gratefully, too excited to speak. He clumsily sets the stone in the ring, holds it up and runs laughing to the love of his dreams, another little rascal. As if it absorbed his love, the star shard begins to glow, twinkling with the stars in the sky. They have blessed you; you feel you now have the strength to protect the beautiful things in your heart. You are a true Warrior now.", "Star Stone"]},
-  "80571": {"tr": ["Meydan Okuma", "Sınıf değiştirmek mi istiyorsun? Gözcü Kampı'na git ve Özel Ataşe'nin seçmesine katıl.", "Özel Ataşe, Gözcü Kampı'nda seni bekliyor.", "Meydan okumayı kabul edecek zamana geldin."],
-            "en": ["Challenge", "You want to change your class? Go to the Watcher Camp and take the Military Attaché's selection.", "The Military Attaché is waiting for you in the Watcher Camp.", "You have reached the time when you can accept the challenge."]},
-  "80238": {"tr": ["Sınavın Şartı", "Neredeyse kendi başına ayakta durabilen bir savaşçı oldun. Bence Güneşgören Şehri'ndeki Savaşçılar Loncası'na gidip onların sınavına girmeli, gerçek bir savaşçı olmalısın. Ama eli boş gidemezsin; gücünü ve samimiyetini kanıtlayacak bir şey götürmelisin. Yoğunsis Kıyısı'ndaki ☆Su Perileri Ejder Dişi Yeşimi denen bir kristal taşır. Üç tane topla, sonra Savaşçılar Loncası Başkanı'na git. İyi iş çıkar, seni öneren beni utandırma.", "Savaşçılık sınavına girebileceğini henüz kanıtlayamadın.", "Gücünü kanıtladın, ama sınavı geçip geçemeyeceğin henüz belli değil.", "Ejder Dişi Yeşimi"],
-            "en": ["Terms of the Trial", "You are almost a warrior who can stand on your own. I think you should go to the Warrior Guild in Sunwatch City, take their trial and become a true warrior. But you can't go empty-handed; you must bring proof of your strength and sincerity. The ☆Water Fairies on Thickfog Coast carry a crystal called Dragon Tooth Jade. Collect three, then go to the Warrior Guild Master. Do well, and don't shame me, your sponsor.", "You haven't yet proven that you can take the warrior's trial.", "You have proven your strength, but whether you can pass the trial is another matter.", "Dragon Tooth Jade"]},
-  "80239": {"tr": ["Savaşçının Sınavı", "Hazır olduğunda yanımdaki geçitten Sınav Odası'na gir. Orada toplam beş düşman var; her birinin üstünde ağır bir Şan Zinciri bulunur. Onları öldürdükten sonra zincirleri taşıyarak savaşmayı sürdürmelisin; ne kadar ağır olduklarını göreceksin... ama sınavı geçtiğinin kanıtı da onlardır. Hazır mısın?", "Henüz sınavı geçmedin.", "Bu ağır yükleri bırak artık, savaşçı. Bundan sonra sana böyle sesleneceğim: halkımızın kılıcı ve kalkanı olarak kabul edildin; şanlı bir Savaşçısın.", "Şan Zinciri"],
-            "en": ["The Warrior's Trial", "When you are ready, enter the Trial Chamber through the portal beside me. There are five enemies in there, each carrying a heavy Chain of Glory. After you kill them you must keep fighting while carrying the chains; you'll find them unusually heavy... but they are also the proof that you passed the trial. Are you ready?", "You haven't passed the trial yet.", "Lay down these heavy burdens, warrior. From now on that is what I will call you: you are recognized as the sword and shield of our people, a glorious Warrior.", "Chain of Glory"]},
-  "80570": {"tr": ["Unvan", "Sınıf değiştirmek mi istiyorsun? Büyü Akademisi'ne git ve sana unvan verebilecek Arma Büyücüsü'nü bul.", "Arma Büyücüsü, Büyü Akademisi'nde seni bekliyor.", "Gelme vaktinin geldiğini biliyordum."],
-            "en": ["Title", "You want to change your class? Go to the Magic Academy and find the Heraldry Mage who can grant you a title.", "The Heraldry Mage is waiting for you in the Magic Academy.", "I knew it was about time you came."]},
-  "80225": {"tr": ["Kendi Arman", "Artık çok iyi bir büyücüsün; resmî bir büyücünün taşıdığı büyü armasına sahip olmanın vakti geldi! Bu listedeki malzemeleri topla, sana yalnız sana ait bir büyü arması yapayım. Sanırım Tarikat Üssü'nün Işınlanma Koridoru'ndaki canavarlar bu malzemeleri sağlayabilir.", "Senin gücünle bunları toplamak zor olmasa gerek.", "Yepyeni bir arma çizmek biraz zaman alır... sabırla bekle."],
-            "en": ["Your Own Crest", "You are a fine mage now; it's time you had a magic crest like every official mage! Gather the materials on this list and I'll make a magic crest that is yours alone. I believe the monsters in the Teleport Corridor of the Cult Base can provide them.", "With your strength, gathering these shouldn't be hard.", "Drawing a brand-new crest takes some time... wait patiently."]},
-  "80226": {"tr": ["Büyücünün Seçimi", "Arma tamamlandı, ama ona gerçek büyü gücü vermek için bir şey daha gerekiyor; sonra seni büyünün daha uzak yollarına götürebilir. Büyü armanı ormanda inzivaya çekilmiş bir perinin kanıyla yıkaman gerek. Acımasız bir iş, ama güç için ödenmesi gereken bedel bu.", "Güneşli Orman Doğu'daki Orman İnziva Perisi'ni bul.", "Çiçeklerin arasına gizlenmiş peri önüne uçuyor. Sessizce sana bakıp ne yapacağını bekliyor. “İnsan, canımı almaya gelenin sen olduğunu hissediyorum. Kaderin buysa karşı koymam; ama bana merhamet edip beni bırakırsan, sana bir kutsamayla karşılık veririm.”"],
-            "en": ["The Mage's Choice", "The crest is finished, but it needs one more thing to gain true magical power; then it can lead you further along the path of magic. You must wash your crest in the blood of a fairy who lives as a hermit in the forest. It is a cruel process, but it is the price that must be paid for power.", "Find the Forest Hermit Fairy in Sunny Forest East.", "The fairy hidden among the flowers flies up to you. She looks at you quietly, waiting for you to act. “Human, I sense you are the one who has come to take my life. If this is fate I will not resist; but if you are merciful and spare me, I will repay you with words of blessing.”"]},
-  "80572": {"tr": ["Mezuniyet", "Sınıf değiştirmek mi istiyorsun? Büyücü Loncası Terası'ndaki Büyücüler Loncası Başkanı'nı gör ve çıraklık eğitimini tamamla.", "Büyücüler Loncası Başkanı seni bekliyor.", "Mezuniyet eğitimin için mi geldin?"],
-            "en": ["Graduation", "You want to change your class? See the Mage Guild Master at the Mage Guild Terrace and complete your apprentice training.", "The Mage Guild Master is waiting for you.", "Have you come for your graduation training?"]},
-  "80240": {"tr": ["Eğitimin Sonu", "Dışarıda bunca deneyim kazandın, neredeyse usta bir büyücü oldun. Artık mezuniyet sınavını verip çıraklıktan kurtulmanın vakti. Sınavın ☆Joule ile ☆Dondur'u öldürmek. Büyücü laboratuvarından kaçmış, değişime uğramış çok tehlikeli canavarlar. ☆Dondur Yoğunsis Kıyısı'ndaki örümceklerin arasında dolaşıyor, ☆Joule ise trol kardeşleriyle Feryat Patikası'na yerleşmiş. Özel element dirençleri olabilir, dikkat et. İşi bitirince bana gel.", "Onları bile halledemezsen nasıl yeterli bir büyücü olacaksın?", "Çok akıllısın, macera gücün de var; bir büyücüde olması gereken her şey sende var."],
-            "en": ["End of Studies", "You've gained so much experience out there that you're almost a skilled mage. It's time to pass your graduation trial and leave apprenticeship behind. Your trial is to kill ☆Joule and ☆Frost, mutated monsters that escaped from the mages' laboratory, very dangerous. ☆Frost roams among the spiders on Thickfog Coast, and ☆Joule has settled on the Wailing Path with his troll brothers. They may have special elemental resistances, so be careful. Come to me when it's done.", "If you can't handle even them, how will you become a proper mage?", "You are clever and have the strength for adventure; you have everything a mage should have."]},
-  "80241": {"tr": ["Miras", "Artık çırak değilsin, ama henüz büyücü de olmadın. Size hep söylerim: gece elflerinin en önemli görevi atalarımızın şanını ve ustalığını aktarmaktır. Tapınaktaki bir yetime büyünü öğret ve yeterli bir büyücü olduğunu kanıtla.", "Kâhin Tapınağı'ndaki Yetim Elf Kız'a büyü öğret.", "Çocuğa birkaç basit büyü gösterdin; büyük bir hevesle izledi ve senin öğrencin olup büyüyünce büyük bir büyücü olmaya karar verdi... Tebrikler, artık bir öğrencin var, Büyücü."],
-            "en": ["Legacy", "You are no longer an apprentice, but you are not yet a mage. I always tell you: the most important mission of the night elves is to pass on the glory and skills of our ancestors. Teach your magic to an orphan in the temple and prove that you are a worthy mage.", "Teach magic to the Orphan Elf Girl in the Prophet's Temple.", "You show the child a few simple spells; she watches eagerly and decides to become your pupil and grow up to be a great mage... Congratulations, you have a pupil now, Mage."]},
-  "82940": {"tr": ["Gökten Gelen Çağrı", "Gökyüzünden fısıltılı bir çağrı geliyor gibi; belki Frey Rahibi sorularını yanıtlayabilir. Başkent'in Tapınak Bölgesi'nde.", "Frey Rahibi, Tapınak Bölgesi'nde seni bekliyor.", "Çocuğum, seni buraya baş tanrı Frey yönlendirdi; belki burada Frey'in onayını kazanabilirsin."],
-            "en": ["Call from the Sky", "A soft calling seems to come from the sky; perhaps the Priest of Frey can answer your questions. He is in the Temple District of the Imperial Capital.", "The Priest of Frey is waiting for you in the Temple District.", "My child, the god Frey has guided you here; perhaps here you can earn Frey's approval."]},
-  "82941": {"tr": ["Lekeyi Silmek", "Dünyadaki bütün kirleri temizlemeye ant içtik; hepsi tanrılara saygısızlıktır! Tarikat Üssü'nün Şaşkınlık Koridoru'nda Thomas Young adında bir tanrı haini var. Onu öldür, baş tanrı Frey'in adına sürdüğü lekeyi sil. ☆【Tanrı Haini】Thomas Young değişime uğramış tanrısal güçlere sahip; ona ancak tanrıların lütfettiği biri ölümcül zarar verebilir.", "Thomas Young ölmeli!", "Hainlere ölümcül darbe vurulur. Lekeyi sildin."],
-            "en": ["Cleansing the Stain", "We have sworn to cleanse all filth from the world; it is all an insult to the gods! In the Corridor of Confusion of the Cult Base there is a god betrayer named Thomas Young. Kill him and wipe away the stain he has cast on the god Frey. ☆【God Betrayer】Thomas Young has mutated divine powers; only one favored by the gods can deal him a fatal blow.", "Thomas Young must die!", "A traitor deserves a fatal blow. You have wiped away the stain."]},
-  "82942": {"tr": ["Tanrının Elçisi", "Frey Başrahibesi baş tanrı Frey'e en yakın kişidir; onu bul, onun onayı Frey'in onayıdır!", "Frey Başrahibesi'ni bul.", "Yaptıkların baş tanrı Frey tarafından onaylandı! Tebrikler çocuğum, farkında olmadan gerçek bir Tanrı Elçisi oldun."],
-            "en": ["Envoy of the God", "The High Priestess of Frey is closest to the god Frey; find her, for her approval is Frey's approval!", "Find the High Priestess of Frey.", "Your deeds are approved by the god Frey! Congratulations, my child; without realizing it, you've become a true Envoy of the God."]},
-  "81965": {"tr": ["Gökten Gelen Çağrı", "Gökyüzünden fısıltılı bir çağrı geliyor gibi; belki Dia, Kâhinin Eli sorularını yanıtlayabilir. Kâhin Tapınağı'nda.", "Dia, Kâhinin Eli, Kâhin Tapınağı'nda seni bekliyor.", "Çocuğum, seni buraya tanrılar yönlendirdi; belki burada tanrıların onayını kazanabilirsin."],
-            "en": ["Call from the Sky", "A soft calling seems to come from the sky; perhaps Dia, Hand of the Prophet, can answer your questions. She is in the Prophet's Temple.", "Dia, Hand of the Prophet, is waiting for you in the Prophet's Temple.", "My child, the gods have guided you here; perhaps here you can earn the gods' approval."]},
-  "82938": {"tr": ["Lekeyi Silmek", "Dünyadaki bütün kirleri temizlemeye ant içtik; hepsi tanrılara saygısızlıktır! Tarikat Üssü'nün Şaşkınlık Koridoru'nda Thomas Young adında bir tanrı haini var. Onu öldür, tapınağa sürdüğü lekeyi sil. ☆【Tanrı Haini】Thomas Young değişime uğramış tanrısal güçlere sahip; ona ancak tanrıların lütfettiği biri ölümcül zarar verebilir.", "Thomas Young ölmeli!", "Hainlere ölümcül darbe vurulur. Lekeyi sildin."],
-            "en": ["Cleansing the Stain", "We have sworn to cleanse all filth from the world; it is all an insult to the gods! In the Corridor of Confusion of the Cult Base there is a god betrayer named Thomas Young. Kill him and wipe away the stain he has cast on the temple. ☆【God Betrayer】Thomas Young has mutated divine powers; only one favored by the gods can deal him a fatal blow.", "Thomas Young must die!", "A traitor deserves a fatal blow. You have wiped away the stain."]},
-  "82939": {"tr": ["Tanrının Elçisi", "Kehanet Kâhini tanrılara en yakın kişidir; onu bul, onun onayı tanrıların onayıdır!", "Kehanet Kâhini'ni bul.", "Yaptıkların tanrılar tarafından onaylandı! Tebrikler çocuğum, farkında olmadan gerçek bir Tanrı Elçisi oldun."],
-            "en": ["Envoy of the God", "The Oracle Prophet is closest to the gods; find her, for her approval is the gods' approval!", "Find the Oracle Prophet.", "Your deeds are approved by the gods! Congratulations, my child; without realizing it, you've become a true Envoy of the God."]}
+  "80343": {
+   "tr": [
+    "Kariyer",
+    "Şimdilik daha yolun başında bir acemisin, ama durmadan çalışırsan güçlü bir maceracı olabilirsin. Bunu merak ediyorsan Jessie'ye sor! En iyi o bilir!",
+    "Jessie'ye sor; bu işleri en iyi o bilir.",
+    "Evet: 40. ve 80. seviyede kendi sınıfının yükseltme görevini alabilirsin. Acemi Savaşçı 40'ta Savaşçı olur; Çırak Büyücü Büyücü, Acemi Kutsal Elçi de Kutsal Elçi olur. 80'de ise Savaşçı Kara Şövalye, Büyücü Büyük Büyü Üstadı, Kutsal Elçi de Seçilmiş olabilir! Bu güçlü sınıflar için çalış!"
+   ],
+   "en": [
+    "Career",
+    "You may be a fresh rookie for now, but with hard work you can still become a mighty adventurer. If you want to know more, ask Jessie! She knows best!",
+    "Ask Jessie; she knows all about it.",
+    "Yes: at level 40 and level 80 you can take your class's advancement quest. A Trainee Warrior becomes a Warrior at 40, a Mage Apprentice becomes a Mage, and a Trainee Priest becomes a Priest. At 80 a Warrior can become a Black Knight, a Mage a Grand Magister, and a Priest one of the Chosen! Work hard for these mighty classes!"
+   ]
+  },
+  "80346": {
+   "tr": [
+    "Kariyer",
+    "Şimdilik daha yolun başında bir acemisin, ama durmadan çalışırsan güçlü bir maceracı olabilirsin. Bunu merak ediyorsan Tapınak Öğretmeni'ne sor! En iyi o bilir!",
+    "Tapınak Öğretmeni'ne sor; bu işleri en iyi o bilir.",
+    "Evet: 40. ve 80. seviyede kendi sınıfının yükseltme görevini alabilirsin. Acemi Savaşçı 40'ta Savaşçı olur; Çırak Büyücü Büyücü, Acemi Kutsal Elçi de Kutsal Elçi olur. 80'de ise Savaşçı Kara Şövalye, Büyücü Büyük Büyü Üstadı, Kutsal Elçi de Seçilmiş olabilir! Bu güçlü sınıflar için çalış!"
+   ],
+   "en": [
+    "Career",
+    "You may be a fresh rookie for now, but with hard work you can still become a mighty adventurer. If you want to know more, ask the Temple Teacher! He knows best!",
+    "Ask the Temple Teacher; he knows all about it.",
+    "Yes: at level 40 and level 80 you can take your class's advancement quest. A Trainee Warrior becomes a Warrior at 40, a Mage Apprentice becomes a Mage, and a Trainee Priest becomes a Priest. At 80 a Warrior can become a Black Knight, a Mage a Grand Magister, and a Priest one of the Chosen! Work hard for these mighty classes!"
+   ]
+  },
+  "80344": {
+   "tr": [
+    "Ömür Boyu Başarı: Acemilikten Çıkış",
+    "Acemilikten çıkma zamanın geldi. Altındalga Limanı'ndaki Ozan sana ileri sınıfları anlatır ve sınıf yükseltme görevini verir; onunla konuş.",
+    "Altındalga Limanı'ndaki Ozan ile konuş.",
+    "40. seviyeye ulaştın! Güçlüsün, deneyimlisin! Artık gerçek bir savaşçı, büyücü ya da kutsal elçi olabilirsin. Benimle konuşup “Sınıf değiştirmek istiyorum!” dersen sana uygun ileri sınıfın görevini veririm."
+   ],
+   "en": [
+    "Lifetime Achievement: No Longer a Rookie",
+    "It's time to leave the rookie days behind. The Bard in Goldwave Harbor can tell you about the advanced classes and give you your class advancement quest; talk to him.",
+    "Talk to the Bard in Goldwave Harbor.",
+    "You've reached level 40! Strong enough, experienced enough! You can now become a true warrior, mage or priest. Talk to me and say “I want to change my class!” and I'll give you the quest for the advanced class that suits you."
+   ]
+  },
+  "80569": {
+   "tr": [
+    "Çocuğun Dileği",
+    "Sınıf değiştirmek mi istiyorsun? Guanlin Kasabası'na git ve derdine düşmüş küçük Tom'a yardım et.",
+    "Tom, Guanlin Kasabası'nda seni bekliyor.",
+    "Hı? Yardıma ihtiyacım olduğunu nereden bildin? Çok şaşırtıcı."
+   ],
+   "en": [
+    "A Boy's Wish",
+    "You want to change your class? Go to Guanlin Town and help little Tom, who is troubled.",
+    "Tom is waiting for you in Guanlin Town.",
+    "Huh? How did you know I needed help? That's amazing."
+   ]
+  },
+  "80223": {
+   "tr": [
+    "Kayıp Eşya",
+    "Ben... Jessie'ye alacağım yüzüğü kaybettim! Bütün bir yaz harçlık biriktirip o yaldızlı yüzüğü almıştım... bir de ormanda zar zor bulduğum o güzel taşı! Jessie'nin doğum gününde ona verip onu sevdiğimi söyleyecektim! Ama dün Başkent Batısı'nda dolaşırken birden Karagece... o kocaman kara köpek fırladı... hu hu hu.",
+    "Hu hu hu... Böyle giderse Jessie kesin Mike'ın hediyesini sever, ben kaybettim, hu hu.",
+    "Teşekkürler... ama... yüzükteki o güzel taş... artık yok.",
+    "Tom'un Yüzüğü"
+   ],
+   "en": [
+    "The Lost Ring",
+    "I... I lost the ring I got for Jessie! I saved a whole summer's pocket money for that gilded ring... and the pretty stone I found in the woods after so much searching! I was going to give it to Jessie on her birthday and tell her I love her! But yesterday, while I was wandering in Capital West, suddenly Blacknight... that huge black dog jumped out... boo hoo.",
+    "Boo hoo... Now Jessie will surely like Mike's present, I've lost, boo hoo.",
+    "Thank you... but... the pretty stone on the ring... it's gone.",
+    "Tom's Ring"
+   ]
+  },
+  "80224": {
+   "tr": [
+    "Yıldız Dileği",
+    "Bir ay önce Gümüşkartal Şehri'nin derinliklerine bir kayan yıldız düştü. Jessie, o yıldızı ona bulursam her dileğimi kabul edeceğine söz verdi! Ona evlenme teklif edeceğim! Lütfen yardım et, hâlâ vakit var! Yıldız Gümüşkartal Avlusu'na düşmüş olmalı; belki bir Şato Uşağı bulup saklamıştır... Sen onu geri alabilirsin, değil mi?",
+    "Geç mi kaldık yoksa...",
+    "Büyü dolu Yıldız Taşı'nı çocuğa verdin. Minnetle sana bakıyor, heyecandan ne diyeceğini bilemiyor. Beceriksizce taşı yüzüğe takıyor, yüzüğü havaya kaldırıp gülerek rüyalarının sevgilisine, başka bir afacana koşuyor. Onun sevgisini emmiş gibi yıldızın parçası parlamaya başlıyor, gökteki yıldızlarla birlikte ışıldıyor. Seni kutsadılar; kalbindeki güzel şeyleri koruyacak güce sahip olduğunu hissediyorsun. Artık gerçek bir Savaşçısın.",
+    "Yıldız Taşı"
+   ],
+   "en": [
+    "Star Wish",
+    "A month ago a shooting star fell deep inside Silver Eagle City. Jessie promised to grant me any wish if I find that star for her! I'm going to propose to her! Please help me, there's still time! The star must have fallen into the Silver Eagle Courtyard; maybe a Castle Attendant picked it up and hid it... You can get it back, can't you?",
+    "Is it too late...",
+    "You hand the magical Star Stone to the boy. He looks at you gratefully, too excited to speak. He clumsily sets the stone in the ring, holds it up and runs laughing to the love of his dreams, another little rascal. As if it absorbed his love, the star shard begins to glow, twinkling with the stars in the sky. They have blessed you; you feel you now have the strength to protect the beautiful things in your heart. You are a true Warrior now.",
+    "Star Stone"
+   ]
+  },
+  "80571": {
+   "tr": [
+    "Meydan Okuma",
+    "Sınıf değiştirmek mi istiyorsun? Gözcü Kampı'na git ve Özel Ataşe'nin seçmesine katıl.",
+    "Özel Ataşe, Gözcü Kampı'nda seni bekliyor.",
+    "Meydan okumayı kabul edecek zamana geldin."
+   ],
+   "en": [
+    "Challenge",
+    "You want to change your class? Go to the Watcher Camp and take the Military Attaché's selection.",
+    "The Military Attaché is waiting for you in the Watcher Camp.",
+    "You have reached the time when you can accept the challenge."
+   ]
+  },
+  "80238": {
+   "tr": [
+    "Sınavın Şartı",
+    "Neredeyse kendi başına ayakta durabilen bir savaşçı oldun. Bence Güneşgören Şehri'ndeki Savaşçılar Loncası'na gidip onların sınavına girmeli, gerçek bir savaşçı olmalısın. Ama eli boş gidemezsin; gücünü ve samimiyetini kanıtlayacak bir şey götürmelisin. Yoğunsis Kıyısı'ndaki ☆Su Perileri Ejder Dişi Yeşimi denen bir kristal taşır. Üç tane topla, sonra Savaşçılar Loncası Başkanı'na git. İyi iş çıkar, seni öneren beni utandırma.",
+    "Savaşçılık sınavına girebileceğini henüz kanıtlayamadın.",
+    "Gücünü kanıtladın, ama sınavı geçip geçemeyeceğin henüz belli değil.",
+    "Ejder Dişi Yeşimi"
+   ],
+   "en": [
+    "Terms of the Trial",
+    "You are almost a warrior who can stand on your own. I think you should go to the Warrior Guild in Sunwatch City, take their trial and become a true warrior. But you can't go empty-handed; you must bring proof of your strength and sincerity. The ☆Water Fairies on Thickfog Coast carry a crystal called Dragon Tooth Jade. Collect three, then go to the Warrior Guild Master. Do well, and don't shame me, your sponsor.",
+    "You haven't yet proven that you can take the warrior's trial.",
+    "You have proven your strength, but whether you can pass the trial is another matter.",
+    "Dragon Tooth Jade"
+   ]
+  },
+  "80239": {
+   "tr": [
+    "Savaşçının Sınavı",
+    "Hazır olduğunda yanımdaki geçitten Sınav Odası'na gir. Orada toplam beş düşman var; her birinin üstünde ağır bir Şan Zinciri bulunur. Onları öldürdükten sonra zincirleri taşıyarak savaşmayı sürdürmelisin; ne kadar ağır olduklarını göreceksin... ama sınavı geçtiğinin kanıtı da onlardır. Hazır mısın?",
+    "Henüz sınavı geçmedin.",
+    "Bu ağır yükleri bırak artık, savaşçı. Bundan sonra sana böyle sesleneceğim: halkımızın kılıcı ve kalkanı olarak kabul edildin; şanlı bir Savaşçısın.",
+    "Şan Zinciri"
+   ],
+   "en": [
+    "The Warrior's Trial",
+    "When you are ready, enter the Trial Chamber through the portal beside me. There are five enemies in there, each carrying a heavy Chain of Glory. After you kill them you must keep fighting while carrying the chains; you'll find them unusually heavy... but they are also the proof that you passed the trial. Are you ready?",
+    "You haven't passed the trial yet.",
+    "Lay down these heavy burdens, warrior. From now on that is what I will call you: you are recognized as the sword and shield of our people, a glorious Warrior.",
+    "Chain of Glory"
+   ]
+  },
+  "80570": {
+   "tr": [
+    "Unvan",
+    "Sınıf değiştirmek mi istiyorsun? Büyü Akademisi'ne git ve sana unvan verebilecek Arma Büyücüsü'nü bul.",
+    "Arma Büyücüsü, Büyü Akademisi'nde seni bekliyor.",
+    "Gelme vaktinin geldiğini biliyordum."
+   ],
+   "en": [
+    "Title",
+    "You want to change your class? Go to the Magic Academy and find the Heraldry Mage who can grant you a title.",
+    "The Heraldry Mage is waiting for you in the Magic Academy.",
+    "I knew it was about time you came."
+   ]
+  },
+  "80225": {
+   "tr": [
+    "Kendi Arman",
+    "Artık çok iyi bir büyücüsün; resmî bir büyücünün taşıdığı büyü armasına sahip olmanın vakti geldi! Bu listedeki malzemeleri topla, sana yalnız sana ait bir büyü arması yapayım. Sanırım Tarikat Üssü'nün Işınlanma Koridoru'ndaki canavarlar bu malzemeleri sağlayabilir.",
+    "Senin gücünle bunları toplamak zor olmasa gerek.",
+    "Yepyeni bir arma çizmek biraz zaman alır... sabırla bekle."
+   ],
+   "en": [
+    "Your Own Crest",
+    "You are a fine mage now; it's time you had a magic crest like every official mage! Gather the materials on this list and I'll make a magic crest that is yours alone. I believe the monsters in the Teleport Corridor of the Cult Base can provide them.",
+    "With your strength, gathering these shouldn't be hard.",
+    "Drawing a brand-new crest takes some time... wait patiently."
+   ]
+  },
+  "80226": {
+   "tr": [
+    "Büyücünün Seçimi",
+    "Arma tamamlandı, ama ona gerçek büyü gücü vermek için bir şey daha gerekiyor; sonra seni büyünün daha uzak yollarına götürebilir. Büyü armanı ormanda inzivaya çekilmiş bir perinin kanıyla yıkaman gerek. Acımasız bir iş, ama güç için ödenmesi gereken bedel bu.",
+    "Güneşli Orman Doğu'daki Orman İnziva Perisi'ni bul.",
+    "Çiçeklerin arasına gizlenmiş peri önüne uçuyor. Sessizce sana bakıp ne yapacağını bekliyor. “İnsan, canımı almaya gelenin sen olduğunu hissediyorum. Kaderin buysa karşı koymam; ama bana merhamet edip beni bırakırsan, sana bir kutsamayla karşılık veririm.”"
+   ],
+   "en": [
+    "The Mage's Choice",
+    "The crest is finished, but it needs one more thing to gain true magical power; then it can lead you further along the path of magic. You must wash your crest in the blood of a fairy who lives as a hermit in the forest. It is a cruel process, but it is the price that must be paid for power.",
+    "Find the Forest Hermit Fairy in Sunny Forest East.",
+    "The fairy hidden among the flowers flies up to you. She looks at you quietly, waiting for you to act. “Human, I sense you are the one who has come to take my life. If this is fate I will not resist; but if you are merciful and spare me, I will repay you with words of blessing.”"
+   ]
+  },
+  "80572": {
+   "tr": [
+    "Mezuniyet",
+    "Sınıf değiştirmek mi istiyorsun? Büyücü Loncası Terası'ndaki Büyücüler Loncası Başkanı'nı gör ve çıraklık eğitimini tamamla.",
+    "Büyücüler Loncası Başkanı seni bekliyor.",
+    "Mezuniyet eğitimin için mi geldin?"
+   ],
+   "en": [
+    "Graduation",
+    "You want to change your class? See the Mage Guild Master at the Mage Guild Terrace and complete your apprentice training.",
+    "The Mage Guild Master is waiting for you.",
+    "Have you come for your graduation training?"
+   ]
+  },
+  "80240": {
+   "tr": [
+    "Eğitimin Sonu",
+    "Dışarıda bunca deneyim kazandın, neredeyse usta bir büyücü oldun. Artık mezuniyet sınavını verip çıraklıktan kurtulmanın vakti. Sınavın ☆Joule ile ☆Dondur'u öldürmek. Büyücü laboratuvarından kaçmış, değişime uğramış çok tehlikeli canavarlar. ☆Dondur Yoğunsis Kıyısı'ndaki örümceklerin arasında dolaşıyor, ☆Joule ise trol kardeşleriyle Feryat Patikası'na yerleşmiş. Özel element dirençleri olabilir, dikkat et. İşi bitirince bana gel.",
+    "Onları bile halledemezsen nasıl yeterli bir büyücü olacaksın?",
+    "Çok akıllısın, macera gücün de var; bir büyücüde olması gereken her şey sende var."
+   ],
+   "en": [
+    "End of Studies",
+    "You've gained so much experience out there that you're almost a skilled mage. It's time to pass your graduation trial and leave apprenticeship behind. Your trial is to kill ☆Joule and ☆Frost, mutated monsters that escaped from the mages' laboratory, very dangerous. ☆Frost roams among the spiders on Thickfog Coast, and ☆Joule has settled on the Wailing Path with his troll brothers. They may have special elemental resistances, so be careful. Come to me when it's done.",
+    "If you can't handle even them, how will you become a proper mage?",
+    "You are clever and have the strength for adventure; you have everything a mage should have."
+   ]
+  },
+  "80241": {
+   "tr": [
+    "Miras",
+    "Artık çırak değilsin, ama henüz büyücü de olmadın. Size hep söylerim: gece elflerinin en önemli görevi atalarımızın şanını ve ustalığını aktarmaktır. Tapınaktaki bir yetime büyünü öğret ve yeterli bir büyücü olduğunu kanıtla.",
+    "Kâhin Tapınağı'ndaki Yetim Elf Kız'a büyü öğret.",
+    "Çocuğa birkaç basit büyü gösterdin; büyük bir hevesle izledi ve senin öğrencin olup büyüyünce büyük bir büyücü olmaya karar verdi... Tebrikler, artık bir öğrencin var, Büyücü."
+   ],
+   "en": [
+    "Legacy",
+    "You are no longer an apprentice, but you are not yet a mage. I always tell you: the most important mission of the night elves is to pass on the glory and skills of our ancestors. Teach your magic to an orphan in the temple and prove that you are a worthy mage.",
+    "Teach magic to the Orphan Elf Girl in the Prophet's Temple.",
+    "You show the child a few simple spells; she watches eagerly and decides to become your pupil and grow up to be a great mage... Congratulations, you have a pupil now, Mage."
+   ]
+  },
+  "82940": {
+   "tr": [
+    "Gökten Gelen Çağrı",
+    "Gökyüzünden fısıltılı bir çağrı geliyor gibi; belki Frey Rahibi sorularını yanıtlayabilir. Başkent'in Tapınak Bölgesi'nde.",
+    "Frey Rahibi, Tapınak Bölgesi'nde seni bekliyor.",
+    "Çocuğum, seni buraya baş tanrı Frey yönlendirdi; belki burada Frey'in onayını kazanabilirsin."
+   ],
+   "en": [
+    "Call from the Sky",
+    "A soft calling seems to come from the sky; perhaps the Priest of Frey can answer your questions. He is in the Temple District of the Imperial Capital.",
+    "The Priest of Frey is waiting for you in the Temple District.",
+    "My child, the god Frey has guided you here; perhaps here you can earn Frey's approval."
+   ]
+  },
+  "82941": {
+   "tr": [
+    "Lekeyi Silmek",
+    "Dünyadaki bütün kirleri temizlemeye ant içtik; hepsi tanrılara saygısızlıktır! Tarikat Üssü'nün Şaşkınlık Koridoru'nda Thomas Young adında bir tanrı haini var. Onu öldür, baş tanrı Frey'in adına sürdüğü lekeyi sil. ☆【Tanrı Haini】Thomas Young değişime uğramış tanrısal güçlere sahip; ona ancak tanrıların lütfettiği biri ölümcül zarar verebilir.",
+    "Thomas Young ölmeli!",
+    "Hainlere ölümcül darbe vurulur. Lekeyi sildin."
+   ],
+   "en": [
+    "Cleansing the Stain",
+    "We have sworn to cleanse all filth from the world; it is all an insult to the gods! In the Corridor of Confusion of the Cult Base there is a god betrayer named Thomas Young. Kill him and wipe away the stain he has cast on the god Frey. ☆【God Betrayer】Thomas Young has mutated divine powers; only one favored by the gods can deal him a fatal blow.",
+    "Thomas Young must die!",
+    "A traitor deserves a fatal blow. You have wiped away the stain."
+   ]
+  },
+  "82942": {
+   "tr": [
+    "Tanrının Elçisi",
+    "Frey Başrahibesi baş tanrı Frey'e en yakın kişidir; onu bul, onun onayı Frey'in onayıdır!",
+    "Frey Başrahibesi'ni bul.",
+    "Yaptıkların baş tanrı Frey tarafından onaylandı! Tebrikler çocuğum, farkında olmadan gerçek bir Tanrı Elçisi oldun."
+   ],
+   "en": [
+    "Envoy of the God",
+    "The High Priestess of Frey is closest to the god Frey; find her, for her approval is Frey's approval!",
+    "Find the High Priestess of Frey.",
+    "Your deeds are approved by the god Frey! Congratulations, my child; without realizing it, you've become a true Envoy of the God."
+   ]
+  },
+  "81965": {
+   "tr": [
+    "Gökten Gelen Çağrı",
+    "Gökyüzünden fısıltılı bir çağrı geliyor gibi; belki Dia, Kâhinin Eli sorularını yanıtlayabilir. Kâhin Tapınağı'nda.",
+    "Dia, Kâhinin Eli, Kâhin Tapınağı'nda seni bekliyor.",
+    "Çocuğum, seni buraya tanrılar yönlendirdi; belki burada tanrıların onayını kazanabilirsin."
+   ],
+   "en": [
+    "Call from the Sky",
+    "A soft calling seems to come from the sky; perhaps Dia, Hand of the Prophet, can answer your questions. She is in the Prophet's Temple.",
+    "Dia, Hand of the Prophet, is waiting for you in the Prophet's Temple.",
+    "My child, the gods have guided you here; perhaps here you can earn the gods' approval."
+   ]
+  },
+  "82938": {
+   "tr": [
+    "Lekeyi Silmek",
+    "Dünyadaki bütün kirleri temizlemeye ant içtik; hepsi tanrılara saygısızlıktır! Tarikat Üssü'nün Şaşkınlık Koridoru'nda Thomas Young adında bir tanrı haini var. Onu öldür, tapınağa sürdüğü lekeyi sil. ☆【Tanrı Haini】Thomas Young değişime uğramış tanrısal güçlere sahip; ona ancak tanrıların lütfettiği biri ölümcül zarar verebilir.",
+    "Thomas Young ölmeli!",
+    "Hainlere ölümcül darbe vurulur. Lekeyi sildin."
+   ],
+   "en": [
+    "Cleansing the Stain",
+    "We have sworn to cleanse all filth from the world; it is all an insult to the gods! In the Corridor of Confusion of the Cult Base there is a god betrayer named Thomas Young. Kill him and wipe away the stain he has cast on the temple. ☆【God Betrayer】Thomas Young has mutated divine powers; only one favored by the gods can deal him a fatal blow.",
+    "Thomas Young must die!",
+    "A traitor deserves a fatal blow. You have wiped away the stain."
+   ]
+  },
+  "82939": {
+   "tr": [
+    "Tanrının Elçisi",
+    "Kehanet Kâhini tanrılara en yakın kişidir; onu bul, onun onayı tanrıların onayıdır!",
+    "Kehanet Kâhini'ni bul.",
+    "Yaptıkların tanrılar tarafından onaylandı! Tebrikler çocuğum, farkında olmadan gerçek bir Tanrı Elçisi oldun."
+   ],
+   "en": [
+    "Envoy of the God",
+    "The Oracle Prophet is closest to the gods; find her, for her approval is the gods' approval!",
+    "Find the Oracle Prophet.",
+    "Your deeds are approved by the gods! Congratulations, my child; without realizing it, you've become a true Envoy of the God."
+   ]
+  },
+  "83085": {
+   "tr": [
+    "Darboğaz",
+    "Gel buraya, savaşçı. (Kara Şövalye Komutanı seni tepeden süzüyor.) Gücün bir savaşçının doruğuna ulaştı; şimdi yeni bir yola, daha büyük güce giden yola çıkmalısın!",
+    "Kara Şövalye Komutanı ile yeniden konuş.",
+    "Kara Şövalye olmayı seçebilirsin; bu, bir savaşçı için en iyi yazgıdır. Ama önce Kara Şövalye olmanın getirdiği sınavı kabul etmeli ve kusursuzca geçmelisin!"
+   ],
+   "en": [
+    "Bottleneck",
+    "Come here, warrior. (The Black Knight Commander looks down on you.) Your strength has reached the peak of a warrior; now you must take a new road, the road to greater power!",
+    "Talk to the Black Knight Commander again.",
+    "You may choose to become a Black Knight; it is the best fate for a warrior. But first you must accept and flawlessly pass the trial every Black Knight goes through!"
+   ]
+  },
+  "83086": {
+   "tr": [
+    "Güç Arayışı",
+    "Güç yürekten doğar derler; ancak yeterli özgüvenle gerçek güce kavuşursun! ☆Ölümsüz Şövalyeler şu an senin için en iyi sınav: onları yen, sonra bana bildir. Hem belki üstlerinden ilginç şeyler de bulursun. ☆Ölümsüz Şövalyeler Ruh Arafı'nda.",
+    "Merak etme, ağır yara almazsın.",
+    "Güç Titreşimi Parçası! Bu çok değerli bir şey, özellikle bir savaşçı için."
+   ],
+   "en": [
+    "Pursuit of Power",
+    "They say strength is born in the heart; only with enough confidence will you gain true power! The ☆Undying Knights are the best test for you right now: defeat them, then report to me. You might even find something interesting on them. The ☆Undying Knights are in Soul Purgatory.",
+    "Don't worry, you won't be badly hurt.",
+    "Power Resonance Shards! These are precious, especially for a warrior."
+   ]
+  },
+  "83087": {
+   "tr": [
+    "Kara Şövalye",
+    "Kara Şövalye olmaya hak kazandın, bunu gönül rahatlığıyla söyleyebilirim. Ama şimdi sana uygun bir donanım gerek! Andecano Tahtı'na git: ☆☆【Çılgın Sayıklayan】Andecano bir yığın arıtılmış ham taş biriktirdi; Kara Şövalyelere özgü donanımı dövmek için harika bir malzeme. Ondan biraz 'iste' ve getir.",
+    "Onu kastettiğimden değil ama ☆☆【Çılgın Sayıklayan】Andecano zaten uslu bir çocuk değil.",
+    "Bir yığın arıtılmış ham taş getirmişsin! Güç Titreşimi Parçalarınla birlikte sana en uygun güçlü donanım olacak. Artık bir Kara Şövalyesin!",
+    "Arıtılmış Ham Taş Yığını"
+   ],
+   "en": [
+    "Black Knight",
+    "You have earned the right to become a Black Knight, I can say that with confidence. But now you need proper gear! Go to Andecano Throne: ☆☆【Mad Dreamtalker】Andecano has hoarded a heap of smelted ore, a fine material for forging the Black Knights' own gear. 'Ask' him for some and bring it back.",
+    "It's nothing personal, but ☆☆【Mad Dreamtalker】Andecano is no good boy anyway.",
+    "You brought back a heap of smelted ore! Together with your Power Resonance Shards it will become the mighty gear that suits you best. You are now a Black Knight!",
+    "Heap of Smelted Ore"
+   ]
+  },
+  "83088": {
+   "tr": [
+    "Güçlü Büyü",
+    "Senin kadar büyü gücüyle dolu bir büyücüyü uzun zamandır görmedim. Daha derin bir büyü gücünün peşinde olmalısın; belki seni benim gibi bir Büyük Büyü Üstadı olmaya yönlendirebilirim.",
+    "Büyük Büyü Üstadı Rehberi ile yeniden konuş.",
+    "Deneyimime göre bir sonraki Büyük Büyü Üstadı için en iyi aday sensin; elbette sınavı tamamlamak şart."
+   ],
+   "en": [
+    "Mighty Magic",
+    "I haven't seen a mage so full of magic power as you in a long time. You must be seeking deeper magic; perhaps I can guide you to become a Grand Magister, like me.",
+    "Talk to the Grand Magister Guide again.",
+    "In my experience you are the best candidate for the next Grand Magister; of course, completing the trial is a must."
+   ]
+  },
+  "83089": {
+   "tr": [
+    "Kayıp Büyü Kristalleri",
+    "Büyü iletken kristal, büyülü donanım yapmak için en iyi malzemedir; ama son zamanlarda Büyük Büyü Üstadı olanlar o kadar çoğaldı ki stoklarımız tükendi. Yine de nerede saklandığını biliyorum! Ruh Arafı'nda bir grup ☆Toz Canavarı tozlu bir kristal sandığını koruyor. Onları öldür, sandıktaki kristalleri getir.",
+    "Büyü iletken kristaller asla başkalarının eline geçmemeli.",
+    "Bu kristaller bir süre idare eder. Çok sevindim."
+   ],
+   "en": [
+    "The Missing Mana Crystals",
+    "Mana crystals are the best material for magic gear, but lately so many have become Grand Magisters that our stock ran out. Still, I know where more are hidden! In Soul Purgatory a band of ☆Dust Fiends guards a dusty crystal chest. Kill them and bring back the crystals from the chest.",
+    "The mana crystals must never fall into others' hands.",
+    "These crystals will last us a while. I'm very pleased."
+   ]
+  },
+  "83090": {
+   "tr": [
+    "Büyük Büyü Üstadı",
+    "Yetenek olarak artık bir Büyük Büyü Üstadısın; ama küçük bir iyiliğe ihtiyacım var. Andecano Tahtı'na git ve ☆☆【Çılgın Sayıklayan】Andecano'yu öldür. Nedenini söyleyemem; sen yalnızca dediğimi yap.",
+    "Bu, Büyük Büyü Üstadı olmanın bir başka sınavı.",
+    "Sana artık başka gözle bakmak zorundayım. Tebrikler, Büyük Büyü Üstadı."
+   ],
+   "en": [
+    "Grand Magister",
+    "In ability you are already a Grand Magister, but I need a small favor. Go to Andecano Throne and kill ☆☆【Mad Dreamtalker】Andecano. I can't tell you why; just do as I say.",
+    "This is another trial of becoming a Grand Magister.",
+    "I have to see you in a new light. Congratulations, Grand Magister."
+   ]
+  },
+  "83091": {
+   "tr": [
+    "İzler",
+    "Tanrının ayak izlerini hep izleyen sen misin, çocuğum? Yaptıkların tanrı tarafından onaylandı. (Dindar Seçilmiş gülümsüyor.) Ama tanrıya daha iyi hizmet etmek için daha güçlü olmalısın; ben de sana hizmet etmek için tanrı tarafından gönderildim.",
+    "Dindar Seçilmiş ile yeniden konuş.",
+    "Atacağın her adım tanrının bıraktığı bir izdir; tanrının ayak izlerini izlemeyi sürdürmek için daha zorlu sınavlardan geçmelisin."
+   ],
+   "en": [
+    "Footsteps",
+    "Are you the one who has always followed the god's footsteps, my child? Your deeds are approved by the god. (The Devout Chosen smiles.) But to serve the god better you must become stronger, and I have been sent by the god to serve you.",
+    "Talk to the Devout Chosen again.",
+    "Every step you take is a footprint the god has left; to keep following them you must pass harsher trials."
+   ]
+  },
+  "83093": {
+   "tr": [
+    "Gezgin Ruhlar",
+    "Seçilmişler bu dünyadaki bütün kötülüğü arındırmayı görev bilir. ☆Ruh Gezgini denen kötü yaratıklar her yerdeki ruh gücünü kirletir. Onları bul ve öldür; ☆Ruh Gezginleri Ruh Arafı'nda yuvalanmış.",
+    "Dünyada tanrıyı aşağılayan hiçbir şey var olmamalı.",
+    "Yaptıkların tanrının övgüsünü kazanacak."
+   ],
+   "en": [
+    "Wandering Souls",
+    "The Chosen hold it their duty to purify all evil in this world. Evil creatures called ☆Soul Wanderers pollute the power of souls wherever they go. Find them and kill them; the ☆Soul Wanderers lurk in Soul Purgatory.",
+    "Nothing that insults the god should exist in this world.",
+    "Your deeds will earn the god's praise."
+   ]
+  },
+  "83092": {
+   "tr": [
+    "Seçilmiş",
+    "Yoldaşlarımız yavaş yavaş kötülüğe dönüşüyor; Thomas Young acı bir örnekti. Tek kurtuluş onları özgür bırakmak! Andecano Tahtı'na git, ☆☆【Çılgın Sayıklayan】Andecano'yu bul, bu Büyü Emici Küre ile onun yozlaşmış büyü gücünü em, sonra onu öldür.",
+    "Bırak kötülükle birlikte arınsın.",
+    "Sen en seçkin Seçilmiş olacaksın. Artık bir Seçilmişsin!"
+   ],
+   "en": [
+    "The Chosen",
+    "Our companions are slowly being turned by evil; Thomas Young was a painful example. The only salvation is to set them free! Go to Andecano Throne, find ☆☆【Mad Dreamtalker】Andecano, draw out his corrupted magic with this Mana-Draining Orb, then kill him.",
+    "Let him be purified together with the evil.",
+    "You will be the finest of the Chosen. You are now one of the Chosen!"
+   ]
+  }
+ },
+ "adlar": {
+  "力量振荡碎片": [
+   "Güç Titreşimi Parçası",
+   "Power Resonance Shard"
+  ],
+  "一袋导魔水晶": [
+   "Bir Torba Büyü Kristali",
+   "Bag of Mana Crystals"
+  ],
+  "摄魔法球": [
+   "Büyü Emici Küre",
+   "Mana-Draining Orb"
+  ]
  }
 }

@@ -282,7 +282,7 @@ const UI = (() => {
     for (const q of act) {
       const st = P.quests[q.id]; ctx.font = `bold 9px ${FB}`; text(q.title, 6, y, '#ffd23a'); y += 10;
       ctx.font = `8.5px ${FB}`;
-      const prog = questState(q) === 'ready' ? `Tamam: ${trName(q.to)} ile konuş` : q.type === 'deliver' ? `${q.item}: ${giveCount(q)}/${q.count}` : q.type === 'kill' ? (q.targets ? q.targets.map(x => `${trName(x[0])} ${(st.c || {})[x[0]] || 0}/${x[1]}`).join(' · ') : `${trName(q.target)}: ${st.n}/${q.count}`) : (q.type === 'collect' || q.type === 'pickup') ? `${q.item}: ${st.n}/${q.count}` : q.goal;
+      const prog = questState(q) === 'ready' ? `Tamam: ${trName(q.to)} ile konuş` : q.type === 'deliver' ? `${q.item}: ${giveCount(q)}/${q.count}` : q.type === 'kill' ? (q.targets ? q.targets.map(x => `${trName(tgKey(x))} ${(st.c || {})[tgKey(x)] || 0}/${x[1]}`).join(' · ') : `${trName(q.target)}: ${st.n}/${q.count}`) : (q.type === 'collect' || q.type === 'pickup') ? `${q.item}: ${st.n}/${q.count}` : q.goal;
       text(prog.length > 44 ? prog.slice(0, 43) + '…' : prog, 8, y, st.ready ? '#9cf58a' : '#e8e0d0'); y += 12;
     }
     if (!act.length && avail.length) { ctx.font = `8.5px ${FB}`; text(`! ${trName(avail[0].giver)} sana görev verecek`, 6, y, '#ffd23a'); }
@@ -359,7 +359,7 @@ const UI = (() => {
       title = 'Ayarlar';
       h = `<div class="iact"><button class="obtn" data-act="tsfx">Ses efektleri: ${SFX.opt.sfx ? 'Açık' : 'Kapalı'}</button><button class="obtn" data-act="tmus">Müzik: ${SFX.opt.music ? 'Açık' : 'Kapalı'}</button></div>
         <div class="iact"><button class="obtn" data-act="lang">${LANG === 'tr' ? 'Language: English' : 'Dil: Türkçe'}</button></div>
-        <div class="iact"><button class="obtn" data-act="totitle">Giriş ekranına dön</button><button class="obtn" data-act="newchar">Yeni karakter oluştur</button></div><p class="hint">Oyun otomatik kaydedilir. Sürüm 11180632</p>`;
+        <div class="iact"><button class="obtn" data-act="totitle">Giriş ekranına dön</button><button class="obtn" data-act="newchar">Yeni karakter oluştur</button></div><p class="hint">Oyun otomatik kaydedilir. Sürüm 11181001</p>`;
     }
     ptitle.textContent = tx(title); pbody.innerHTML = h; txDom(pbody);
   }
@@ -472,7 +472,11 @@ const UI = (() => {
     if (listMode === 'gm') {
       const S = Assets.D.scenes, ids = Object.keys(S).filter(id => !v || (id + ' ' + trName(S[id].name) + ' ' + S[id].name).toLocaleLowerCase('tr').includes(v))
         .sort((a, b) => (S[a].kind[0] === 1 ? 0 : 1) - (S[b].kind[0] === 1 ? 0 : 1) || (S[a].lv || 0) - (S[b].lv || 0) || a - b);
-      $('#glist').innerHTML = ids.slice(0, 200).map(id => `<button data-s="${id}" class="${id === Game.sceneId ? 'on' : ''}"><b>${hx(trName(S[id].name))}</b><small>${tx(KIND[S[id].kind[0]] || 'Özel')}${S[id].lv ? ' · ' + tx('Sv') + ' ' + S[id].lv : ''} · ${id}</small></button>`).join('') +
+      // yolculuk ağı (arabacılar/ışınlayıcılar; game.js › Yolculuk): ücretsiz kip, bu haritadaki yolculuk NPC'sine yürü
+      const tvN = Object.keys(TRAVEL.npc).length, tvHere = travelEdges(Game.sceneId).length;
+      const tvRow = `<div class="grow"><b>${hx(GT('Yolculuk ağı', 'Travel network'))}</b><small>${hx(`${tvN} ${GT('arabacı/ışınlayıcı', 'coachmen/teleporters')} · ${GT('bu haritada', 'on this map')} ${tvHere} · ${GT('ücretsiz', 'free')}: ${Game.gmFreeTravel ? GT('açık', 'on') : GT('kapalı', 'off')}`)}</small><span>`
+        + [['tv:free', GT('Ücretsiz yolculuk (aç/kapa)', 'Free travel (toggle)')], ['tv:near', GT('Yolculuk NPC\'sine yürü', 'Walk to travel NPC')], ['tv:axe', GT('Bozbalta Şehri\'ne git', 'Go to Greyaxe City')]].map(([k, l]) => `<button data-x="${k}">${hx(l)}</button>`).join('') + '</span></div>';
+      $('#glist').innerHTML = (v ? '' : tvRow) + ids.slice(0, 200).map(id => `<button data-s="${id}" class="${id === Game.sceneId ? 'on' : ''}"><b>${hx(trName(S[id].name))}</b><small>${tx(KIND[S[id].kind[0]] || 'Özel')}${S[id].lv ? ' · ' + tx('Sv') + ' ' + S[id].lv : ''} · ${id}</small></button>`).join('') +
         (ids.length > 200 ? `<p class="hint">${ids.length - 200} ${tx('harita daha var; aramayı daralt.')}</p>` : '');
     } else {
       const L = Game.ents.map((e, i) => [e, i]).filter(([e]) => e.kind === 'npc' && !e.hidden && !e.pickup && (!e.dummy || e.node) && (!v || (e.name || '').toLocaleLowerCase('tr').includes(v)));
@@ -500,6 +504,8 @@ const UI = (() => {
         [['cls:resetPts', GT('Puanları sıfırla (bedava)', 'Reset points (free)')], ['cls:fill:0', GT('Ağaçları doldur (1. uzmanlık)', 'Fill trees (spec 1)')], ['cls:fill:1', GT('Ağaçları doldur (2. uzmanlık)', 'Fill trees (spec 2)')]]);
       h += row(GT('Beceri efektleri', 'Skill effects'), `${GT('beklemesiz', 'no cooldown')}: ${Game.gmNoCd ? GT('açık', 'on') : GT('kapalı', 'off')}`,
         [['cls:dummy', GT('Kukla canavar', 'Training dummy')], ['cls:nocd', GT('Beklemesiz beceri (aç/kapa)', 'No cooldown (toggle)')]]);
+      h += row(GT('80 yükseltmesi', '80 advancement'), GT('Bozbalta Şehri: Kara Şövalye / Büyük Büyü Üstadı / Seçilmiş', 'Greyaxe City: Black Knight / Grand Magister / The Chosen'),
+        [['cls:start80', GT('80 yap + Bozbalta\'ya git', 'Set 80 + go to Greyaxe')]]);
       for (const q of ClassGM.chain()) if (!v || (q.title + ' ' + q.id).toLocaleLowerCase('tr').includes(v))
         h += row(q.title + (q.adv ? ' ★' : ''), `${q.id} · ${trName(q.giver)} → ${trName(q.to)} · ${SN[questState(q)]}`, [[`cls:ready:${q.id}`, GT('Hazır yap', 'Make ready')], [`cls:done:${q.id}`, GT('Bitir', 'Complete')], [`cls:go:${q.id}`, GT('Git', 'Go')]]);
     } else {
@@ -520,7 +526,10 @@ const UI = (() => {
   function gmX(k) {
     const [a, b, c, d] = k.split(':');
     if (a === 'dg') { const G = Dungeon.GM; if (b === 'in' || b === 'door') { closeAll(); setTimeout(() => G[b === 'in' ? 'enter' : 'door'](c, +d), 200); return; } if (b === 'last') { closeAll(); G.lastFloor(); return; } if (b === 'leave') { closeAll(); G.leave(); return; } G[b](); }
-    if (a === 'cls') { const G = ClassGM; if (b === 'go') { closeAll(); setTimeout(() => questWalk(QBY[c]), 200); return; } if (b === 'ready' || b === 'done' || b === 'fill') G[b](+c); else G[b](); }
+    if (a === 'tv') { if (b === 'free') { Game.gmFreeTravel = !Game.gmFreeTravel; toast(Game.gmFreeTravel ? GT('Ücretsiz yolculuk: açık', 'Free travel: on') : GT('Ücretsiz yolculuk: kapalı', 'Free travel: off')); }
+      else if (b === 'axe') { closeAll(); setTimeout(() => gotoScene('120156', null, [50, 39]), 200); return; }
+      else { const p = Game.player, L = Game.ents.filter(e => e.kind === 'npc' && travelOf(e)).sort((x, y) => Math.hypot(x.x - p.x, x.y - p.y) - Math.hypot(y.x - p.x, y.y - p.y)); closeAll(); if (L[0]) walkToEnt(L[0]); else toast(GT('Bu haritada yolculuk NPC\'si yok.', 'No travel NPC on this map.')); return; } }
+    if (a === 'cls') { const G = ClassGM; if (b === 'start80') { closeAll(); setTimeout(() => G.start80(), 200); return; } if (b === 'go') { closeAll(); setTimeout(() => questWalk(QBY[c]), 200); return; } if (b === 'ready' || b === 'done' || b === 'fill') G[b](+c); else G[b](); }
     if (a === 'pet') { const G = Pet.GM; if (b === 'win') { closeAll(); Win.open('pet'); return; } if (b === 'petf' || b === 'petfs') { closeAll(); Win.open('petf', { mode: b === 'petf' ? 'tf' : 'sk' }); return; }
       if (b === 'give' || b === 'egg') G[b](c); else if (b === 'stage0') G.stage(0); else G[b](); }
     drawList();

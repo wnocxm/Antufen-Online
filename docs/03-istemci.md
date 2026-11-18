@@ -114,7 +114,7 @@ Otomatik yol: `routeTo(sid)` sahneler arası (`scenePath`), `routeToNpc(cn)`, `w
 - Seviye şartı yok; puan seviye başına 1 (+ başlangıçta 1).
 - Ön koşul: 3. ve 4. beceri 1.'nin, 5. beceri 3.'nün, 6. beceri 4.'nün **5. kademesini** ister. Uzmanlıklarda 2. beceri kökün 1. kademesini ister.
 - Sınıf ağacı: 40'taki sınıf yükseltmesi (`P.adv >= 1`, 130004/130005/130011) **ve acemi ağacına 35 puan**.
-- Uzmanlık: 80'deki ikinci yükseltme (`P.adv >= 2`, 黑骑士 Kara Şövalye 130006 / 大魔导师 Başbüyücü 130008 / 天选者 Seçilmiş 130012; iki uzmanlık da aynı sınıf) **ve sınıf ağacına 40 puan**. İki uzmanlığın kökü birbirini dışlar: birini öğrenen öbürünü alamaz.
+- Uzmanlık: 80'deki ikinci yükseltme (`P.adv >= 2`, 黑骑士 Kara Şövalye 130006 / 大魔导师 Büyük Büyü Üstadı 130008 / 天选者 Seçilmiş 130012; iki uzmanlık da aynı sınıf; Bozbalta görevleriyle, docs/04) **ve sınıf ağacına 40 puan**. İki uzmanlığın kökü birbirini dışlar: birini öğrenen öbürünü alamaz.
 - Puanları sıfırlama: **Eğitim Kitabı** (训练之书 30092, Symbian fiyatı 8750 altın, beceri eğitmenlerinde: 技能训练师 Guanlin / Kâhin Tapınağı). `skillReset(free)`.
 - Irk ağacı (kendiliğinden, kademe 1): İnsan Ruhu (savunma +2×sv, mana +5×sv), Açgözlülük (altın +%10, görev altını dahil); Ruh Kutsaması (direnç +2×sv, can +8×sv), Yaşam Özütü (canavar %5 Yaşam Elementi 30127). Seviye artışları bizim (orijinal metin yalnız "seviyeyle artar" diyor). Eski düz ırk bonusu kaldırıldı.
 - Kayıt: `fixSkills(s)` şartı tutmayan ya da kademesi aşan becerinin puanını geri verir (eski kurallarla alınmış beceriler).
@@ -147,7 +147,7 @@ Panel yazıları seçili dilde: sekme adları, arama kutusu ve satırlar (`GT(tr
 Sekmeler (`#gtools` `v:maps|dg|pet`, `drawGmSys`, `gmX` in `ui.js`):
 - **Haritalar**: haritaya ışınlan (arama), NPC listesi.
 - **Zindanlar** (`Dungeon.GM`): her zindan/kopya için "Kapıya git", "İçeri gir" (seviye, ön görev, günlük sınır yok; sayaç artmaz); bu harita için "Boss'u öldür", "Canavarları öldür", "Son kata / başa", "Zindandan çık", "Günlük hakları sıfırla".
-- **Sınıf** (`ClassGM`, game.js): beceri efektleri satırı ("Kukla canavar": yanına ölmeyen, kıpırdamayan, saldırmayan canavar, hedef seçili; "Beklemesiz beceri" aç/kapa: bekleme ve mana yok, `Game.gmNoCd`); durum satırı ("Sınıfı yükselt", "İkinci yükseltme (80)", "Acemiye döndür": şartı tutmayan beceriler geri + zincir sıfırlanır, "40 yap + ilk görev"); beceri ağaçları satırı ("Puanları sıfırla (bedava)", "Ağaçları doldur" 1./2. uzmanlık: en az 80, iki yükseltme, puanlar oyuncu gibi dağıtılır); oyuncunun sınıf/ırk zincirindeki her görev için "Hazır yap", "Bitir" (öncekileri de bitmiş sayar), "Git" (görev yürüyüşü). Test: `tools/test/gm.js`, `tools/test/sinif.js`.
+- **Sınıf** (`ClassGM`, game.js): "80 yap + Bozbalta'ya git" (`start80`: 80, 40 yükseltmesi, Bozbalta Şehri; zincirin görevleri listede); beceri efektleri satırı ("Kukla canavar": yanına ölmeyen, kıpırdamayan, saldırmayan canavar, hedef seçili; "Beklemesiz beceri" aç/kapa: bekleme ve mana yok, `Game.gmNoCd`); durum satırı ("Sınıfı yükselt", "İkinci yükseltme (80)", "Acemiye döndür": şartı tutmayan beceriler geri + zincir sıfırlanır, "40 yap + ilk görev"); beceri ağaçları satırı ("Puanları sıfırla (bedava)", "Ağaçları doldur" 1./2. uzmanlık: en az 80, iki yükseltme, puanlar oyuncu gibi dağıtılır); oyuncunun sınıf/ırk zincirindeki her görev için "Hazır yap", "Bitir" (öncekileri de bitmiş sayar), "Git" (görev yürüyüşü). Test: `tools/test/gm.js`, `tools/test/sinif.js`.
 - **Evcil** (`Pet.GM`):
   - Her tür için "Hayvanı ver" (doğrudan kuluçka, hak doluysa hak artar) ve "Yumurta + kutu".
   - Üstte "Pencereyi aç", "Seviyeme çek", "Dirilt + doyur + iyileştir", "Evcil eşyaları ver" (mama, iksir, diriltme, Sözleşme Taşı, İç Öz, kutular), "Acıktır" (aç hayvan savaşmaz testi), "Hepsini sil".
@@ -166,6 +166,14 @@ Test: `tools/test/gm.js` panel düğmelerine gerçekten basar (görüntüler `OU
 - HUD: çerçeveli minimap (`ui2/hud_frame.png`), 6 yuvarlak harf düğmesi (`ui2/hud_btn.png`): Karakter, Çanta, Beceri, Görev, Harita, Sohbet/Ayarlar.
 - Dünya haritası: `assets/wm/` (world.jpg, r1..r7.jpg bölge resimleri, `wm.json`): dünya → bölge → yerel; Otomatik Yol, NPC Listesi.
 - Pencere açıkken oyun güncellenmeye devam eder (`update` hep çalışır).
+
+## Yolculuk (arabacılar, ışınlayıcılar; game.js)
+- Veri `www/assets/travel.json` ← `tools/seyahat.py` (elle düzenleme): orijinal NPC kayıtlarındaki (all_citizen) seçenekler. Arabacı (驿站老板 insan, 盲眼向导 elf): "我想去X" + `npc_choise_trans_city_common` + hedef, 100 altın. Işınlayıcı (传送法阵, 风暴法师, 首席大法师, 远古之风, zindan çıkışları …): ücretsiz; 【虚空商人】洛基 100 altın.
+- **Hedef sahne = seçenekten sonraki tek karakterin kodu + 65536** (ör. 风暴法师 "前往灰斧城" '한' → 120156; doğrulama: 噬魂远征军军需官 → 120276). Varış: hedef sahnedeki yolculuk NPC'sinin önü; yoksa sahnenin giriş bölgesi. 54 NPC, 273 seçenek.
+- Zaten başka yerde işlenenler atlanır: `DUNGEON_TP` NPC'leri (dungeon.js), görevle ışınlayan acemi kampı görevlileri.
+- NPC penceresi: ışınlanmalar tek satır ("✦ Işınlan: X"), arabacının şehirleri "✦ Yolculuk (100 altın)" altında sayfalı liste (3 şehir + Diğer yerler + Geri; yeni pencere 5 satır). `travelOf`, `travelLabel`, `travelGo`.
+- Yol bulma: `routePath` önce yürüyerek (`scenePath`), olmazsa yolculuk kenarlarıyla (`scenePath(…, true)`, `travelEdges`). Sıradaki adım yolculuksa `routeStep` o NPC'ye yürür, `Game.travelHint` hedefi pencerede en üstte yeşil satır yapar; ışınlanınca yol kendiliğinden sürer. Bozbalta Şehri bölgesi (75-77) ana dünyaya yalnız böyle bağlı (Fırtına Büyücüsü: Başkent Soylular Mahallesi; Başbüyücü: Büyücüler Loncası Terası; arabacılar → İnsan/Gece Elfi Kampı).
+- GM (Haritalar sekmesi üst satırı): ücretsiz yolculuk (`Game.gmFreeTravel`), en yakın yolculuk NPC'sine yürü, Bozbalta Şehri'ne git. Test: `tools/test/yolculuk.js`.
 
 ## Zindanlar (`www/js/dungeon.js`)
 - `DUNGEONS`: `{id, cn, lv, lvr, train, daily, board, boss, copies:[{door:[alanSahnesi, geçitBölgesi], scenes:[…]}]}`. Irk başına ayrı kopya olabilir (Sınav Ormanı, Mehtap Korusu: insan + elf girişi).

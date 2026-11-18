@@ -29,6 +29,14 @@ N = {   # (TR, EN) — tüketimde (TR, EN, açıklama TR, açıklama EN, kullan�
     # 40. seviye sınıf yükseltme takımları (sinif.json): savaşçı 队长头盔/符文甲/金丝束带/大步靴, büyücü 琉璃圈/符文法袍/骨钉腰带/轻灵靴
     10095: ('Yüzbaşı Miğferi', 'Captain\'s Helm'), 10098: ('Rün Zırhı', 'Rune Armor'), 10100: ('Altın Telli Kuşak', 'Gold-Thread Sash'), 10101: ('Uzun Adım Çizmesi', 'Striding Boots'),
     10103: ('Sırlı Taç', 'Glazed Circlet'), 10105: ('Rün Cübbesi', 'Rune Robe'), 10107: ('Kemik Çivili Kemer', 'Bone-Stud Belt'), 10108: ('Hafif Adım Çizmesi', 'Lightstep Boots'),
+    # 80. seviye ikinci sınıf yükseltme takımları (sinif.json, Bozbalta zinciri): Kara Şövalye 强光头饰/精金剑/荣誉铠甲/钢铁战裙/探险靴,
+    # Büyük Büyü Üstadı 烈火角盔/深渊法杖/族长之袍/光荣束带/探险者长靴, Seçilmiş 熔岩兜帽/天谴魔典/冥域长袍/监工束带/军团长靴
+    10212: ('Parlak Işık Başlığı', 'Radiant Headpiece'), 10201: ('Saf Altın Kılıç', 'Pure Gold Sword'), 10202: ('Onur Zırhı', 'Armor of Honor'),
+    10204: ('Çelik Savaş Eteği', 'Steel War Skirt'), 10205: ('Kâşif Çizmesi', 'Explorer Boots'),
+    10207: ('Alev Boynuzlu Miğfer', 'Blazing Horned Helm'), 10214: ('Uçurum Asası', 'Abyss Staff'), 10209: ('Kabile Reisi Cübbesi', 'Chieftain\'s Robe'),
+    10211: ('Şan Kuşağı', 'Sash of Glory'), 10146: ('Kâşif Uzun Çizmesi', 'Explorer\'s Long Boots'),
+    11348: ('Lav Başlığı', 'Lava Hood'), 11349: ('İlahi Ceza Kitabı', 'Tome of Divine Wrath'), 11350: ('Ölüler Diyarı Cübbesi', 'Netherworld Robe'),
+    11351: ('Gözcü Kuşağı', 'Overseer\'s Sash'), 11352: ('Lejyon Çizmesi', 'Legion Boots'),
     10128: ('Morsalkım Zırhı', 'Wisteria Armor'), 10130: ('Boz Ayı Savaş Eteği', 'Grizzly War Skirt'), 10131: ('Sık Orman Çizmesi', 'Deepwood Boots'),
     10132: ('Kaliteli Demir Miğfer', 'Fine Iron Helm'), 10135: ('Solgun Cübbe', 'Withered Robe'), 10137: ('Geyik Savaş Eteği', 'Stag War Skirt'),
     10148: ('Gizemli Miğfer', 'Mystic Helm'), 10156: ('Sırlı Peçe', 'Arcane Veil'), 10586: ('İsabet Bilekliği', 'Bracer of Accuracy'),
@@ -53,8 +61,11 @@ N = {   # (TR, EN) — tüketimde (TR, EN, açıklama TR, açıklama EN, kullan�
 }
 # görev ödülü olmayan ama bir sistemin gerektirdiği eşyalar: kimlik → satan NPC'ler (beceri ağacı: docs/03 › Beceri ağaçları)
 EKSTRA = {30092: ['技能训练师（人类）', '技能训练师（夜精灵）'],   # 训练之书: beceri puanlarını sıfırlar (orijinal açıklama)
-          30127: []}                                          # 生命元素: gece elfi ırk becerisi Yaşam Özütü düşürür
+          30127: [],                                          # 生命元素: gece elfi ırk becerisi Yaşam Özütü düşürür
+          33662: []}                                          # 摄魔法球: Seçilmiş görevi (83092), görev alınınca verilir
 N[30092] = ('Eğitim Kitabı', 'Training Book', 'Bütün beceri puanlarını sıfırlar: beceri ağacında "Puanları Sıfırla"ya bas, kitap kendiliğinden harcanır.', 'Resets all skill points: press "Reset Points" in the skill tree; the book is used up automatically.', None)
+N[30788] = N[30092]   # 80 sınıf ödülündeki Eğitim Kitabı (aynı kitap, ayrı numara)
+N[33662] = ('Büyü Emici Küre', 'Mana-Draining Orb', 'Seçilmişler için iki ağızlı bir kılıç: bu küre kutsal ışığın kaynağı olacak. ☆☆【Çılgın Sayıklayan】Andecano hedefteyken kullan.', 'A double-edged sword for the Chosen: this orb will become a source of holy light. Use it while ☆☆【Mad Dreamtalker】Andecano is your target.', {'qt': 1})
 N[30127] = ('Yaşam Elementi', 'Life Element', 'Gece elfi büyücülerinin bulduğu büyüyle can çekişen yaratıklardan toplanan yaşam özü.', 'Life essence gathered from dying creatures with a spell invented by night elf mages.', None)
 PETN = {   # evcil hayvan eşyaları (pet.js useItem)
     30703: ('Ejderin Kurtuluşu', 'Dragon\'s Redemption', 'Değerli bir ilaç: can çekişen evcil hayvanı diriltir ve biraz can verir.', 'A precious medicine: revives a dying pet with a little HP.', {'petRevive': 0.3}),

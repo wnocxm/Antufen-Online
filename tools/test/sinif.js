@@ -60,5 +60,41 @@ const { chromium } = require('playwright');
   log('seviyeler', await p.evaluate(() => ({ thomas: monDef('☆【叛神者】托马斯杨').lv, şatoUşağı: monDef('城堡侍从', Assets.D.scenes['120132']).lv, avlu: Assets.D.scenes['120132'].lvr, sınavOdası: Assets.D.scenes['120165'].lvr })));
   // 5) eski kayıt: 45. seviye, sınıf yükseltmesiz, sınıf ağacında 3 kademe → puan geri
   log('eski kayıt', await p.evaluate(() => { const s = JSON.parse(JSON.stringify(Game.P)); s.cls = '战士'; delete s.adv; s.sk = { w1: 5, w4: 3, wp4: 2 }; s.sp = 0; const f = fixSave(s); return { sk: f.sk, sp: f.sp }; }));
+  // 6) 80. seviye ikinci sınıf yükseltmesi: Bozbalta Şehri zinciri (Kara Şövalye / Büyük Büyü Üstadı / Seçilmiş). Yükseltmesiz kilitli; Ozan
+  //    80 öncesi ve sonrası ne der; NPC konuşmaları gerçekten açılır; düşen eşya, sandık, görev eşyası kullanma; ödül takımı + Eğitim Kitabı.
+  const setup80 = (cls, adv) => p.evaluate(([cls, adv]) => { const P = Game.P; P.cls = cls; P.adv = adv; P.quests = {}; for (const q of QUESTS) if (q.id >= 83085 && q.id <= 83093) delete P.done[q.id]; if (P.lv < 80) gmLevel(80); fixSkills(P); return { giriş: [83085, 83088, 83091].map(i => questState(QBY[i])) }; }, [cls, adv]);
+  log('80: yükseltmesiz', await setup80('战士', 0));
+  log('80: yükseltmeli', await setup80('战士', 1));
+  await go('120094'); await p.evaluate(() => { Game.P.lv = 79; }); log('Ozan (79)', await talk('吟游诗人')); await row('Sınıf değiştirmek|change my class'); log('  söz', await p.evaluate(() => Win.npcOpts().txt.slice(0, 70)));
+  await p.evaluate(() => { Game.P.lv = 80; }); await talk('吟游诗人'); await row('Sınıf değiştirmek|change my class'); log('Ozan (80, savaşçı)', await p.evaluate(() => Win.npcOpts().txt.slice(0, 160)));
+  const done80 = async (npc, id, re) => { await talk(npc); await row(re); await row('Tamamla|Complete'); return p.evaluate(i => !!Game.P.done[i], id); };
+  const take80 = async (npc, re) => { await talk(npc); await row(re); await row('Kabul|Accept'); };
+  // savaşçı
+  await go('120156'); log('Komutan seçenekleri', await talk('黑骑士统领'));
+  await row('Darboğaz|Bottleneck'); await row('Kabul|Accept'); log('Darboğaz bitti', await done80('黑骑士统领', 83085, 'Darboğaz|Bottleneck'));
+  await take80('黑骑士统领', 'Güç Arayışı|Pursuit');
+  log('Ölümsüz Şövalye + parça', await p.evaluate(() => { let k = 0; const st = Game.P.quests[83086]; while (!st.ready && k < 200) { questKill('☆不朽骑士'); k++; } return { öldürme: k, sayaç: st.c, hazır: st.ready }; }));
+  log('Güç Arayışı bitti', await done80('黑骑士统领', 83086, 'Güç Arayışı|Pursuit'));
+  await take80('黑骑士统领', 'Kara Şövalye|Black Knight'); await p.evaluate(() => questKill('☆☆【疯狂梦呓者】安德卡诺'));
+  await talk('黑骑士统领'); await row('Kara Şövalye|Black Knight'); await p.screenshot({ path: O + '_kara_sovalye.png' }); await row('Tamamla|Complete');
+  log('KARA ŞÖVALYE', await p.evaluate(() => ({ sınıf: clsName(), adv: Game.P.adv, takım: ['10212', '10201', '10202', '10204', '10205'].map(countItem), kitap: countItem('30788') })));
+  // büyücü: sandık
+  await setup80('法师', 1); await take80('大魔导师引导者', 'Güçlü Büyü|Mighty Magic'); log('Güçlü Büyü bitti', await done80('大魔导师引导者', 83088, 'Güçlü Büyü|Mighty Magic'));
+  await take80('大魔导师引导者', 'Kristal|Crystals');
+  await p.evaluate(() => { for (let k = 0; k < 10; k++) questKill('☆风尘怪'); });
+  await go('120495'); log('sandık', await p.evaluate(() => { const n = Game.ents.find(e => e.cn === '尘封的导魔水晶箱'); interact(n); return { sayaç: Game.P.quests[83089].c, hazır: Game.P.quests[83089].ready }; }));
+  await go('120156'); log('Kristaller bitti', await done80('大魔导师引导者', 83089, 'Kristal|Crystals'));
+  await take80('大魔导师引导者', 'Büyük Büyü Üstadı|Grand Magister'); await p.evaluate(() => questKill('☆☆【疯狂梦呓者】安德卡诺'));
+  await done80('大魔导师引导者', 83090, 'Büyük Büyü Üstadı|Grand Magister'); log('BÜYÜK BÜYÜ ÜSTADI', await p.evaluate(() => ({ sınıf: clsName(), adv: Game.P.adv, asa: countItem('10214') })));
+  // rahip: Büyü Emici Küre
+  await setup80('牧师', 1); await take80('虔诚的天选者', 'İzler|Footsteps'); await done80('虔诚的天选者', 83091, 'İzler|Footsteps');
+  await take80('虔诚的天选者', 'Gezgin|Wandering'); await p.evaluate(() => { for (let k = 0; k < 10; k++) questKill('☆灵魂漫步者'); }); await done80('虔诚的天选者', 83093, 'Gezgin|Wandering');
+  await take80('虔诚的天选者', 'Seçilmiş|The Chosen'); log('küre çantada', await p.evaluate(() => countItem('33662')));
+  await go('120499');
+  log('küresiz öldürme', await p.evaluate(() => { questKill('☆☆【疯狂梦呓者】安德卡诺'); return Game.P.quests[83092].c || {}; }));
+  log('hedefsiz küre', await p.evaluate(() => { setTarget(null); useItem('33662'); return { küre: countItem('33662'), c: Game.P.quests[83092].c || {} }; }));
+  log('küre + öldürme', await p.evaluate(() => { const m = Game.ents.find(e => e.kind === 'mob' && e.name === '☆☆【疯狂梦呓者】安德卡诺'); Game.player.x = m.x + 1; Game.player.y = m.y; setTarget(m, true); useItem('33662'); questKill(m.name); return { küre: countItem('33662'), c: Game.P.quests[83092].c, hazır: Game.P.quests[83092].ready, sv: m.d.lv }; }));
+  await go('120156'); await done80('虔诚的天选者', 83092, 'Seçilmiş|The Chosen'); log('SEÇİLMİŞ', await p.evaluate(() => ({ sınıf: clsName(), adv: Game.P.adv, kitap: countItem('11349') })));
+  log('hedef seviyeleri', await p.evaluate(() => ['☆不朽骑士', '☆风尘怪', '☆灵魂漫步者', '☆☆【疯狂梦呓者】安德卡诺'].map(n => n + ' ' + monDef(n).lv)));
   console.log('HATA', errs); await b.close();
 })();

@@ -39,7 +39,7 @@
   - Birkaç bölge bağı.
   - Sınıf yükseltme zincirleri (10 bağ: giriş görevleri 80344'e, elçi zincirleri; orijinalde sunucudaydı).
 
-## Sınıf yükseltme (40) — `sinif.json` + `sinif_kaynak.json` (17.11)
+## Sınıf yükseltme (40) — `sinif.json` + `sinif_kaynak.json` (17.11; 80 aşağıda)
 Orijinal ham kayıt (b=4, ek alanda 130004 Savaşçı / 130005 Büyücü / 130011 Kutsal Elçi; metinler `tasks.json`). Akış:
 1. **80344 "Acemilikten Çıkış"** 40. seviyede kendiliğinden alınır (`auto`; orijinalde verensiz). Altındalga Limanı'ndaki Ozan'a teslim (2000 altın; unvan 180050 ödülü unvan sistemi olmadığı için yok).
 2. Ozan'da **"✦ Sınıf değiştirmek istiyorum!"** satırı (orijinal “我要转职！”) sınıfa ve ırka göre giriş görevini verir (`cls` + ırk; orijinalde verensiz görevler, bizde veren Ozan, `zincir` ile 80344'e bağlı).
@@ -55,6 +55,26 @@ Orijinal ham kayıt (b=4, ek alanda 130004 Savaşçı / 130005 Büyücü / 13001
   - Henüz düzeltilmeyen, aynı yöntemle yanlış görünenler: yoksul mahalle altı katları (120081-120084, dosya 70-80, tahmin ~47-48), lağım parçaları (120106-120122, dosya 39-50, tahmin 47-63), Gümüşkartal iç şehir/kule (120135-120143, dosya 100, tahmin 53-61), Tarikat Üssü 120001 (dosya 50, tahmin ~26-33). Kapsam 55'e kadar olduğu için bunlar ayrı bir işte ele alınmalı (o bölgelerin 55 altı görevleri de alınabilir).
 - Thomas Young yalnız bu görevlerde geçen seçkin: `MON` ile 42. seviye (koridorun kendisi ~52; yanındaki ☆Taş Muhafız'a dikkat).
 - Test: `tools/test/sinif.js` (insan savaşçı zinciri NPC konuşmalarıyla, her sınıf/ırk için giriş görevi, iki eşyalı toplama, seçim, eski kayıt).
+
+## Sınıf yükseltme (80) — Bozbalta Şehri zinciri (18.11; "talent" görevleri tamam)
+Orijinalde 80 için iki kuşak görev var. **Son sürüm** Bozbalta Şehri (灰斧城) zinciri: Ozan'ın kaydı ([21]-[23]) ve Jessie'nin metni (80343) bunu anlatır,
+ödül sınıfları (130006 黑骑士 Kara Şövalye / 130008 大魔导师 Büyük Büyü Üstadı / 130012 天选者 Seçilmiş) uzmanlık ağaçlarının kök sınıfıdır (`skills.json` `root.cls`).
+Eski taslak (80227-80248: 神器工匠 şövalye, 衰老的角斗士 çılgın savaşçı 130007, 铁锤将军/烈焰导师 element, 黑魔道大师 gölge büyücüsü 130009; ödülde 30488
+"老玩家证书") ve onu anlatan 80345 "Ömür Boyu Başarı: Usta Olmak" alınmadı: 130007/130009 sınıflarının beceri ağacı yok, elçi sınıfı yok.
+- Ozan, 40 yükseltmesinden sonra (`adv` 1) "✦ Sınıf değiştirmek istiyorum!": 80 öncesi "80'e ulaşmalısın" ([6]), 80'de sınıfına göre Bozbalta'daki kişiyi anlatır (`BARD80`, game.js).
+- Giriş görevini Bozbalta'daki NPC verir (orijinalde veren var); `advMin: 1` → yalnız 40 yükseltmesini yapmış, 80'i yapmamış oyuncu alır. Seviye 80 (`seviye_kesin`).
+  - Savaşçı: 83085 Darboğaz (Kara Şövalye Komutanı) → 83086 Ruh Arafı'nda 10 ☆Ölümsüz Şövalye + 10 Güç Titreşimi Parçası (aynı canavardan düşer, %70) → 83087 ☆☆Andecano'dan Arıtılmış Ham Taş Yığını (`adv: 2`).
+  - Büyücü: 83088 Güçlü Büyü (Büyük Büyü Üstadı Rehberi) → 83089 10 ☆Toz Canavarı + Tozlu Büyü İletken Kristal Sandık'tan bir torba kristal (yerdeki nesne) → 83090 ☆☆Andecano'yu öldür.
+  - Kutsal Elçi: 83091 İzler (Dindar Seçilmiş) → 83093 10 ☆Ruh Gezgini → 83092 Büyü Emici Küre'yi Andecano hedefteyken kullan, sonra öldür (küre görev alınınca çantaya konur).
+  - Ödül (orijinal): sınıfın 80. seviye takımı (5 parça, `odul_esyalari.py`) + Eğitim Kitabı 30788 (uzmanlık seçimi için bedava sıfırlama); deneyim/altın 0 (orijinal).
+- Yeni görev alanları (`sinif_kaynak.json` → `gorevler.py` → `quests_gen.js`): `advMin`, `accItems` (alınca verilen eşya), `targets` türleri:
+  `[canavar, adet]` öldür · `[canavar, adet, şans, eşya]` düşen eşya · `[nesne, adet, 'node', eşya]` yerdeki nesne · `[canavar, adet, 'use', eşya, eşyaNo]` görev eşyası kullanma
+  (`tgKey`, `tgAdd`, `questUseItem`, `pickupNode`; kullanılması gereken eşya kullanılmadan öldürmek sayılmaz).
+- Hedef seviyeleri (`MON`): Ruh Arafı/Andecano Tahtı'nın seviye aralığı tabloda yok (bölge 75-77); üç seçkin 80, Andecano 82. Andecano üç sınıfın son hedefi: `solo` → zindan boss'u gibi ×8 can,
+  saldırı seçkin düzeyinde. `ADV=1 BOSS='120499:☆☆【疯狂梦呓者】安德卡诺:80' node tools/test/savas.js`: savaşçı %63 can 1 iksir, büyücü %59 5 iksir, elçi %36 0 iksir.
+- Bozbalta bölgesine ana dünyadan yürüyerek gidilmez: yolculuk ağı (docs/03 › Yolculuk). Görev yürüyüşü yolculuk NPC'lerini kullanır.
+- Sınıf adı: 大魔导师 "Büyük Büyü Üstadı / Grand Magister" (Başbüyücü / Archmage, 首席大法师 NPC'sinin adıyla karışıyordu).
+- Test: `tools/test/sinif.js` 6. bölüm (kilit, Ozan, üç sınıfın zinciri NPC konuşmalarıyla, sandık, küre, ödüller).
 
 ## Seviye kilidi (`game.js`)
 `questState(q)` → `done | ready | active | new | soon | locked`. `soon` = `P.lv < questMinLv(q)` (5 seviye içindeyse "Alınabilir"de gri görünür).

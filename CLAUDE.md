@@ -29,7 +29,7 @@ Bir konuya girmeden önce ilgili belgeyi oku; bir sistemi değiştirince belgesi
   Durdurma kancası commit edilmemiş/izlenmeyen dosya varsa uyarır: her işi commit + push ile bitir.
 - **Her yeni sistem GM komutuyla gelir** (kullanıcı isteği): modülde `GM` nesnesi, GM panelinde sekme/düğme, `tools/test/gm.js`'e adım; `docs/03-istemci.md` › GM'ye yazılır.
 - **Belgeler her işte güncellenir**: değişen sistemin belgesi + `docs/08-gunluk.md`'ye (bugünün tarihi altında) bir satır + gerekirse `docs/01-proje.md` durum/sırada.
-- **Üretilen dosyaları elle düzenleme:** `www/js/quests_gen.js` (`tools/gorevler.py`), `www/js/tr_scenes.js` (`tools/ceviri.py`), `www/assets/data.json` (`tools/pack_all.py`), `www/assets/skills.json` (`tools/beceriler.py`; çeviri `kaynak/ceviri/beceriler.json`).
+- **Üretilen dosyaları elle düzenleme:** `www/js/quests_gen.js` (`tools/gorevler.py`), `www/js/tr_scenes.js` (`tools/ceviri.py`), `www/assets/data.json` (`tools/pack_all.py`), `www/assets/skills.json` (`tools/beceriler.py`; çeviri `kaynak/ceviri/beceriler.json`), `www/assets/travel.json` (`tools/seyahat.py`).
 - **Çeviriler** `kaynak/ceviri/gorevler/<bölge>.json` içindedir (görev metinleri + o bölgenin yeni NPC/canavar adları).
 - **Kapsam:** Şu an 55. seviyeye kadar her şey "kusursuz" olacak. 70-80-90 sonra. 55 üstü görevler `atla` ile dışarıda bırakılır.
 - **APK kullanımı:** APK'dan orijinal görsel ve veri alınır; APK ekibinin Unity kodu, sunucu adresi, yönetici araçları alınmaz.

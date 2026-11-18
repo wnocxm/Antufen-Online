@@ -77,7 +77,7 @@ const Win = (() => {
     else if (h.id === 'm50761') numEdit();   // sayıya dokun: klavyeyle adet yaz
     else if (h.id === 'm52791') { numClose(); modal = null; m.onOk(m.n); }
   }
-  function open(name, o = {}) { if (!cur) HUB.y = 0; cur = name; opt = o; if (name === 'map') { WM.mode = 'world'; WM.sel = null; wmData(); } if (name === 'npc') { D.q = null; SFX.play('request', 0.6); } if (name === 'task') { K.sel = null; K.sure = false; } if (name === 'menu') M.page = 0; if (name === 'shop') { H.tab = 0; H.sel = null; H.off = 0; } if (name === 'pet') { const L = Pet.list(), i = L.findIndex(x => x.uid === Game.P.petOn); if (i >= 0) PW.i = i; } if (name === 'petf') { TF.mode = o.mode || 'tf'; TF.main = o.main && Pet.resting(Pet.list().find(x => x.uid === o.main)) ? o.main : null; TF.mat = null; TF.a = [null, null]; } B.sel = null; B.sure = false; B.assign = false; B.page = 0; if (o.cat != null) B.cat = o.cat; SFX.play('menu_appear', 0.5); if (name === 'bag') questFlag('openBag'); }
+  function open(name, o = {}) { if (!cur) HUB.y = 0; cur = name; opt = o; if (name === 'map') { WM.mode = 'world'; WM.sel = null; wmData(); } if (name === 'npc') { D.q = null; D.trv = null; SFX.play('request', 0.6); } if (name === 'task') { K.sel = null; K.sure = false; } if (name === 'menu') M.page = 0; if (name === 'shop') { H.tab = 0; H.sel = null; H.off = 0; } if (name === 'pet') { const L = Pet.list(), i = L.findIndex(x => x.uid === Game.P.petOn); if (i >= 0) PW.i = i; } if (name === 'petf') { TF.mode = o.mode || 'tf'; TF.main = o.main && Pet.resting(Pet.list().find(x => x.uid === o.main)) ? o.main : null; TF.mat = null; TF.a = [null, null]; } B.sel = null; B.sure = false; B.assign = false; B.page = 0; if (o.cat != null) B.cat = o.cat; SFX.play('menu_appear', 0.5); if (name === 'bag') questFlag('openBag'); }
   function close() { cur = null; opt = {}; modal = null; numClose(); }
   const isOpen = () => !!cur || !!modal;   // tek başına onay kutusu da (ör. zindan girişi) pencere sayılır
 
@@ -302,6 +302,8 @@ const Win = (() => {
     if (e.a === 'shop') { UI.openShop(n.cn); return; }
     if (e.a === 'tp') { UI.closeAll(); setTimeout(() => questTeleport(e.q), 300); return; }
     if (e.a === 'dtp') { UI.closeAll(); setTimeout(() => e.d.go(), 300); return; }
+    if (e.a === 'trv') { D.trv = 0; return; } if (e.a === 'tmore') { D.trv++; return; } if (e.a === 'tback') { D.trv = null; return; }
+    if (e.a === 'tgo') return travelGo(n, e.x);
     if (e.a === 'accept') { const q = D.q; acceptQuest(q); D.q = null; UI.closeAll(); if (q.tp) { setTimeout(() => questTeleport(q), 400); return; } if (q.type === 'talk' && q.to === n.cn) Game.P.quests[q.id].ready = true; return; }
     if (e.a === 'complete') { const q = D.q; completeQuest(q); D.q = null; if (e.ch != null && q.choice) opt.say = q.choice[e.ch][1]; return; }
   }
@@ -912,6 +914,13 @@ const Win = (() => {
     const n = opt.npc, P = Game.P, o = [];
     if (opt.say) return { txt: opt.say, o: [{ t: 'Tamam', a: 'bye' }] };
     let txt = TR.greet[n.cn] || '...';
+    // arabacının yolculuk listesi: sayfa başına 3 şehir + "Diğer yerler" + "Geri" (yeni pencerede 5 satır var)
+    if (D.trv != null) {
+      const ar = (travelOf(n) || []).filter(x => x[0] === 'araba'), per = 3, pages = Math.max(1, Math.ceil(ar.length / per)), pg = D.trv % pages;
+      const o2 = ar.slice(pg * per, pg * per + per).map(x => ({ t: travelLabel(n, x), a: 'tgo', x }));
+      if (pages > 1) o2.push({ t: T2('Diğer yerler…', 'More places…'), a: 'tmore' }); o2.push({ t: T2('Geri', 'Back'), a: 'tback' });
+      return { txt, o: o2 };
+    }
     if (D.q) {
       const q = D.q, st = questState(q);
       if (st === 'new') { txt = q.text; o.push({ t: q.ok || 'Kabul et', a: 'accept' }, { t: 'Daha sonra', a: 'back' }); }
@@ -923,7 +932,15 @@ const Win = (() => {
         { t: T2('Dönüşüm ve beceri aktarma nedir?', 'What are transformation and skill transfer?'), a: 'say', s: T2(PETHELP[0], PETHELP[1]) });   // orijinal: 幻化 / 技能转移 düğmeleri
       for (const q of questsFor(n.cn)) { const st = questState(q), cc = st === 'new' && q.req === 80344;   // orijinal: Ozan'da “我要转职！” seçeneği sınıfın giriş görevini verir
         o.push({ t: cc ? '✦ ' + T2('Sınıf değiştirmek istiyorum!', 'I want to change my class!') : (st === 'ready' ? '? ' : st === 'new' ? '! ' : '… ') + q.title, a: 'q', q, c: st === 'active' ? '#c8c0b0' : '#ffe070' }); }
+      // Ozan, 40'taki sınıf yükseltmesinden sonra: 80'deki ikinci yükseltmenin nerede alınacağını anlatır (orijinal “我要转职！”)
+      if (n.cn === '吟游诗人' && (P.adv || 0) === 1) o.push({ t: '✦ ' + T2('Sınıf değiştirmek istiyorum!', 'I want to change my class!'), a: 'say', s: P.lv >= 80 ? BARD80[P.cls] : BARD80.soon });
       const tq = tpQuestOf(n.cn); if (tq) o.push({ t: '✦ Işınlan: ' + trName(Assets.D.scenes[tq.tp[0]].name), a: 'tp', q: tq });
+      // yolculuk (orijinal NPC seçenekleri): otomatik yolun istediği hedef en üstte; ışınlanmalar tek tek; arabacının şehirleri bir listede
+      const tv = travelOf(n);
+      if (tv) { const hint = Game.travelHint && tv.find(x => x[2] === Game.travelHint);
+        if (hint) o.unshift({ t: '✦ ' + travelLabel(n, hint), a: 'tgo', x: hint, c: '#8cf07a' });
+        for (const x of tv) if (x[0] === 'tp' && x !== hint) o.push({ t: '✦ ' + travelLabel(n, x), a: 'tgo', x });
+        if (tv.some(x => x[0] === 'araba')) o.push({ t: '✦ ' + T2(`Yolculuk (${TRAVEL.cost.araba || 100} altın)`, `Travel (${TRAVEL.cost.araba || 100} gold)`), a: 'trv' }); }
       for (const d of Dungeon.npcTp(n.cn)) o.push({ t: '✦ ' + d.label, a: 'dtp', d });   // zindan merkezine/merkezden ışınlanma
       o.push({ t: 'Hoşça kal', a: 'bye' });
     }
@@ -955,6 +972,8 @@ const Win = (() => {
     if (e.a === 'shop') { UI.openShop(n.cn); return; }
     if (e.a === 'tp') { UI.closeAll(); setTimeout(() => questTeleport(e.q), 300); return; }
     if (e.a === 'dtp') { UI.closeAll(); setTimeout(() => e.d.go(), 300); return; }
+    if (e.a === 'trv') { D.trv = 0; return; } if (e.a === 'tmore') { D.trv++; return; } if (e.a === 'tback') { D.trv = null; return; }
+    if (e.a === 'tgo') return travelGo(n, e.x);
     if (e.a === 'accept') { const q = D.q; acceptQuest(q); D.q = null; UI.closeAll(); if (q.tp) { setTimeout(() => questTeleport(q), 400); return; } if (q.type === 'talk' && q.to === n.cn) Game.P.quests[q.id].ready = true; return; }   // görev alınınca pencere kapanır
     if (e.a === 'complete') { const q = D.q; completeQuest(q); D.q = null; if (e.ch != null && q.choice) opt.say = q.choice[e.ch][1]; return; }
   }

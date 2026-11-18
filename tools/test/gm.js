@@ -48,6 +48,13 @@ const { chromium } = require('playwright');
   console.log('kukla + beklemesiz', JSON.stringify(await p.evaluate(async () => { const m = Game.ents.find(e => e.gmDummy), i = CLS[Game.P.cls].skills.findIndex(k => !k.pas && k.f && skRank(k)); Game.player.state = 'idle'; useSkill(i);
     await new Promise(r => setTimeout(r, 700)); Game.player.state = 'idle'; const hp1 = m.hp; useSkill(i); await new Promise(r => setTimeout(r, 900)); return { kukla: !!m, hedef: Game.target === m, ikinciVuruş: m.hp < hp1, beklemesiz: Game.gmNoCd, kımıldamadı: Math.hypot(m.x - m.home.x, m.y - m.home.y) < 0.01 }; })));
   await p.click('[data-x="cls:nocd"]');
+  // 80 yükseltmesi: 80 yap + Bozbalta Şehri'ne git; yolculuk ağı (Haritalar sekmesi): ücretsiz yolculuk
+  await open(); await p.click('[data-g="v:cls"]'); await p.waitForTimeout(200); await p.click('[data-x="cls:start80"]');
+  await p.waitForFunction(() => Game.sceneId === '120156' && !Game.transit, null, { timeout: 30000 }); await p.waitForTimeout(500);
+  console.log('80 + Bozbalta    ', JSON.stringify(await p.evaluate(() => ({ sahne: trName(Game.scene.name), sv: Game.P.lv, adv: Game.P.adv, görev: QUESTS.filter(q => q.id >= 83085 && q.id <= 83093 && questState(q) === 'new').map(q => q.id) }))));
+  await open(); await p.click('[data-g="v:maps"]'); await p.waitForTimeout(200); await p.click('[data-x="tv:free"]'); await p.waitForTimeout(200);
+  console.log('ücretsiz yolculuk', JSON.stringify(await p.evaluate(() => ({ açık: !!Game.gmFreeTravel, satır: document.querySelector('#glist .grow small').textContent }))));
+  await p.click('[data-x="tv:free"]');
   // sekme adları ve arama kutusu seçili dilde mi; çevrilmeden kalan Türkçe yazılar (DIL=en)
   await open(); await p.click('[data-g="v:dg"]'); await p.waitForTimeout(200);
   console.log('sekmeler        ', JSON.stringify(await p.evaluate(() => [...document.querySelectorAll('#gtools button')].map(b => b.textContent).join(' | ') + ' · ' + document.querySelector('#gq').placeholder)));

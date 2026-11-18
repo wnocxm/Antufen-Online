@@ -248,7 +248,7 @@ function skillAutoSpend(points, spec = 0) {
 function skillReset(free) {
   const P = Game.P, spent = Object.values(P.sk || {}).reduce((a, b) => a + b, 0);
   if (!spent) return UI.toast(T_('Harcanmış beceri puanı yok.', 'No skill points spent.'));
-  if (!free && !removeItem('30092')) return UI.toast(T_('Eğitim Kitabı gerekir (beceri eğitmeninde satılır).', 'Requires a Training Book (sold by the skill trainer).'));
+  if (!free && !removeItem('30092') && !removeItem('30788')) return UI.toast(T_('Eğitim Kitabı gerekir (beceri eğitmeninde satılır).', 'Requires a Training Book (sold by the skill trainer).'));
   P.sp = (P.sp || 0) + spent; P.sk = {}; Game.player.buffs = []; SFX.play('skill_levelup');
   UI.log(T_(`Beceri puanları sıfırlandı: ${spent} puan geri geldi.`, `Skill points reset: ${spent} points returned.`), 'q'); clampVitals(); UI.refresh(); save();
 }
@@ -286,6 +286,7 @@ const STATN = { atk: 'Saldırı', def: 'Savunma', hp: 'Can', mp: 'Mana', crit: '
 let SHOPS = {};
 async function loadItems() {
   await loadSkills();   // beceri ağaçları (skills.json)
+  await loadTravel();   // yolculuk ağı (travel.json)
   const D = await fetch(vq(Assets.base + 'items.json')).then(r => r.json());
   for (const [id, it] of Object.entries(D.items)) { it.ik = it.icon[0]; it.icon = it.icon[1]; if (it.slot) it.desc = it.desc || ''; if (LANG === 'en') { it.name = it.en || EN_ITEM[it.name] || it.name; it.desc = it.den || tx(it.desc); } ITEMS[id] = it; }
   if (LANG === 'en') { for (const k of ['hp1', 'hp2', 'mp1', 'mp2', 'growthBox', 'quest']) { ITEMS[k].name = tx(ITEMS[k].name); ITEMS[k].desc = tx(ITEMS[k].desc); } SLOTS.forEach(s => s[1] = tx(s[1])); for (const k in STATN) STATN[k] = tx(STATN[k]); for (const t of Object.values(D.shops)) t.forEach(x => x[0] = tx(x[0])); }
@@ -405,6 +406,9 @@ function monDef(nm, sc) {
 }
 // Sınıf yükseltme görevlerinin hedefi: orijinalde yalnız 82938/82941'de geçen, 40. seviye görevi için konmuş seçkin (bulunduğu koridor ~52)
 MON['☆【叛神者】托马斯杨'] = { lv: 42, rank: 1, xp: mobXp(42, 1), n: 1, wide: 2 };
+// 80. seviye ikinci sınıf yükseltme hedefleri (Ruh Arafı, Andecano Tahtı: haritaların seviye aralığı tabloda yok; bölge 77)
+for (const n of ['☆不朽骑士', '☆风尘怪', '☆灵魂漫步者']) MON[n] = { lv: 80, rank: 1, xp: mobXp(80, 1), n: 3, wide: 5 };
+MON['☆☆【疯狂梦呓者】安德卡诺'] = { lv: 82, rank: 2, xp: mobXp(82, 2), n: 1, wide: 1, solo: 1 };   // üç sınıfın da son görev hedefi: tek kişilik boss (tools/test/savas.js BOSS)
 class Mob extends Ent {
   constructor(name, x, y, home) {
     super('mob', x, y); const d = monDef(name, Game.scene);
@@ -414,6 +418,7 @@ class Mob extends Ent {
     const mhp = Math.round((250 + 260 * L) * soft * (rk === 2 ? 18 : rk ? 3 : 1)); this.atk = Math.round((48 + 27 * L + 0.15 * L * L) * soft * (rk === 2 ? 1.8 : rk ? 1.15 : 1)); this.def = 8 * L * (rk ? 1.5 : 1);
     Object.assign(this, { name, d, hp: mhp, maxHp: mhp, home, state: 'idle', atkT: 0, wanderT: rnd(1, 4), aggro: false, slowT: 0 });
     Dungeon.tune(this);   // zindan: sınav canavarı zayıf, boss tek kişilik
+    if (d.solo && rk === 2) { this.maxHp = this.hp = Math.round(this.hp * 8 / 18); this.atk = Math.round(this.atk / 1.8); }   // görev boss'u tek kişilik: ×8 can, saldırı seçkin düzeyinde (tools/test/savas.js BOSS)
     const info = Game.mobInfo(name); this.sp = info ? Game.map.sprite(info[1]) : null; this.deathFx = info?.[2];
     this.dir = irnd(0, 3);
   }
@@ -786,6 +791,7 @@ function useItem(id) {
   if (it.pet) return Pet.useItem(id);   // evcil hayvan eşyaları (pet.js)
   if (it.slot) return equip(id);
   if (it.use) {
+    if (it.use.qt) return questUseItem(id);   // görev eşyası
     if (it.use.hp) { if (p.hp >= s.hp) return UI.log('Canın dolu.'); p.hp = Math.min(s.hp, p.hp + it.use.hp); UI.float(p, '+' + it.use.hp, '#7bff8a'); }
     if (it.use.mp) { if (p.mp >= s.mp) return UI.log('Manan dolu.'); p.mp = Math.min(s.mp, p.mp + it.use.mp); UI.float(p, '+' + it.use.mp, '#6fb7ff'); }
     for (const h of [it.use.hot, it.use.hot2]) if (h) { // yiyecek: süre boyunca yavaş yavaş yeniler (aynı türden yenisi eskisinin yerine geçer); hot2: can + mana birlikte
@@ -809,7 +815,7 @@ function refreshLook() { Game.player.doll.set(look()); Assets.preload([]); UI.re
 const QBY = Object.fromEntries(QUESTS.map(q => [q.id, q]));
 // q.race: yalnızca o ırk; q.req: tek kimlik ya da "herhangi biri" listesi
 function questState(q) { const P = Game.P; if (P.done[q.id]) return 'done'; if (P.quests[q.id]) return P.quests[q.id].ready || (q.type === 'deliver' && giveCount(q) >= q.count) ? 'ready' : 'active'; if ((q.race && q.race !== P.race) || (q.cls && q.cls !== P.cls)) return 'locked';
-  if (q.req && !(Array.isArray(q.req) ? q.req.some(r => P.done[r]) : P.done[q.req])) return 'locked'; if (P.lv < questMinLv(q)) return 'soon'; return 'new'; }
+  if (q.req && !(Array.isArray(q.req) ? q.req.some(r => P.done[r]) : P.done[q.req])) return 'locked'; if (q.advMin && (P.adv || 0) !== q.advMin) return 'locked'; if (P.lv < questMinLv(q)) return 'soon'; return 'new'; }
 // ---------------- Görevlerin seviye şartı ----------------
 // Orijinal istemci seviye şartını taşımaz (sunucudaydı); şart orijinal verilerden türetilir:
 //  1) hedef canavarın yaşadığı haritanın seviye aralığının alt sınırı - 1 (aralıklar dünya haritası tablosundan),
@@ -895,15 +901,20 @@ for (const q of QUESTS) if (!q.reward) { const L = q.lv || (MON[q.target] && MON
 // orijinal deneyim, altın ve eşya ödülü (Symbian ham kaydı, tools/gorev_ham.py → quests_gen.js QRW); eşyanın 3. öğesi sınıf: yalnız o sınıfa verilir
 for (const q of QUESTS) if (q.rw) { q.reward.xp = q.rw.xp; q.reward.gold = q.rw.gold; q.reward.items = q.rw.items || []; }   // deneyim de orijinal (kullanıcı kararı 16.11)
 const rewardItems = q => (q.reward.items || []).filter(([id, , c]) => ITEMS[id] && (!c || [].concat(c).includes(Game.P.cls)));
-function acceptQuest(q) { const P = Game.P; P.quests[q.id] = { n: 0, ready: q.type === 'talk' }; if (q.type === 'special' && Game.flags[q.flag]) P.quests[q.id].ready = true; UI.log(`Görev alındı: ${q.title}`, 'q'); SFX.play('accept_task'); UI.refresh(); save(); }
+// görev alınınca: accItems görev eşyası çantaya konur (ör. Büyü Emici Küre)
+function acceptQuest(q) { const P = Game.P; P.quests[q.id] = { n: 0, ready: q.type === 'talk' }; for (const [id, n] of q.accItems || []) if (!countItem(id)) addItem(id, n); if (q.type === 'special' && Game.flags[q.flag]) P.quests[q.id].ready = true; UI.log(`Görev alındı: ${q.title}`, 'q'); SFX.play('accept_task'); UI.refresh(); save(); }
 function questKill(name) {
   const P = Game.P;
   for (const q of QUESTS) {
     const st = P.quests[q.id]; if (!st || st.ready) continue;
-    if (q.type === 'kill' && q.targets) {   // çok hedefli: her hedefin kendi sayacı, toplam st.n
-      const tg = q.targets.find(x => x[0] === name); if (!tg) continue; st.c = st.c || {};
-      if ((st.c[name] || 0) < tg[1]) { st.c[name] = (st.c[name] || 0) + 1; st.n = (st.n || 0) + 1; UI.log(`${trName(name)} ${st.c[name]}/${tg[1]}`, 'loot'); }
-      if (q.targets.every(x => (st.c[x[0]] || 0) >= x[1])) readyQuest(q); UI.refresh(); continue;
+    if (q.type === 'kill' && q.targets) {   // çok hedefli: her hedefin kendi sayacı, toplam st.n (türler: tgKey üstünde)
+      for (const x of q.targets) { if (x[0] !== name || x[2] === 'node' || x[2] === 'use') continue;
+        if (typeof x[2] === 'number') { if (Math.random() < x[2]) tgAdd(q, st, x); continue; }   // canavardan düşen eşya
+        // önce görev eşyası kullanılmalıysa (Büyü Emici Küre) kullanılmadan öldürmek sayılmaz
+        const use = q.targets.find(y => y[0] === name && y[2] === 'use' && ((st.c || {})[tgKey(y)] || 0) < y[1]);
+        if (use) { UI.log(T_(`Önce ${trName(use[3])} kullanılmalıydı.`, `You had to use the ${trName(use[3])} first.`), 'q'); continue; }
+        tgAdd(q, st, x); }
+      continue;
     }
     if (q.type === 'collect' && q.drops) {   // çok eşyalı toplama: q.mobs'tan biri her öldürmede eksik eşyaların her biri için şans
       if (!(q.mobs || [q.target]).includes(name)) continue; st.c = st.c || {};
@@ -914,13 +925,32 @@ function questKill(name) {
     if (q.type === 'collect' && q.target === name && Math.random() < q.chance) { st.n++; UI.log(`${q.item} ${st.n}/${q.count}`, 'loot'); if (st.n >= q.count) readyQuest(q); UI.refresh(); }
   }
 }
+// Çok hedefli görevin hedef türleri (q.targets): [canavar, adet] öldür; [canavar, adet, şans, eşya] canavardan düşen eşya; [nesne, adet, 'node', eşya]
+// yerdeki nesneden alınır (sandık); [canavar, adet, 'use', eşya, eşyaNo] çantadaki görev eşyası o canavar hedefteyken kullanılır. Sayaç anahtarı: eşya adı ya da canavar.
+const tgKey = x => x[3] || x[0];
+function tgAdd(q, st, x) {
+  const k = tgKey(x); st.c = st.c || {}; if ((st.c[k] || 0) >= x[1]) return false;
+  st.c[k] = (st.c[k] || 0) + 1; st.n = (st.n || 0) + 1; UI.log(`${trName(k)} ${st.c[k]}/${x[1]}`, 'loot');
+  if (q.targets.every(y => (st.c[tgKey(y)] || 0) >= y[1])) readyQuest(q); UI.refresh(); return true;
+}
+// görev eşyasını kullan (Büyü Emici Küre): hedefteki canavar görevin 'use' hedefi olmalı ve yakında
+function questUseItem(id) {
+  const P = Game.P, p = Game.player, t = Game.target;
+  for (const q of QUESTS) { const st = P.quests[q.id]; if (!st || st.ready || !q.targets) continue;
+    const x = q.targets.find(y => y[2] === 'use' && y[4] === id); if (!x || ((st.c || {})[tgKey(x)] || 0) >= x[1]) continue;
+    if (!t || t.dead || t.name !== x[0]) return UI.toast(T_(`Önce ${trName(x[0])} hedef al.`, `Target ${trName(x[0])} first.`));
+    if (Math.hypot(t.x - p.x, t.y - p.y) > 6) return UI.toast(T_('Çok uzak.', 'Too far away.'));
+    Game.fx.push(new Fx('特效-治疗buff', t.x, t.y, { follow: t })); SFX.play('skill_juqi'); removeItem(id); tgAdd(q, st, x); return;
+  }
+  UI.toast(T_('Bunu şimdi kullanamazsın.', 'You cannot use this now.'));
+}
 function questFlag(f) { Game.flags[f] = true; for (const q of QUESTS) { const st = Game.P.quests[q.id]; if (st && !st.ready && q.type === 'special' && q.flag === f) readyQuest(q); } }
 function readyQuest(q) { Game.P.quests[q.id].ready = true; SFX.play('message'); UI.toast(`Görev tamamlandı: ${q.title}`); UI.log(`${q.title} tamam. ${trName(q.to)} ile konuş.`, 'q'); }
 function completeQuest(q) {
   if (q.type === 'deliver') { if (giveCount(q) < q.count) return UI.toast(`${q.item}: ${giveCount(q)}/${q.count}`); takeGive(q); }
   const P = Game.P, r = q.reward; delete P.quests[q.id]; P.done[q.id] = true; SFX.play('finish_task');
   if (r.gold) P.gold += Math.round(r.gold * (1 + (stats().goldUp || 0) / 100)); for (const [id, n] of rewardItems(q)) addItem(id, n);
-  gainXp(r.xp || 0); UI.log(`Ödül: ${r.xp} TP${r.gold ? ', ' + r.gold + ' altın' : ''}`, 'q');
+  gainXp(r.xp || 0); if (r.xp || r.gold) UI.log(`Ödül: ${r.xp} TP${r.gold ? ', ' + r.gold + ' altın' : ''}`, 'q');
   if (q.adv) classUp(q.adv);
   UI.refresh(); save();
 }
@@ -935,9 +965,10 @@ function classUp(n) {
 function autoQuests() { for (const q of QUESTS) if (q.auto && questState(q) === 'new') { acceptQuest(q); UI.toast(`${tx('Yeni görev')}: ${q.title}`); } }
 // GM: sınıf yükseltme (GM paneli › Sınıf; tools/test/sinif.js)
 const ClassGM = {
-  chain() { const P = Game.P; return QUESTS.filter(q => (q.cls === P.cls && (!q.race || q.race === P.race) && q.lvMin >= 40) || q.id === 80344).sort((a, b) => (a.id === 80344 ? -1 : b.id === 80344 ? 1 : 0) || chainDepth(a) - chainDepth(b)); },
+  chain() { const P = Game.P; return QUESTS.filter(q => (q.cls === P.cls && (!q.race || q.race === P.race) && q.lvMin >= 40) || q.id === 80344).sort((a, b) => (a.id === 80344 ? -1 : b.id === 80344 ? 1 : 0) || (a.lvMin || 0) - (b.lvMin || 0) || chainDepth(a) - chainDepth(b)); },
   up() { classUp(1); },
-  up2() { classUp(1); classUp(2); },   // 80: ikinci sınıf yükseltmesi (uzmanlık ağaçları; 80 görevleri içerikle gelecek)
+  up2() { classUp(1); classUp(2); },   // 80: ikinci sınıf yükseltmesi (uzmanlık ağaçları; görevleri Bozbalta Şehri'nde)
+  start80() { const P = Game.P; if (P.lv < 80) gmLevel(80); classUp(1); gotoScene('120156', null, [50, 39]); },   // 80 yap + Bozbalta'ya ışınla
   reset() { const P = Game.P; P.adv = 0; fixSkills(P); for (const q of this.chain()) { delete P.quests[q.id]; delete P.done[q.id]; } UI.refresh(); save(); },
   resetPts() { skillReset(true); },
   // ağaçları doldur: seviyeyi en az 80 yap, iki yükseltme, puanları oyuncu gibi dağıt; spec: 0 = ilk uzmanlık, 1 = ikinci
@@ -950,6 +981,16 @@ const ClassGM = {
   nocd() { Game.gmNoCd = !Game.gmNoCd; UI.toast(Game.gmNoCd ? T_('Beklemesiz beceri: açık', 'No cooldown: on') : T_('Beklemesiz beceri: kapalı', 'No cooldown: off')); },
 };
 // Ozan (金波港): 40'ta sınıf yükseltme görevlerini dağıtır (80344 metni)
+// Ozan'ın 80 için anlattıkları (orijinal 吟游诗人 kaydı: 80 öncesi, savaşçı / büyücü / elçi)
+const BARD80 = LANG === 'en' ? {
+  soon: 'If you want greater power, you must reach level 80; only then can you touch the secrets of the higher classes.',
+  '战士': 'I can feel the fierce killing intent on your weapon from far away, my brave warrior. When you reach level 80 your strength will touch an unprecedented peak. Then find the Black Knight Commander in Greyaxe City, accept the trial to become a Black Knight and pursue even greater power!',
+  '法师': 'I can see you growing, my child; your potential goes beyond the limits of an ordinary mage. When you reach level 80, go to Greyaxe City: the Grand Magister Guide will guide you better. Becoming a Grand Magister is your true destiny.',
+  '牧师': "As a priest, your deeds have won everyone's approval, but what a priest truly seeks is the approval of the god. When you reach level 80, the Devout Chosen may lead you onto the path of the god; the Devout Chosen waits in Greyaxe City to choose the god's envoys." } : {
+  soon: 'Daha büyük güç istiyorsan 80. seviyeye ulaşmalısın; ancak o zaman üst sınıfların sırlarına erişebilirsin.',
+  '战士': "Silahındaki o korkunç öldürme hırsını çok uzaktan bile hissedebiliyorum, cesur savaşçım. 80. seviyeye ulaştığında gücün daha önce hiç görülmemiş bir doruğa varacak. O zaman Bozbalta Şehri'ndeki Kara Şövalye Komutanı'nı bul, Kara Şövalye olma sınavını kabul et ve daha büyük gücün peşine düş!",
+  '法师': "Büyüdüğünü görüyorum, çocuğum; potansiyelin sıradan bir büyücünün sınırlarını aşıyor. 80. seviyeye ulaştığında Bozbalta Şehri'ne git; Büyük Büyü Üstadı Rehberi sana daha iyi yol gösterecek. Büyük Büyü Üstadı olmak, senin asıl yazgın.",
+  '牧师': "Bir kutsal elçi olarak yaptıkların herkesçe takdir edildi; ama bir kutsal elçinin asıl aradığı, tanrının onayıdır. 80. seviyeye ulaştığında Dindar Seçilmiş seni tanrının yoluna götürebilir; Dindar Seçilmiş, tanrının elçilerini seçmek için Bozbalta Şehri'nde bekliyor." };
 TR.greet['吟游诗人'] = LANG === 'en' ? 'My songs tell the tales of many heroes. When you reach level 40, come to me and I will tell you how to become a true warrior, mage or priest.'
   : 'Şarkılarım nice kahramanın hikâyesini anlatır. 40. seviyeye gelince bana uğra; gerçek bir savaşçı, büyücü ya da kutsal elçi olmanın yolunu anlatayım.';
 function chainDepth(q) { let d = 0; for (let r = q.req; r && d < 20; r = QBY[r] && QBY[r].req) d++; return d; }
@@ -971,20 +1012,46 @@ function gmHeal() { const s = stats(), p = Game.player; p.hp = s.hp; p.mp = s.mp
 // ---------------- Otomatik yol: haritalar arası geçitlerden hedef haritaya yürür ----------------
 function routeTo(sid) {
   if (sid === Game.sceneId) return UI.toast('Zaten buradasın.');
-  if (!scenePath(Game.sceneId, sid)) { if (isGM()) { Game.route = null; return gotoScene(sid, null, null, null); } return UI.toast('Buradan oraya yürüyerek gidilemiyor.'); }
+  if (!routePath(Game.sceneId, sid)) { if (isGM()) { Game.route = null; return gotoScene(sid, null, null, null); } return UI.toast('Buradan oraya yürüyerek gidilemiyor.'); }
   Game.route = sid; routeStep();
 }
-// geçit bağlantıları üzerinde en kısa sahne zinciri
-function scenePath(from, to) {
+// geçit bağlantıları üzerinde en kısa sahne zinciri; tv: arabacı/ışınlayıcı yolculukları da kullanılır
+function scenePath(from, to, tv) {
   const S = Assets.D.scenes, prev = { [from]: null }, q = [from];
   while (q.length) { const c = q.shift(); if (c === to) { const out = []; for (let x = to; x; x = prev[x]) out.unshift(x); return out; }
-    for (const e of S[c].exits) if (e[2] && S[e[2]] && !(e[2] in prev)) { prev[e[2]] = c; q.push(e[2]); } }
+    for (const e of S[c].exits) if (e[2] && S[e[2]] && !(e[2] in prev)) { prev[e[2]] = c; q.push(e[2]); }
+    if (tv) for (const t of travelEdges(c)) for (const o of t.L) if (S[o[2]] && !(o[2] in prev)) { prev[o[2]] = c; q.push(o[2]); } }
   return null;
+}
+// önce yürüyerek; yürüyerek gidilemiyorsa yolculuk NPC'leriyle (Bozbalta Şehri gibi ayrı bölgeler)
+const routePath = (from, to) => scenePath(from, to) || scenePath(from, to, true);
+// ---------------- Yolculuk: arabacılar ve ışınlayıcılar ----------------
+// Orijinal NPC seçenekleri (www/assets/travel.json ← tools/seyahat.py): arabacı (驿站老板 / 盲眼向导) 100 altın, ışınlayıcı (传送法阵,
+// 风暴法师, 首席大法师 …) ücretsiz; NPC → [[tür, şehir adı, hedef sahne, varış x, y]]. GM: ücretsiz yolculuk (Game.gmFreeTravel).
+let TRAVEL = { npc: {}, cost: {}, ucret: {} }, TRAVEL_SC = null;
+async function loadTravel() { try { TRAVEL = await fetch(vq(Assets.base + 'travel.json')).then(r => r.json()); } catch (e) { console.warn('travel.json', e); } }
+const travelOf = n => (n && TRAVEL.npc[n.id]) || null;
+const travelCost = (n, x) => Game.gmFreeTravel ? 0 : x[0] === 'araba' ? (TRAVEL.cost.araba || 100) : (TRAVEL.ucret[n.cn] || 0);
+function travelLabel(n, x) { const c = travelCost(n, x), nm = trName(x[1]); return (x[0] === 'tp' ? T_('Işınlan: ', 'Teleport: ') : T_('Yolculuk: ', 'Travel: ')) + nm + (c ? T_(` (${c} altın)`, ` (${c} gold)`) : ''); }
+function travelGo(n, x) {
+  const P = Game.P, c = travelCost(n, x);
+  if (c && P.gold < c) return UI.toast(T_(`${c} altın gerekir.`, `Requires ${c} gold.`));
+  P.gold -= c; UI.log(travelLabel(n, x), 'q'); Game.travelHint = null; SFX.play('menusel', 0.6);
+  UI.closeAll(); setTimeout(() => gotoScene(x[2], null, x[3] != null ? [x[3], x[4]] : null), 300);
+}
+// sahnedeki yolculuk NPC'leri (yol bulma)
+function travelEdges(sid) {
+  if (!TRAVEL_SC) { TRAVEL_SC = {}; for (const [s, sc] of Object.entries(Assets.D.scenes)) for (const e of sc.ents) { const L = TRAVEL.npc[e[0]]; if (L) (TRAVEL_SC[s] || (TRAVEL_SC[s] = [])).push({ id: String(e[0]), cn: e[1], L }); } }
+  return TRAVEL_SC[sid] || [];
 }
 function routeStep() {
   const to = Game.route; if (!to || !Game.player) return;
   if (to === Game.sceneId) { Game.route = null; const rq = Game.routeQuest && QUESTS.find(x => x.id === Game.routeQuest); Game.routeQuest = null; if (rq && Game.P.quests[rq.id]) return questWalk(rq); const cn = Game.routeNpc; Game.routeNpc = null; if (cn) { const e = Game.ents.find(e => e.cn === cn); if (e) return walkToEnt(e); } return UI.toast('Hedefe vardın.'); }
-  const path = scenePath(Game.sceneId, to), ex = path && Game.scene.exits.find(e => e[2] === path[1]), r = ex && Game.map.regionsOf(1).find(g => g[0] === ex[0]);
+  const path = routePath(Game.sceneId, to), ex = path && Game.scene.exits.find(e => e[2] === path[1]), r = ex && Game.map.regionsOf(1).find(g => g[0] === ex[0]);
+  if (path && !ex) {   // sıradaki adım yolculuk: o hedefe giden arabacıya/ışınlayıcıya yürü, konuşunca hedef en üstte çıkar
+    const n = Game.ents.find(e => e.kind === 'npc' && (travelOf(e) || []).some(x => x[2] === path[1]));
+    if (n) { Game.travelHint = path[1]; UI.toast(T_(`${trName(n.cn)} ile yolculuk: ${trName(Assets.D.scenes[path[1]].name)}`, `Travel with ${trName(n.cn)}: ${trName(Assets.D.scenes[path[1]].name)}`)); return walkToEnt(n); }
+  }
   if (!r) { Game.route = null; return UI.toast('Yol bulunamadı.'); }
   const p = Game.player; let best = null;
   for (let y = r[3]; y <= r[5]; y++) for (let x = r[2]; x <= r[4]; x++) if (!Game.map.blocked(x, y)) { const d = Math.hypot(x - p.x, y - p.y); if (!best || d < best[2]) best = [x, y, d]; }
@@ -1010,7 +1077,10 @@ function questWalk(q) {
     const sid = npcSceneNear(q.node); if (sid && sid !== Game.sceneId) return away(sid);
     UI.toast('Toplanacak yer bilinmiyor.'); return goNpc(q.to);
   }
-  const names = q.targets ? q.targets.filter(x => ((st.c || {})[x[0]] || 0) < x[1]).map(x => x[0]) : q.mobs || [q.target];
+  const rem = q.targets && q.targets.filter(x => ((st.c || {})[tgKey(x)] || 0) < x[1]);
+  // geriye yalnız yerdeki nesne kaldıysa (sandık) ona yürü
+  if (rem && rem.length && rem.every(x => x[2] === 'node')) { const n = near(e => e.kind === 'npc' && e.cn === rem[0][0] && !e.hidden); if (n) return walkToEnt(n); const sid = npcSceneNear(rem[0][0]); if (sid && sid !== Game.sceneId) return away(sid); }
+  const names = rem ? [...new Set(rem.filter(x => x[2] !== 'node').map(x => x[0]))] : q.mobs || [q.target];
   const t = near(e => e.kind === 'mob' && !e.dead && names.includes(e.name));
   if (t) { p.path = findPath(Game.map, p.x, p.y, t.x, t.y + 1); Game.goTarget = null; setTarget(t); return; }   // canavarın yanına yürür ve seçer; saldırmaz (kullanıcı isteği)
   const spot = near(e => e.kind === 'mob' && names.includes(e.name));   // hepsi ölü: yeniden doğdukları yere yürü
@@ -1022,6 +1092,10 @@ function questWalk(q) {
 }
 function pickupNode(n) {
   const P = Game.P;
+  // çok hedefli görevdeki sandık (Tozlu Büyü İletken Kristal Sandık): açılınca eşya sayılır
+  for (const q2 of QUESTS) { const st = P.quests[q2.id]; if (!st || st.ready || !q2.targets) continue;
+    const x = q2.targets.find(y => y[2] === 'node' && y[0] === n.cn); if (!x || ((st.c || {})[tgKey(x)] || 0) >= x[1]) continue;
+    SFX.play('coin', 0.7); tgAdd(q2, st, x); n.hidden = true; n.respawnT = 20; return; }
   const q = QUESTS.find(q => q.type === 'pickup' && q.node === n.cn && P.quests[q.id] && !P.quests[q.id].ready);
   if (!q) { UI.say(n, TR.greet[n.cn] || '...'); return; }
   const st = P.quests[q.id]; st.n++; UI.log(`${q.item} ${st.n}/${q.count}`, 'loot');

@@ -44,6 +44,7 @@ Uyarılar: 1025'teki `level` alanı aslında öldürme adedi; APK görev dosyas�
 | `esyalar.py` | Eşya aktarımı → `www/assets/items.json` |
 | `gorev_ham.py` | Symbian `all_task.godat` ham görev kaydı → `cozulmus/tablolar/gorev_ham.json` (zincir, adetler, altın, deneyim, sınıfa göre ödül eşyaları; APK 1025 bunları yanlış okur) |
 | `odul_esyalari.py` | Görev ödülü olup `items.json`'da olmayan eşyaları ekler (mevcut değer merdiveninden) |
+| `seyahat.py` | Yolculuk ağı: `all_citizen` araba/ışınlanma seçenekleri → `www/assets/travel.json` (hedef sahne = seçenek karakteri + 65536) |
 | `katalog.py` | `kaynak/index.html` |
 | `test/*.js` | Playwright test betikleri (bkz. 06) |
 

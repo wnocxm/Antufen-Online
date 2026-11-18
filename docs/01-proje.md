@@ -50,7 +50,7 @@ Sırada (kullanıcı onayladı):
 
 Ertelenenler / bilinenler:
 - **40. seviye sınıf yükseltmesi ✔ (17.11)**: orijinal görevlerle; sınıf ağacı yalnız bununla açılır (kullanıcı kararı: orijinal gibi).
-- **Bütün beceri ağaçları ✔ (18.11)**: acemi, sınıf, iki uzmanlık, ırk, Yaşam sekmesi; orijinal kurallar, sayılar ve açıklamalar (docs/03 › Beceri ağaçları). Uzmanlıklar 80'deki ikinci yükseltmeyle (sistem hazır, GM'den; 80 görevleri içerikle gelecek).
+- **Bütün beceri ağaçları ✔ (18.11)**: acemi, sınıf, iki uzmanlık, ırk, Yaşam sekmesi; orijinal kurallar, sayılar ve açıklamalar (docs/03 › Beceri ağaçları). Uzmanlıklar 80'deki ikinci yükseltmeyle: **Bozbalta Şehri görevleri ✔ (18.11, kullanıcı: "talent görevleri tamam, bir daha dönmeyelim")** — Kara Şövalye / Büyük Büyü Üstadı / Seçilmiş; yolculuk ağı (arabacılar, ışınlayıcılar) ile ulaşılır.
 - Sırada: **yaşam becerileri sistemi** (madencilik, arkeoloji, mücevher arıtma, parçalama: eğitmenden öğrenme, 120 toplama noktası, malzemeler); unvan, mücevher/tarif.
 - Harita seviyeleri: dosya adındaki sayı seviye değil; dünya haritasında olmayan bazı sahneler yanlış seviyede (docs/04 › Sınıf yükseltme › Seviye bulgusu). Sırada önerilen: bu sahneleri düzeltip 55 altına düşen görevlerini almak.
 - Zindan, binek ve çok hedefli görevler alınmadı.
