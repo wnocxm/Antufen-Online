@@ -46,6 +46,7 @@ class Hud {
   std::vector<Tap> taps_;
   struct WinPtr { bool on = false; int id = -1; float x = 0, y = 0, moved = 0, lx = 0, ly = 0; } wp_;   // pencere açıkken dokunuş
   double deathAt = -1;   // ölüm penceresi bu saatte açılır (HTML UI.death: 1,2 sn sonra)
+  std::string assign_;   // kısayola yerleştirilecek (s<n> / i:<eşya>): yuvalar parlar, dokunulan yuvaya yerleşir (HTML UI.startAssign)
   void handle(engine::World& w);
   struct Log { std::string m; uint32_t c; double t; };
   std::vector<Log> logs_; size_t seen_ = 0;
@@ -61,9 +62,11 @@ class Hud {
   void attack(engine::World& w);
   void quick(engine::World& w, int i);
   void tapWorld(engine::World& w, float x, float y);
-  float rockerX() const { return 104 * HS + safeL; }
-  float rockerY() const { return engine::VH - 74 * HS; }
-  static constexpr float HS = 1.1f;   // dokunmatik düğmelerin ölçeği
+  // konumlar çift duyarlıklı hesaplanır, çizime tek duyarlıklı geçer (HTML'deki gibi: JS sayısı → tarayıcının float'ı; en yakın komşu
+  // örneklemede sınıra düşen satırlar böyle aynı kaynak pikseline gider)
+  double rockerX() const { return 104 * HS + safeL; }
+  double rockerY() const { return engine::VH - 74 * HS; }
+  static constexpr double HS = 1.1;   // dokunmatik düğmelerin ölçeği
 };
 
 }  // namespace ui

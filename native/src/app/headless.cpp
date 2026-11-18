@@ -37,7 +37,7 @@
 //   bekleme <beceri> <sn>            beceri bekleme süresi (kısayol karartması)
 //   gorevver <no>                    görevi doğrudan alınmış say (yan etkisiz; test)
 //   gorevhazir <no> [sayı]           görevi teslime hazır say (test)
-//   pencere <hub|npc|task|dead|kapat> [varlık]  pencere aç (npc: kişinin varlık sırası) ya da kapat
+//   pencere <hub|npc|task|dead|bag|role|skill|shop|kapat> [varlık]  pencere aç (npc, shop: kişinin varlık sırası) ya da kapat
 //   ciz                              kareyi çiz (dosyaya yazmadan; dokunma bölgeleri için)
 //   dokun <x> <y>                    ekrana dokun (pencere açıksa pencereye, değilse HUD'a ya da dünyaya)
 //   konus <varlık>                   kişiye konuş (yakınsa konuşma penceresi, uzaksa yürür)
@@ -48,6 +48,12 @@
 //   can <oran> · mana <oran>         oyuncunun canı/manası (azami değerin oranı)
 //   goruntu <dosya.png>              çiz ve PNG yaz
 //   durum <dosya.json|->             oyuncu, sahne, zaman (JSON)
+//   esya <al|sat|giy|cikar|kullan|ekle|sil> <eşya|yuva> [adet]   eşya işlemi (HTML buyItem, sellItem, equip, unequip, useItem, addItem, removeItem)
+//   gmgear · altin <n>               GM: seviyeye uygun en iyi ekipman · altın
+//   beceriyukselt <beceri no> · becerisifirla <0|1>   beceri penceresinin Yükselt'i · Puanları Sıfırla (1: bedava)
+//   kisayol <yuva> <sıra>            kısayol halkasına yerleştir (s<n> beceri, i:<eşya>)
+//   beceriyazilari <dosya>           her becerinin kilit iletisi, her kademedeki açıklaması ve sonraki kademe farkı
+//   karakterdurum <dosya.json|->     altın, çanta, ekipman, beceriler, değerler, görünüm, son ileti ve bildirim (JSON)
 #include <algorithm>
 #include <climits>
 #include <cstdio>
@@ -318,8 +324,40 @@ int main(int argc, char** argv) {
       else if (cmd == "hedefle") { int i; ss >> i; W().setTarget(i); }
       else if (cmd == "bekleme") { std::string id; double t; ss >> id >> t; W().player.cds[id] = t; }
       else if (cmd == "gorevver") { int id; ss >> id; W().P.quests[id] = QuestSt(); }   // görevi doğrudan alınmış say (test)
+      else if (cmd == "esya") {
+        std::string op, id; int n = 1; ss >> op >> id >> n; if (!ss) n = 1; World& w = W();
+        if (op == "al") w.buyItem(id, n); else if (op == "sat") w.sellItem(id, n); else if (op == "giy") w.equip(id); else if (op == "cikar") w.unequip(id);
+        else if (op == "kullan") w.useItem(id); else if (op == "ekle") w.addItem(id, n, true); else if (op == "sil") w.removeItem(id, n);
+        else throw godat::Error("esya: bilinmeyen işlem " + op);
+      } else if (cmd == "gmgear") W().gmGear();
+      else if (cmd == "altin") ss >> W().P.gold;
+      else if (cmd == "beceriyukselt") { int sn; ss >> sn; const SkillDef* sk = W().balance().skills.bySn(sn); if (sk) W().skillUp(*sk); }
+      else if (cmd == "becerisifirla") { int f; ss >> f; W().skillReset(f != 0); }
+      else if (cmd == "kisayol") { std::string sl; int qi; ss >> sl >> qi; W().assignQuick(sl, qi); }
+      else if (cmd == "beceriyazilari") {   // her beceri: kilit iletisi, her kademede açıklama ve sonraki kademe farkı (satır satır)
+        std::string f; ss >> f; World& w = W(); std::string o;
+        std::vector<const SkillDef*> L; for (const SkillDef& k : w.skills()) L.push_back(&k); for (const SkillDef& k : w.balance().skills.race(w.P.race)) L.push_back(&k);
+        for (const SkillDef* k : L) {
+          o += k->id + "\t" + k->name + "\t" + w.skLockMsg(*k) + "\n";
+          for (int r = 1; r <= (k->mx ? k->mx : 10); r++) o += "  " + std::to_string(r) + "\t" + w.skDesc(*k, r) + "\t" + (r < (k->mx ? k->mx : 10) ? w.skNextDiff(*k, r) : std::string()) + "\n";
+        }
+        out(f, o);
+      }
+      else if (cmd == "karakterdurum") {
+        std::string f; ss >> f; World& w = W(); const Stats s = w.stats(); auto q = [](const std::string& x) { return "\"" + x + "\""; };
+        std::string o = "{\"altin\":" + std::to_string(w.P.gold) + ",\"canta\":[";
+        for (size_t i = 0; i < w.P.bag.size(); i++) o += (i ? "," : "") + std::string("[") + q(w.P.bag[i].first) + "," + std::to_string(w.P.bag[i].second) + "]";
+        o += "],\"eq\":{"; bool fst = true; for (const auto& kv : w.P.eq) if (!kv.second.empty()) { o += (fst ? "" : ",") + q(kv.first) + ":" + q(kv.second); fst = false; }
+        o += "},\"sk\":{"; fst = true; for (const auto& kv : w.P.sk) { o += (fst ? "" : ",") + q(kv.first) + ":" + std::to_string(kv.second); fst = false; }
+        o += "},\"sp\":" + std::to_string(w.P.sp) + ",\"can\":" + num(w.player.hp) + ",\"mana\":" + num(w.player.mp);
+        o += ",\"st\":[" + num(s.hp) + "," + num(s.mp) + "," + num(s.atk) + "," + num(s.def) + "," + num(s.crit) + "," + num(s.dodge) + "," + num(s.res) + "," + num(s.hpreg) + "," + num(s.mpreg) + "]";
+        o += ",\"gorunum\":[" + q(w.player.look.bodyG) + "," + q(w.player.look.headG) + "," + q(w.player.look.weapG) + "],\"kisayol\":[";
+        for (size_t i = 0; i < w.P.quick.size(); i++) o += (i ? "," : "") + q(w.P.quick[i]);
+        o += "],\"ileti\":" + q(w.log.empty() ? std::string() : w.log.back().m) + ",\"bildirim\":" + q(w.toastMsg) + "}\n";
+        out(f, o);
+      }
       else if (cmd == "gorevhazir") { int id, n = 0; ss >> id >> n; QuestSt q; q.n = n; q.ready = true; W().P.quests[id] = q; }   // görev teslime hazır (test)
-      else if (cmd == "pencere") { std::string n; int e = -1; ss >> n >> e; hud->win.close(); if (n != "kapat") hud->win.open(W(), n, e); }
+      else if (cmd == "pencere") { std::string n; int e = -1; ss >> n >> e; hud->win.close(); if (n == "shop") hud->win.openShop(W(), W().ents.at(size_t(e)).name); else if (n != "kapat") hud->win.open(W(), n, e); }
       else if (cmd == "ciz") { W().draw(canvas, opts); hud->draw(canvas, W(), false); }
       else if (cmd == "dokun") { float x, y; ss >> x >> y; hud->press(W(), 1, x, y); hud->release(W(), 1, x, y); hud->win.clearPressed(); hud->draw(canvas, W(), false); }
       else if (cmd == "konus") { int e; ss >> e; W().talkTo(e); hud->draw(canvas, W(), false); }
@@ -341,7 +379,7 @@ int main(int argc, char** argv) {
         o += "],\"sahne\":\"" + w.sceneId + "\",\"x\":" + num(w.player.x) + ",\"y\":" + num(w.player.y) + ",\"hedef\":" + std::to_string(w.target()) + ",\"konusma\":" + std::to_string(dialog) + "}\n";
         out(f, o);
       }
-      else if (cmd == "temizle") { World& w = W(); w.log.clear(); w.floats.clear(); w.zoneT = w.toastT = w.lvlT = w.hurtT = 0; }
+      else if (cmd == "temizle") { World& w = W(); w.log.clear(); w.floats.clear(); w.zoneT = w.toastT = w.lvlT = w.hurtT = 0; w.toastMsg.clear(); }
       else if (cmd == "can") { double k; ss >> k; W().player.hp = W().stats().hp * k; }
       else if (cmd == "mana") { double k; ss >> k; W().player.mp = W().stats().mp * k; }
       else if (cmd == "goruntu") {

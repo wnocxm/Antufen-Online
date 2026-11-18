@@ -4,8 +4,8 @@
 // Dokunma / fare: oyun ekranı (HUD) düğmeleri, sol altta ejderha = yürüme kolu, dünyada canavara dokun (ikinci dokunuş saldırır),
 // kişiye dokun (ikinci dokunuş ya da sağ alttaki konuşma düğmesi konuşur), sağ alt halka: saldırı, beceriler, iksirler.
 // Tuşlar (HTML gibi): ok tuşları / WASD yürü, boşluk saldır, 1-6 beceri, Q can iksiri, E mana iksiri, Tab hedef değiştir,
-// F12 ekran görüntüsü (anrufen_ekran.png), Esc pencereyi kapatır / çıkış. Pencereler: konuşma, görev listesi, ana menü, ölüm (karakter,
-// çanta, beceri, harita, ayarlar sonraki adımda).
+// F12 ekran görüntüsü (anrufen_ekran.png), Esc pencereyi kapatır / çıkış. Pencereler: konuşma, görev listesi, ana menü, ölüm, karakter,
+// çanta, beceri ağacı, dükkân (adet kutusunda rakamlar, ↑/↓, Enter); harita ve ayarlar sonraki adımlarda.
 // Veri verilmezse sırayla: veri/oyun.gdp, ../veri/oyun.gdp, ../../www/assets, ../../../www/assets, ../www/assets, www/assets.
 #include <SDL.h>
 
@@ -74,8 +74,15 @@ int main(int argc, char** argv) {
     SDL_Event ev;
     while (SDL_PollEvent(&ev)) {
       if (ev.type == SDL_QUIT) run = false;
+      if (ev.type == SDL_TEXTINPUT && hud.win.isOpen()) { for (const char* ch = ev.text.text; *ch; ch++) if (*ch >= '0' && *ch <= '9') hud.win.key(std::string(1, *ch)); continue; }   // ekran klavyesi: adet
       if (ev.type == SDL_KEYDOWN) {
         const SDL_Keycode k = ev.key.keysym.sym;
+        if (hud.win.isOpen()) {   // açık onay/adet kutusu tuşları alır (oyun kısayollarına gitmez)
+          std::string kn = k >= SDLK_0 && k <= SDLK_9 ? std::string(1, char('0' + (k - SDLK_0))) : k >= SDLK_KP_1 && k <= SDLK_KP_9 ? std::string(1, char('1' + (k - SDLK_KP_1))) : k == SDLK_KP_0 ? "0"
+            : k == SDLK_BACKSPACE ? "Backspace" : (k == SDLK_RETURN || k == SDLK_KP_ENTER) ? "Enter" : k == SDLK_UP ? "ArrowUp" : k == SDLK_DOWN ? "ArrowDown" : (k == SDLK_PLUS || k == SDLK_KP_PLUS) ? "+" : (k == SDLK_MINUS || k == SDLK_KP_MINUS) ? "-" : k == SDLK_ESCAPE ? "Escape" : "";
+          if (!kn.empty() && SDL_IsTextInputActive() && kn.size() == 1 && kn[0] >= '0' && kn[0] <= '9') kn.clear();   // rakam metin olayından gelir
+          if (!kn.empty() && hud.win.key(kn)) continue;
+        }
         if (k == SDLK_ESCAPE) { if (hud.win.isOpen()) hud.closeAll(); else run = false; }
         if (k == SDLK_F12) godat::writeFile("anrufen_ekran.png", core::encodePNG(canvas.img));
         if (k == SDLK_SPACE) { int t = world.target(); if (t < 0 || world.ents[size_t(t)].kind != Ent::MOB || world.ents[size_t(t)].dead) t = world.nearestMob(9); if (t >= 0) world.setTarget(t, true); else world.note("Yakında hedef yok."); }
@@ -112,6 +119,7 @@ int main(int argc, char** argv) {
     if (canvas.w() != cw || canvas.h() != VH) canvas.resize(cw, VH);
     world.draw(canvas);
     hud.now += dt; hud.draw(canvas, world);
+    if (hud.win.wantText != bool(SDL_IsTextInputActive())) { if (hud.win.wantText) SDL_StartTextInput(); else SDL_StopTextInput(); }   // adet kutusu: ekran klavyesi
     if (!tex || texW != cw || texH != VH) {
       if (tex) SDL_DestroyTexture(tex);
       tex = SDL_CreateTexture(ren, SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_STREAMING, cw, VH); texW = cw; texH = VH;

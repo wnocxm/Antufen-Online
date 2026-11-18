@@ -9,10 +9,11 @@ if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
 endif()
 # uyarılar yalnız kendi kodumuza (SDL'e değil)
+# kayan nokta işlemleri birleştirilmez (FMA yok): JS'teki gibi her işlem ayrı yuvarlanır (HTML ile aynı sonuç; ARM/Android'de de)
 if(MSVC)
-  set(ANRUFEN_WARN /W4 /utf-8)
+  set(ANRUFEN_WARN /W4 /utf-8 /fp:precise)
 else()
-  set(ANRUFEN_WARN -Wall -Wextra)
+  set(ANRUFEN_WARN -Wall -Wextra -ffp-contract=off)
 endif()
 
 # zlib: sistemde varsa o (Linux), yoksa depodaki kopya (third_party/zlib: Windows, Android, iOS)
@@ -64,8 +65,8 @@ target_link_libraries(godat_pack PRIVATE godat)
 
 # Motor (pencereden bağımsız): PNG/JSON, sanal dosya sistemi, tuval, varlıklar, harita, dünya
 add_library(motor STATIC src/core/png.cpp src/core/json.cpp src/engine/vfs.cpp src/engine/canvas.cpp
-            src/engine/assets.cpp src/engine/map.cpp src/engine/balance.cpp src/engine/skills.cpp src/engine/quests.cpp src/engine/world.cpp src/engine/world_quests.cpp src/engine/world_nav.cpp
-            src/ui/font.cpp src/ui/hud.cpp src/ui/forms.cpp src/ui/win.cpp)
+            src/engine/assets.cpp src/engine/map.cpp src/engine/balance.cpp src/engine/skills.cpp src/engine/quests.cpp src/engine/world.cpp src/engine/world_quests.cpp src/engine/world_nav.cpp src/engine/world_items.cpp
+            src/ui/font.cpp src/ui/hud.cpp src/ui/forms.cpp src/ui/win.cpp src/ui/win_items.cpp)
 target_include_directories(motor PUBLIC src)
 target_link_libraries(motor PUBLIC godat)
 

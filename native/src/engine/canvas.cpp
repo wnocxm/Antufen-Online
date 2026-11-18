@@ -125,15 +125,51 @@ void Canvas::drawImage(const core::Image& src, float sx, float sy, float sw, flo
   const int X0 = std::max(0, int(std::floor(dx))), X1 = std::min(img.w, int(std::ceil(dx + dw))), Y0 = std::max(0, int(std::floor(dy))), Y1 = std::min(img.h, int(std::ceil(dy + dh)));
   const float fx = dw / sw, fy = dh / sh;
   auto at = [&](int x, int y) { x = std::max(int(sx), std::min(int(std::ceil(sx + sw)) - 1, x)); y = std::max(int(sy), std::min(int(std::ceil(sy + sh)) - 1, y)); x = std::max(0, std::min(src.w - 1, x)); y = std::max(0, std::min(src.h - 1, y)); return src.at(x, y); };
+  // en yakın komşu (tarayıcının Skia hesabı, SkBitmapProcStateAutoMapper): ters dönüşüm tek duyarlıklı (ölçek S = dw/sw, ters 1/S);
+  // satırın ilk pikselinin merkezi eşlenir ve 1/65536 aşağı kaydırılır (tam sayıya düşen örnek küçük olan kaynak pikseline gitsin:
+  // 32 → 36 px büyütmede her 9. sütun/satır); kaynak satırı bundan, sütunlar ilk pikselden ters ölçek adımlarıyla toplanarak
+  const float Sx = dw / sw, Sy = dh / sh, iSx = 1.f / Sx, iSy = 1.f / Sy;
+  const float Tx = dx - sx * Sx, Ty = dy - sy * Sy, iTx = -Tx * iSx, iTy = -Ty * iSy;
   for (int py = Y0; py < Y1; py++) {
     const float cyy = py + 0.5f; if (cyy < dy || cyy >= dy + dh) continue;   // piksel merkezi hedefin içinde mi (tarayıcıdaki gibi)
+    int nearX0 = -1; double nearU0 = 0; int nearV = 0;
+    if (!smooth) { const float a = cyy * iSy; const float b = a + iTy; nearV = int(std::floor(double(b) - 1.0 / 65536)); }
+    // çift doğrusal (Skia'nın eski CPU yolu, SkBitmapProcState "low"): kaynak konumu 16.16 sabit noktada, yarım piksel geri; satır
+    // doğrudan, sütunlar ilk pikselden ters ölçek adımlarıyla (32.32); ağırlıklar 4 bit (1/16), renkler önceden çarpılmış, toplam >> 8
+    int by0 = 0, by1 = 0, bsy = 0; int64_t bfx = 0; bool bfirst = true;
+    const int xmin = std::max(0, int(sx)), xmax = std::min(src.w - 1, int(std::ceil(sx + sw)) - 1), ymin = std::max(0, int(sy)), ymax = std::min(src.h - 1, int(std::ceil(sy + sh)) - 1);
+    auto frac = [](float v) { return int64_t(double(v) * 4294967296.0); };   // SkScalarToFractionalInt (sıfıra doğru)
+    if (smooth && !additive) {
+      const float a = cyy * iSy; const float b = a + iTy; const int32_t f = int32_t((frac(b) - (int64_t(0x8000) << 16)) >> 16);
+      by0 = std::max(ymin, std::min(ymax, f >> 16)); bsy = (f >> 12) & 0xF; by1 = std::max(ymin, std::min(ymax, (f + 0x10000) >> 16));
+    }
     for (int px = X0; px < X1; px++) {
       const float cxx = px + 0.5f; if (cxx < dx || cxx >= dx + dw) continue;
-      // kaynakta karşılığı: hedef piksel merkezinden ölçeğe bölerek, tek duyarlıklı (tarayıcının en yakın komşu örneklemesine en yakın)
+      // kaynakta karşılığı (çift doğrusal): hedef piksel merkezinden ölçeğe bölerek, tek duyarlıklı
       const float u = sx + (cxx - dx) / fx, v = sy + (cyy - dy) / fy;
       float c[4] = {0, 0, 0, 0};
-      if (!smooth) { const uint8_t* s = at(int(std::floor(u)), int(std::floor(v))); for (int k = 0; k < 4; k++) c[k] = s[k]; }
-      else {   // çift doğrusal (tarayıcının varsayılan "low" kalitesi: küçültmede de ara boyut yok); önceden çarpılmış alfa ile
+      if (!smooth) {
+        if (nearX0 < 0) { nearX0 = px; const float a = cxx * iSx; const float b = a + iTx; nearU0 = double(b) - 1.0 / 65536; }
+        const uint8_t* s = at(int(std::floor(nearU0 + double(px - nearX0) * double(iSx))), nearV); for (int k = 0; k < 4; k++) c[k] = s[k];
+      }
+      else if (!additive) {
+        if (bfirst) { bfirst = false; const float a = cxx * iSx; const float b = a + iTx; bfx = frac(b) - (int64_t(0x8000) << 16); }
+        const int32_t f = int32_t(bfx >> 16); bfx += frac(iSx);
+        const int bx0 = std::max(xmin, std::min(xmax, f >> 16)), bsx = (f >> 12) & 0xF, bx1 = std::max(xmin, std::min(xmax, (f + 0x10000) >> 16));
+        const uint8_t* q[4] = {src.at(bx0, by0), src.at(bx1, by0), src.at(bx0, by1), src.at(bx1, by1)};
+        const int xy = bsx * bsy, w[4] = {256 - 16 * bsy - 16 * bsx + xy, 16 * bsx - xy, 16 * bsy - xy, xy};
+        int sum[4] = {0, 0, 0, 0};
+        for (int j = 0; j < 4; j++) { const int A = q[j][3]; for (int k = 0; k < 3; k++) { const int pm = A == 255 ? q[j][k] : (q[j][k] * A + 128 + ((q[j][k] * A + 128) >> 8)) >> 8; sum[k] += pm * w[j]; } sum[3] += A * w[j]; }
+        int pc[4]; for (int k = 0; k < 4; k++) pc[k] = sum[k] >> 8;   // önceden çarpılmış sonuç
+        float cov = 1; if (clipR_ || clipC_) cov = clipCov(px, py);
+        const int A8 = int(std::lround(std::min(1.f, alpha * cov) * 255));
+        if (A8 < 255) { const int sc = A8 + 1; for (int k = 0; k < 4; k++) pc[k] = (pc[k] * sc) >> 8; }
+        if (pc[3] <= 0 && pc[0] + pc[1] + pc[2] == 0) continue;
+        uint8_t* d = img.at(px, py); const int inv = 256 - pc[3];   // kaynak üstte (SkAlphaMulQ)
+        for (int k = 0; k < 3; k++) d[k] = uint8_t(std::min(255, pc[k] + ((d[k] * inv) >> 8)));
+        d[3] = 255; continue;
+      }
+      else {   // ışık (lighter) olarak çift doğrusal: kayan noktalı, önceden çarpılmış alfa ile
         const float fu = u - 0.5f, fv = v - 0.5f; const int iu = int(std::floor(fu)), iv = int(std::floor(fv)); const float tu = fu - iu, tv = fv - iv;
         const uint8_t* q[4] = {at(iu, iv), at(iu + 1, iv), at(iu, iv + 1), at(iu + 1, iv + 1)}; const float w[4] = {(1 - tu) * (1 - tv), tu * (1 - tv), (1 - tu) * tv, tu * tv};
         float sa = 0; for (int j = 0; j < 4; j++) { for (int k = 0; k < 3; k++) c[k] += q[j][k] * q[j][3] / 255.f * w[j]; sa += q[j][3] * w[j]; }

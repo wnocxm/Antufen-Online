@@ -160,9 +160,13 @@ void Hud::handle(World& w) {
     const std::string r = request; request.clear();
     if (r.rfind("talk:", 0) == 0) w.talkTo(std::atoi(r.c_str() + 5));
     else if (r == "hub") win.open(w, "hub");
-    else if (r == "quest") win.open(w, "task");
-    else w.toast("Bu pencere yakında (arayüz 2. parça).");
+    else if (r == "quest") { win.close(); win.open(w, "task"); }
+    else if (r == "char") { win.close(); win.open(w, "role"); }
+    else if (r == "bag") { win.close(); win.open(w, "bag"); }
+    else if (r == "skill") { win.close(); win.open(w, "skill"); }
+    else w.toast("Bu pencere yakında.");
   }
+  if (!win.assignReq.empty()) { assign_ = win.assignReq; w.toastMsg = "Bir yuvaya dokun: " + win.assignName; w.toastT = 3; win.assignReq.clear(); win.close(); }
   if (w.dialogEnt >= 0) { win.close(); win.open(w, "npc", w.dialogEnt, w.dialogSay); w.dialogEnt = -1; w.dialogSay.clear(); }
   if (w.died) { w.died = false; win.close(); deathAt = now + 1.2; }
   if (deathAt >= 0 && now >= deathAt) { deathAt = -1; if (w.player.dead) win.open(w, "dead"); }
@@ -231,33 +235,36 @@ void Hud::draw(engine::Canvas& c, World& w, bool advance) {
     } }
   drawTracker(c, w);
   // sol alt: ejderha madalyonu = yürüme kolu (orijinal FORM_ROCKER), turuncu küre (7005) ışık olarak
-  { const float Rx = rockerX(), Ry = rockerY();
+  { const double Rx = rockerX(), Ry = rockerY();
     if (const core::Image* dm = image("ui/AnbufenUI_Resource_7002.png")) c.drawImage(*dm, 0, 0, float(dm->w), float(dm->h), Rx - 66 * HS, Ry - 67 * HS, 132 * HS, 134 * HS);
-    const float kx = Rx + (joy_.on ? joy_.dx : 0), ky = Ry + (joy_.on ? joy_.dy : 0);
-    if (const core::Image* kn = image("ui/AnbufenUI_Resource_7005.png")) c.drawImage(*kn, 0, 0, float(kn->w), float(kn->h), kx - 19.5f * HS, ky - 19.5f * HS, 39 * HS, 39 * HS, joy_.on ? 1 : 0.8f, false, true); }
+    const double kx = Rx + (joy_.on ? joy_.dx : 0), ky = Ry + (joy_.on ? joy_.dy : 0);
+    if (const core::Image* kn = image("ui/AnbufenUI_Resource_7005.png")) c.drawImage(*kn, 0, 0, float(kn->w), float(kn->h), kx - 19.5 * HS, ky - 19.5 * HS, 39 * HS, 39 * HS, joy_.on ? 1 : 0.8f, false, true); }
   // sağ alt: büyük saldırı düğmesi, çevresinde yay biçiminde beceri ve iksir yuvaları (orijinal halka 7078)
   { const core::Image* ring = image("ui/AnbufenUI_Resource_7078.png");
-    const float ax = vw_ - 50 * HS - safeR, ay = VH - 50 * HS;
-    auto slotAt = [&](float cx, float cy, float r, int qi, std::function<void()> fn) {
-      if (ring) { const float ww = r * 2 + 8; c.drawImage(*ring, 0, 0, float(ring->w), float(ring->h), cx - ww / 2, cy - ww / 2, ww, ww); }
-      const float ir = r * 0.66f; c.clipCircle(cx, cy, ir); c.fillRect(cx - ir, cy - ir, ir * 2, ir * 2, 0x0c0805);
+    const double ax = double(vw_) - 50 * HS - safeR, ay = VH - 50 * HS;
+    const float pulse = assign_.empty() ? 0 : 0.5f + 0.5f * std::sin(float(now) * 1000 / 160);
+    auto slotAt = [&](double cx, double cy, double r, int qi, std::function<void()> fn) {
+      if (!assign_.empty()) c.fillEllipse(cx, cy, r + 5, r + 5, 0xffd250, 0.25f + 0.35f * pulse);
+      if (!assign_.empty()) fn = [this, &w, qi] { w.assignQuick(assign_, qi); assign_.clear(); w.toastMsg = "Kısayola yerleşti."; w.toastT = 1.5f; };
+      if (ring) { const double ww = r * 2 + 8; c.drawImage(*ring, 0, 0, float(ring->w), float(ring->h), cx - ww / 2, cy - ww / 2, ww, ww); }
+      const double ir = r * 0.66; c.clipCircle(cx, cy, ir); c.fillRect(cx - ir, cy - ir, ir * 2, ir * 2, 0x0c0805);
       drawSlot(c, w, qi < int(P.quick.size()) ? P.quick[size_t(qi)] : "", cx - ir, cy - ir, ir * 2 / 32); c.clearClip();
-      hud_.push_back({cx - r - 2, cy - r - 2, r * 2 + 4, r * 2 + 4, std::move(fn)});
+      hud_.push_back({float(cx - r - 2), float(cy - r - 2), float(r * 2 + 4), float(r * 2 + 4), std::move(fn)});
     };
     const int ti = w.target(); const bool npc = ti >= 0 && w.ents[size_t(ti)].kind == Ent::NPC && !w.ents[size_t(ti)].hidden;
-    if (npc) {   // hedef bir kişi: büyük düğme konuşma düğmesi (Android sürümünün turuncu düğmesi)
-      const float r = 32 * HS;
+    if (npc && assign_.empty()) {   // hedef bir kişi: büyük düğme konuşma düğmesi (Android sürümünün turuncu düğmesi)
+      const double r = 32 * HS;
       if (const core::Image* im = image("ui2/talk_7004.png")) c.drawImage(*im, 0, 0, float(im->w), float(im->h), ax - r - 4, ay - r - 4, r * 2 + 8, r * 2 + 8, 1, true);
-      hud_.push_back({ax - r - 2, ay - r - 2, r * 2 + 4, r * 2 + 4, [this, &w, ti] { request = "talk:" + std::to_string(ti); }});
+      hud_.push_back({float(ax - r - 2), float(ay - r - 2), float(r * 2 + 4), float(r * 2 + 4), [this, &w, ti] { request = "talk:" + std::to_string(ti); }});
     } else slotAt(ax, ay, 32 * HS, 0, [this, &w] { attack(w); });
-    auto arc = [&](float R, int n, float from, float to, float r, int base) {
-      for (int i = 0; i < n; i++) { const float a = (from + (to - from) * (n == 1 ? 0 : float(i) / (n - 1))) * float(M_PI) / 180; const int qi = base + i;
+    auto arc = [&](double R, int n, double from, double to, double r, int base) {
+      for (int i = 0; i < n; i++) { const double a = (from + (to - from) * (n == 1 ? 0 : double(i) / (n - 1))) * M_PI / 180; const int qi = base + i;
         slotAt(ax + std::cos(a) * R * HS, ay + std::sin(a) * R * HS, r * HS, qi, [this, &w, qi] { quick(w, qi); }); }
     };
     arc(66, 3, 180, 270, 19, 1);    // iç yay: 3 beceri
     arc(112, 4, 180, 270, 18, 4);   // dış yay: 2 beceri + 2 iksir
     // hedef değiştir: yayın dışında küçük düğme
-    const float tx0 = ax - 142 * HS, ty0 = ay + 22 * HS;
+    const float tx0 = float(ax - 142 * HS), ty0 = float(ay + 22 * HS);
     c.fillEllipse(tx0, ty0, 14, 14, 0x0c0805, 0.8f); c.strokeEllipse(tx0, ty0, 14, 14, 1.5f, 0xb89a50);
     text(c, "S", 13, "◎", tx0, ty0 + 5, 0xffe48a, CENTER);
     hud_.push_back({tx0 - 18, ty0 - 18, 36, 36, [&w] { w.cycleTarget(); }}); }
@@ -265,7 +272,7 @@ void Hud::draw(engine::Canvas& c, World& w, bool advance) {
   { std::vector<const Log*> L; for (const Log& l : logs_) if (now - l.t < 10) L.push_back(&l);
     if (L.size() > 5) L.erase(L.begin(), L.end() - 5);
     if (!L.empty()) {
-      const float bx = rockerX() + 76 * HS, bw = std::max(110.f, std::min(360.f, vw_ - bx - 215 * HS)), bh = float(L.size()) * 11 + 6, by = VH - 6 - bh;
+      const float bx = float(rockerX() + 76 * HS), bw = std::max(110.f, std::min(360.f, float(vw_ - bx - 215 * HS))), bh = float(L.size()) * 11 + 6, by = VH - 6 - bh;
       c.fillRect(bx, by, bw, bh, 0x000000, 0.5f);
       for (size_t i = 0; i < L.size(); i++) text(c, "B", 9, L[i]->m, bx + 5, by + 12 + float(i) * 11, L[i]->c, LEFT, std::min(1.f, float((10 - (now - L[i]->t)) / 1)));
     } }
@@ -285,19 +292,19 @@ bool Hud::press(World& w, int id, float x, float y) {
   for (int i = int(hud_.size()) - 1; i >= 0; i--) { const Hit& h = hud_[size_t(i)]; if (x >= h.x && x <= h.x + h.w && y >= h.y && y <= h.y + h.h) { auto fn = h.fn; fn(); return true; } }
   if (x < std::max(vw_ * 0.33f, 240.f) && y > engine::VH * 0.4f && !joy_.on) {   // yürüme kolu: sol alt bölgede herhangi bir yerden başlar
     float dx = x - rockerX(), dy = y - rockerY(); const float l = std::hypot(dx, dy); if (l > 48) { dx = dx / l * 48; dy = dy / l * 48; }
-    joy_ = {true, id, rockerX(), rockerY(), dx, dy}; return true;
+    joy_ = {true, id, float(rockerX()), float(rockerY()), dx, dy}; return true;
   }
   taps_.push_back({id, x, y}); (void)w;
   return false;
 }
 void Hud::move(int id, float x, float y) {
-  if (wp_.on && id == wp_.id) { wp_.moved += std::fabs(y - wp_.ly) + std::fabs(x - wp_.lx); wp_.lx = x; wp_.ly = y; return; }
+  if (wp_.on && id == wp_.id) { wp_.moved += std::fabs(y - wp_.ly) + std::fabs(x - wp_.lx); if (wp_.moved > 6) win.drag(y - wp_.ly, wp_.x, wp_.y); wp_.lx = x; wp_.ly = y; return; }
   if (joy_.on && id == joy_.id) { float dx = x - joy_.ox, dy = y - joy_.oy; const float l = std::hypot(dx, dy); if (l > 48) { dx = dx / l * 48; dy = dy / l * 48; } joy_.dx = dx; joy_.dy = dy; }
 }
 void Hud::release(World& w, int id, float x, float y) {
   if (wp_.on && id == wp_.id) { const WinPtr p = wp_; wp_.on = false; if (p.moved <= 6) win.tap(w, p.x, p.y); return; }
   if (joy_.on && id == joy_.id) joy_.on = false;
-  for (size_t i = 0; i < taps_.size(); i++) if (taps_[i].id == id) { const Tap t = taps_[i]; taps_.erase(taps_.begin() + long(i)); if (std::hypot(x - t.x, y - t.y) < 12) tapWorld(w, x, y); break; }
+  for (size_t i = 0; i < taps_.size(); i++) if (taps_[i].id == id) { const Tap t = taps_[i]; taps_.erase(taps_.begin() + long(i)); if (!assign_.empty()) { assign_.clear(); w.toastT = 0; } if (std::hypot(x - t.x, y - t.y) < 12) tapWorld(w, x, y); break; }
 }
 void Hud::joy(double& sx, double& sy) const {
   sx = sy = 0; if (joy_.on && std::hypot(joy_.dx, joy_.dy) > 6) { sx = joy_.dx; sy = joy_.dy; }

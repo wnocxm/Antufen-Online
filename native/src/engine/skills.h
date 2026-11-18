@@ -37,7 +37,7 @@ struct SkillDef;
 
 // beceri işlevlerine verilen bağlam (HTML f(K, s, p, t)): K("sabit") becerinin o kademedeki değeri, s oyuncu değerleri, t hedef
 struct SkCtx {
-  World& w; const SkillDef& sk; const Stats& s; int L; Ent* t;
+  World& w; const SkillDef& sk; const Stats& s; int L; Ent* t; int R = -1;   // R: K() bu kademeden (beceri açıklaması; -1 şimdiki)
   double K(const char* key) const;
   int rank(int sn) const;                    // HTML skRankSn
   double C(int sn, const char* key) const;   // HTML skCSn
@@ -79,6 +79,7 @@ class Skills {
   const std::vector<SkillTree>& trees(const std::string& c) const { static const std::vector<SkillTree> e; auto it = trees_.find(c); return it == trees_.end() ? e : it->second; }
   const SkillTree* tree(int id) const;
   bool loaded() const { return !bySn_.empty(); }
+  const core::Json& json() const { return J_; }   // skills.json (ırk ağacı adları, yaşam meslekleri)
 
  private:
   core::Json J_;

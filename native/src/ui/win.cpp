@@ -26,11 +26,14 @@ static std::string bard80(const std::string& cls, int lv) {
 }
 
 void Win::open(World& w, const std::string& name, int npc, const std::string& say) {
-  (void)w; cur = name;
+  cur = name; shop_.clear();
   if (name == "npc") { npc_ = npc; say_ = say; dq_ = -1; dtrv_ = -1; dkey_.clear(); }
   if (name == "task") ksel_ = 0;
+  if (name == "shop") { H_.tab = 0; H_.sel.clear(); H_.off = 0; }
+  B_.sel.clear(); B_.page = 0;
+  if (name == "bag") w.questFlag("openBag");
 }
-void Win::close() { cur.clear(); npc_ = -1; say_.clear(); modal_ = Modal(); }
+void Win::close() { cur.clear(); npc_ = -1; say_.clear(); modal_ = Modal(); shop_.clear(); wantText = false; }
 void Win::ask(const std::string& text, std::function<void()> onYes) { modal_.on = true; modal_.text = text; modal_.yes = std::move(onYes); }
 
 void Win::hit(const Xf& xf, const std::string& id, float x, float y, float w, float h, std::vector<Hit>* L) { (L ? *L : hits_).push_back({id, xf.X(x), xf.Y(y), w * xf.k, h * xf.k}); }
@@ -76,7 +79,7 @@ std::pair<std::string, std::vector<Win::Opt>> Win::npcOptions(World& w) {
     } else { txt = !q.tr.wait.empty() ? q.tr.wait : q.tr.goal; Opt b; b.t = "Tamam"; b.a = "back"; o = {b}; }
     return {txt, o};
   }
-  if (w.balance().shops.count(cn)) { Opt e; e.t = "Alışveriş"; e.a = "soon"; e.c = 0xffe070; o.push_back(e); }
+  if (w.balance().shops.count(cn)) { Opt e; e.t = "Alışveriş"; e.a = "shop"; e.c = 0xffe070; o.push_back(e); }
   if (cn == "魔法兽强化大师") for (const char* t : {"✦ Dönüşüm", "✦ Beceri aktarma"}) { Opt e; e.t = t; e.a = "soon"; o.push_back(e); }
   for (int qi : w.questsFor(cn)) {
     const Quest& q = Q.all()[size_t(qi)]; const std::string st = w.questState(qi);
@@ -142,6 +145,7 @@ void Win::tapNpc(World& w, const std::string& id) {
   if (e.a == "back") { dq_ = -1; return; }
   if (e.a == "say") { say_ = e.s; return; }
   if (e.a == "soon") { w.toast("Bu bölüm yakında."); return; }
+  if (e.a == "shop") { const std::string cn = w.ents[size_t(n)].name; close(); openShop(w, cn); return; }
   if (e.a == "tp") { close(); w.questTeleport(e.qi); return; }
   if (e.a == "trv") { dtrv_ = 0; return; }
   if (e.a == "tmore") { dtrv_++; return; }
@@ -246,6 +250,7 @@ void Win::drawDead(engine::Canvas& c, World& w, float vw, float VH) {
 // ---------------- onay kutusu (NEW_FORM_DIALOG_YESNO) ----------------
 void Win::drawModal(engine::Canvas& c, float vw, float VH) {
   c.fillRect(0, 0, vw, VH, 0x000000, 0.45f); modal_.hits.clear();
+  if (modal_.num) { drawNum(c, vw, VH); return; }
   const float k = 1.3f; const Xf xf = begin(k, std::round((vw - 227 * k) / 2), std::round((VH - 129 * k) / 2)); const std::string f = "n_dialog_yesno";
   nDraw(c, xf, f, 50042, false);
   auto L = F_.wrap(modal_.text, 196, 11); if (L.size() > 5) L.resize(5);
@@ -260,8 +265,12 @@ void Win::drawModal(engine::Canvas& c, float vw, float VH) {
 void Win::draw(engine::Canvas& c, World& w, float dt) {
   clock_ += dt; hits_.clear();
   const float vw = float(c.w()), VH = float(engine::VH);
-  if (cur == "npc") drawNpc(c, w, VH);
+  if (cur == "bag") drawBag(c, w, VH);
+  else if (cur == "role") drawRole(c, w, VH);
+  else if (cur == "npc") drawNpc(c, w, VH);
   else if (cur == "task") drawTask(c, w, VH);
+  else if (cur == "skill") drawSkill(c, w, VH);
+  else if (cur == "shop") drawShop(c, w, vw, VH);
   else if (cur == "dead") drawDead(c, w, vw, VH);
   if (cur == "hub") drawHub(c, w, VH);
   if (modal_.on) drawModal(c, vw, VH);
@@ -270,8 +279,13 @@ void Win::draw(engine::Canvas& c, World& w, float dt) {
 bool Win::tap(World& w, float x, float y) {
   if (modal_.on) {
     for (const Hit& h : modal_.hits) if (x >= h.x && x < h.x + h.w && y >= h.y && y < h.y + h.h) {
-      pressed_ = h.id; pressT_ = clock_;
-      if (h.id == "m52786") { auto yes = modal_.yes; modal_ = Modal(); if (yes) yes(); } else if (h.id == "m52788") modal_ = Modal();
+      pressed_ = h.id; pressT_ = clock_; Modal& m = modal_;
+      if (h.id == "m52786") { auto yes = m.yes; modal_ = Modal(); if (yes) yes(); }
+      else if (h.id == "m52788" || h.id == "m52792") { modal_ = Modal(); wantText = false; }
+      else if (h.id == "m50758") { m.n = m.n > 1 ? m.n - 1 : m.max; m.typed.clear(); }
+      else if (h.id == "m50759") { m.n = m.n < m.max ? m.n + 1 : 1; m.typed.clear(); }
+      else if (h.id == "m50761") { wantText = true; m.typed.clear(); }   // sayıya dokun: klavyeyle adet yaz (telefonda ekran klavyesi)
+      else if (h.id == "m52791") { auto ok = m.ok; const int n = m.n; modal_ = Modal(); wantText = false; if (ok) ok(n); }
       break;
     }
     return true;
@@ -283,12 +297,17 @@ bool Win::tap(World& w, float x, float y) {
   const std::string id = h->id; pressed_ = id; pressT_ = clock_;
   if (id.rfind("hub:", 0) == 0) {
     const std::string k = id.substr(4);
-    if (k == "task") { close(); open(w, "task"); } else if (k != cur) w.toast("Bu pencere yakında (arayüz 2. parça).");
+    if (k == "task" || k == "role" || k == "bag" || k == "skill") { if (k != cur) { close(); open(w, k); } }
+    else if (k != cur) w.toast("Bu pencere yakında.");
     return true;
   }
   if (id == "close") { close(); return true; }
-  if (cur == "npc") tapNpc(w, id);
+  if (cur == "bag") tapBag(w, id);
+  else if (cur == "role") tapRole(w, id);
+  else if (cur == "npc") tapNpc(w, id);
   else if (cur == "task") tapTask(w, id);
+  else if (cur == "skill") tapSkill(w, id);
+  else if (cur == "shop") tapShop(w, id);
   else if (cur == "dead" && id == "revive") { close(); w.revive(); }
   return true;
 }

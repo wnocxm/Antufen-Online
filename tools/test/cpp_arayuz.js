@@ -1,7 +1,7 @@
 // C++ ↔ HTML oyun ekranı (HUD) karşılaştırması (docs/09-cpp.md): aynı durum (sahne, karakter, hedef, görevler, bekleme, can/mana),
 // HTML'de oyunun kendi çizimi (drawWorld + drawHud; ekran görüntüsü), C++'ta anrufen_test "arayuz 1". İki kare:
-//   <ad>_yazisiz: yazılar kapalı → piksel piksel (tools/test/goruntu_fark.py; sınır SINIR, varsayılan %1,5: kenar yumuşatması, görsel
-//                 küçültme ve tarayıcının alfa yuvarlaması küçük farklar bırakır),
+//   <ad>_yazisiz: yazılar kapalı → piksel piksel (tools/test/goruntu_fark.py; sınır SINIR, varsayılan %1: çizgi/elips kenar yumuşatması
+//                 ve yarım piksel kenarlar küçük farklar bırakır; görsel ölçekleme tarayıcının Skia hesabıyla aynı),
 //   <ad>_yazili:  yazılar açık → yan yana göz denetimi (yazı tarayıcıda farklı yumuşatılır; fark yüzdesi bilgi için).
 // Duyurular, günlük ve uçan sayılar iki tarafta da kapalı (kare sayacına bağlı); onlar göz denetiminde.
 //   node tools/test/cpp_arayuz.js   (OUT=klasör; URL verilmezse www/ geçici sunucuyla açılır; önce: cmake --build native/build)
@@ -68,7 +68,7 @@ const MULBERRY = `(a => () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imu
   execFileSync('native/build/anrufen_test', [path.join(OUT, 'senaryo.txt')], { stdio: ['ignore', 'ignore', 'inherit'], env: Object.assign({}, process.env, { ANRUFEN_TARAYICI_ALFA: '1' }) });
   let out = '';
   const run = (lim, list) => { try { return execFileSync('python3', ['tools/test/goruntu_fark.py', OUT, ...list], { env: Object.assign({}, process.env, { SINIR: lim }) }).toString(); } catch (e) { process.exitCode = 1; return e.stdout.toString(); } };
-  out += 'yazısız (piksel):\n' + run(process.env.SINIR || '1.5', names.map(n => n + '_yazisiz'));
+  out += 'yazısız (piksel):\n' + run(process.env.SINIR || '1', names.map(n => n + '_yazisiz'));
   out += 'yazılı (göz denetimi; yan yana: <ad>_yazili_fark.png):\n' + run('100', names.map(n => n + '_yazili'));
   process.stdout.write(out);
   if (errs.length) { console.log('HATA', errs); process.exitCode = 1; }

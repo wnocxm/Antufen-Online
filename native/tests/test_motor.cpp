@@ -106,6 +106,18 @@ int main(int argc, char** argv) {
     hud.press(w, 2, 114, 309); double jx, jy; hud.joy(jx, jy); hud.release(w, 2, 114, 309);
     CHECK(jy > 6 && std::fabs(jx) < 1, "arayüz: yürüme kolu aşağı");
     hud.press(w, 3, 640 - 95 + 40, 40); CHECK(hud.request == "map", "arayüz: küçük haritaya dokununca harita penceresi istenir");
+    // eşyalar: Gelişim Paketi, başka sınıfın eşyası, satın alma, satma, çıkarma
+    w.P = engine::CharData(); w.setChar("战士", "人类", "male"); w.setLevel(12);
+    w.addItem("growthBox", 1, true); w.useItem("growthBox");
+    CHECK(w.eqOf("weap") == "10003" && w.eqOf("body") == "10004" && w.eqOf("head") == "10002" && w.countItem("hp1") == 10 && !w.player.look.weapG.empty(), "eşya: Gelişim Paketi acemi ekipmanını kuşatır, görünüş değişir");
+    w.addItem("10006", 1, true); w.equip("10006"); CHECK(w.eqOf("weap") == "10003" && w.toastMsg == "Bu eşya Büyücü içindir.", "eşya: başka sınıfın silahı kuşanılmaz");
+    w.P.gold = 100; w.buyItem("30016", 3); CHECK(w.P.gold == 40 && w.countItem("30016") == 3, "eşya: satın alma (3 × 20 altın)");
+    w.sellItem("30016", 2); CHECK(w.P.gold == 44 && w.countItem("30016") == 1, "eşya: satma (satış fiyatı 2)");
+    w.unequip("weap"); CHECK(w.eqOf("weap").empty() && w.countItem("10003") == 1, "eşya: çıkarılan çantaya döner");
+    // en yakın komşu ölçekleme: 32 → 36 px'te tam sınıra düşen sütun küçük olan kaynak pikseline gider (tarayıcı/Skia)
+    { core::Image s2; s2.w = 32; s2.h = 1; s2.px.assign(32 * 4, 255); for (int x = 0; x < 32; x++) s2.px[size_t(x) * 4] = uint8_t(x);
+      engine::Canvas cc; cc.resize(200, 4); cc.drawImage(s2, 0, 0, 32, 1, 154.125f - 100, 0, 36, 4);
+      CHECK(cc.img.px[size_t(57) * 4] == 2 && cc.img.px[size_t(58) * 4] == 3, "tuval: en yakın komşu sınır örneği (Skia)"); }
   }
   std::printf("motor testleri: %d geçti, %d kaldı\n", passed, failed);
   return failed ? 1 : 0;

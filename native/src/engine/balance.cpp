@@ -45,20 +45,24 @@ void Balance::load(const Vfs& vfs, const core::Json& D) {
       auto hot = [](const core::Json& h, Item::Hot& o) { if (h.isArr()) { o.res = h[0].str(); o.amt = h[1].num(); o.sec = h[2].num(); } };
       hot(u["hot"], x.hot); hot(u["hot2"], x.hot2);
     }
-    for (const auto& s : it["st"].obj()) x.st[s.first] = s.second.num();
+    for (const auto& s : it["st"].obj()) { x.st[s.first] = s.second.num(); x.stOrder.push_back(s.first); }
+    x.desc = it["desc"].str(); x.gfx = it["gfx"].str(); x.price = it["price"].i(0); x.sell = it["sell"].i(0); x.pet = it["pet"].truthy();
     itemIdx_[x.id] = items_.size(); items_.push_back(std::move(x));
   }
-  for (const auto& kv : I["shops"].obj()) shops.insert(kv.first);
+  for (const auto& kv : I["shops"].obj()) {
+    shops.insert(kv.first); auto& T = shopTabs[kv.first];
+    for (const core::Json& t : kv.second.arr()) { ShopTab x; x.name = t[0].str(); for (const core::Json& id : t[1].arr()) x.ids.push_back(id.str()); T.push_back(std::move(x)); }
+  }
   for (const auto& hp : std::vector<std::pair<std::string, std::string>>{{"道具商人（人类）", "道具商人（夜精灵）"}, {"武器商人（人类）", "武器商人（夜精灵）"}, {"防具商人（人类）", "防具商人（夜精灵）"}, {"饰品商人（人类）", "饰品商人（夜精灵）"}})
-    if (shops.count(hp.first)) shops.insert(hp.second);   // gece elfi tüccarları aynı listeleri satar
+    if (shops.count(hp.first)) { shops.insert(hp.second); shopTabs[hp.second] = shopTabs[hp.first]; }   // gece elfi tüccarları aynı listeleri satar
   // oyunun kendi eşyaları (HTML game.js ITEMS; tablodakilerden sonra — JS nesne sırası: sayısal numaralar önce)
-  auto own = [&](const char* id, const char* nm, int icon, double hp, double mp, bool growth) {
-    Item x; x.id = id; x.name = nm; x.ik = "item"; x.icon = icon; x.useHp = hp; x.useMp = mp; x.use = hp || mp; x.growth = growth;
-    itemIdx_[x.id] = items_.size(); items_.push_back(std::move(x));
+  auto own = [&](const char* id, const char* nm, int icon, const char* desc, int price, double hp, double mp, bool growth) {
+    Item x; x.id = id; x.name = nm; x.ik = "item"; x.icon = icon; x.desc = desc; x.price = price; x.useHp = hp; x.useMp = mp; x.use = hp || mp; x.growth = growth;
+    x.quest = x.id == "quest"; itemIdx_[x.id] = items_.size(); items_.push_back(std::move(x));
   };
-  own("hp1", "Zayıf Can İksiri", 1019, 800, 0, false); own("hp2", "Can İksiri", 1020, 2000, 0, false);
-  own("mp1", "Zayıf Mana İksiri", 1026, 0, 800, false); own("mp2", "Mana İksiri", 1024, 0, 2000, false);
-  own("growthBox", "Gelişim Paketi", 1038, 0, 0, true); own("quest", "Görev Eşyası", 1125, 0, 0, false);
+  own("hp1", "Zayıf Can İksiri", 1019, "800 can yeniler.", 20, 800, 0, false); own("hp2", "Can İksiri", 1020, "2000 can yeniler.", 80, 2000, 0, false);
+  own("mp1", "Zayıf Mana İksiri", 1026, "800 mana yeniler.", 20, 0, 800, false); own("mp2", "Mana İksiri", 1024, "2000 mana yeniler.", 80, 0, 2000, false);
+  own("growthBox", "Gelişim Paketi", 1038, "Aç: seviyene uygun ekipman ve iksir çıkar.", 0, 0, 0, true); own("quest", "Görev Eşyası", 1125, "Görev için gerekli.", 0, 0, 0, false);
   // canavar kayıtları; veri düzeltmesi (HTML fixMonData): ☆☆【小胖】拉斯 kaydında görünüm ile ölüm efekti yer değiştirmiş
   auto fx = [](const std::string& s) { return s.rfind("特效-", 0) == 0; };
   for (const auto* kv : jsOrder(D["mon"])) {

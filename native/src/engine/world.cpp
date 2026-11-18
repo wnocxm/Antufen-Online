@@ -135,8 +135,11 @@ std::string World::skLock(const SkillDef& sk) const {
 }
 bool World::skillUp(const SkillDef& sk) {
   const int r = skRank(sk);
-  if (!sk.race.empty() || r >= (sk.mx ? sk.mx : 10) || !skLock(sk).empty() || P.sp < 1) return false;
-  P.sp--; P.sk[sk.id] = r + 1; clampVitals(); return true;
+  if (!sk.race.empty()) return false;
+  if (r >= (sk.mx ? sk.mx : 10)) { toast("Bu beceri en yüksek kademede."); return false; }
+  if (!skLock(sk).empty()) { toast(skLockMsg(sk)); return false; }
+  if (P.sp < 1) { toast("Beceri puanın yok. Seviye atlayınca puan kazanırsın."); return false; }
+  P.sp--; P.sk[sk.id] = r + 1; note(sk.name + ": kademe " + std::to_string(r + 1), LOG_Q); clampVitals(); return true;
 }
 // her puan, öğrenilebilir beceriler arasında kademesi en düşük olana (eşitse önceki ağaç / önceki yuva); oyuncu gibi önce bir sonraki
 // ağacı açacak kadar (acemi 35, sınıf 40), sonra en üstteki açık ağaç. spec: hangi uzmanlık (öbürü alınmaz)
@@ -166,21 +169,23 @@ void World::skillAutoSpend(int points, int spec) {
 // puanları sıfırla: Eğitim Kitabı (30092 ya da 30788) harcanır; GM'de bedava
 bool World::skillReset(bool free) {
   int spent = 0; for (const auto& kv : P.sk) spent += kv.second;
-  if (!spent) return false;
-  if (!free && !removeItem("30092") && !removeItem("30788")) return false;
-  P.sp += spent; P.sk.clear(); player.buffs.clear(); clampVitals(); return true;
+  if (!spent) { toast("Harcanmış beceri puanı yok."); return false; }
+  if (!free && !removeItem("30092") && !removeItem("30788")) { toast("Eğitim Kitabı gerekir (beceri eğitmeninde satılır)."); return false; }
+  P.sp += spent; P.sk.clear(); player.buffs.clear();
+  note("Beceri puanları sıfırlandı: " + std::to_string(spent) + " puan geri geldi.", LOG_Q); clampVitals(); return true;
 }
 
 int World::countItem(const std::string& id) const { for (const auto& b : P.bag) if (b.first == id) return b.second; return 0; }
 // eşya adı (HTML ITEMS[id].name): eşya tablosu, ya da oyunun kendi iksirleri ve paketi
 std::string World::itemName(const std::string& id) const { const Item* it = bal_.item(id); return it ? it->name : id; }
 
-// eşya kullan (HTML useItem): iksir, yiyecek (süre boyunca yeniler), görev eşyası; kuşanma, Gelişim Paketi ve evcil eşyaları eşya adımında
+// eşya kullan (HTML useItem): ekipman kuşanılır, iksir, yiyecek (süre boyunca yeniler), görev eşyası, Gelişim Paketi; evcil eşyaları evcil adımında
 void World::useItem(const std::string& id) {
   const Item* it = bal_.item(id); Player& p = player; const Stats s = stats();
   if (!it || !countItem(id) || p.dead) return;
-  if (!it->slot.empty() || it->growth) { toast("Eşya penceresi yakında."); return; }
-  if (!it->use) return;
+  if (it->pet) { toast("Evcil hayvanlar yakında."); return; }
+  if (!it->slot.empty()) { equip(id); return; }
+  if (!it->use) { if (it->growth) openGrowthBox(id); return; }
   if (it->qt) { questUseItem(id); return; }
   if (it->useHp) { if (p.hp >= s.hp) { note("Canın dolu."); return; } p.hp = std::min(s.hp, p.hp + it->useHp); ufloat(-2, "+" + std::to_string(int(it->useHp)), 0x7bff8a); }
   if (it->useMp) { if (p.mp >= s.mp) { note("Manan dolu."); return; } p.mp = std::min(s.mp, p.mp + it->useMp); ufloat(-2, "+" + std::to_string(int(it->useMp)), 0x6fb7ff); }

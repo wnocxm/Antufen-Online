@@ -7,7 +7,7 @@
 
 namespace engine {
 
-double SkCtx::K(const char* key) const { return w.skC(sk, key); }
+double SkCtx::K(const char* key) const { return w.skC(sk, key, R); }
 int SkCtx::rank(int sn) const { return w.skRankSn(sn); }
 double SkCtx::C(int sn, const char* key) const { return w.skCSn(sn, key); }
 

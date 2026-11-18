@@ -78,6 +78,7 @@ struct CharData {
   std::map<int, QuestSt> quests;                         // alınmış görevler
   std::set<int> done;                                    // bitmiş görevler
   bool hasHome = false; std::string homeScene; bool homeXY = false; int homeX = 0, homeY = 0;   // ölünce doğulan yer (ışınlanma görevi)
+  std::map<std::string, int> life;                       // yaşam meslekleri (meslek → kademe; sistem sonraki adımda)
 };
 
 struct Stats { double hp = 0, mp = 0, atk = 0, def = 0, crit = 0, dodge = 0, hpreg = 0, mpreg = 0, res = 0, dr = 0, spd = 0, goldUp = 0, lifeEl = 0,
@@ -129,6 +130,23 @@ class World {
   bool skillUp(const SkillDef& sk);
   void skillAutoSpend(int points, int spec = 0);  // puanları oyuncu gibi dağıt (GM "ağaçları doldur")
   bool skillReset(bool free);
+  std::string skLockMsg(const SkillDef& sk) const;          // öğrenme şartının açıklaması (boş: öğrenilebilir)
+  std::string skDesc(const SkillDef& sk, int r = 0) const;  // açıklama: orijinal şablon, {sabit} kademe değeriyle (r 0: şimdiki)
+  std::string skNextDiff(const SkillDef& sk, int r) const;  // sonraki kademede değişen sayılar: "20→40, 5→6"
+  // eşyalar (HTML canEquip, equip, unequip, buyItem, sellItem, gmGear; world_items.cpp)
+  std::string canEquip(const Item& it) const;               // boş: kuşanılabilir; değilse neden
+  void equip(const std::string& id);
+  void unequip(const std::string& slot);
+  void buyItem(const std::string& id, int n = 1);
+  void sellItem(const std::string& id, int n = 1);
+  std::string eqOf(const std::string& slot) const { auto it = P.eq.find(slot); return it == P.eq.end() ? std::string() : it->second; }
+  void refreshLook();                                       // ekipman görünümü (eşyanın gfx alanı)
+  void gmGear();                                            // GM: seviyeye uygun en iyi ekipman
+  void openGrowthBox(const std::string& id);               // Gelişim Paketi: acemi ekipmanı + iksirler
+  void assignQuick(const std::string& sl, int qi);          // kısayol halkasına yerleştir (aynısı başka yuvadaysa oradan kalkar)
+  std::string clsName() const;                              // acemi / sınıf / ikinci sınıf adı
+  static std::string clsTr(const std::string& cls);        // Savaşçı, Büyücü, Kutsal Elçi
+  static std::string raceTr(const std::string& race);      // İnsan, Gece Elfi
   void clampVitals();
   int healPlayer(double h, const std::string& fx = "");
   bool god = false, gmNoCd = false, fast = false, gmFreeTravel = false;   // GM: ölümsüzlük, beklemesiz + manasız beceri, hızlı koşu, ücretsiz yolculuk
