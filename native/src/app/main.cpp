@@ -1,7 +1,7 @@
 // anrufen: pencereli oyun (SDL2). Tuval 360 piksel yüksekliğinde çizilir (HTML'deki gibi), pencereye büyütülür.
 //   anrufen [--veri <klasör|paket.gdp>]… [--sahne <numara>] [--sinif 战士|法师|牧师] [--irk 人类|精灵] [--cinsiyet male|fema]
 // Tuşlar: ok tuşları / WASD yürü, F12 ekran görüntüsü (anrufen_ekran.png), Esc çıkış.
-// Veri verilmezse sırayla: ./veri/oyun.gdp, ../../www/assets, ../www/assets, www/assets.
+// Veri verilmezse sırayla: veri/oyun.gdp, ../veri/oyun.gdp, ../../www/assets, ../../../www/assets, ../www/assets, www/assets.
 #include <SDL.h>
 
 #include <algorithm>
@@ -25,7 +25,9 @@ int main(int argc, char** argv) {
     if (k == "--veri") data.push_back(v); else if (k == "--sahne") scene = v;
     else if (k == "--sinif") look.cls = v; else if (k == "--irk") look.race = v; else if (k == "--cinsiyet") look.sex = v;
   }
-  if (data.empty()) for (const char* p : {"veri/oyun.gdp", "../../www/assets", "../www/assets", "www/assets"}) if (std::filesystem::exists(p)) { data.push_back(p); break; }
+  // veri aranır: oyunun yanındaki paket (Visual Studio programı build/Release içine koyar), sonra geliştirme klasörü
+  if (data.empty()) for (const char* p : {"veri/oyun.gdp", "../veri/oyun.gdp", "../../www/assets", "../../../www/assets", "../www/assets", "www/assets"})
+    if (std::filesystem::exists(p)) { data.push_back(p); break; }
   Vfs vfs; Assets assets;
   try {
     for (const std::string& d : data) { if (d.size() > 4 && d.substr(d.size() - 4) == ".gdp") vfs.mountPack(d); else vfs.mountDir(d); }

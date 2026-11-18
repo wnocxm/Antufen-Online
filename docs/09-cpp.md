@@ -27,6 +27,7 @@ native/
   src/tools/              godat_dump.cpp, godat_pack.cpp (komut satırı araçları)
   tests/                  test_godat.cpp, test_motor.cpp (birim testleri)
   third_party/SDL2/       SDL 2.30.9 kaynağı (sürüm, kaynak, ayıklananlar: third_party/README.md)
+  third_party/zlib/       zlib 1.3.1 (sistemde yoksa: Windows, Android, iOS)
   build/                  derleme çıktısı + build/veri/oyun.gdp (git dışı)
   anahtar.txt             yayın anahtarı (git dışı; yoksa geliştirme anahtarı)
 ```
@@ -35,6 +36,13 @@ cmake -S native -B native/build -G Ninja && cmake --build native/build && ctest 
 cmake --build native/build --target anrufen     # pencereli oyun (SDL2 burada derlenir, ~10 sn)
 cmake --build native/build --target veri        # www/assets → build/veri/oyun.gdp (2955 dosya, 56 → 33 MB, şifreli)
 ```
+
+### Kendi bilgisayarında (kullanıcı)
+- **Windows:** Visual Studio 2022 ("C++ ile masaüstü geliştirme" iş yükü; CMake içinde gelir). "x64 Native Tools Command Prompt" içinde, depo kökünde:
+  `cmake -S native -B native/build` → `cmake --build native/build --config Release --target anrufen veri` → `native\build\Release\anrufen.exe` (veriyi `native\build\veri\oyun.gdp`'den bulur).
+  Windows'ta zlib yoktur; depodaki kopya kendiliğinden derlenir. SDL2 de depodan derlenir (ilk sefer birkaç dakika).
+- **Linux:** derleyici, CMake, Ninja ve ekran kütüphanelerinin geliştirme paketleri (X11 ya da Wayland); komutlar yukarıdaki gibi, program `native/build/anrufen`.
+- Bu ortamda (bulut) yalnız ekransız test modu ve sahte ekran sürücüsüyle duman testi yapılabiliyor; gerçek pencere senin bilgisayarında.
 
 ## Motor (2. adım)
 - **Çizim yazılımla** (`Canvas`, RGBA): her kare işlemcide çizilir, pencerede SDL dokusu olarak büyütülür (keskin piksel). Aynı kod ekransız testte PNG'ye yazar → test görüntüsü oyundakiyle aynıdır. 2D ve 640×360 mantıksal ekran için yeterince hızlı; gerekirse sonra GPU'ya taşınır.
