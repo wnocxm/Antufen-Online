@@ -57,3 +57,5 @@ Her commit'te buraya bir satır eklenir (tarih başlığı altında). Ayrıntı 
 - 24 uzmanlık becerisi ve 4 ırk becerisi çalışıyor (can emme, yansıtma, kanama, dönüşümler, totem, mana kalkanı…); 80'de ikinci sınıf yükseltmesi (Kara Şövalye / Başbüyücü / Seçilmiş).
 - Eğitim Kitabı (puan sıfırlama) beceri eğitmenlerinde; Yaşam Elementi (elf ırk becerisi).
 - Denge: orijinal sayılarla büyücü/rahip zayıfladı; sınıf vuruş çarpanları (1,25 / 1,7 / 1,75) ile 10-80 yeniden ölçüldü. GM Sınıf sekmesine ikinci yükseltme, bedava sıfırlama, ağaçları doldur.
+- Beceri simgeleri kaynakla denetlendi: Symbian yolları ve APK tablosuyla 75/76 aynı, APK görüntüleriyle savaşçının 24 simgesi birebir; simgeler artık net (yumuşatmasız).
+- Yazı tipleri: başlık/düğme/sol menü Metamorphous, gövde Alegreya (Türkçe harfli, oyunla birlikte gelir); sol menüdeki çift yazı (kaydırılmış gölge kopyası) kaldırıldı, tek kalem + dış çizgi; NPC konuşmasında seçili satır yazısı koyu.

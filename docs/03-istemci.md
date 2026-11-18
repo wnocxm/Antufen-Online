@@ -110,6 +110,7 @@ Otomatik yol: `routeTo(sid)` sahneler arası (`scenePath`), `routeToNpc(cn)`, `w
 - Orijinalde PvE etkisi olmayanlar da var: isabet (Mana Denetimi; canavarların kaçınması yok), Umutsuzluk Gücü (canavar şifası yok), Mutlak Alan (takım yok), Kutsal Akış (hasar türü ayrımı yok).
 - **Denge** (orijinal sayılar + bizim sınıf tabanları): vuruş çarpanı `dmgK` savaşçı 1,25, büyücü 1,7, rahip 1,75 (eskiden büyücü/rahip becerilerinde ×1,5 vardı; orijinal "saldırı + ek" biçiminde). `tools/test/savas.js` puanları oyuncu gibi dağıtır (`skillAutoSpend`: acemi 35 → sınıf 40 → uzmanlık). 18.11 sonucu: 10-55 normal canavar 4-10 sn, seçkin 12-35 sn, kayıp can ≤%82 (büyücü 23☆ %81); 40-80 iki uzmanlıkla hepsi kazanıyor; zindan boss'ları 0-4 iksirle; 40. sınıf görevi hedefleri acemi ağacıyla iksirsiz.
 - Uzmanlık becerilerinin mana bedelleri bizim (orijinal değerler sunucudaydı); bekleme süreleri kayıttan.
+- **Simgeler** (18.11 denetim): her becerinin simgesi kendi kaydındaki yoldan (`icon_res_skill`, tam yolla, çakışma yok; 3 beceri eşya simgesi kullanıyor). APK'nın beceri tablosuyla adına göre karşılaştırıldı: 76 becerinin 75'inde yol aynı (治疗术 APK'da bu adla yok). Kullanıcının APK görüntüleriyle savaşçının 4 ağacındaki 24 simge tek tek gözle karşılaştırıldı: hepsi aynı.
 
 ## Eşyalar ve dükkânlar
 - **Satın alma / satma adedi** (`win.js buyAsk`, `sellAsk`):
@@ -138,6 +139,12 @@ Sekmeler (`#gtools` `v:maps|dg|pet`, `drawGmSys`, `gmX` in `ui.js`):
 Test: `tools/test/gm.js` panel düğmelerine gerçekten basar (görüntüler `OUT_zindan.png`, `OUT_evcil.png`, `OUT_panda.png`, `OUT_atesdevi.png`, `OUT_aktarma.png`, `OUT_sinif.png`; Ateş Devi'nin 8 biçimini sırayla geçer).
 
 ## Arayüz notları
+- **Yazı tipleri** (18.11, kullanıcı isteği: "Excel/Word gibi duruyor, oyun havası yok"): `www/assets/fonts/` (SIL OFL, @fontsource; latin + latin-ext dosyası birlikte: ç ö ü temel Latin'de, ğ ş İ genişletilmiş Latin'de). `forms.js` başındaki `FH` / `FB` değişkenleri, `loadFonts()` açılışta yükler.
+  - `FH` başlık: **Metamorphous** — sol menü, sekmeler, düğmeler, pencere başlıkları (13 px ve üstü `nText`), duyuru, harita adı. `Forms.btnText`: kalın, altın-parşömen dolgu, koyu kahve dış çizgi.
+  - `FB` gövde: **Alegreya** — parşömen yazıları, listeler, açıklamalar, HUD, HTML paneller (`style.css`).
+  - Denenip elenen: Cinzel (küçük harfi büyük harf gibi çiziyor, Türkçede i/ı ayrımı kayboluyor), Marcellus, Almendra, MedievalSharp, Grenze Gotisch. Değiştirmek için `FH`/`FB` ve `fonts.css`.
+  - Eski "çift yazı": yazının altına 1 px kaydırılmış siyah kopya çiziliyordu (sekmelerde ayrıca açık renkli ikinci kopya). Artık tek kalem + dış çizgi (`Forms.label`, `Forms.btnText`).
+- Simgeler `drawIcon` ile yumuşatmasız (orijinal pikseller net).
 - Sol menü (`drawHub2`, `n_v5_menu`): `hubItems()` listesi 7'den uzunsa (GM) kaydırılır. `HUB.y` kaydırma (form birimi), `HUB.r` ekrandaki alan; `Win.drag` sürükleme ve `ui.js`'teki tekerlek olayı kaydırır; düğmeler 8-312 bandına kırpılır, aşağıda/yukarıda düğme varsa küçük ok çizilir. Menü kapalıyken açılınca başa döner. Test: `tools/test/menu.js`.
 - Başlık ekranı orijinal ana menü (logo, kitap çerçevesi UIData_2033, sarı oklar): Devam Et / Yeni Karakter / Çevrimiçi / Dil.
 - HUD: çerçeveli minimap (`ui2/hud_frame.png`), 6 yuvarlak harf düğmesi (`ui2/hud_btn.png`): Karakter, Çanta, Beceri, Görev, Harita, Sohbet/Ayarlar.

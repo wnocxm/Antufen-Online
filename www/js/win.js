@@ -86,7 +86,7 @@ const Win = (() => {
     if (B.cat === 3) { const qi = []; for (const q of QUESTS) { const st = P.quests[q.id]; if (st && q.item && st.n) qi.push({ quest: q.item, n: st.n }); } return qi; }
     return P.bag.filter(b => { const it = ITEMS[b.id]; if (!it) return false; const c = it.slot ? 0 : (it.use || it.growth) ? 1 : 2; return c === B.cat; });
   }
-  function drawIcon(ctx, it, x, y, s = 26) { const im = Forms.img; const I = uiImgAny(it); if (I.complete && I.naturalWidth) ctx.drawImage(I, x, y, s, s); }
+  function drawIcon(ctx, it, x, y, s = 26) { const I = uiImgAny(it); if (!I.complete || !I.naturalWidth) return; const sm = ctx.imageSmoothingEnabled; ctx.imageSmoothingEnabled = false; ctx.drawImage(I, x, y, s, s); ctx.imageSmoothingEnabled = sm; }   // simgeler orijinal pikselleriyle net
   const icache = {};
   function uiImgAny(it) { const k = `icon_res_${it.ik || 'item'}_${it.icon}`; let I = icache[k]; if (!I) { I = new Image(); I.src = `${Assets.base}ui/${k}.png`; icache[k] = I; } return I; }
 
@@ -135,13 +135,13 @@ const Win = (() => {
   const nC = (f, id) => Forms.ctrl(f, id);
   function nDraw(ctx, f, id, st, txt) { const c = nC(f, id); Forms.drawCtrl(ctx, c, st ? 1 : 0, 0, 0, txt); return c.s[0].r; }
   // parşömen üstünde gölgesiz yazı
-  function nText(ctx, s, x, y, col, size = 11, align = 'left', w) { ctx.font = `${size}px "Noto Sans", sans-serif`; ctx.textAlign = align; ctx.textBaseline = 'middle'; ctx.fillStyle = col; if (w) ctx.fillText(tx(String(s)), x, y, w); else ctx.fillText(tx(String(s)), x, y); ctx.textBaseline = 'alphabetic'; }
+  function nText(ctx, s, x, y, col, size = 11, align = 'left', w) { ctx.font = size >= 13 ? `bold ${size}px ${FH}` : `${size + 1}px ${FB}`; ctx.textAlign = align; ctx.textBaseline = 'middle'; ctx.fillStyle = col; if (w) ctx.fillText(tx(String(s)), x, y, w); else ctx.fillText(tx(String(s)), x, y); ctx.textBaseline = 'alphabetic'; }
   // sol sütun: arka plan + sekmeler (seçili olan sarı) + kapatma düğmesi
   function nTabs(ctx, f, bgId, ids, labels, active, closeId) {
     nDraw(ctx, f, bgId, 0);
     ids.forEach((id, i) => { if (labels[i] == null) return; const c = nC(f, id), on = i === active || pressed === id, r = nDraw(ctx, f, id, on, tx(labels[i]));
       // bazı ekranlarda sekmenin kendi yazı katmanı yok: yazı aynı yere elle çizilir
-      if (!c.s[0].L.some(L => L[0] === 3)) { ctx.font = 'bold 11px "Noto Sans", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = 'rgba(255,230,170,.55)'; ctx.fillText(tx(labels[i]), r[0] + 54, r[1] + 16.5, 96); ctx.fillStyle = '#1c0a04'; ctx.fillText(tx(labels[i]), r[0] + 54, r[1] + 15.5, 96); ctx.textBaseline = 'alphabetic'; }
+      if (!c.s[0].L.some(L => L[0] === 3)) Forms.btnText(ctx, labels[i], r[0], r[1], 108, 31, 0, 13);
       nHit(id, r[0], r[1], r[2], r[3]); });
     if (closeId) { const r = nDraw(ctx, f, closeId, pressed === closeId); nHit(closeId, r[0], r[1], r[2], r[3]); }
     nHit('frame', 0, 0, 126, 320);
@@ -149,7 +149,7 @@ const Win = (() => {
   // sağ işlem paneli: [etiket, kimlik] listesi
   function nActions(ctx, f, bgId, btnIds, acts) {
     nDraw(ctx, f, bgId, 0); nHit('frame', 353, 0, 135, 320);
-    acts.forEach(([label, key], i) => { const id = btnIds[i]; if (!id) return; const r = nDraw(ctx, f, id, pressed === key, ''); Forms.label(ctx, label, r[0], r[1], r[2], r[3], '#f4ead0', 'center', 11); nHit(key, r[0], r[1], r[2], r[3]); });
+    acts.forEach(([label, key], i) => { const id = btnIds[i]; if (!id) return; const r = nDraw(ctx, f, id, pressed === key, ''); Forms.btnText(ctx, label, r[0], r[1], r[2], r[3], '#f4ead0', 12); nHit(key, r[0], r[1], r[2], r[3]); });
   }
   // ---------------- Ana menü (NEW_FORM_V5_MENU): sol sütunda kırmızı düğmeler ----------------
   const HUBB = [50223, 50224, 50225, 50226, 50227, 50228, 50229], HUBS = 43, HUBT = 8, HUBA = 312;   // düğmeler 43 birim arayla; görünen bant HUBT..HUBA
@@ -279,7 +279,7 @@ const Win = (() => {
   const N2ROWS = [50289, 50290, 50291, 50292, 50293], R3 = 'AnbufenUI_3_Resource';
   // uzun parşömen: 227x320 zemin, satırlar 370'e kadar indiği için zemin o boya gerilir
   function nLongBg(ctx, h = 373) { const I = Forms.img(7033, R3); if (I.complete && I.naturalWidth) ctx.drawImage(I, 0, 0, 227, h); nHit('frame', 0, 0, 227, h); }
-  function nRow(ctx, f, id, on, label, key, col) { const c = nC(f, id), r = c.s[0].r; Forms.drawCtrl(ctx, c, on ? 1 : 0, 0, 0); nText(ctx, label, r[0] + 14, r[1] + 19, on ? '#ffffff' : (col || '#3a1c08'), 12, 'left', 190); nHit(key, r[0], r[1], r[2], 50); }
+  function nRow(ctx, f, id, on, label, key, col) { const c = nC(f, id), r = c.s[0].r; Forms.drawCtrl(ctx, c, on ? 1 : 0, 0, 0); nText(ctx, label, r[0] + 14, r[1] + 19, on ? '#2a0c03' : (col || '#3a1c08'), 12, 'left', 190); nHit(key, r[0], r[1], r[2], 50); }
   function drawNpc2(ctx, vw, VH) {
     nBegin(ctx, VH, { k: VH / 373 }); const f = 'n_npc_dialogue'; let { txt, o } = npcOptions(); o = o.slice(0, 5);
     const lines = wrap(ctx, txt, 196, 11), per = 5, pages = Math.max(1, Math.ceil(lines.length / per)); if (D.key !== txt) { D.key = txt; D.pg = 0; D.focus = 0; }
@@ -391,7 +391,7 @@ const Win = (() => {
       else { icon = c.sk.icon; ik = c.sk.ik; rank = skRank(c.sk); lock = !rank; }
       drawIcon(ctx, { ik: ik || 'skill', icon }, x + 7, y + 7, 32);
       if (lock) { ctx.fillStyle = 'rgba(0,0,0,.45)'; ctx.fillRect(x + 7, y + 7, 32, 32); }
-      ctx.font = '8px "Noto Sans", sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+      ctx.font = `bold 8.5px ${FB}`; ctx.textAlign = 'left'; ctx.textBaseline = 'top';
       if (lock) { ctx.fillStyle = '#ff5a5a'; const w = E ? ['Not', 'Learned'] : ['Öğrenil-', 'medi']; ctx.fillText(w[0], x + 6, y + 9); ctx.fillText(w[1], x + 6, y + 19); }
       else { ctx.fillStyle = '#000'; ctx.fillText((E ? 'Lv' : 'Sv') + rank, x + 9, y + 9); ctx.fillStyle = '#fff'; ctx.fillText((E ? 'Lv' : 'Sv') + rank, x + 8, y + 8); }
       ctx.textBaseline = 'alphabetic';
@@ -898,7 +898,7 @@ const Win = (() => {
   }
   // yazıyı genişliğe göre satırlara böl
   function wrap(ctx, str, w, size = 11) {
-    ctx.font = `${size}px "Noto Sans", sans-serif`; const out = [];
+    ctx.font = `${size + 1}px ${FB}`; const out = [];
     for (const para of String(str).split('\n')) { let line = ''; for (const word of para.split(' ')) { const t = line ? line + ' ' + word : word; if (ctx.measureText(t).width > w && line) { out.push(line); line = word; } else line = t; } out.push(line); }
     return out;
   }

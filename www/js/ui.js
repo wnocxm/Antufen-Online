@@ -91,14 +91,14 @@ const UI = (() => {
     }
     for (const f of Game.fx) f.draw(ctx, map.px(f.x, f.y) - ox, map.py(f.x, f.y) - oy);
     // isimler ve işaretler
-    ctx.textAlign = 'center'; ctx.font = '10px "Noto Sans", sans-serif';
+    ctx.textAlign = 'center'; ctx.font = `10px ${FB}`;
     for (const e of Game.ents) {
       const X = e.X - ox, Y = e.Y - oy; if (X < -60 || X > vw + 60 || Y < -20 || Y > VH + 100) continue;
       if (e.kind === 'npc' && !e.hidden && (!e.dummy || e.node)) {
         const mk = npcMark(e.cn);
         if (!e.pickup) text(e.name, X, Y - 62, '#9cf58a');
-        if (mk) { ctx.font = 'bold 18px serif'; text(mk, X, Y - 74 + Math.sin(Game.time * 4) * 2, '#ffd23a'); ctx.font = '10px "Noto Sans", sans-serif'; }
-        if (e.pickup && QUESTS.some(q => q.type === 'pickup' && q.node === e.cn && Game.P.quests[q.id] && !Game.P.quests[q.id].ready)) { ctx.font = 'bold 14px serif'; text('✦', X, Y - 30 + Math.sin(Game.time * 5) * 2, '#ffe060'); ctx.font = '10px "Noto Sans", sans-serif'; }
+        if (mk) { ctx.font = 'bold 18px serif'; text(mk, X, Y - 74 + Math.sin(Game.time * 4) * 2, '#ffd23a'); ctx.font = `10px ${FB}`; }
+        if (e.pickup && QUESTS.some(q => q.type === 'pickup' && q.node === e.cn && Game.P.quests[q.id] && !Game.P.quests[q.id].ready)) { ctx.font = 'bold 14px serif'; text('✦', X, Y - 30 + Math.sin(Game.time * 5) * 2, '#ffe060'); ctx.font = `10px ${FB}`; }
       } else if (e.kind === 'mob' && !e.dead) {
         const show = e === Game.target || e.aggro || e.d.rank || e.hp < e.maxHp;
         if (show) {
@@ -118,12 +118,12 @@ const UI = (() => {
     for (let i = floats.length - 1; i >= 0; i--) {
       const f = floats[i]; f.t += 1 / 60; if (f.t > 1.1) { floats.splice(i, 1); continue; }
       const X = Game.map.px(f.e.x, f.e.y) - ox, Y = Game.map.py(f.e.x, f.e.y) - oy - 50 - f.t * 26;
-      ctx.globalAlpha = f.t < 0.8 ? 1 : (1.1 - f.t) / 0.3; ctx.font = `bold ${Math.round(12 * f.s)}px "Noto Sans", sans-serif`; text(f.txt, X, Y, f.c); ctx.globalAlpha = 1;
+      ctx.globalAlpha = f.t < 0.8 ? 1 : (1.1 - f.t) / 0.3; ctx.font = `bold ${Math.round(12 * f.s)}px ${FB}`; text(f.txt, X, Y, f.c); ctx.globalAlpha = 1;
     }
   }
   // konuşma balonu: oyuncunun yazdığı metin çevrilmeden gösterilir
   function bubble(s, x, y, t) {
-    ctx.save(); ctx.font = '10px "Noto Sans", sans-serif'; ctx.globalAlpha = Math.min(1, t);
+    ctx.save(); ctx.font = `10px ${FB}`; ctx.globalAlpha = Math.min(1, t);
     const words = String(s).split(' '), lines = []; let ln = '';
     for (const w of words) { const n = ln ? ln + ' ' + w : w; if (ctx.measureText(n).width > 130 && ln) { lines.push(ln); ln = w; } else ln = n; } if (ln) lines.push(ln);
     const L = lines.slice(0, 4), w = Math.min(140, Math.max(...L.map(l => ctx.measureText(l).width))) + 10, h = L.length * 12 + 6, bx = Math.round(x - w / 2), by = Math.round(y - h);
@@ -153,35 +153,35 @@ const UI = (() => {
     ctx.save(); ctx.translate(hx, hy); ctx.scale(hk, hk);
     const hf = U(7143); if (hf.complete && hf.naturalWidth) ctx.drawImage(hf, 2, 2, 40, 38);
     if (por.complete && por.naturalWidth) ctx.drawImage(por, 6, 6, 32, 30);
-    ctx.fillStyle = 'rgba(0,0,0,.75)'; ctx.fillRect(26, 29, 14, 10); ctx.textAlign = 'center'; ctx.font = 'bold 8px "Noto Sans", sans-serif'; text(String(P.lv), 33, 37, '#ffe48a');
+    ctx.fillStyle = 'rgba(0,0,0,.75)'; ctx.fillRect(26, 29, 14, 10); ctx.textAlign = 'center'; ctx.font = `bold 8px ${FB}`; text(String(P.lv), 33, 37, '#ffe48a');
     ctx.restore();
     const bx0 = hx + 44 * hk + 2;
-    ctx.textAlign = 'left'; ctx.font = 'bold 10px "Noto Sans", sans-serif'; text(P.name, bx0, 14, '#ffe48a');
+    ctx.textAlign = 'left'; ctx.font = `bold 10px ${FB}`; text(P.name, bx0, 14, '#ffe48a');
     const thin = (y, v, c) => { ctx.fillStyle = 'rgba(0,0,0,.7)'; ctx.fillRect(bx0, y, 92, 5); ctx.fillStyle = c; ctx.fillRect(bx0 + 1, y + 1, 90 * clamp(v, 0, 1), 3); };
     thin(18, p.hp / s.hp, '#e02818'); thin(25, p.mp / s.mp, '#2a58e8'); thin(32, P.xp / xpNeed(P.lv), '#d8b030');
-    ctx.font = '8px "Noto Sans", sans-serif'; text(`${Math.ceil(p.hp)}/${s.hp}`, bx0 + 96, 23, '#ffb0a0'); text(`${Math.floor(p.mp)}/${s.mp}`, bx0 + 96, 31, '#a8c0ff');
+    ctx.font = `8px ${FB}`; text(`${Math.ceil(p.hp)}/${s.hp}`, bx0 + 96, 23, '#ffb0a0'); text(`${Math.floor(p.mp)}/${s.mp}`, bx0 + 96, 31, '#a8c0ff');
     // "Karakter" düğmesi: soldaki sekmeli menüyü açar (Karakter, Çanta, Beceri, Görev, Harita, Ayarlar)
     { const kx = 3, ky = 56, kw = 54, kh = 15; ctx.fillStyle = 'rgba(0,0,0,.7)'; ctx.fillRect(kx, ky, kw, kh); ctx.strokeStyle = '#8a6a30'; ctx.lineWidth = 1; ctx.strokeRect(kx + 0.5, ky + 0.5, kw - 1, kh - 1);
-      ctx.textAlign = 'center'; ctx.font = 'bold 9px "Noto Sans", sans-serif'; text('Karakter ▸', kx + kw / 2, ky + 11, '#ffe48a'); hud.push([kx - 2, ky - 2, kw + 4, kh + 6, () => open('hub')]); }
+      ctx.textAlign = 'center'; ctx.font = `bold 9px ${FH}`; text('Karakter ▸', kx + kw / 2, ky + 11, '#ffe48a'); hud.push([kx - 2, ky - 2, kw + 4, kh + 6, () => open('hub')]); }
     hud.push([2, 2, 56, 52, () => open('hub')]);
     // hedef
     const t = Game.target;
-    if (t && t.kind === 'npc' && !t.hidden) { const w = 150, x = Math.round(vw / 2 - w / 2), y = 4; ctx.fillStyle = 'rgba(0,0,0,.72)'; ctx.fillRect(x, y, w, 20); ctx.strokeStyle = '#4a8a3a'; ctx.lineWidth = 1; ctx.strokeRect(x + 0.5, y + 0.5, w - 1, 19); ctx.textAlign = 'center'; ctx.font = 'bold 10px "Noto Sans", sans-serif'; text(t.name, vw / 2, y + 14, '#9cf58a'); }
+    if (t && t.kind === 'npc' && !t.hidden) { const w = 150, x = Math.round(vw / 2 - w / 2), y = 4; ctx.fillStyle = 'rgba(0,0,0,.72)'; ctx.fillRect(x, y, w, 20); ctx.strokeStyle = '#4a8a3a'; ctx.lineWidth = 1; ctx.strokeRect(x + 0.5, y + 0.5, w - 1, 19); ctx.textAlign = 'center'; ctx.font = `bold 10px ${FB}`; text(t.name, vw / 2, y + 14, '#9cf58a'); }
     else if (t && !t.dead) {
       const w = 170, x = Math.round(vw / 2 - w / 2), y = 4, col = t.d.rank === 2 ? '#e890ff' : t.d.rank ? '#ffb050' : t.d.lv > P.lv + 3 ? '#ff6040' : '#f0e0d0';
       ctx.fillStyle = 'rgba(0,0,0,.72)'; ctx.fillRect(x, y, w, 30);
       ctx.fillStyle = '#9f998f'; ctx.fillRect(x, y, w, 1); ctx.fillRect(x, y + 29, w, 1); ctx.fillStyle = '#4b4547'; ctx.fillRect(x, y + 1, 1, 28); ctx.fillRect(x + w - 1, y + 1, 1, 28);
-      ctx.textAlign = 'left'; ctx.font = 'bold 10px "Noto Sans", sans-serif'; text(trName(t.name), x + 6, y + 12, col);
-      ctx.textAlign = 'right'; ctx.font = 'bold 9px "Noto Sans", sans-serif'; text('Sv' + t.d.lv, x + w - 6, y + 12, '#ffe48a');
+      ctx.textAlign = 'left'; ctx.font = `bold 10px ${FB}`; text(trName(t.name), x + 6, y + 12, col);
+      ctx.textAlign = 'right'; ctx.font = `bold 9px ${FB}`; text('Sv' + t.d.lv, x + w - 6, y + 12, '#ffe48a');
       ctx.fillStyle = 'rgba(0,0,0,.8)'; ctx.fillRect(x + 6, y + 17, w - 12, 7); ctx.fillStyle = '#e02818'; ctx.fillRect(x + 7, y + 18, (w - 14) * clamp(t.hp / t.maxHp, 0, 1), 5);
-      ctx.textAlign = 'center'; ctx.font = '7px "Noto Sans", sans-serif'; text(`${Math.max(0, Math.ceil(t.hp))}/${t.maxHp}`, vw / 2, y + 24, '#fff');
+      ctx.textAlign = 'center'; ctx.font = `7px ${FB}`; text(`${Math.max(0, Math.ceil(t.hp))}/${t.maxHp}`, vw / 2, y + 24, '#fff');
     }
     // sağ üst: küçük harita (çerçeve ve yuvarlak düğmeler Android sürümünün görselleri)
     { const mw = 92, mh = 86, mx = vw - mw - 3, my = 3;
       drawMinimap(mx + 5, my + 5, mw - 10, mh - 10);
       const fr = uiImg2('hud_frame'); if (fr.complete && fr.naturalWidth) { ctx.imageSmoothingEnabled = true; ctx.drawImage(fr, mx, my, mw, mh); ctx.imageSmoothingEnabled = false; }
-      ctx.textAlign = 'center'; ctx.font = 'bold 9.5px "Noto Sans", sans-serif'; text(trName(Game.scene.name), mx + mw / 2, my + 17, '#ff9a30');
-      ctx.font = '8.5px "Noto Sans", sans-serif'; text(`(${Math.round(p.x)}, ${Math.round(p.y)})`, mx + mw / 2, my + mh - 9, '#ffb060');
+      ctx.textAlign = 'center'; ctx.font = `bold 9.5px ${FH}`; text(trName(Game.scene.name), mx + mw / 2, my + 17, '#ff9a30');
+      ctx.font = `8.5px ${FB}`; text(`(${Math.round(p.x)}, ${Math.round(p.y)})`, mx + mw / 2, my + mh - 9, '#ffb060');
       hud.push([mx, my, mw, mh, () => open('map')]);
       // yuvarlak düğmeler: iki sütun, üç satır (orijinaldeki tek harfli düğmelerin karşılığı)
       const B = [['Karakter', () => open('char')], ['Çanta', () => open('bag')], ['Beceri', () => open('skill')], ['Görev', () => open('quest')], ['Harita', () => open('map')], Net.on ? ['Sohbet', () => openChat()] : ['Ayarlar', () => open('sys')]];
@@ -229,13 +229,13 @@ const UI = (() => {
       if (L.length) {
         const bx = rockerPos().x + 76 * HS, bw = Math.max(110, Math.min(360, vw - bx - 215 * HS)), bh = L.length * 11 + 6, by = VH - 6 - bh;
         ctx.fillStyle = 'rgba(0,0,0,.5)'; ctx.fillRect(bx, by, bw, bh);
-        ctx.textAlign = 'left'; ctx.font = '9px "Noto Sans", sans-serif';
+        ctx.textAlign = 'left'; ctx.font = `9px ${FB}`;
         L.forEach((l, i) => { ctx.globalAlpha = Math.min(1, (10000 - (now - l.t)) / 1000); text(l.m, bx + 5, by + 12 + i * 11, l.c); });
         ctx.globalAlpha = 1;
       } }
     // duyurular
     if (zoneT > 0) { zoneT -= 1 / 60; ctx.globalAlpha = Math.min(1, zoneT); ctx.textAlign = 'center'; ctx.font = 'bold 20px "Noto Serif", serif'; text(zoneMsg, vw / 2, 92, '#ffe48a'); ctx.globalAlpha = 1; }
-    if (toastT > 0) { toastT -= 1 / 60; ctx.globalAlpha = Math.min(1, toastT * 2); ctx.textAlign = 'center'; ctx.font = 'bold 13px "Noto Sans", sans-serif'; text(toastMsg, vw / 2, 130, '#ffd23a'); ctx.globalAlpha = 1; }
+    if (toastT > 0) { toastT -= 1 / 60; ctx.globalAlpha = Math.min(1, toastT * 2); ctx.textAlign = 'center'; ctx.font = `bold 13px ${FH}`; text(toastMsg, vw / 2, 130, '#ffd23a'); ctx.globalAlpha = 1; }
     if (lvlT > 0) { lvlT -= 1 / 60; ctx.globalAlpha = Math.min(1, lvlT); ctx.textAlign = 'center'; ctx.font = 'bold 28px "Noto Serif", serif'; text('Seviye ' + lvlN, vw / 2, 160, '#ffe080'); ctx.globalAlpha = 1; }
     if (hurtT > 0) { hurtT -= 1 / 60; const g = ctx.createRadialGradient(vw / 2, VH / 2, VH * 0.3, vw / 2, VH / 2, vw * 0.6); g.addColorStop(0, 'rgba(160,0,0,0)'); g.addColorStop(1, `rgba(160,0,0,${hurtT})`); ctx.fillStyle = g; ctx.fillRect(0, 0, vw, VH); }
   }
@@ -251,7 +251,7 @@ const UI = (() => {
     } else {
       const id = sl.slice(2), it = ITEMS[id]; if (!it) return;
       const im = uiImg('icon_res_item_' + it.icon); if (im.complete) ctx.drawImage(im, x, y, 32, 32);
-      ctx.textAlign = 'right'; ctx.font = 'bold 9px sans-serif'; text(countItem(id), x + 31, y + 31, '#fff');
+      ctx.textAlign = 'right'; ctx.font = `bold 9px ${FB}`; text(countItem(id), x + 31, y + 31, '#fff');
     }
   }
   // kısayol atama: pencereden "Kısayol" seçilince yay yuvaları parlar, dokunulan yuvaya yerleşir
@@ -280,12 +280,12 @@ const UI = (() => {
     let y = 86; ctx.textAlign = 'left';
     const avail = QUESTS.filter(q => questState(q) === 'new').slice(0, 1);
     for (const q of act) {
-      const st = P.quests[q.id]; ctx.font = 'bold 9px "Noto Sans", sans-serif'; text(q.title, 6, y, '#ffd23a'); y += 10;
-      ctx.font = '8.5px "Noto Sans", sans-serif';
+      const st = P.quests[q.id]; ctx.font = `bold 9px ${FB}`; text(q.title, 6, y, '#ffd23a'); y += 10;
+      ctx.font = `8.5px ${FB}`;
       const prog = questState(q) === 'ready' ? `Tamam: ${trName(q.to)} ile konuş` : q.type === 'deliver' ? `${q.item}: ${giveCount(q)}/${q.count}` : q.type === 'kill' ? (q.targets ? q.targets.map(x => `${trName(x[0])} ${(st.c || {})[x[0]] || 0}/${x[1]}`).join(' · ') : `${trName(q.target)}: ${st.n}/${q.count}`) : (q.type === 'collect' || q.type === 'pickup') ? `${q.item}: ${st.n}/${q.count}` : q.goal;
       text(prog.length > 44 ? prog.slice(0, 43) + '…' : prog, 8, y, st.ready ? '#9cf58a' : '#e8e0d0'); y += 12;
     }
-    if (!act.length && avail.length) { ctx.font = '8.5px "Noto Sans", sans-serif'; text(`! ${trName(avail[0].giver)} sana görev verecek`, 6, y, '#ffd23a'); }
+    if (!act.length && avail.length) { ctx.font = `8.5px ${FB}`; text(`! ${trName(avail[0].giver)} sana görev verecek`, 6, y, '#ffd23a'); }
     hud.push([0, 76, 180, Math.max(20, y - 76), () => open('quest')]);
   }
   function hudHit(x, y) { if (mode !== 'play' || panelOpen()) return null; for (let i = hud.length - 1; i >= 0; i--) { const [a, b, w, h, f] = hud[i]; if (x >= a && x <= a + w && y >= b && y <= b + h) return f; } return null; }
@@ -359,7 +359,7 @@ const UI = (() => {
       title = 'Ayarlar';
       h = `<div class="iact"><button class="obtn" data-act="tsfx">Ses efektleri: ${SFX.opt.sfx ? 'Açık' : 'Kapalı'}</button><button class="obtn" data-act="tmus">Müzik: ${SFX.opt.music ? 'Açık' : 'Kapalı'}</button></div>
         <div class="iact"><button class="obtn" data-act="lang">${LANG === 'tr' ? 'Language: English' : 'Dil: Türkçe'}</button></div>
-        <div class="iact"><button class="obtn" data-act="totitle">Giriş ekranına dön</button><button class="obtn" data-act="newchar">Yeni karakter oluştur</button></div><p class="hint">Oyun otomatik kaydedilir. Sürüm 11180457</p>`;
+        <div class="iact"><button class="obtn" data-act="totitle">Giriş ekranına dön</button><button class="obtn" data-act="newchar">Yeni karakter oluştur</button></div><p class="hint">Oyun otomatik kaydedilir. Sürüm 11180558</p>`;
     }
     ptitle.textContent = tx(title); pbody.innerHTML = h; txDom(pbody);
   }
@@ -654,7 +654,7 @@ const UI = (() => {
     
   }
   async function boot() {
-    txDom(document.body); await Assets.init('assets/'); await loadItems(); await Pet.init(); await Forms.init('assets/');
+    txDom(document.body); await loadFonts(); await Assets.init('assets/'); await loadItems(); await Pet.init(); await Forms.init('assets/');
     Input.bind(cv);
     for (const k of ['AnbufenUI_Resource_7005', 'AnbufenUI_Resource_7078', 'icon_res_item_1038', 'AnbufenUI_Resource_7003', 'AnbufenUI_Resource_7002', 'AnbufenUI_Resource_7009', 'UIData_2067']) uiImg(k);
     $('#loading').classList.add('hidden');

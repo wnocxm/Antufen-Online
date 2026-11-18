@@ -1,6 +1,16 @@
 // Orijinal ekran tanımlarını (AnbufenUI.godat -> assets/forms.json) çizen ve dokunmayı eşleyen katman.
 // Her denetim: konum, durumlar (0 normal, 1 basılı/seçili) ve katmanlar (0 çizgi, 1 dolgu/yer tutucu, 2 görsel, 3 yazı).
 'use strict';
+// Yazı tipleri (assets/fonts/fonts.css; docs/03 › Yazı tipleri): FH başlık (düğme, sekme, sol menü, pencere başlığı), FB gövde (açıklama,
+// liste, günlük, HUD). Değişken (var): denemek için çalışırken değiştirilebilir.
+var FH = '"Metamorphous", "Noto Sans", serif', FB = '"Alegreya", "Noto Sans", serif';   // Cinzel denendi: küçük harfi büyük gibi çizip i/ı ayrımını kaybediyor
+// yazı tiplerini çizimden önce yükle (Türkçe harfler latin-ext dosyasında; metinle istenmezse yüklenmez)
+async function loadFonts() {
+  if (!document.fonts || !document.fonts.load) return;
+  const fam = s => s.split(',')[0].trim(), sample = 'AaĞğŞşİıÇçÖöÜü0123', L = [];
+  for (const f of [FH, FB]) for (const w of ['', 'bold ']) L.push(document.fonts.load(`${w}16px ${fam(f)}`, sample));
+  await Promise.race([Promise.all(L).catch(() => {}), new Promise(r => setTimeout(r, 2500))]);
+}
 
 const Forms = (() => {
   let F = null; const imgs = {};
@@ -40,14 +50,27 @@ const Forms = (() => {
         ctx.globalAlpha = 1;
       } else if (k === 0) { ctx.fillStyle = rgb(col); ctx.fillRect(X, Y, Math.max(1, w), Math.max(1, h)); }
       else if (k === 1) { if (a2 === 0 && al > 0) { ctx.globalAlpha = al / 100; ctx.fillStyle = rgb(col); ctx.fillRect(X, Y, w, h); ctx.globalAlpha = 1; } }
-      else if (k === 3) { const str = txt != null ? txt : (T[t] || T[(t || '').trim()] || t); label(ctx, str, X, Y, w, h, rgb(col)); }
+      else if (k === 3) { const str = txt != null ? txt : (T[t] || T[(t || '').trim()] || t); btnText(ctx, str, X, Y, w, h, col); }
     }
   }
-  function label(ctx, str, x, y, w, h, color, align = 'center', size = 11) {
+  // koyu zemin üstünde yazı: gövde yazı tipi, ince koyu dış çizgi (kaydırılmış ikinci kopya yok)
+  function label(ctx, str, x, y, w, h, color, align = 'center', size = 11, fam) {
     if (str == null || str === '') return; str = tx(String(str));
-    ctx.font = `${size}px "Noto Sans", sans-serif`; ctx.textAlign = align; ctx.textBaseline = 'middle';
+    ctx.font = `${size + 1}px ${fam || FB}`; ctx.textAlign = align; ctx.textBaseline = 'middle';
     const lx = align === 'center' ? x + w / 2 : align === 'right' ? x + w - 2 : x + 2, ly = y + h / 2 + 0.5;
-    ctx.fillStyle = '#000'; ctx.fillText(str, lx + 1, ly + 1, w); ctx.fillStyle = color || '#fff'; ctx.fillText(str, lx, ly, w);
+    ctx.lineJoin = 'round'; ctx.lineWidth = 2.4; ctx.strokeStyle = 'rgba(20,8,2,.8)'; ctx.strokeText(str, lx, ly, w);
+    ctx.fillStyle = color || '#fff'; ctx.fillText(str, lx, ly, w);
+    ctx.textBaseline = 'alphabetic';
+  }
+  // düğme / sekme / sol menü yazısı: başlık yazı tipi, kalın; koyu (siyah) form rengi altın-parşömen dolguya çevrilir, koyu kahve dış çizgi
+  function btnText(ctx, str, x, y, w, h, col, size) {
+    if (str == null || str === '') return; str = tx(String(str));
+    const c = col == null ? 0 : col, dark = ((c >>> 16) & 255) + ((c >>> 8) & 255) + (c & 255) < 200;
+    const sz = size || Math.max(9, Math.min(14, Math.round(h * 0.5)));
+    ctx.font = `bold ${sz}px ${FH}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    const lx = x + w / 2, ly = y + h / 2 + 1;
+    ctx.lineJoin = 'round'; ctx.lineWidth = 3; ctx.strokeStyle = '#2a0c03'; ctx.strokeText(str, lx, ly, w - 4);
+    ctx.fillStyle = dark ? '#fbe6b0' : typeof col === 'string' ? col : rgb(c); ctx.fillText(str, lx, ly, w - 4);
     ctx.textBaseline = 'alphabetic';
   }
   // Formun düz (gruba ait olmayan) denetimlerini arkadan öne çiz
@@ -72,5 +95,5 @@ const Forms = (() => {
     for (const c of f.c) { if (c.g !== -1 || !c.s.length) continue; if (filter && !filter(c)) continue; const r = c.s[0].r; if (x >= ox + r[0] && x < ox + r[0] + r[2] && y >= oy + r[1] && y < oy + r[1] + r[3]) return c; }
     return null;
   }
-  return { init, get, ctrl, draw, drawCtrl, drawGroup, hit, label, img, T };
+  return { init, get, ctrl, draw, drawCtrl, drawGroup, hit, label, btnText, img, T };
 })();
