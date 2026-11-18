@@ -46,7 +46,7 @@ void GameMap::load(Assets& as, const std::string& mapName) {
       g.blit(*G.S, (tile % G.cols) * TW, (tile / G.cols) * TH, TW, TH, X, Y);
     }
   }
-  ground = std::move(g.img);
+  ground = std::move(g.img); ground.canvas = true;
   // nesneler; düz olanlar (büyü çemberi, tabela, ok, halı) her şeyin altında çizilir
   for (int y = 0; y < h; y++) for (int x = 0; x < w; x++) {
     const size_t i = size_t(y) * w + x; const int oi = o[i]; if (!oi) continue;

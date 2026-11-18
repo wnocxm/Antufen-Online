@@ -1,7 +1,8 @@
 // Pencereler (HTML win.js; Android sürümünün NEW_FORM_* ekranları): ana menü (v5_menu), konuşma (npc_dialogue), görev listesi (task +
 // item_info), ölüm (deadselect), onay kutusu (dialog_yesno). Pencereler 320 (konuşma ve ölüm 373) birim yüksekliğe göre tasarlanmış,
 // ekran yüksekliğine ölçeklenir; görseller yumuşatılarak büyütülür. 8. adım (win_items.cpp): çanta (bag_2), karakter (player), beceri
-// ağacı (skilltree), dükkân (shop + shopinfo), adet kutusu (selnum). Henüz yok: evcil, harita, ayarlar — menüden seçilince "yakında".
+// ağacı (skilltree), dükkân (shop + shopinfo), adet kutusu (selnum). 9. adım (win_map.cpp): dünya haritası, ayarlar, NPC listesi.
+// Henüz yok: evcil — menüden seçilince "yakında".
 #pragma once
 #include <functional>
 #include <map>
@@ -32,6 +33,8 @@ class Win {
   float safeL = 0;
   bool wantText = false;                            // adet kutusunun sayısına dokunuldu: ekran klavyesi açılsın (SDL_StartTextInput)
   std::string assignReq, assignName;                // kısayola yerleştirme isteği (HUD yuvaya dokunulmasını bekler)
+  bool optSfx = true, optMusic = true;              // ayarlar (ses sistemi gelince kullanılır)
+  void openNpcList(engine::World& w);               // bu haritadaki kişiler (dokununca yürür)
 
  private:
   Forms& F_;
@@ -58,6 +61,12 @@ class Win {
   std::string lastTapId_; double lastTapT_ = -1;   // çift dokunuş (kullan / satın al)
   float nk_ = 1;                                   // açık pencerenin ölçeği (kaydırma)
   struct Line { std::string t; uint32_t c; float s; };
+  // dünya haritası (wm/wm.json): kıta → bölge → bulunduğun harita
+  struct { std::string mode = "world"; int area = -1; std::string sel; } WM_;
+  core::Json wm_; bool wmLoaded_ = false;
+  // liste penceresi (NPC listesi)
+  struct ListRow { std::string label, sub; int ent = -1; };
+  std::vector<ListRow> list_; std::string listTitle_; int listOff_ = 0;
 
   Xf begin(float k, float x, float y, float oy = 0) const { Xf f; f.k = k; f.x = x; f.y = y - oy * k; f.smooth = true; return f; }
   void hit(const Xf& xf, const std::string& id, float x, float y, float w, float h, std::vector<Hit>* L = nullptr);
@@ -94,6 +103,14 @@ class Win {
   void drawNum(engine::Canvas& c, float vw, float VH);
   void buyAsk(engine::World& w, const std::string& id);
   void sellAsk(engine::World& w, const std::string& id);
+  // win_map.cpp
+  const core::Json& wm(engine::World& w);
+  void drawMap(engine::Canvas& c, engine::World& w, float vw, float VH);
+  void tapMap(engine::World& w, const std::string& id);
+  void drawSys(engine::Canvas& c, engine::World& w, float VH);
+  void tapSys(engine::World& w, const std::string& id);
+  void drawList(engine::Canvas& c, engine::World& w, float VH);
+  void tapList(engine::World& w, const std::string& id);
 };
 
 }  // namespace ui

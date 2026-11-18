@@ -30,6 +30,7 @@ void Win::open(World& w, const std::string& name, int npc, const std::string& sa
   if (name == "npc") { npc_ = npc; say_ = say; dq_ = -1; dtrv_ = -1; dkey_.clear(); }
   if (name == "task") ksel_ = 0;
   if (name == "shop") { H_.tab = 0; H_.sel.clear(); H_.off = 0; }
+  if (name == "map") { WM_.mode = "world"; WM_.sel.clear(); }
   B_.sel.clear(); B_.page = 0;
   if (name == "bag") w.questFlag("openBag");
 }
@@ -272,6 +273,9 @@ void Win::draw(engine::Canvas& c, World& w, float dt) {
   else if (cur == "skill") drawSkill(c, w, VH);
   else if (cur == "shop") drawShop(c, w, vw, VH);
   else if (cur == "dead") drawDead(c, w, vw, VH);
+  else if (cur == "list") drawList(c, w, VH);
+  if (cur == "sys") { drawHub(c, w, VH); drawSys(c, w, VH); }
+  else if (cur == "map") { drawMap(c, w, vw, VH); drawHub(c, w, VH); }
   if (cur == "hub") drawHub(c, w, VH);
   if (modal_.on) drawModal(c, vw, VH);
 }
@@ -297,11 +301,14 @@ bool Win::tap(World& w, float x, float y) {
   const std::string id = h->id; pressed_ = id; pressT_ = clock_;
   if (id.rfind("hub:", 0) == 0) {
     const std::string k = id.substr(4);
-    if (k == "task" || k == "role" || k == "bag" || k == "skill") { if (k != cur) { close(); open(w, k); } }
+    if (k == "task" || k == "role" || k == "bag" || k == "skill" || k == "map" || k == "sys") { if (k != cur) { close(); open(w, k); } }
     else if (k != cur) w.toast("Bu pencere yakında.");
     return true;
   }
   if (id == "close") { close(); return true; }
+  if (cur == "sys") { if (id.rfind("s:", 0) == 0) tapSys(w, id.substr(2)); return true; }
+  if (cur == "map") { tapMap(w, id); return true; }
+  if (cur == "list") { tapList(w, id); return true; }
   if (cur == "bag") tapBag(w, id);
   else if (cur == "role") tapRole(w, id);
   else if (cur == "npc") tapNpc(w, id);

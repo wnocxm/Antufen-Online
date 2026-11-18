@@ -31,6 +31,8 @@ class Canvas {
                  float alpha = 1, bool smooth = false, bool additive = false);
   // radyal degrade dolgu (iç yarıçapta a0, dış yarıçapta a1 saydamlık; arası doğrusal) — HTML createRadialGradient
   void fillRadial(float cx, float cy, float r0, float r1, uint32_t rgb, float a0, float a1);
+  // daire, iki noktalı radyal degradeyle (HTML createRadialGradient(gx0, gy0, r0, gx1, gy1, r1) + iki renk durağı, sonra arc dolgu)
+  void fillCircleGrad(float cx, float cy, float r, float gx0, float gy0, float r0, float gx1, float gy1, float r1, uint32_t c0, uint32_t c1);
   // kırpma: dikdörtgen ve/veya daire (kenarı yumuşak); clearClip hepsini kaldırır
   void clipRect(float x, float y, float w, float h);
   void clipCircle(float cx, float cy, float r);

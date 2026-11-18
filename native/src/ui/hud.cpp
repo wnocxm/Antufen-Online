@@ -164,6 +164,8 @@ void Hud::handle(World& w) {
     else if (r == "char") { win.close(); win.open(w, "role"); }
     else if (r == "bag") { win.close(); win.open(w, "bag"); }
     else if (r == "skill") { win.close(); win.open(w, "skill"); }
+    else if (r == "map") { win.close(); win.open(w, "map"); }
+    else if (r == "sys") { win.close(); win.open(w, "sys"); }
     else w.toast("Bu pencere yakında.");
   }
   if (!win.assignReq.empty()) { assign_ = win.assignReq; w.toastMsg = "Bir yuvaya dokun: " + win.assignName; w.toastT = 3; win.assignReq.clear(); win.close(); }

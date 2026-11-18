@@ -14,6 +14,11 @@ const rect = (f, id) => F2[f].c.find(c => c.id === id).s[0].r;
 // form biriminden ekrana (win.js nBegin): x = safeL + fx·k, y = (fy - oy)·k
 const at = (f, id, k, oy = 0, dx = 0, dy = 0) => { const r = rect(f, id); return [(r[0] + dx + r[2] / 2) * k, (r[1] + dy + r[3] / 2 - oy) * k]; };
 const kN = 360 / 373, kT = 360 / 320;
+// dünya haritası (win.js mapRect, 640×360): görünüm alanı ve Guanlin'in bölgesi, o bölgede başka bir harita
+const WMD = JSON.parse(fs.readFileSync('www/assets/wm/wm.json', 'utf8'));
+const MW = 544, MH = 344, MOX = 82, MOY = 8, MVX = MOX + 4, MVY = MOY + 4, MVW = MW - 8, MVH = MH - 4 - 36, MBY = MOY + MH - 36 + 3;
+const GA = WMD.areas.find(a => a.scenes.some(s => s.sid === '120005')), GS = GA.scenes.find(s => s.sid !== '120005');
+const areaAt = [MVX + GA.cx / 100 * MVW, MVY + GA.cy / 100 * MVH], scAt = [MVX + GS.x / 100 * MVW, MVY + GS.y / 100 * MVH];
 // [ad, eylemler]: eylem = ['pencere', ad, varlık?] | ['dokun', x, y]
 const CASES = [
   ['konusma', [['pencere', 'npc', 10]]],
@@ -34,6 +39,11 @@ const CASES = [
   ['beceri_sinif', [['pencere', 'skill'], ['dokun', ...at('skilltree', 50397, kT)], ['dokun', ...at('skilltree', 50403, kT)]]],   // sınıf ağacı (kilitli)
   ['beceri_irk', [['pencere', 'skill'], ['dokun', ...at('skilltree', 50400, kT)], ['dokun', ...at('skilltree', 50402, kT)]]],   // ırk ağacı
   ['dukkan', [['pencere', 'shop', '武器商人（人类）'], ['dokun', (rect('shop', 50334)[0] + 104) * kT, (49 + 53 + 26 - 41) * kT]]],   // silahçı, ikinci satır
+  // 9. adım: dünya haritası (kıta, bölge + seçili harita, bulunduğun harita), ayarlar
+  ['harita', [['pencere', 'map']]],
+  ['harita_bolge', [['pencere', 'map'], ['dokun', ...areaAt], ['dokun', ...scAt]]],
+  ['harita_yerel', [['pencere', 'map'], ['dokun', MOX + 8 + 35, MBY + 15]]],
+  ['ayarlar', [['pencere', 'sys']]],
   ['adet', [['pencere', 'shop', '道具商人（人类）'], ['dokun', (rect('shop', 50334)[0] + 104) * kT, (49 + 26 - 41) * kT], ['dokun', ...at('shopinfo', 50369, kT, 41, Math.min(358, 640 / kT - 229), 70)], ['dokun', ...at('selnum', 50255, 1.3, 0, 172 / 1.3, 96 / 1.3)]]],
 ];
 (async () => {

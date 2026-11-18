@@ -58,7 +58,8 @@ Oyun hazır: `window.__G && window.__G.player`. Konsoldan: `gmLevel(n)`, `loadSc
 - `native/build/anrufen_test <senaryo>`: ekransız test modu (komutlar docs/09). `node tools/test/cpp_karsilastir.js` (sunucu açık): C++ ↔ HTML 6 sahne çizim + 6 yön yürüme; çıkış kodu 0 = geçti.
 - `node tools/test/cpp_savas.js`: C++ ↔ HTML canavar yerleşimi + 26 senaryoda (18'i becerili) saniye saniye savaş izi (tohumlu zar); çıkış kodu 0 = geçti.
 - `node tools/test/cpp_arayuz.js`: C++ ↔ HTML oyun ekranı (HUD) 3 durumda: yazısız piksel (sınır %1) + yazılı yan yana (`/tmp/cpp_arayuz/<ad>_yazili_fark.png`).
-- `node tools/test/cpp_pencere.js`: C++ ↔ HTML pencereler 18 durumda (konuşma, görev satırları, görev listesi iki sekme, ana menü, ölüm, onay; çanta, karakter, beceri ağacı, dükkân, adet kutusu): yazısız piksel (sınır %1) + yazılı yan yana (`/tmp/cpp_pencere/`).
+- `node tools/test/cpp_pencere.js`: C++ ↔ HTML pencereler 22 durumda (konuşma, görev satırları, görev listesi iki sekme, ana menü, ölüm, onay; çanta, karakter, beceri ağacı, dükkân, adet kutusu; dünya haritası üç görünüm, ayarlar): yazısız piksel (sınır %1) + yazılı yan yana (`/tmp/cpp_pencere/`).
+- `python3 tools/test/jpeg_esitlik.py`: C++ JPEG çözücüsü ↔ libjpeg-turbo (Pillow), bütün JPEG'ler birebir olmalı.
 - `node tools/test/cpp_esya.js`: C++ ↔ HTML eşya ve beceri işlemleri (3 sınıf × 33 işlem: Gelişim Paketi, al, sat, kuşan, çıkar, iksir, GM ekipmanı, beceri yükselt/sıfırla, kısayol) + her becerinin açıklama ve kilit yazıları.
 - `node tools/test/cpp_yol.js`: C++ ↔ HTML yol bulma: 60 A* yolu, kişiye yürüyüp konuşma, görev "Yol Bul"uyla haritalar arası gidiş ve teslim için dönüş (varışlar, son yer, hedef, konuşma birebir).
 - `node tools/test/cpp_gorev.js` (`ADIM=80`): C++ ↔ HTML görevler: 945 görevin açılma seviyesi, 4 görev botu (her adım), 6 sınıf yükseltme zinciri. Karşılaştırma testlerinin hepsi oyun sunucusu olmadan (geçici statik sunucuyla, port 8097; aynı anda bir tane) çalışır.

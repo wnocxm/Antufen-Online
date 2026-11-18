@@ -1,5 +1,7 @@
 #include "forms.h"
 
+#include "core/jpeg.h"
+
 #include <algorithm>
 #include <cmath>
 
@@ -30,7 +32,7 @@ const core::Image* Forms::image(const std::string& path) {
   auto it = img_.find(path);
   if (it == img_.end()) {
     std::unique_ptr<core::Image> im;
-    try { if (as_.vfs().exists(path)) im = std::make_unique<core::Image>(core::decodePNG(as_.vfs().read(path))); } catch (...) { im.reset(); }
+    try { if (as_.vfs().exists(path)) { const auto b = as_.vfs().read(path); im = std::make_unique<core::Image>(core::isJPEG(b) ? core::decodeJPEG(b) : core::decodePNG(b)); } } catch (...) { im.reset(); }
     it = img_.emplace(path, std::move(im)).first;
   }
   return it->second.get();

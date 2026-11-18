@@ -48,6 +48,7 @@
 //   can <oran> · mana <oran>         oyuncunun canı/manası (azami değerin oranı)
 //   goruntu <dosya.png>              çiz ve PNG yaz
 //   durum <dosya.json|->             oyuncu, sahne, zaman (JSON)
+//   jpeg <girdi.jpg> <çıktı.png>     JPEG çözücü denetimi (tools/test/jpeg_esitlik.py)
 //   esya <al|sat|giy|cikar|kullan|ekle|sil> <eşya|yuva> [adet]   eşya işlemi (HTML buyItem, sellItem, equip, unequip, useItem, addItem, removeItem)
 //   gmgear · altin <n>               GM: seviyeye uygun en iyi ekipman · altın
 //   beceriyukselt <beceri no> · becerisifirla <0|1>   beceri penceresinin Yükselt'i · Puanları Sıfırla (1: bedava)
@@ -64,6 +65,7 @@
 #include <sstream>
 #include <string>
 
+#include "core/jpeg.h"
 #include "core/png.h"
 #include "engine/assets.h"
 #include "engine/balance.h"
@@ -324,6 +326,7 @@ int main(int argc, char** argv) {
       else if (cmd == "hedefle") { int i; ss >> i; W().setTarget(i); }
       else if (cmd == "bekleme") { std::string id; double t; ss >> id >> t; W().player.cds[id] = t; }
       else if (cmd == "gorevver") { int id; ss >> id; W().P.quests[id] = QuestSt(); }   // görevi doğrudan alınmış say (test)
+      else if (cmd == "jpeg") { std::string a, b; ss >> a >> b; godat::writeFile(b, core::encodePNG(core::decodeJPEG(godat::readFile(a)))); }   // JPEG → PNG (çözücü denetimi)
       else if (cmd == "esya") {
         std::string op, id; int n = 1; ss >> op >> id >> n; if (!ss) n = 1; World& w = W();
         if (op == "al") w.buyItem(id, n); else if (op == "sat") w.sellItem(id, n); else if (op == "giy") w.equip(id); else if (op == "cikar") w.unequip(id);

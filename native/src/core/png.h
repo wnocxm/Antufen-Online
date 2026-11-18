@@ -11,6 +11,7 @@ namespace core {
 struct Image {
   int w = 0, h = 0;
   std::vector<uint8_t> px;
+  bool canvas = false;   // HTML'de tuval (görsel değil, ör. harita zemini): tarayıcı yarıdan çok küçültmede mip kullanmaz
   uint8_t* at(int x, int y) { return &px[(size_t(y) * w + x) * 4]; }
   const uint8_t* at(int x, int y) const { return &px[(size_t(y) * w + x) * 4]; }
   bool empty() const { return w == 0 || h == 0; }

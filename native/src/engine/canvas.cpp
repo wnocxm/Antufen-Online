@@ -105,6 +105,25 @@ void Canvas::fillEllipse(float cx, float cy, float rx, float ry, uint32_t rgb, f
     if (n) blend(px, py, rgb, a * n / 16.f);
   }
 }
+void Canvas::fillCircleGrad(float cx, float cy, float r, float gx0, float gy0, float r0, float gx1, float gy1, float r1, uint32_t c0, uint32_t c1) {
+  if (r <= 0) return;
+  const float dx = gx1 - gx0, dy = gy1 - gy0, dr = r1 - r0, A = dx * dx + dy * dy - dr * dr;
+  const int X0 = std::max(0, int(std::floor(cx - r))), X1 = std::min(img.w, int(std::ceil(cx + r))), Y0 = std::max(0, int(std::floor(cy - r))), Y1 = std::min(img.h, int(std::ceil(cy + r)));
+  for (int py = Y0; py < Y1; py++) for (int px = X0; px < X1; px++) {
+    int n = 0;
+    for (int sy = 0; sy < 4; sy++) for (int sx = 0; sx < 4; sx++) { const float u = (px + (sx + 0.5f) / 4 - cx) / r, v = (py + (sy + 0.5f) / 4 - cy) / r; n += u * u + v * v <= 1; }
+    if (!n) continue;
+    // degrade konumu t: noktadan geçen en büyük daire c(t) = c0 + t·d, r(t) = r0 + t·dr ≥ 0 (piksel merkezinde)
+    const float qx = px + 0.5f - gx0, qy = py + 0.5f - gy0, B = qx * dx + qy * dy + r0 * dr, C = qx * qx + qy * qy - r0 * r0;
+    float t = 0;
+    if (std::fabs(A) < 1e-6f) t = B != 0 ? C / (2 * B) : 0;
+    else { const float D = B * B - A * C; if (D < 0) continue; const float sq = std::sqrt(D), t1 = (B + sq) / A, t2 = (B - sq) / A; t = std::max(t1, t2); if (r0 + t * dr < 0) t = std::min(t1, t2); }
+    t = std::max(0.f, std::min(1.f, t));
+    auto ch = [&](int sh) { return float((c0 >> sh) & 255) + (float((c1 >> sh) & 255) - float((c0 >> sh) & 255)) * t; };
+    const uint32_t col = (uint32_t(ch(16) + 0.5f) << 16) | (uint32_t(ch(8) + 0.5f) << 8) | uint32_t(ch(0) + 0.5f);
+    blend(px, py, col, n / 16.f);
+  }
+}
 void Canvas::strokeEllipse(float cx, float cy, float rx, float ry, float lw, uint32_t rgb, float a) {
   if (rx <= 0 || ry <= 0) return;
   const float m = lw / 2 + 1;
@@ -120,8 +139,37 @@ void Canvas::strokeEllipse(float cx, float cy, float rx, float ry, float lw, uin
   }
 }
 
+// küçültme kopyası (mip düzeyi): her düzey bir öncekinin 2×2 ortalaması (Skia SkMipmap: önceden çarpılmış renk, toplam >> 2); önbellekli
+static const core::Image& mipLevel(const core::Image& src, int lvl) {
+  struct E { const void* p; int w, h, lvl; uint32_t sum; core::Image im; };
+  static std::vector<E> cache;
+  uint32_t sum = 0; for (int k = 0; k < 16; k++) { const size_t i = (src.px.size() / 4 / 16 * size_t(k)) * 4; sum = sum * 31 + src.px[i] + (uint32_t(src.px[i + 1]) << 8) + (uint32_t(src.px[i + 3]) << 16); }
+  for (const E& e : cache) if (e.p == src.px.data() && e.w == src.w && e.h == src.h && e.lvl == lvl && e.sum == sum) return e.im;
+  std::vector<int> cur(src.px.size()); int w = src.w, h = src.h;
+  for (size_t i = 0; i < src.px.size(); i += 4) { const int A = src.px[i + 3]; for (int k = 0; k < 3; k++) { const int v = src.px[i + k] * A + 128; cur[i + size_t(k)] = A == 255 ? src.px[i + k] : (v + (v >> 8)) >> 8; } cur[i + 3] = A; }
+  for (int l = 0; l < lvl; l++) {
+    const int nw = std::max(1, w / 2), nh = std::max(1, h / 2); std::vector<int> nx(size_t(nw) * nh * 4);
+    for (int y = 0; y < nh; y++) for (int x = 0; x < nw; x++) for (int k = 0; k < 4; k++) {
+      const int x0 = std::min(w - 1, 2 * x), x1 = std::min(w - 1, 2 * x + 1), y0 = std::min(h - 1, 2 * y), y1 = std::min(h - 1, 2 * y + 1);
+      nx[(size_t(y) * nw + x) * 4 + size_t(k)] = (cur[(size_t(y0) * w + x0) * 4 + size_t(k)] + cur[(size_t(y0) * w + x1) * 4 + size_t(k)] + cur[(size_t(y1) * w + x0) * 4 + size_t(k)] + cur[(size_t(y1) * w + x1) * 4 + size_t(k)]) >> 2;
+    }
+    cur.swap(nx); w = nw; h = nh;
+  }
+  core::Image im; im.w = w; im.h = h; im.px.resize(cur.size());
+  for (size_t i = 0; i < cur.size(); i += 4) { const int A = cur[i + 3]; for (int k = 0; k < 3; k++) im.px[i + size_t(k)] = uint8_t(A == 255 ? cur[i + size_t(k)] : A ? std::min(255, (cur[i + size_t(k)] * 255 + A / 2) / A) : 0); im.px[i + 3] = uint8_t(A); }
+  if (cache.size() > 24) cache.erase(cache.begin());
+  cache.push_back({src.px.data(), src.w, src.h, lvl, sum, std::move(im)});
+  return cache.back().im;
+}
+
 void Canvas::drawImage(const core::Image& src, float sx, float sy, float sw, float sh, float dx, float dy, float dw, float dh, float alpha, bool smooth, bool additive) {
   if (alpha <= 0 || dw <= 0 || dh <= 0 || sw <= 0 || sh <= 0 || src.empty()) return;
+  // yarıdan çok küçültmede tarayıcı (Chrome görsel önbelleği, MipMapUtil) hedeften küçük olmayan en küçük mip düzeyinden örnekler
+  if (smooth && !additive && !src.canvas && sx == 0 && sy == 0 && int(sw) == src.w && int(sh) == src.h) {
+    const int tw = int(std::ceil(dw - 1e-4f)), th = int(std::ceil(dh - 1e-4f)); int lvl = 0;
+    for (;;) { const int nw = std::max(1, src.w >> (lvl + 1)), nh = std::max(1, src.h >> (lvl + 1)); if (nh < th || nw < tw || ((src.w >> lvl) <= 1 && (src.h >> lvl) <= 1)) break; lvl++; }
+    if (lvl > 0) { const core::Image& m = mipLevel(src, lvl); drawImage(m, 0, 0, float(m.w), float(m.h), dx, dy, dw, dh, alpha, true, false); return; }
+  }
   const int X0 = std::max(0, int(std::floor(dx))), X1 = std::min(img.w, int(std::ceil(dx + dw))), Y0 = std::max(0, int(std::floor(dy))), Y1 = std::min(img.h, int(std::ceil(dy + dh)));
   const float fx = dw / sw, fy = dh / sh;
   auto at = [&](int x, int y) { x = std::max(int(sx), std::min(int(std::ceil(sx + sw)) - 1, x)); y = std::max(int(sy), std::min(int(std::ceil(sy + sh)) - 1, y)); x = std::max(0, std::min(src.w - 1, x)); y = std::max(0, std::min(src.h - 1, y)); return src.at(x, y); };
