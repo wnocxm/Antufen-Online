@@ -359,7 +359,7 @@ const UI = (() => {
       title = 'Ayarlar';
       h = `<div class="iact"><button class="obtn" data-act="tsfx">Ses efektleri: ${SFX.opt.sfx ? 'Açık' : 'Kapalı'}</button><button class="obtn" data-act="tmus">Müzik: ${SFX.opt.music ? 'Açık' : 'Kapalı'}</button></div>
         <div class="iact"><button class="obtn" data-act="lang">${LANG === 'tr' ? 'Language: English' : 'Dil: Türkçe'}</button></div>
-        <div class="iact"><button class="obtn" data-act="totitle">Giriş ekranına dön</button><button class="obtn" data-act="newchar">Yeni karakter oluştur</button></div><p class="hint">Oyun otomatik kaydedilir. Sürüm 11180558</p>`;
+        <div class="iact"><button class="obtn" data-act="totitle">Giriş ekranına dön</button><button class="obtn" data-act="newchar">Yeni karakter oluştur</button></div><p class="hint">Oyun otomatik kaydedilir. Sürüm 11180632</p>`;
     }
     ptitle.textContent = tx(title); pbody.innerHTML = h; txDom(pbody);
   }
@@ -498,6 +498,8 @@ const UI = (() => {
         [['cls:up', GT('Sınıfı yükselt', 'Advance class')], ['cls:up2', GT('İkinci yükseltme (80)', 'Second advancement (80)')], ['cls:reset', GT('Acemiye döndür', 'Back to trainee')], ['cls:start', GT('40 yap + ilk görev', 'Set 40 + first quest')]]);
       h += row(GT('Beceri ağaçları', 'Skill trees'), `${GT('puan', 'points')} ${P.sp || 0} · ${Object.values(P.sk || {}).reduce((a, b) => a + b, 0)} ${GT('harcanmış', 'spent')}`,
         [['cls:resetPts', GT('Puanları sıfırla (bedava)', 'Reset points (free)')], ['cls:fill:0', GT('Ağaçları doldur (1. uzmanlık)', 'Fill trees (spec 1)')], ['cls:fill:1', GT('Ağaçları doldur (2. uzmanlık)', 'Fill trees (spec 2)')]]);
+      h += row(GT('Beceri efektleri', 'Skill effects'), `${GT('beklemesiz', 'no cooldown')}: ${Game.gmNoCd ? GT('açık', 'on') : GT('kapalı', 'off')}`,
+        [['cls:dummy', GT('Kukla canavar', 'Training dummy')], ['cls:nocd', GT('Beklemesiz beceri (aç/kapa)', 'No cooldown (toggle)')]]);
       for (const q of ClassGM.chain()) if (!v || (q.title + ' ' + q.id).toLocaleLowerCase('tr').includes(v))
         h += row(q.title + (q.adv ? ' ★' : ''), `${q.id} · ${trName(q.giver)} → ${trName(q.to)} · ${SN[questState(q)]}`, [[`cls:ready:${q.id}`, GT('Hazır yap', 'Make ready')], [`cls:done:${q.id}`, GT('Bitir', 'Complete')], [`cls:go:${q.id}`, GT('Git', 'Go')]]);
     } else {

@@ -43,6 +43,11 @@ const { chromium } = require('playwright');
   const sk = () => p.evaluate(() => ({ adv: Game.P.adv || 0, harcanan: Object.values(Game.P.sk).reduce((a, b) => a + b, 0), puan: Game.P.sp, ad: clsName() }));
   await open(); await p.click('[data-g="v:cls"]'); await p.waitForTimeout(200); await p.click('[data-x="cls:fill:1"]'); await p.waitForTimeout(200); console.log('ağaçları doldur  ', JSON.stringify(await sk()));
   await p.click('[data-x="cls:resetPts"]'); await p.waitForTimeout(200); console.log('puan sıfırla     ', JSON.stringify(await sk()));
+  // beceri efektleri: kukla canavar + beklemesiz beceri (iki kez arka arkaya kullanılır)
+  await p.click('[data-x="cls:fill:0"]'); await p.click('[data-x="cls:dummy"]'); await p.click('[data-x="cls:nocd"]'); await p.waitForTimeout(200);
+  console.log('kukla + beklemesiz', JSON.stringify(await p.evaluate(async () => { const m = Game.ents.find(e => e.gmDummy), i = CLS[Game.P.cls].skills.findIndex(k => !k.pas && k.f && skRank(k)); Game.player.state = 'idle'; useSkill(i);
+    await new Promise(r => setTimeout(r, 700)); Game.player.state = 'idle'; const hp1 = m.hp; useSkill(i); await new Promise(r => setTimeout(r, 900)); return { kukla: !!m, hedef: Game.target === m, ikinciVuruş: m.hp < hp1, beklemesiz: Game.gmNoCd, kımıldamadı: Math.hypot(m.x - m.home.x, m.y - m.home.y) < 0.01 }; })));
+  await p.click('[data-x="cls:nocd"]');
   // sekme adları ve arama kutusu seçili dilde mi; çevrilmeden kalan Türkçe yazılar (DIL=en)
   await open(); await p.click('[data-g="v:dg"]'); await p.waitForTimeout(200);
   console.log('sekmeler        ', JSON.stringify(await p.evaluate(() => [...document.querySelectorAll('#gtools button')].map(b => b.textContent).join(' | ') + ' · ' + document.querySelector('#gq').placeholder)));

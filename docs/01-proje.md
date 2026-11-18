@@ -15,7 +15,7 @@ Kullanıcı ileride Unity'ye taşımayı düşünüyor; bunu kendi bilgisayarın
 - Görev penceresi kabulden sonra kapanır. Görevler sırayla ve seviyeye göre açılır (bkz. `04-gorevler.md`).
 - Sağ tarafta yay biçiminde beceri düğmeleri + büyük saldırı düğmesi; düğme ölçeği `HS = 1.1`. Koşu hızı artırılmış hâli korunur.
 - GM hesabı: haritaları hızlı gezmek için (bkz. `03-istemci.md` › GM).
-- Beceri görselleri orijinal efekt tablosuyla birebir (bkz. `03-istemci.md` › Efektler).
+- Beceri görselleri orijinal efekt tablosuyla birebir: oyuncu/mermi/çarpma efektleri, sayı ve saçılma, süren güçlendirme/zayıflatma görselleri, çağrılan totemler (bkz. `03-istemci.md` › Beceriler ve efektler; test `tools/test/efekt.js`).
 - **Çevrimdışı mod** sunucu kurulana kadar test için kalır; oyun çıkınca kaldırılacak (yalnızca hesapla giriş; bir ayar bayrağıyla).
 - Kapsam: önce **55. seviyeye kadar** kusursuz; 70-80-90 sonra.
 - **Görevler ırka göre ayrı** (orijinaldeki gibi). Taraf orijinal veriden: APK 1009 muhafız tablosundaki `camp` (1 = insan, 2 = gece elfi),

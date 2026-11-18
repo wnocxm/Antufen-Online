@@ -67,7 +67,10 @@ const MON = {
 // Sınıf değerleri ve beceriler. Ağaçlar, adlar, simgeler, açıklamalar, en yüksek kademe, ön koşullar ve kademe sabitleri orijinal:
 // www/assets/skills.json (tools/beceriler.py ← all_skilltree, all_skill, skill_const_2nd.lua). Burada her becerinin oyundaki karşılığı durur:
 // `sn` orijinal numara; `f(K, s, p, t)` etkin becerinin o kademedeki sayıları (K('sabit') = kademe değeri), `pas(K, s)` edilgen,
-// `buff(K, s)` + `dur` güçlendirme, `heal(K, s)` şifa. Etkin beceriler önce (kısayol sırası), edilgenler sonra; yeni ağaçların becerileri
+// `buff(K, s)` + `dur` güçlendirme, `heal(K, s)` şifa. Efektler orijinal efekt tablosundan (APK efekt_beceriler + Symbian all_skill/all_buff;
+// docs/03 › Beceri efektleri): `self` oyuncuda oynar (`selfN` kez, `selfR` px saçılma), `proj` hedefe uçar (`projN` tane), `hit` hedefte
+// (`hitN`/`hitR`), `fx` eski tek efekt (şifa, alan), `bfx` güçlendirme süresince karakterde döner, `totem` yere konan çağrılmış nesne
+// (Gözdağı Totemi, Şifa Pınarı). Etkin beceriler önce (kısayol sırası), edilgenler sonra; yeni ağaçların becerileri
 // eskilerin arkasına eklendi (eski kayıtlardaki kısayol sırası bozulmasın). Sınıf taban değerleri (hp, atk… ve seviye artışları) bizim
 // dengemiz (orijinal sunucudaydı; docs/03 › Denge).
 const R100 = v => v / 100;
@@ -76,10 +79,10 @@ const CLS = {
     skills: [
       // acemi (见习 150008) ve sınıf (战士 150009) ağaçları
       { id: 'w1', sn: 90020, mp: 0, cd: 0.8, range: 1.6, fx: 'BLOOD', snd: 'skill_sword', f: K => ({ mult: 1, add: K('add_phy') }) },
-      { id: 'w2', sn: 90095, mp: 25, cd: 1.0, range: 1.6, self: '特效-刀光-红', hit: 'BLOOD', snd: 'skill_daoguang', f: K => ({ mult: 1, add: K('add_phy'), crit: K('add_fatal') }) },
+      { id: 'w2', sn: 90095, mp: 25, cd: 1.0, range: 1.6, self: '特效-刀光-红', hit: 'BLOOD', hitN: 2, hitR: 5, snd: 'skill_daoguang', f: K => ({ mult: 1, add: K('add_phy'), crit: K('add_fatal') }) },
       { id: 'w3', sn: 90021, mp: 35, cd: 1.5, range: 6, proj: '特效-飞刀', hit: '特效-细碎爆炸', splash: 1.8, snd: 'skill_nife', snd2: 'skill_pilipala', f: K => ({ mult: R100(K('phy_basic')), add: K('add_phy'), taunt: 1 }) },
       { id: 'w4', sn: 90044, mp: 45, cd: 5, hits: 2, range: 1.6, self: '特效-刀光', hit: '特效-大喷血', fx2: 'BLOOD', snd: 'skill_daoguang', f: K => ({ mult: 1 + R100(K('add_phy_rate')), mult2: R100(K('add_holy_rate')) }) },
-      { id: 'w5', sn: 90084, mp: 30, cd: 20, dur: 5, fx: '特效-加速', snd: 'skill_juqi', buff: K => ({ spd: 0.25, nextCrit: K('next_attack_is_fatal_rate'), noSlow: 1 }) },
+      { id: 'w5', sn: 90084, mp: 30, cd: 20, dur: 5, self: '特性-聚气', bfx: '特效-加速', snd: 'skill_juqi', buff: K => ({ spd: 0.25, nextCrit: K('next_attack_is_fatal_rate'), noSlow: 1 }) },
       { id: 'w6', sn: 90105, mp: 60, cd: 15, range: 5, self: '特效-刀光', hit: '特效-死亡标记', snd: 'skill_deathtag', f: K => ({ mult: R100(K('add_phy_rate')), crit: K('add_fatal') }) },
       { id: 'wp1', sn: 90022, pas: K => ({ atk: K('add_phy') }) },
       { id: 'wp2', sn: 90042, pas: K => ({ hpPct: K('add_hp_max_rate') }) },
@@ -88,16 +91,16 @@ const CLS = {
       { id: 'wp5', sn: 90096, pas: K => ({ hpreg: K('hp_grow') }) },
       { id: 'wp6', sn: 90104, pas: K => ({ dr: K('add_sorbdamage_rate') }) },
       // uzmanlık: Kana Susamış (嗜血 150010)
-      { id: '90106', sn: 90106, mp: 300, cd: 15, dur: 10, fx: '特效-鲜血印记', snd: 'skill_juqi', buff: K => ({ leech: R100(K('add_hp_rate')) }) },
-      { id: '90113', sn: 90113, mp: 150, cd: 2, range: 1.6, self: '特效-刀光-红', hit: '特效-大喷血', snd: 'skill_daoguang', f: (K, s, p) => ({ mult: 0, add: p.hp * R100(K('dec_hp_rate')) * (skRankSn(90115) ? 1.05 : 1), pure: 1, refresh: '90106' }) },
-      { id: '90598', sn: 90598, mp: 200, cd: 10, dur: 6, fx: '特效-反击风暴', snd: 'skill_juqi', buff: () => ({ reflect: 0.1 }) },
+      { id: '90106', sn: 90106, mp: 300, cd: 15, dur: 10, self: '特性-聚气', bfx: '特效-鲜血印记', snd: 'skill_juqi', buff: K => ({ leech: R100(K('add_hp_rate')) }) },
+      { id: '90113', sn: 90113, mp: 150, cd: 2, range: 1.6, self: '特效-刀光-红', selfN: 5, selfR: 5, hit: 'RELIVE', snd: 'skill_daoguang', snd2: 'skill_relive', f: (K, s, p) => ({ mult: 0, add: p.hp * R100(K('dec_hp_rate')) * (skRankSn(90115) ? 1.05 : 1), pure: 1, refresh: '90106' }) },
+      { id: '90598', sn: 90598, mp: 200, cd: 10, dur: 6, self: '特性-聚气', bfx: '特效-反击风暴', snd: 'skill_juqi', buff: () => ({ reflect: 0.1 }) },
       { id: '90107', sn: 90107, pas: K => ({ healUp: K('add_resume_effect_rate') }) },
       { id: '90119', sn: 90119, pas: K => ({ defToAtk: K('add_physical_attack_value') }) },
       { id: '90115', sn: 90115, pas: () => ({}) },
       // uzmanlık: Öfke (狂暴 150011)
-      { id: '90117', sn: 90117, mp: 120, cd: 1.5, range: 1.6, self: '特效-疾风斩', hit: '特效-刀光-红', fx2: 'BLOOD', snd: 'skill_daoguang', f: K => ({ mult: R100(K('phy_attack_factor')), add: K('add_phy_attack_value'), bleed: 1 }) },
-      { id: '90116', sn: 90116, mp: 200, cd: 4, range: 5, self: '特效-刀光', hit: '特效-七彩的刀光', fx2: 'BLOOD', snd: 'skill_deathtag', f: (K, s, p, t) => tearHit(K, s, p, t) },
-      { id: '90599', sn: 90599, mp: 150, cd: 10, dur: 6, fx: '特效-狂暴之怒', snd: 'skill_juqi', buff: () => ({ atk: 0.05, def: -0.05, noSlow: 1 }) },
+      { id: '90117', sn: 90117, mp: 120, cd: 1.5, range: 1.6, self: '特效-刀光-红', selfN: 3, selfR: 5, hit: 'BLOOD', hitN: 5, hitR: 5, snd: 'skill_daoguang', snd2: 'skill_bomb', f: K => ({ mult: R100(K('phy_attack_factor')), add: K('add_phy_attack_value'), bleed: 1 }) },
+      { id: '90116', sn: 90116, mp: 200, cd: 4, range: 5, hit: '特效-狂暴BUFF', snd: 'skill_deathtag', f: (K, s, p, t) => tearHit(K, s, p, t) },
+      { id: '90599', sn: 90599, mp: 150, cd: 10, dur: 6, self: '特性-聚气', bfx: '特效-狂暴之怒', snd: 'skill_juqi', buff: () => ({ atk: 0.05, def: -0.05, noSlow: 1 }) },
       { id: '90118', sn: 90118, pas: K => ({ despair: K('trigger_effect_rate') }) },
       { id: '90121', sn: 90121, pas: K => ({ atkToDef: K('add_physical_defence_and_resist_value') }) },
       { id: '90120', sn: 90120, pas: () => ({}) },
@@ -108,26 +111,26 @@ const CLS = {
       { id: 'm1', sn: 90122, mp: 20, cd: 1.2, range: 7, proj: '特效-火球', hit: '特效-火爆炸', snd: 'skill_fireball', snd2: 'skill_bomb', f: K => ({ mult: 1, add: K('add_fire') }) },
       { id: 'm2', sn: 90123, mp: 30, cd: 0.9, range: 7, proj: '特效-冰球', hit: 'WATER_ATTACK', slow: 2, snd: 'skill_wind', snd2: 'skill_bubble', f: K => ({ mult: 1, add: K('add_water'), crit: K('add_fatal') }) },
       { id: 'm3', sn: 90126, mp: 60, cd: 20, fx: 'LIGHT_ATTACK', snd: 'skill_light', heal: K => K('add_hp') },
-      { id: 'm4', sn: 90127, mp: 70, cd: 8, aoe: 2.4, projN: 3, fx: 'FIRE_ATTACK', hit: '特效-火爆炸', snd: 'skill_fireball2', snd2: 'skill_bomb', f: K => ({ mult: 1 + R100(K('add_fire_rate')), add: K('add_fire_val') }) },
-      { id: 'm5', sn: 90129, mp: 80, cd: 30, dur: 10, fx: '特效-法力盾', snd: 'skill_juqi', buff: K => ({ manaShield: R100(K('work_rate')), mpPerDmg: K('mp_trans_hp') }) },
-      { id: 'm6', sn: 90128, mp: 90, cd: 12, range: 7, proj: '特效-冰球', hit: '特效-冰块碎裂', hitN: 10, splash: 2.6, slow: 2, snd: 'skill_wind', snd2: 'skill_ice', f: K => ({ mult: R100(K('basic_attack_rate')), add: K('add_water') }) },
+      { id: 'm4', sn: 90127, mp: 70, cd: 8, range: 3, proj: 'FIRE_ATTACK', projN: 3, hit: '特效-火爆炸', hitN: 3, hitR: 2, snd: 'skill_fireball2', snd2: 'skill_bomb', f: K => ({ mult: 1 + R100(K('add_fire_rate')), add: K('add_fire_val') }) },
+      { id: 'm5', sn: 90129, mp: 80, cd: 30, dur: 10, bfx: '特效-弱化术', snd: 'skill_juqi', buff: K => ({ manaShield: R100(K('work_rate')), mpPerDmg: K('mp_trans_hp') }) },
+      { id: 'm6', sn: 90128, mp: 90, cd: 12, range: 7, proj: '特效-冰球', hit: '特效-冰块碎裂', hitN: 10, hitR: 50, splash: 2.6, slow: 2, snd: 'skill_wind', snd2: 'skill_ice', f: K => ({ mult: R100(K('basic_attack_rate')), add: K('add_water') }) },
       { id: 'mp1', sn: 90124, pas: K => ({ atk: K('add_mag') }) },
       { id: 'mp2', sn: 90125, pas: K => ({ mpPct: K('add_mp_max_rate') }) },
       { id: 'mp3', sn: 90097, pas: K => ({ acc: K('add_raw_shoot_rate') }) },
       { id: 'mp4', sn: 90130, pas: K => ({ res: K('add_resist') }) },
       { id: 'mp5', sn: 90098, pas: K => ({ mpreg: K('mp_grow') }) },
-      { id: 'mp6', sn: 90131, mp: 60, cd: 1, fx: '特效-治疗buff', snd: 'skill_light', dur: K => K('buff_duration') * 60, buff: K => ({ mpAdd: K('add_mp_max') }) },   // orijinalde etkin (eskiden edilgendi)
+      { id: 'mp6', sn: 90131, mp: 60, cd: 1, snd: 'skill_light', dur: K => K('buff_duration') * 60, buff: K => ({ mpAdd: K('add_mp_max') }) },   // orijinalde etkin (eskiden edilgendi)
       // uzmanlık: Element (元素 150016)
-      { id: '90132', sn: 90132, mp: 300, cd: 4, range: 7, proj: '特效-火球', hit: '特效-火爆炸', hitN: 3, splash: 2.2, snd: 'skill_fireball2', snd2: 'skill_bomb', f: K => ({ mult: R100(K('fire_attack_factor')), add: K('add_fire_attack_value'), burn: 1 }) },
+      { id: '90132', sn: 90132, mp: 300, cd: 4, range: 7, proj: 'FIRE_ATTACK2', projN: 3, hit: 'FIRE_ATTACK2', hitN: 10, hitR: 30, splash: 2.2, snd: 'skill_fireball2', snd2: 'skill_bomb', f: K => ({ mult: R100(K('fire_attack_factor')), add: K('add_fire_attack_value'), burn: 1 }) },
       { id: '90134', sn: 90134, mp: 300, cd: 4, aoe: 3, fx: '特效-冰霜新星', snd: 'skill_ice', f: K => ({ mult: R100(K('ice_attack_factor')) * (skRankSn(90135) ? 1.02 : 1), add: K('add_ice_attack_value'), slow: 2, freeze: skRankSn(90135) ? 10 : 0 }) },
-      { id: '90136', sn: 90136, mp: 0, cd: 15, dur: 6, fx: '特效-元素赐生', snd: 'skill_light', buff: K => ({ mpTick: R100(K('add_mp_rate')) / 2, dmgOut: skRankSn(90600) ? R100(skCSn(90600, 'magic_attack_dec_to_rate')) : 0.5, atk: skRankSn(90600) ? 0.05 : 0, hpTick: skRankSn(90600) ? 1 : 0 }) },
+      { id: '90136', sn: 90136, mp: 0, cd: 15, dur: 6, self: '特性-聚气', bfx: '特效-元素赐生', snd: 'skill_light', buff: K => ({ mpTick: R100(K('add_mp_rate')) / 2, dmgOut: skRankSn(90600) ? R100(skCSn(90600, 'magic_attack_dec_to_rate')) : 0.5, atk: skRankSn(90600) ? 0.05 : 0, hpTick: skRankSn(90600) ? 1 : 0 }) },
       { id: '90133', sn: 90133, pas: K => ({ ccDmg: K('add_damage_rate') }) },
       { id: '90135', sn: 90135, pas: () => ({}) },
       { id: '90600', sn: 90600, pas: () => ({}) },
       // uzmanlık: Gizem (奥术 150017)
-      { id: '90137', sn: 90137, mp: 0, cd: 1.5, range: 7, proj: '特效-黑暗火球', hit: '特效-火爆炸', snd: 'skill_fireball', snd2: 'skill_bomb', f: K => ({ mult: 1.2, arcane: 1 }), mpPct: K => R100(K('count_up_dec_mp_rate')) },
-      { id: '90140', sn: 90140, mp: 250, cd: 7.5, range: 7, fx: '特效-蓝火球', snd: 'skill_wind', f: (K, s) => ({ phantom: R100(K('copy_factor')), life: 5 + (skRankSn(90138) ? skCSn(90138, 'extra_lifetime') : 0) }) },
-      { id: '90139', sn: 90139, mp: 200, cd: 15, dur: 6, fx: '特效-加速', snd: 'skill_juqi', buff: K => Object.assign({ dodge: K('add_jook_rate') }, skRankSn(90601) && Math.random() < 0.1 ? { spd: 0.3, noSlow: 1 } : null) },
+      { id: '90137', sn: 90137, mp: 0, cd: 1.5, range: 7, proj: '特效-黑暗火球', hit: '特效-火爆炸', snd: 'skill_wind', snd2: 'skill_bomb', f: K => ({ mult: 1.2, arcane: 1 }), mpPct: K => R100(K('count_up_dec_mp_rate')) },
+      { id: '90140', sn: 90140, mp: 250, cd: 7.5, range: 7, snd: 'skill_wind', f: (K, s) => ({ phantom: R100(K('copy_factor')), life: 5 + (skRankSn(90138) ? skCSn(90138, 'extra_lifetime') : 0) }) },
+      { id: '90139', sn: 90139, mp: 200, cd: 15, dur: 6, self: '特性-聚气', bfx: '特效-神圣之盾', snd: 'skill_juqi', buff: K => Object.assign({ dodge: K('add_jook_rate') }, skRankSn(90601) && Math.random() < 0.1 ? { spd: 0.3, noSlow: 1 } : null) },
       { id: '90141', sn: 90141, pas: K => ({ mpToAtk: K('add_magic_attack_value') }) },
       { id: '90138', sn: 90138, pas: () => ({}) },
       { id: '90601', sn: 90601, pas: () => ({}) },
@@ -137,27 +140,27 @@ const CLS = {
       // acemi (初级 150022) ve sınıf (神使 150023) ağaçları
       { id: 'p1', sn: 90312, mp: 18, cd: 1.0, range: 7, proj: '特效-暗影冲击_红', hit: '特效-冲击爆炸', snd: 'skill_wind', snd2: 'skill_bomb', f: (K, s, p, t) => ({ mult: 1 + (t && t.dot && t.dot.corr ? R100(skCSn(90314, 'arrow_buff')) : 0), add: K('add_dark') }) },
       { id: 'p2', sn: 90314, mp: 30, cd: 1, range: 7, fx: '特效-死亡标记', snd: 'skill_deathtag', f: () => ({ mult: 0, corrode: 1 }) },
-      { id: 'p3', sn: 90317, mp: 50, cd: 15, aoe: 3, fx: '特效-神之威慑', snd: 'skill_juqi', f: (K, s) => ({ mult: 0, weakDef: s.atk * R100(K('def_reduce_rate')), weakT: 10 }) },
-      { id: 'p4', sn: 90319, mp: 60, cd: 15, dur: 10, fx: '特效-治疗之泉', snd: 'skill_light', buff: (K, s) => ({ hotT: s.atk * 0.1 + K('hp_resume') }) },
+      { id: 'p3', sn: 90317, mp: 50, cd: 15, aoe: 3, totem: '特效-神之威慑', snd: 'skill_juqi', f: (K, s) => ({ mult: 0, weakDef: s.atk * R100(K('def_reduce_rate')), weakT: 10 }) },
+      { id: 'p4', sn: 90319, mp: 60, cd: 15, dur: 10, totem: '特效-治疗之泉', snd: 'skill_light', buff: (K, s) => ({ hotT: s.atk * 0.1 + K('hp_resume') }) },
       { id: 'p5', sn: 90318, mp: 45, cd: 6, range: 7, hit: '特效-暗影灼烧_红', snd: 'skill_fire2', snd2: 'skill_bomb', f: (K, s, p, t) => burnHit(K, t) },
-      { id: 'p6', sn: 90321, mp: 70, cd: 3, fx: '特效-缓缓加红', snd: 'skill_light', heal: (K, s) => s.atk + K('heal_hp') },
-      { id: 'p7', sn: 90322, mp: 90, cd: 40, fx: '特效-神努buff', snd: 'skill_relive', dur: K => K('buff_duration'), buff: (K, s) => ({ atkAdd: s.atk * R100(K('add_attack_rate')), defAdd: s.atk * R100(K('add_defence_rate')) }) },
+      { id: 'p6', sn: 90321, mp: 70, cd: 3, self: '特效-缓缓加红', selfN: 40, selfR: 180, snd: 'skill_light', heal: (K, s) => s.atk + K('heal_hp') },
+      { id: 'p7', sn: 90322, mp: 90, cd: 40, self: '特效-狂暴BUFF', selfN: 40, selfR: 180, bfx: '特效-神努buff', snd: 'skill_relive', dur: K => K('buff_duration'), buff: (K, s) => ({ atkAdd: s.atk * R100(K('add_attack_rate')), defAdd: s.atk * R100(K('add_defence_rate')) }) },
       { id: 'pp1', sn: 90313, pas: K => ({ atk: K('add_magic_attack') }) },
       { id: 'pp2', sn: 90315, pas: K => ({ crit: K('add_cruel_rate') }) },
       { id: 'pp3', sn: 90316, pas: () => ({}) },
       { id: 'pp4', sn: 90320, pas: () => ({}) },   // stats() can/mana sınırı bilindikten sonra ekler
       { id: 'pp5', sn: 90323, pas: () => ({}) },
       // uzmanlık: Kutsal (神圣 150024)
-      { id: '90602', sn: 90602, mp: 100, cd: 1, dur: 60, fx: '特性-聚气', snd: 'skill_juqi', toggle: 1, buff: K => ({ convert: K('convert_factor') }) },
-      { id: '90604', sn: 90604, mp: 300, cd: 5, aoe: 3, fx: '特效-细碎爆炸', snd: 'skill_light', f: K => ({ mult: R100(K('holy_damage_factor')), add: K('add_holy_damage_value'), novaHeal: 1, stun: skRankSn(90605) ? 10 : 0 }) },
-      { id: '90606', sn: 90606, mp: 200, cd: 20, dur: 3, fx: '特效-圣光壁垒', snd: 'skill_relive', buff: K => ({ dr: K('add_sorbdamage_rate') }) },
+      { id: '90602', sn: 90602, mp: 100, cd: 1, dur: 60, self: '特性-聚气', snd: 'skill_juqi', toggle: 1, buff: K => ({ convert: K('convert_factor') }) },
+      { id: '90604', sn: 90604, mp: 300, cd: 5, aoe: 3, self: '特效-细碎爆炸', selfN: 5, selfR: 80, snd: 'skill_light', f: K => ({ mult: R100(K('holy_damage_factor')), add: K('add_holy_damage_value'), novaHeal: 1, stun: skRankSn(90605) ? 10 : 0 }) },
+      { id: '90606', sn: 90606, mp: 200, cd: 20, dur: 3, bfx: '特效-圣光壁垒', snd: 'skill_relive', buff: K => ({ dr: K('add_sorbdamage_rate') }) },
       { id: '90603', sn: 90603, pas: K => ({ cheatDeath: K('trigger_effect_rate') }) },
       { id: '90605', sn: 90605, pas: () => ({}) },
       { id: '90607', sn: 90607, pas: () => ({}) },
       // uzmanlık: Gölge (暗影 150025)
       { id: '90608', sn: 90608, mp: 250, cd: 4, range: 7, proj: '特效-暗影冲击_红', hit: '特性-冰火爆炸', snd: 'skill_wind', snd2: 'skill_deathtag', f: K => ({ mult: R100(K('dark_damage_factor')), add: K('add_dark_damage_value'), corrode: 1 }) },
-      { id: '90610', sn: 90610, mp: 0, cd: 10, dur: 6, fx: '特效-黑暗契约', snd: 'skill_deathtag', buff: K => ({ mp2hp: R100(K('dec_mp_rate')) }) },
-      { id: '90613', sn: 90613, mp: 300, cd: 20, dur: 6, fx: '特效-黑暗降临', snd: 'skill_relive', buff: () => ({ atk: 0.3, drain: 0.01, noHeal: 1 }) },
+      { id: '90610', sn: 90610, mp: 0, cd: 10, dur: 6, self: '特性-聚气', bfx: '特效-黑暗契约', snd: 'skill_deathtag', buff: K => ({ mp2hp: R100(K('dec_mp_rate')) }) },
+      { id: '90613', sn: 90613, mp: 300, cd: 20, dur: 6, self: '特效-治疗buff', bfx: '特效-缓缓加红', snd: 'skill_relive', buff: () => ({ atk: 0.3, drain: 0.01, noHeal: 1 }) },
       { id: '90609', sn: 90609, pas: K => ({ seal: K('trigger_effect_rate') }) },
       { id: '90612', sn: 90612, pas: K => ({ veil: K('trigger_effect_rate') }) },
       { id: '90611', sn: 90611, pas: () => ({}) },
@@ -435,19 +438,52 @@ class Npc extends Ent {
 }
 // Efekt dosyalarında 0. animasyon tek karelik duruş karesidir; asıl efekt sonraki animasyondadır.
 // Yöne bağlı efektlerde (kılıç izi, kan sıçraması) her yönün kendi animasyonu vardır: bakılan yöne göre seçilir.
+// 8 yuvalı yönlü efektler (kılıç izi 特效-刀光, kan BLOOD, 特效-疾风斩): tek numaralı yuvalar 4 çapraz yön; (1,5) ve (3,7) yuvaları
+// birbirinin yatay aynası, 1 ve 3 sağa, 5 ve 7 sola bakar → yön 0 sağ-yukarı: 1, 1 sağ-aşağı: 3, 2 sol-aşağı: 7, 3 sol-yukarı: 5
+// (eskiden 1,3,5,7 sırasıyla alınıyordu; sola bakan iki yönde iz kılıcın tersine düşüyordu)
+const FX8 = [1, 3, 7, 5];
 function fxAnim(sp, dir) {
   if (!sp.ok) return 0; const L = sp.anims.map(a => a.length), cand = [];
+  if (L.length === 8 && [1, 3, 5, 7].every(i => L[i] > 1)) return FX8[((dir || 0) % 4 + 4) % 4];
   L.forEach((n, i) => { if (n > 1) cand.push(i); });
-  if (!cand.length) { const i = L.findIndex(n => n > 0); return i < 0 ? 0 : i; }
+  // tek kareli efektlerde de 0. animasyon boş duruş karesidir (örn. buz kalıbı 特效-冻结: 0 boş, 1 buz): 1. animasyon alınır
+  if (!cand.length) { const i = L.findIndex((n, k) => n > 0 && (k > 0 || L.length === 1)); return i < 0 ? 0 : i; }
   return cand.length === 1 ? cand[0] : cand[((dir || 0) % cand.length + cand.length) % cand.length];
 }
+// opt: anim/dir (animasyon), follow (varlığı izler), loop (bitmez; süren etkiler), z (yükseklik), ox/oy (piksel kayması: saçılma)
 class Fx {
   constructor(name, x, y, opt = {}) {
-    this.sp = Game.map.sprite(name); this.sp.glow = true; this.x = x; this.y = y; this.t = 0; this.loop = opt.loop || 0; this.follow = opt.follow; this.z = opt.z || 0;
+    this.sp = Game.map.sprite(name); this.sp.glow = opt.glow !== false; this.x = x; this.y = y; this.t = 0; this.loop = opt.loop || 0; this.follow = opt.follow; this.z = opt.z || 0;
+    this.ox = opt.ox || 0; this.oy = opt.oy || 0; this.map = Game.map;
     this.anim = opt.anim != null ? opt.anim : fxAnim(this.sp, opt.dir != null ? opt.dir : Game.player ? Game.player.dir : 0);
     this.len = this.sp.ok ? this.sp.animLen(this.anim) : 0; this.done = !this.sp.ok || !this.len;
   }
-  draw(ctx, X, Y) { if (this.sp.ok) this.sp.draw(ctx, this.anim, this.t, X, Y - this.z); }
+  draw(ctx, X, Y) { if (this.sp.ok) this.sp.draw(ctx, this.anim, this.t, X + this.ox, Y + this.oy - this.z); }
+}
+// Orijinal efekt tablosundaki "sayı + yarıçap": efekt n kez, ilki tam ortada, ötekiler r piksellik daire içinde rastgele (yer düzlemi:
+// dikeyde yarı) ve kısa aralıklarla (toplam en çok ~0,6 sn) oynar. Örn. Öç Bıçağı kılıç izi 5×5 px, Kutsal Işık kırmızı ışık 40×180 px.
+function fxBurst(name, x, y, n, r, opt = {}) {
+  if (!name) return; n = n || 1; const gap = Math.min(0.06, 0.6 / n);
+  for (let k = 0; k < n; k++) {
+    const go = () => { const a = Math.random() * 6.283, d = k && r ? Math.sqrt(Math.random()) * r : 0; Game.fx.push(new Fx(name, x, y, Object.assign({}, opt, { ox: Math.cos(a) * d, oy: Math.sin(a) * d * 0.5 }))); };
+    const dl = (opt.delay || 0) + k * gap; if (dl > 0) later(dl, go); else go();
+  }
+}
+// Çağrılan nesneler (orijinal all_monster: 威慑图腾 → 特效-神之威慑, 治疗之泉 → 特效-治疗之泉, 魔法幻象 → 怪物-魔法幻象): yere konur,
+// süresi boyunca durur, sonra kaybolur.
+function totemAt(name, x, y, life) { const f = new Fx(name, x, y, { loop: 1 }); f.life = life; Game.fx.push(f); return f; }
+// Büyü Hayali (90140): "hayal totemi" oyuncunun yanına dikilir, süresince oyuncunun hedefine ateş eder; mermiler totemden çıkar.
+// Canavar görseli (ışık değil): 0-3 duruş, 8-11 saldırı.
+function phantomFx() {
+  const p = Game.player, f = new Fx('怪物-魔法幻象', p.x - 1, p.y + 0.3, { loop: 1, anim: p.dir, glow: false });
+  f.at = () => ({ x: f.x, y: f.y }); Game.fx.push(f); return f;
+}
+// Süren etkilerin görseli (orijinal all_buff: her güçlendirme/zayıflatmanın bir efekti var): etki sürdükçe efekt varlığın üstünde
+// döner, bitince kalkar; harita değişince yeniden kurulur. want = { anahtar: efekt adı }.
+function auraSync(e, want) {
+  const A = e._aura || (e._aura = {});
+  for (const k in want) { const f = A[k]; if (!f || f.done || f.map !== Game.map || f.name !== want[k]) { if (f) f.done = true; const g = new Fx(want[k], e.x, e.y, { follow: e, loop: 1 }); g.name = want[k]; Game.fx.push(g); A[k] = g; } }
+  for (const k in A) if (!(k in want)) { A[k].done = true; delete A[k]; }
 }
 
 // ---------------- Sahne yükleme ----------------
@@ -464,8 +500,8 @@ async function loadScene(sid, arrive) {
   const names = new Set(map.names);
   for (const [id, nm] of sc.ents) { const info = D.cit[id] || D.mon[id]; if (info) { names.add(info[1]); if (info[2]) names.add(info[2]); } }
   for (const n of ['特效-血爆死亡', '特效-刀光', 'LEVELUP', '特效-火球', '特效-火爆炸', '特效-冰球', '特效-冰块碎裂', '特效-黑暗火球', '特效-蓝火球', '特效-大喷血', '特效-治疗buff', 'NPC-新手引导－1', 'NPC-新手引导－2']) names.add(n);
-  for (const s of CLS[Game.P.cls].skills) for (const k of ['fx', 'proj', 'hit', 'self', 'fx2']) if (s[k]) names.add(s[k]);
-  for (const n of ['特效-冻结', '特效-抗性减少', '特效-漆黑之幕', '特效-神圣之盾']) names.add(n);   // beceri tetikleyicilerinin efektleri (dondurma, gözdağı, perde, kutsanmış beden)
+  for (const s of CLS[Game.P.cls].skills) for (const k of ['fx', 'proj', 'hit', 'self', 'fx2', 'bfx', 'totem']) if (s[k]) names.add(s[k]);
+  for (const n of ['特效-冻结', '特效-缓缓加蓝', '特效-抗性衰减buff', '特效-漆黑之幕', '怪物-魔法幻象']) names.add(n);   // süren etkiler (donma, yavaşlama, gözdağı, perde) ve Büyü Hayali
   for (const k of ['bolt', 'boltHit']) if (CLS[Game.P.cls][k]) names.add(CLS[Game.P.cls][k]);
   await Assets.preload([...names]);
   Game.player && (Game.player = null);
@@ -573,7 +609,7 @@ function hitMob(m, mult, o = {}) {
     if (B.leech) healPlayer(d * B.leech);   // Kan Damgası
     if (o.bleed) { m.bleed = { n: Math.min(5, ((m.bleed && m.bleed.n) || 0) + 1), t: 10, tick: 2 }; }   // Testere Bıçak: en çok 5 kat
     if (o.burn) m.burn = { t: 6, tick: 2 };   // Alev Darbesi: yanma (yığılmaz)
-    if (o.freeze && Math.random() * 100 < o.freeze) { m.rootT = 2; Game.fx.push(new Fx('特效-冻结', m.x, m.y)); }
+    if (o.freeze && Math.random() * 100 < o.freeze) m.rootT = 2;
     const now = Game.time;
     if (o.stun && Math.random() * 100 < o.stun && !(p.stunCd > now)) { m.stunT = 3; p.stunCd = now + 15; UI.float(m, T_('Sersem', 'Stun'), '#ffe070'); }
     if (s.seal && Math.random() * 100 < s.seal && !(p.sealCd > now)) { m.sealT = 3; p.sealCd = now + 10; UI.float(m, T_('Mühür', 'Sealed'), '#c080ff'); }
@@ -609,15 +645,15 @@ function hurtPlayer(m) {
   // Büyücü Bedeni (90611): Karanlık Ahit sırasında %10 hasarı savuştur, hasar kadar mana
   if (B.mp2hp && skRankSn(90611) && Math.random() < 0.1) { p.mp = Math.min(s.mp, p.mp + r.d); UI.float(p, T_('Savuşturuldu', 'Negated'), '#9fd0ff'); return; }
   // Zifiri Perde (90612): Karanlık Ahit dışında, 15 saniyede bir, savunma ve dirençler 6 saniye artar
-  if (s.veil && !B.mp2hp && !(p.veilCd > now) && Math.random() * 100 < s.veil) { p.veilCd = now + 15; p.buffs.push({ id: 'veil', buff: { def: 0.5, res: Math.round(s.res * 0.5) }, t: 6 }); Game.fx.push(new Fx('特效-漆黑之幕', p.x, p.y, { follow: p })); }
+  if (s.veil && !B.mp2hp && !(p.veilCd > now) && Math.random() * 100 < s.veil) { p.veilCd = now + 15; p.buffs.push({ id: 'veil', buff: { def: 0.5, res: Math.round(s.res * 0.5) }, t: 6, fx: '特效-漆黑之幕' }); }   // güçlendirme 210192
   // Büyü Kalkanı (90129): hasarın bir kısmı manadan düşer
   if (B.manaShield) { const per = B.mpPerDmg || 1, want = Math.round(r.d * Math.min(1, B.manaShield)), can = Math.min(want, Math.floor(p.mp / per)); p.mp -= can * per; r.d -= can; }
   // Karşı Saldırı Fırtınası (90598): fiziksel saldırının %10'u ile alınan hasardan küçük olanı yansır
   if (B.reflect && r.d > 0 && !m.dead) { const back = Math.round(Math.min(s.atk * B.reflect, r.d)); if (back > 0) hitMob(m, 0, { add: back, pure: 1, tick: 1 }); }
   if (r.d <= 0) return;
   p.hp -= r.d; p.combatT = 5; UI.float(p, '-' + r.d, '#ff5040'); UI.hurt();
-  // Kutsanmış Beden (90603): ölümcül darbeyi olasılıkla savuştur, biraz can
-  if (p.hp <= 0 && s.cheatDeath && Math.random() * 100 < s.cheatDeath) { p.hp = Math.round(s.hp * 0.2); Game.fx.push(new Fx('特效-神圣之盾', p.x, p.y, { follow: p })); UI.float(p, T_('Kutsandı', 'Blessed'), '#ffe070'); return; }
+  // Kutsanmış Beden (90603): ölümcül darbeyi olasılıkla savuştur, biraz can (orijinal kayıtta efekt yok: yalnızca yazı)
+  if (p.hp <= 0 && s.cheatDeath && Math.random() * 100 < s.cheatDeath) { p.hp = Math.round(s.hp * 0.2); UI.float(p, T_('Kutsandı', 'Blessed'), '#ffe070'); return; }
   if (p.hp <= 0) { p.hp = 0; p.dead = true; p.deadT = 0; p.state = 'dead'; SFX.play('kill', 0.5); UI.death(); setTarget(null); }
 }
 function gainXp(n) {
@@ -642,6 +678,7 @@ function useSkill(i) {
   const P = Game.P, p = Game.player, C = CLS[P.cls], sk = C.skills[i]; if (!sk || sk.pas || p.dead) return;
   if (!skRank(sk)) { const L = skLock(sk); UI.log(L ? `${sk.name}: ${L[1]}` : 'Bu beceri henüz öğrenilmedi. Beceriler ekranından puan ver.'); return; }
   const K = k => skC(sk, k), s = stats();
+  if (Game.gmNoCd) { p.cds = {}; p.mp = s.mp; }   // GM: beklemesiz + manasız
   if ((p.cds[sk.id] || 0) > 0) return;
   // Gölge Hükümdarı: şifa ve destek becerileri çalışmaz (orijinal)
   if ((sk.heal || (sk.buff && sk.sn !== 90613)) && p.buffs.some(b => b.buff.noHeal)) { UI.log(T_('Gölge Hükümdarı etkinken şifa ve destek becerileri çalışmaz.', 'Healing and support skills do not work during Shadow Sovereign.')); return; }
@@ -666,30 +703,33 @@ function useSkill(i) {
   // vuruşun ardından: Çürüme bırakma, hayal totemi, Kan Damgası'nı yenileme, Büyü Darbesi katı; başka bir saldırı becerisi Büyü Darbesi etkisini tüketir
   const after = tg => {
     if (F.corrode && tg && !tg.dead) applyCorrosion(tg);
-    if (F.phantom && tg) Game.phantom = { t: F.life, tick: 0, mult: F.phantom, tg };
+    if (F.phantom && tg) { if (Game.phantom && Game.phantom.fx) Game.phantom.fx.done = true; Game.phantom = { t: F.life, tick: 0, mult: F.phantom, tg, fx: phantomFx() }; }
     if (F.refresh) { const b = p.buffs.find(x => x.id === F.refresh); if (b) b.t = Math.max(b.t, typeof SKBYSN[90106].dur === 'number' ? SKBYSN[90106].dur : 10); }
     if (F.arcane) { const n = Math.min(3, (arc ? arc.n : 0) + 1); p.buffs = p.buffs.filter(b => b.id !== 'arcane'); p.buffs.push({ id: 'arcane', n, buff: { dmgUp: n * K('count_up_damage_rate') }, t: 3 }); }
     else if (arc && sk.f && (MUL || o.add)) p.buffs = p.buffs.filter(b => b !== arc);
   };
+  // vuruş efekti: hitN kez hitR px içinde; birden çok mermide (projN) her mermi kendi payını patlatır
+  const PN = sk.projN || 1, per = Math.ceil((sk.hitN || 1) / PN), hitFx = n => fxBurst(sk.hit || sk.fx, t.x, t.y, n, sk.hitR || 0);
   const land = () => {
     if (sk.snd2) SFX.play(sk.snd2);
-    if (sk.splash) { const n = sk.hitN || 1; for (let k = 0; k < n; k++) later(k * 0.06, () => { const r = k ? Math.random() * 1.3 : 0, a = Math.random() * 6.283; Game.fx.push(new Fx(sk.hit, t.x + Math.cos(a) * r, t.y + Math.sin(a) * r)); }); for (const m of mobsNear(t.x, t.y, sk.splash)) hitMob(m, MUL, o); }
-    else if (MUL || o.add) { hitMob(t, MUL, o); const f = sk.hit || sk.fx; if (f) Game.fx.push(new Fx(f, t.x, t.y)); }
-    else { const f = sk.hit || sk.fx; if (f) Game.fx.push(new Fx(f, t.x, t.y)); }
+    hitFx(per);
+    if (sk.splash) { for (const m of mobsNear(t.x, t.y, sk.splash)) hitMob(m, MUL, o); }
+    else if (MUL || o.add) hitMob(t, MUL, o);
     if (sk.fx2) Game.fx.push(new Fx(sk.fx2, t.x, t.y));
     if (sk.hits === 2) later(0.28, () => { if (!t.dead) { hitMob(t, F.mult2 != null ? F.mult2 : MUL, Object.assign({}, o, { add: F.mult2 != null ? 0 : o.add })); SFX.play(sk.snd); } });
     after(t);
   };
-  if (sk.self) Game.fx.push(new Fx(sk.self, p.x, p.y, { dir: p.dir }));
+  // oyuncudaki efekt; yakın dövüşte kılıç izi saldırı hareketinin inişine denk gelsin diye 2 kare sonra (kılıç kalkarken değil)
+  if (sk.self) fxBurst(sk.self, p.x, p.y, sk.selfN, sk.selfR, { dir: p.dir, delay: p.state === 'attack' ? 2 / TICK : 0 });
   later(0.25, () => {
-    if (sk.proj && t) shoot(sk.proj, p, t, land);
+    if (sk.proj && t) { shoot(sk.proj, p, t, land); for (let k = 1; k < PN; k++) later(k * 0.12, () => shoot(sk.proj, p, t, () => hitFx(Math.min(per, (sk.hitN || 1) - k * per)), true)); }
     else if (sk.aoe) {
-      const near = mobsNear(p.x, p.y, sk.aoe); if (!sk.projN || !near.length) Game.fx.push(new Fx(sk.fx, p.x, p.y)); if (sk.snd2 && !sk.projN) SFX.play(sk.snd2);
+      const near = mobsNear(p.x, p.y, sk.aoe); if (sk.fx) Game.fx.push(new Fx(sk.fx, p.x, p.y)); if (sk.snd2) SFX.play(sk.snd2);
+      if (sk.totem) totemAt(sk.totem, p.x, p.y, F.weakT || 10);
       let dealt = 0;
       for (const m of near) {
         if (MUL || o.add) dealt += hitMob(m, MUL, o);
-        if (F.weakDef) { m.weakT = F.weakT; m.weakDef = F.weakDef; Game.fx.push(new Fx('特效-抗性减少', m.x, m.y)); }
-        if (sk.projN) { for (let k = 0; k < sk.projN; k++) later(k * 0.12, () => { if (!m.dead) Game.fx.push(new Fx(sk.hit, m.x + rnd(-0.4, 0.4), m.y + rnd(-0.4, 0.4))); }); }
+        if (F.weakDef) { m.weakT = F.weakT; m.weakDef = F.weakDef; }   // görseli süren zayıflatma (特效-抗性衰减buff)
       }
       if (F.novaHeal && dealt) healPlayer(dealt);   // Kutsal Nova: verilen hasar kadar can
       after(near[0]);
@@ -698,8 +738,11 @@ function useSkill(i) {
     else if (sk.heal) { healPlayer(Math.round(sk.heal(K, s)), sk.fx); }
     else if (sk.buff) {
       const dur = typeof sk.dur === 'function' ? sk.dur(K) : sk.dur;
-      p.buffs = p.buffs.filter(b => b.id !== sk.id); p.buffs.push({ id: sk.id, buff: sk.buff(K, s), t: dur });
-      Game.fx.push(new Fx(sk.fx, p.x, p.y, { follow: p })); UI.log(`${sk.name} etkin.`); clampVitals();
+      const b = { id: sk.id, buff: sk.buff(K, s), t: dur }; if (sk.bfx) b.fx = sk.bfx;
+      // Şifa Pınarı: pınar yere konur, yalnızca yanındayken iyileştirir (orijinal: çağrılan nesne 治疗之泉)
+      if (sk.totem) { b.at = { x: p.x, y: p.y, r: 3 }; totemAt(sk.totem, p.x, p.y, dur); }
+      p.buffs = p.buffs.filter(x => x.id !== sk.id); p.buffs.push(b);
+      if (sk.fx) Game.fx.push(new Fx(sk.fx, p.x, p.y, { follow: p })); UI.log(`${sk.name} etkin.`); clampVitals();
     }
   });
   UI.refresh();
@@ -902,6 +945,9 @@ const ClassGM = {
   start() { const P = Game.P; if (P.lv < 40) gmLevel(40); autoQuests(); UI.refresh(); },
   ready(id) { const q = QBY[id], P = Game.P; if (!q || P.done[id]) return; for (let r = q.req; r && !P.done[r]; r = QBY[r] && QBY[r].req) { P.done[r] = true; delete P.quests[r]; } if (!P.quests[id]) acceptQuest(q); readyQuest(q); save(); },
   done(id) { const q = QBY[id]; if (!q || Game.P.done[id]) return; this.ready(id); if (q.type === 'deliver') return; completeQuest(q); },
+  // efekt denemesi: yanına ölmeyen, saldırmayan kukla canavar; beklemesiz + manasız beceri (aç/kapa)
+  dummy() { const p = Game.player; Game.ents = Game.ents.filter(e => !e.gmDummy); const m = new Mob('☆水仙子', p.x + 1.5, p.y); m.hp = m.maxHp = 1e9; m.gmDummy = 1; m.home = { x: m.x, y: m.y }; Game.ents.push(m); setTarget(m, true); },
+  nocd() { Game.gmNoCd = !Game.gmNoCd; UI.toast(Game.gmNoCd ? T_('Beklemesiz beceri: açık', 'No cooldown: on') : T_('Beklemesiz beceri: kapalı', 'No cooldown: off')); },
 };
 // Ozan (金波港): 40'ta sınıf yükseltme görevlerini dağıtır (80344 metni)
 TR.greet['吟游诗人'] = LANG === 'en' ? 'My songs tell the tales of many heroes. When you reach level 40, come to me and I will tell you how to become a true warrior, mage or priest.'
@@ -1008,6 +1054,7 @@ function update(dt) {
   const px0 = p.x, py0 = p.y; p.animT = (p.animT || 0) + dt * TICK; p.combatT -= dt; p.atkT -= dt;
   for (const k in p.cds) p.cds[k] = Math.max(0, p.cds[k] - dt);
   p.buffs.forEach(b => b.t -= dt); p.buffs = p.buffs.filter(b => b.t > 0);
+  { const w = {}; if (!p.dead) for (const b of p.buffs) if (b.fx) w[b.id] = b.fx; auraSync(p, w); }   // güçlendirme görselleri (b.fx)
   if (p.stateT > 0) { p.stateT -= dt; if (p.stateT <= 0) p.state = 'idle'; }
   if (p.dead) p.deadT = (p.deadT || 0) + dt;
   if (!p.dead) {
@@ -1015,6 +1062,7 @@ function update(dt) {
     p.hp = Math.min(s.hp, p.hp + (s.hp * regen + s.hpreg * 0.1) * dt); p.mp = Math.min(s.mp, p.mp + (s.mp * regen * 1.3 + s.mpreg * 0.1) * dt);
     const noHeal = p.buffs.some(b => b.buff.noHeal), hu = 1 + (s.healUp || 0) / 100;
     for (const b of p.buffs) { const B = b.buff;
+      if (b.at && Math.hypot(p.x - b.at.x, p.y - b.at.y) > b.at.r) continue;   // yere konmuş etki (Şifa Pınarı): uzaktayken işlemez
       if (B.hot && !noHeal) p.hp = Math.min(s.hp, p.hp + s.hp * B.hot * hu * dt); if (B.hotT && !noHeal) p.hp = Math.min(s.hp, p.hp + B.hotT * hu * dt); if (B.motT) p.mp = Math.min(s.mp, p.mp + B.motT * dt);
       if (B.mpTick) { const v = s.mp * B.mpTick * dt; p.mp = Math.min(s.mp, p.mp + v); if (B.hpTick && !noHeal) p.hp = Math.min(s.hp, p.hp + v); }   // Element Bağışı (+ Ruh Uyumu)
       if (B.mp2hp) { const v = Math.min(p.mp, p.mp * B.mp2hp * dt); p.mp -= v; if (!noHeal) p.hp = Math.min(s.hp, p.hp + v * hu); }   // Karanlık Ahit
@@ -1022,8 +1070,10 @@ function update(dt) {
     }
     const ph = Game.phantom;   // Büyü Hayali: saniyede bir, savunma tanımayan hasar
     if (ph) { ph.t -= dt; ph.tick -= dt; const tg = Game.target && !Game.target.dead && Game.target.kind === 'mob' ? Game.target : ph.tg && !ph.tg.dead ? ph.tg : null;
-      if (ph.tick <= 0 && tg) { ph.tick = 1; shoot('特效-蓝火球', p, tg, () => hitMob(tg, ph.mult, { pure: 1, tick: 1 })); }
-      if (ph.t <= 0) Game.phantom = null; }
+      if (!ph.fx || ph.fx.map !== Game.map) ph.fx = phantomFx();   // harita değişince yeniden
+      ph.fx.anim = (tg ? dirOf(tg.x - ph.fx.x, tg.y - ph.fx.y) : p.dir) + (ph.tick < 0.4 && tg ? 8 : 0);   // hedefe bakar; atarken saldırı hareketi
+      if (ph.tick <= 0 && tg) { ph.tick = 1; shoot('特效-蓝火球', ph.fx.at(), tg, () => hitMob(tg, ph.mult, { pure: 1, tick: 1 })); }
+      if (ph.t <= 0) { ph.fx.done = true; Game.phantom = null; } }
     const J = Input.joy();
     let moving = false;
     if (J) {
@@ -1062,8 +1112,11 @@ function update(dt) {
     if (e.kind === 'npc') { e.t += dt * TICK * 0.8; if (e.hidden && (e.respawnT -= dt) <= 0) e.hidden = false; continue; }
     if (e.kind !== 'mob') continue;
     e.t += dt * TICK; e.animT = (e.animT || 0) + dt * TICK;
-    if (e.dead) { e.deadT += dt; if ((e.respawnT -= dt) <= 0) { Object.assign(e, { dead: false, hp: e.maxHp, x: e.home.x, y: e.home.y, aggro: false, state: 'idle' }); } continue; }
+    if (e.dead) { if (e._aura) auraSync(e, {}); e.deadT += dt; if ((e.respawnT -= dt) <= 0) { Object.assign(e, { dead: false, hp: e.maxHp, x: e.home.x, y: e.home.y, aggro: false, state: 'idle' }); } continue; }
     e.atkT -= dt; e.slowT -= dt; if (e.weakT > 0) e.weakT -= dt; else if (e.weakDef) e.weakDef = 0;
+    // zayıflatma görselleri (orijinal all_buff): yavaşlama (210148) 特效-缓缓加蓝, Tanrı Gözdağı (210146) 特效-抗性衰减buff, donma (210015) 特效-冻结
+    { const w = {}; if (e.slowT > 0) w.slow = '特效-缓缓加蓝'; if (e.weakT > 0 && e.weakDef) w.weak = '特效-抗性衰减buff'; if (e.rootT > 0) w.root = '特效-冻结'; if (e._aura || w.slow || w.weak || w.root) auraSync(e, w); }
+    if (e.gmDummy) { e.state = e.state === 'hurt' && e.stateT > 0 ? 'hurt' : 'idle'; if (e.stateT > 0) e.stateT -= dt; continue; }   // GM kuklası: kıpırdamaz, saldırmaz
     if (e.bleed && (e.bleed.tick -= dt) <= 0) { e.bleed.tick = 2; e.bleed.t -= 2; hitMob(e, 0.08 * e.bleed.n, { tick: 1 }); if (e.bleed && e.bleed.t <= 0) e.bleed = null; if (e.dead) continue; }   // Testere Bıçak kanaması
     if (e.burn && (e.burn.tick -= dt) <= 0) { e.burn.tick = 2; e.burn.t -= 2; hitMob(e, 0.15, { tick: 1 }); if (e.burn && e.burn.t <= 0) e.burn = null; if (e.dead) continue; }   // Alev Darbesi yanması
     if (e.rootT > 0) e.rootT -= dt; if (e.sealT > 0) e.sealT -= dt; if (e.despairT > 0) e.despairT -= dt;
@@ -1089,7 +1142,8 @@ function update(dt) {
   }
   // efektler
   for (const f of Game.fx) {
-    f.t += dt * TICK; if (f.follow) { f.x = f.follow.x; f.y = f.follow.y; }
+    if (f.done) continue; f.t += dt * TICK; if (f.follow) { f.x = f.follow.x; f.y = f.follow.y; }
+    if (f.life != null && (f.life -= dt) <= 0) { f.done = true; continue; }
     if (f.proj) {
       const t = f.proj.to; if (!t || (t.dead && !f.proj.vis)) { f.done = true; continue; }
       const dx = t.x - f.x, dy = t.y - f.y, d = Math.hypot(dx, dy), st = f.proj.sp * dt;

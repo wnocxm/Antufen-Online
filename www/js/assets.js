@@ -76,12 +76,13 @@ const Assets = (() => {
       const fv = p[1] & 2, w = m[2], h = m[3];
       let flipX = !!(p[1] & 1), px = p[2], py = p[3];
       if (mirror) { px = -px; flipX = !flipX; }
-      // aynalı parçada x değeri sağ kenarı gösterir
-      const left = flipX ? px - w : px;
+      // aynalı parçada x değeri sağ kenarı, dikey çevrilmiş parçada y değeri alt kenarı gösterir (kılıç izi 特效-刀光'nın aşağı bakan
+      // yönleri böyle; eskiden y üst kenar sayılıyordu ve iz karakterin ~100 px altında çıkıyordu)
+      const left = flipX ? px - w : px, top = fv ? py - h : py;
       ctx.globalAlpha = alpha;
-      if (!flipX && !fv) ctx.drawImage(S, m[0], m[1], w, h, x + left, y + py, w, h);
+      if (!flipX && !fv) ctx.drawImage(S, m[0], m[1], w, h, x + left, y + top, w, h);
       else {
-        ctx.save(); ctx.translate(x + left + (flipX ? w : 0), y + py + (fv ? h : 0)); ctx.scale(flipX ? -1 : 1, fv ? -1 : 1);
+        ctx.save(); ctx.translate(x + left + (flipX ? w : 0), y + top + (fv ? h : 0)); ctx.scale(flipX ? -1 : 1, fv ? -1 : 1);
         ctx.drawImage(S, m[0], m[1], w, h, 0, 0, w, h); ctx.restore();
       }
     }
