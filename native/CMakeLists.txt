@@ -84,11 +84,17 @@ if(ANRUFEN_SDL)
   target_link_libraries(anrufen PRIVATE motor SDL2::SDL2main SDL2::SDL2-static)
 endif()
 
-# Oyun veri paketi: www/assets → build/veri/oyun.gdp (şifreli; cmake --build … --target veri)
-add_custom_target(veri
+# Oyun veri paketi: www/assets → build/veri/oyun.gdp (şifreli). Veri dosyalarından biri değişince (ya da yeni dosya gelince)
+# oyunla birlikte yeniden üretilir; eski paket kalıp "veri dosyası yok" hatası vermesin.
+file(GLOB_RECURSE VERI_DOSYALARI CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/../www/assets/*)
+add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/veri/oyun.gdp
   COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/veri
   COMMAND godat_pack -o ${CMAKE_BINARY_DIR}/veri/oyun.gdp --dizin ${CMAKE_CURRENT_SOURCE_DIR}/../www/assets
-  DEPENDS godat_pack COMMENT "veri paketi: www/assets → veri/oyun.gdp")
+  DEPENDS godat_pack ${VERI_DOSYALARI} COMMENT "veri paketi: www/assets → veri/oyun.gdp")
+add_custom_target(veri DEPENDS ${CMAKE_BINARY_DIR}/veri/oyun.gdp)
+if(TARGET anrufen)
+  add_dependencies(anrufen veri)
+endif()
 
 foreach(t godat godat_dump godat_pack motor anrufen_test)
   target_compile_options(${t} PRIVATE ${ANRUFEN_WARN})

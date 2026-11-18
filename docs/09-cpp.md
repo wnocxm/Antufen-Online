@@ -34,7 +34,8 @@ native/
 ```bash
 cmake -S native -B native/build -G Ninja && cmake --build native/build && ctest --test-dir native/build
 cmake --build native/build --target anrufen     # pencereli oyun (SDL2 burada derlenir, ~10 sn)
-cmake --build native/build --target veri        # www/assets → build/veri/oyun.gdp (2955 dosya, 56 → 33 MB, şifreli)
+cmake --build native/build --target veri        # www/assets → build/veri/oyun.gdp (2956 dosya, 56 → 33 MB, şifreli)
+                                                # anrufen derlenirken de yapılır; www/assets'te dosya değişince/eklenince yeniden üretilir
 ```
 
 ### Kendi bilgisayarında (kullanıcı)
