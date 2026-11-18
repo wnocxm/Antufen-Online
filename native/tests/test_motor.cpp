@@ -7,7 +7,9 @@
 #include "core/json.h"
 #include "core/png.h"
 #include "engine/assets.h"
+#include "engine/balance.h"
 #include "engine/canvas.h"
+#include "engine/rng.h"
 #include "engine/vfs.h"
 #include "engine/world.h"
 
@@ -35,19 +37,32 @@ int main(int argc, char** argv) {
   CHECK(std::abs(int(c.img.px[8]) - 55) <= 1, "tuval: yarı saydam");
   c.blit(s, 0, 0, 1, 1, 3, 0, false, false, 1.f, true);
   CHECK(c.img.px[12] == 110, "tuval: ışık olarak ekleme");
+  {   // zar üreteci: JavaScript mulberry32 ile aynı dizi (tohum 12345; değerler node ile hesaplandı)
+    engine::Rng r(12345); const double a = r.next(), b = r.next(), c2 = r.next();
+    CHECK(a == 0.97972826776094735 && b == 0.30675226449966431 && c2 == 0.48420542152598500, "zar: JS mulberry32 ile aynı");
+    CHECK(engine::jsRound(-2.5) == -2 && engine::jsRound(2.5) == 3 && engine::jsHypot(3, 4) == 5, "JS yuvarlama ve hypot");
+  }
   CHECK(engine::dirOf(1, 0) == 1 && engine::dirOf(0, 1) == 2 && engine::dirOf(-1, 0) == 3 && engine::dirOf(0, -1) == 0, "yön: dört eksen");
 
   if (argc > 1) {
-    engine::Vfs vfs; vfs.mountDir(argv[1]); engine::Assets as; as.load(vfs);
-    engine::World w(as); w.loadScene("120005");
-    CHECK(w.sceneName == "观林镇" && w.map.w == 50 && !w.npcs.empty() && !w.map.objs.empty(), "sahne: Guanlin yüklendi");
+    engine::Vfs vfs; vfs.mountDir(argv[1]); engine::Assets as; as.load(vfs); engine::Balance bal; bal.load(vfs, as.D());
+    engine::World w(as, bal); w.loadScene("120005");
+    CHECK(w.sceneName == "观林镇" && w.map.w == 50 && !w.ents.empty() && !w.map.objs.empty(), "sahne: Guanlin yüklendi");
     CHECK(!w.map.blocked(w.player.x, w.player.y), "sahne: oyuncu geçilebilir karede");
     const double x0 = w.player.x;
     for (int k = 0; k < 30; k++) w.update(1.0 / 60, 21, 11 * 1.9);   // sağ-aşağı tuşları: +x ekseni
-    CHECK(w.player.x > x0 + 1.5 && w.player.dir == 1 && w.player.moving, "yürüme: 0,5 sn sağ-aşağı ≈ 2 kare");
+    CHECK(w.player.x > x0 + 1.5 && w.player.dir == 1 && w.player.state == "move", "yürüme: 0,5 sn sağ-aşağı ≈ 2 kare");
     engine::Canvas fr; fr.resize(640, 360); w.draw(fr);
     size_t lit = 0; for (size_t i = 0; i < fr.img.px.size(); i += 4) if (fr.img.px[i] | fr.img.px[i + 1] | fr.img.px[i + 2]) lit++;
     CHECK(lit > 640 * 360 / 2, "çizim: ekranın çoğu boyalı");
+    // canavarlar: Güneşli Orman Kuzey'de örümcekler; en yakına saldır, 20 sn içinde en az biri ölür, deneyim ve altın gelir
+    engine::rng().seed(5); w.P = engine::CharData(); w.setChar("战士", "人类", "male"); w.setLevel(20);
+    const int at[2] = {40, 75}; w.loadScene("120018", at);
+    int mobs = 0; for (const auto& e : w.ents) mobs += e.kind == engine::Ent::MOB;
+    CHECK(mobs == 24, "canavar: 24 örümcek yerleşti");
+    bool killed = false;
+    for (int k = 0; k < 600 && !killed; k++) { if (w.target() < 0) { const int m = w.nearestMob(8); if (m >= 0) w.setTarget(m, true); } w.update(1.0 / 30); for (const auto& e : w.ents) killed |= e.dead; }
+    CHECK(killed && w.P.gold > 0 && w.P.xp > 0, "savaş: canavar öldü, deneyim ve altın geldi");
   }
   std::printf("motor testleri: %d geçti, %d kaldı\n", passed, failed);
   return failed ? 1 : 0;

@@ -9,6 +9,7 @@
 
 #include "core/png.h"
 #include "engine/assets.h"
+#include "engine/rng.h"
 
 namespace engine {
 
@@ -37,7 +38,5 @@ class GameMap {
   std::unordered_map<std::string, std::unique_ptr<Sprite>> sprites_;
 };
 
-// JavaScript Math.round (yarım yukarı): C++ std::round eksi yarımda farklı yuvarlar
-inline double jsRound(double v) { return std::floor(v + 0.5); }
 
 }  // namespace engine

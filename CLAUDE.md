@@ -30,7 +30,7 @@ Bir konuya girmeden önce ilgili belgeyi oku; bir sistemi değiştirince belgesi
   Durdurma kancası commit edilmemiş/izlenmeyen dosya varsa uyarır: her işi commit + push ile bitir.
 - **Her yeni sistem GM komutuyla gelir** (kullanıcı isteği): modülde `GM` nesnesi, GM panelinde sekme/düğme, `tools/test/gm.js`'e adım; `docs/03-istemci.md` › GM'ye yazılır.
 - **Belgeler her işte güncellenir**: değişen sistemin belgesi + `docs/08-gunluk.md`'ye (bugünün tarihi altında) bir satır + gerekirse `docs/01-proje.md` durum/sırada.
-- **Üretilen dosyaları elle düzenleme:** `www/js/quests_gen.js` (`tools/gorevler.py`), `www/js/tr_scenes.js` (`tools/ceviri.py`), `www/assets/data.json` (`tools/pack_all.py`), `www/assets/skills.json` (`tools/beceriler.py`; çeviri `kaynak/ceviri/beceriler.json`), `www/assets/travel.json` (`tools/seyahat.py`).
+- **Üretilen dosyaları elle düzenleme:** `www/js/quests_gen.js` (`tools/gorevler.py`), `www/js/tr_scenes.js` (`tools/ceviri.py`), `www/assets/data.json` (`tools/pack_all.py`), `www/assets/skills.json` (`tools/beceriler.py`; çeviri `kaynak/ceviri/beceriler.json`), `www/assets/travel.json` (`tools/seyahat.py`), `www/assets/denge.json` (`tools/denge_cikar.js`; game.js'te canavar/deneyim/sınıf değerleri değişince yeniden çalıştır).
 - **Çeviriler** `kaynak/ceviri/gorevler/<bölge>.json` içindedir (görev metinleri + o bölgenin yeni NPC/canavar adları).
 - **Kapsam:** Şu an 55. seviyeye kadar her şey "kusursuz" olacak. 70-80-90 sonra. 55 üstü görevler `atla` ile dışarıda bırakılır.
 - **APK kullanımı:** APK'dan orijinal görsel ve veri alınır; APK ekibinin Unity kodu, sunucu adresi, yönetici araçları alınmaz.
@@ -38,5 +38,5 @@ Bir konuya girmeden önce ilgili belgeyi oku; bir sistemi değiştirince belgesi
 - `rm` ile göreli joker kullanma (güvenlik denetimi engeller).
 - **C++ geçişi (18.11):** yeni iş `native/` (C++17) içinde yapılır; `www/` HTML sürümü usta kopyadır, yalnız hata düzeltmesi alır. Eksik haritalar/zindanlar C++ sürümünde tamamlanır.
   Derleme ve test: `cmake -S native -B native/build -G Ninja && cmake --build native/build && ctest --test-dir native/build`; `python3 tools/test/godat_esitlik.py`;
-  ekransız test modu `native/build/anrufen_test <senaryo>`; HTML ile karşılaştırma `node tools/test/cpp_karsilastir.js` (sunucu açıkken). Her taşınan sistem bu karşılaştırmayla doğrulanır.
+  ekransız test modu `native/build/anrufen_test <senaryo>`; HTML ile karşılaştırma `node tools/test/cpp_karsilastir.js` (çizim, yürüme) ve `node tools/test/cpp_savas.js` (canavar, savaş; tohumlu zar). Her taşınan sistem böyle bir karşılaştırmayla doğrulanır; zarlar HTML ile aynı sırada atılmalı (docs/09).
   `native/anahtar.txt` (yayın anahtarı) asla commit edilmez.

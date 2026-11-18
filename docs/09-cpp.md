@@ -12,7 +12,7 @@
 ## Yol haritası
 1. **godat kütüphanesi ✔ (18.11)**: orijinal okuma, GODAT3.0 şifreli paket, katmanlı yama, araçlar, testler.
 2. **Motor iskeleti + test modu ✔ (18.11)**: SDL2 depoda; veri paketi; sahne (zemin, nesneler, NPC'ler), oyuncu katmanları, kamera, 4 yönlü yürüme; ekransız test modu. HTML ile karşılaştırma: 6 sahnede çizim birebir (en kötü %0,018), 6 yönde yürüme aynı.
-3. Sistemler tek tek, her biri "aynı senaryo iki sürümde aynı sonuç" testiyle: savaş → beceri/efekt → görev → pencereler → eşya/dükkân → evcil → zindan → yolculuk → GM → ağ (mevcut sunucu).
+3. Sistemler tek tek, her biri "aynı senaryo iki sürümde aynı sonuç" testiyle: **canavarlar + temel savaş ✔ (18.11)** → beceri/efekt → görev → pencereler → eşya/dükkân → evcil → zindan → yolculuk → GM → ağ (mevcut sunucu).
 4. Paketleme: Android (GitHub otomatik derleme), iOS (Mac gerekir).
 
 ## Klasör ve derleme
@@ -51,15 +51,27 @@ cmake --build native/build --target veri        # www/assets → build/veri/oyun
 - **Pencereli oyun** `anrufen [--veri <klasör|paket.gdp>] [--sahne <no>] [--sinif …] [--irk …] [--cinsiyet …]`: ok tuşları/WASD, F12 ekran görüntüsü, Esc. Burada yalnız sahte ekran sürücüsüyle (`SDL_VIDEODRIVER=dummy`) çalıştırılabildi; gerçek pencere kullanıcının bilgisayarında.
 - **Kapsam (sırada)**: canavarlar, savaş, efektler, arayüz pencereleri, görevler … (yol haritası 3. adım). Ayak gölgesi çiziliyor; adlar/yazı tipi henüz yok.
 
+## Canavarlar ve temel savaş (3. adım, ilk parça)
+- **Zar**: oyunun bütün rastgele sayıları tek üreteçten (`engine/rng.h`, mulberry32; HTML'deki `Math.random` yerine). Tohum verilince dizi sabittir; karşılaştırma testinde HTML'de `Math.random` aynı üreteçle değiştirilir. Zarlar HTML ile **aynı sırayla** atılır (varlık oluşturma: NPC/canavar/oyuncu `t`, canavar gezinme süresi ve yönü; yerleşim; hasar; ıska; öldürmede altın → Yaşam Elementi → iksirler → ganimet → evcil yumurtası).
+- **JS hesap karşılıkları**: `jsRound` (yarım yukarı), `jsHypot` (V8'in Kahan toplamlı Math.hypot'u; son basamak farkı dallanmayı değiştirmesin), JS nesne anahtar sırası (tam sayı anahtarlar artan: eşya ve canavar kayıtları).
+- **Denge verisi** `www/assets/denge.json` ← `tools/denge_cikar.js` (game.js'ten: MON, XPT, MXPT, sınıf tabanları; elle düzenleme). `engine/balance.cpp`: canavar tanımı (elle yazılmış + sahne seviyesinden otomatik, ilk hesaplandığı sahne belirler — HTML önbelleği gibi), deneyim, eşyalar (items.json), canavar kayıtları (fixMonData düzeltmesiyle), evcil yumurtası ailesi (pets.json).
+- **`engine/world.cpp`** (HTML'deki sırayla): sahne yükleme (NPC, sabit "canavar" düğümleri + geçilmez kare, canavar yerleşimi), oyuncu istatistikleri (sınıf + seviye + ekipman + ırk becerileri), zamanlayıcılar (`later`, sondan başa), hedefe koşma/takılma/saldırı (yakın dövüş vuruşu 0,25 sn sonra; büyücü/elçi ateş topu mermisi), canavar yapay zekâsı (kendiliğinden saldırma, 12 kare sonra vazgeçme, kovalama, 1,6 sn'de bir darbe, gezinme), hasar formülü, ıska, ölüm ve yeniden doğma, deneyim/seviye atlama, altın, iksir, ganimet, evcil yumurtası, efektler (ölüm, kan, mermi, seviye), geçitten başka haritaya geçiş.
+- **Pencereli oyunda**: boşluk tuşu en yakın canavara saldırır.
+- **Henüz yok**: beceriler ve güçlendirmeler, görevler, evcil hayvan, zindan kuralları (boss ayarı, kesilen canavar, kapılar), arayüz (can çubuğu, adlar, hasar sayıları, pencereler).
+- **Bulgu (HTML hatası, düzeltildi):** harita değişince bekleyen zamanlayıcılar silinmiyordu; önceki haritadaki bir canavarın bekleyen darbesi yeni haritada oyuncuya vuruyordu. HTML `loadScene` artık zamanlayıcıları temizliyor (C++ zaten öyle).
+
 ## Ekransız test modu (`anrufen_test <senaryo.txt|->`)
-Satır başına bir komut: `veri <klasör|paket.gdp>` · `karakter <sınıf> <ırk> <cinsiyet>` · `sahne <no> [x y]` · `konum <x> <y>` (denetimsiz) · `yon <0-3>` ·
+Satır başına bir komut: `veri <klasör|paket.gdp>` · `tohum <sayı>` · `karakter <sınıf> <ırk> <cinsiyet>` (yeni karakter) · `seviye <n>` · `doldur` · `sahne <no> [x y]` · `konum <x> <y>` (denetimsiz) · `yon <0-3>` ·
+`hedef <yakın|sıra>` · `savas <dt> <sn> <iz.json> [oto]` (sabit adım, her saniye iz satırı; oto: en yakın canavarı hedef al) · `canavarlar <dosya|->` ·
 `saat0` (zaman ve animasyon sayaçları 0) · `bekle <sn>` · `yuru <sag|sol|yukari|asagi|sag+yukari…> <sn>` (1/60 sn adımlar, tuşlar HTML'deki gibi) ·
 `ekran <g> <y>` · `golge <0|1>` · `goruntu <dosya.png>` · `durum <dosya.json|->`. Ben (Claude) C++ sürümünü bununla çalıştırıp görüntüsüne bakarak denetlerim.
 
-## HTML ile karşılaştırma (`node tools/test/cpp_karsilastir.js`)
-- Sunucu açıkken (docs/06). HTML'de oyunun kendi çizim parçalarıyla aynı kare (640×360, zaman 0, canavarsız, gölgesiz, adsız) çizilir; C++ aynı senaryoyu çizer; `tools/test/goruntu_fark.py` piksel piksel karşılaştırır (kanal farkı > 3 = farklı; sınır %0,1). Yan yana + kırmızı farklar: `OUT/<ad>_fark.png`.
+## HTML ile karşılaştırma (`node tools/test/cpp_karsilastir.js`, `node tools/test/cpp_savas.js`)
+- `URL` verilmezse `www/` geçici bir statik sunucuyla açılır (çevrimdışı kip; oyun sunucusu gerekmez). HTML'de oyunun kendi çizim parçalarıyla aynı kare (640×360, zaman 0, canavarsız, gölgesiz, adsız) çizilir; C++ aynı senaryoyu çizer; `tools/test/goruntu_fark.py` piksel piksel karşılaştırır (kanal farkı > 3 = farklı; sınır %0,1). Yan yana + kırmızı farklar: `OUT/<ad>_fark.png`.
 - Sahneler: Guanlin (iki yer), elf acemi kampı, Altındalga Limanı, Bozbalta Şehri, Ruh Arafı; üç sınıf, iki ırk, iki cinsiyet, dört yön. 18.11: 0 / 0 / 1 / 0 / 41 / 11 piksel.
 - Yürüme: aynı kareden 6 tuş birleşimiyle 0,5 sn; konum, yön ve adım sayacı iki sürümde aynı.
+- Canavarlar da çizilir (aynı tohum → aynı yerleşim): Güneşli Orman Kuzey'de 24 örümcek, 1 piksel fark.
+- **`cpp_savas.js`**: 8 senaryo (üç sınıf, iki ırk, Sv 9-88, sahne seviyesi 7-80; biri 24 canavarın ortasında ölüm): canavar yerleşimi (ad, yer, yön, can, seviye, saldırı, savunma, gezinme) ve 15-60 sn otomatik savaşta **her saniye** oyuncu canı/manası, seviye, deneyim, altın, yer, hedef ve canı, yaşayan canavar, canavarların toplam yeri, ölüm, çanta. 18.11: 8/8 birebir aynı (toplam 8 dakika; öldürme, iksir ve kılıç düşmesi, ölüm dahil).
 - **Bulgu (HTML kusuru):** tarayıcı yarı saydam pikselleri saklarken yuvarladığı için (önceden çarpılmış alfa) palet numarası kayıyor; alev, geçit, ışık gibi saydamlığı olan görseller HTML'de koyu benekli çıkıyor. C++ veriyi kayıpsız okuduğu için düzgün çiziyor (HTML'de düzeltmek PNG'yi elle çözmeyi gerektirir; usta kopyada bırakıldı). Karşılaştırmada C++ bu yuvarlamayı `ANRUFEN_TARAYICI_ALFA=1` ile taklit eder; taklit kapalıyken farkın tamamı bu (Guanlin 26, elf kampı 2666 piksel).
 Kod düzeni: C++17, adlar İngilizce, yorumlar Türkçe; hata `godat::Error` istisnasıyla. Oyun sistemleri gelince GM kuralı aynen geçerli (her sistem GM komutuyla).
 
@@ -94,7 +106,9 @@ Güncellemede oyuncu yalnız yeni yama paketini indirir (oyun tarafındaki yükl
 | `native/build/godat_pack [--sifresiz] -o <çıktı> <taban> [yama …]` | Bir ya da birkaç arşivi (orijinal ya da GODAT3.0) tek şifreli pakete yazar |
 | `tools/godat_ozet.py <dosya>` | Aynı özetin Python karşılığı (`tools/godat.py` ile) |
 | `native/build/test_godat` (`ctest`) | Birim testleri: ChaCha20 RFC 8439 resmî örneği, paket gidiş-dönüş, yama, yanlış anahtar/oynanmış kayıt, orijinal çok parçalı kayıt (22 denetim) |
-| `native/build/test_motor` (`ctest`) | JSON, PNG gidiş-dönüş, tuval (ayna, saydamlık, ışık), yön, Guanlin yükleme, yürüme, çizim (12 denetim) |
+| `native/build/test_motor` (`ctest`) | JSON, PNG gidiş-dönüş, tuval (ayna, saydamlık, ışık), zar üreteci = JS, JS yuvarlama/hypot, yön, Guanlin yükleme, yürüme, çizim, örümcek ormanında savaş (17 denetim) |
 | `native/build/anrufen_test <senaryo>` | Ekransız test modu (yukarıda) |
+| `node tools/test/cpp_savas.js` | C++ ↔ HTML canavar yerleşimi ve savaş izi (yukarıda) |
+| `node tools/denge_cikar.js` | game.js → `www/assets/denge.json` (C++ denge verisi; game.js'te MON/XPT/sınıf değişince) |
 | `node tools/test/cpp_karsilastir.js` | C++ ↔ HTML çizim ve yürüme karşılaştırması (yukarıda) |
 | `python3 tools/test/godat_esitlik.py` | `kaynak/` altındaki 346 godat: C++ ile Python birebir aynı mı, paketleyip geri okuyunca içerik aynı mı. 18.11: 346/346 eşit, 24.427 kayıt; 29,5 MB → 29,2 MB |

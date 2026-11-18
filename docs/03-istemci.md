@@ -47,6 +47,7 @@ Otomatik yol: `routeTo(sid)` sahneler arası (`scenePath`), `routeToNpc(cn)`, `w
 - Başlangıç: insan `120207`, elf `120205` (acemi kampları).
 
 ## Savaş
+- Harita değişince bekleyen zamanlayıcılar (`later`: canavar darbesi, beceri vuruşu) silinir (`loadScene`; 18.11, C++ karşılaştırmasında bulundu: önceki haritanın canavarı yeni haritada vurabiliyordu).
 - `stats()` sınıf tabanı (`CLS[cls]`: hp, mp, atk, def ve seviye artışları) + ekipman + pasif beceriler + bufflar.
 - `dmgCalc(atk, def, mult, critBonus, add)`: `(atk·mult+add)·rnd(0.92..1.08)·1000/(1000+3·def)`, kritik %8+bonus.
 - **Deneyim sistemi** (kullanıcı kararı 16.11: "orijinal + %40 görev"):

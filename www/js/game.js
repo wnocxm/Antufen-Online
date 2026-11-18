@@ -511,6 +511,7 @@ async function loadScene(sid, arrive) {
   await Assets.preload([...names]);
   Game.player && (Game.player = null);
   Game.map = map; Game.scene = sc; Game.sceneId = sid; Game.target = null; Game.ents = []; Game.fx = []; Game.floats = [];
+  timers.length = 0;   // önceki haritanın bekleyen işleri (canavar darbesi, beceri vuruşu) yeni haritada çalışmasın (C++ karşılaştırmasında bulundu)
   map.build();
   Dungeon.onLoad(sid);
   // NPC'ler ve canavarlar

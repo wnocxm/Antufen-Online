@@ -1,6 +1,6 @@
 // anrufen: pencereli oyun (SDL2). Tuval 360 piksel yüksekliğinde çizilir (HTML'deki gibi), pencereye büyütülür.
 //   anrufen [--veri <klasör|paket.gdp>]… [--sahne <numara>] [--sinif 战士|法师|牧师] [--irk 人类|精灵] [--cinsiyet male|fema]
-// Tuşlar: ok tuşları / WASD yürü, F12 ekran görüntüsü (anrufen_ekran.png), Esc çıkış.
+// Tuşlar: ok tuşları / WASD yürü, boşluk en yakın canavara saldır, F12 ekran görüntüsü (anrufen_ekran.png), Esc çıkış.
 // Veri verilmezse sırayla: veri/oyun.gdp, ../veri/oyun.gdp, ../../www/assets, ../../../www/assets, ../www/assets, www/assets.
 #include <SDL.h>
 
@@ -13,6 +13,7 @@
 
 #include "core/png.h"
 #include "engine/assets.h"
+#include "engine/balance.h"
 #include "engine/vfs.h"
 #include "engine/world.h"
 
@@ -28,12 +29,13 @@ int main(int argc, char** argv) {
   // veri aranır: oyunun yanındaki paket (Visual Studio programı build/Release içine koyar), sonra geliştirme klasörü
   if (data.empty()) for (const char* p : {"veri/oyun.gdp", "../veri/oyun.gdp", "../../www/assets", "../../../www/assets", "../www/assets", "www/assets"})
     if (std::filesystem::exists(p)) { data.push_back(p); break; }
-  Vfs vfs; Assets assets;
+  Vfs vfs; Assets assets; Balance bal;
   try {
     for (const std::string& d : data) { if (d.size() > 4 && d.substr(d.size() - 4) == ".gdp") vfs.mountPack(d); else vfs.mountDir(d); }
-    assets.load(vfs);
+    assets.load(vfs); bal.load(vfs, assets.D());
   } catch (const std::exception& e) { std::fprintf(stderr, "Veri yüklenemedi: %s\n", e.what()); return 1; }
-  World world(assets); world.setLook(look);
+  rng().seed(uint32_t(SDL_GetPerformanceCounter()));
+  World world(assets, bal); world.setChar(look.cls, look.race, look.sex);
   try { world.loadScene(scene); } catch (const std::exception& e) { std::fprintf(stderr, "Sahne yüklenemedi: %s\n", e.what()); return 1; }
 
   if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) != 0) { std::fprintf(stderr, "SDL: %s\n", SDL_GetError()); return 1; }
@@ -51,6 +53,10 @@ int main(int argc, char** argv) {
       if (ev.type == SDL_QUIT) run = false;
       if (ev.type == SDL_KEYDOWN && ev.key.keysym.sym == SDLK_ESCAPE) run = false;
       if (ev.type == SDL_KEYDOWN && ev.key.keysym.sym == SDLK_F12) godat::writeFile("anrufen_ekran.png", core::encodePNG(canvas.img));
+      if (ev.type == SDL_KEYDOWN && ev.key.keysym.sym == SDLK_SPACE) {   // saldırı: hedef yoksa en yakın canavar (HTML büyük saldırı düğmesi)
+        int t = world.target(); if (t < 0 || world.ents[t].dead) t = world.nearestMob(8);
+        if (t >= 0) world.setTarget(t, true);
+      }
     }
     const Uint8* k = SDL_GetKeyboardState(nullptr);
     double x = 0, y = 0;
