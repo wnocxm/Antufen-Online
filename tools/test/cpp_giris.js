@@ -9,6 +9,8 @@
 const { chromium } = require('playwright');
 const { execFileSync, spawn } = require('child_process');
 const fs = require('fs'), path = require('path');
+// DIL=en: İngilizce kip (HTML localStorage anrufen_lang = en; C++ "dil en")
+const DIL = process.env.DIL === 'en' ? ['dil en'] : [];
 const OUT = process.env.OUT || '/tmp/cpp_giris';
 const HIDE = `#title *, #create *, #title .ver { color: transparent !important; text-shadow: none !important; caret-color: transparent !important; }`;
 const SAVE = { v: 1, name: 'Kurt', cls: '战士', race: '人类', sex: 'male', lv: 45, xp: 0, gold: 30, hp: 1e9, mp: 1e9, gear: { weap: 0, body: 0, head: 0 }, eq: {}, bag: [], quests: {}, done: {}, qitems: {},
@@ -36,9 +38,9 @@ const CREATE = [
   fs.mkdirSync(OUT, { recursive: true });
   let srv = null, URL = process.env.URL;
   if (!URL) { srv = spawn('python3', ['-m', 'http.server', '8097', '--directory', 'www'], { stdio: 'ignore' }); URL = 'http://localhost:8097/'; await new Promise(r => setTimeout(r, 800)); }
-  const b = await chromium.launch(); const errs = [], scen = ['veri www/assets', 'giris surum Sürüm 11190635'], states = [], names = [], sesH = {};
+  const b = await chromium.launch(); const errs = [], scen = ['veri www/assets', ...DIL, 'giris surum Sürüm 11190635'], states = [], names = [], sesH = {};
   const page = async (W, save) => {
-    const p = await (await b.newContext({ viewport: { width: W, height: 360 }, locale: 'tr-TR' })).newPage(); p.on('pageerror', e => errs.push(e.message));
+    const p = await (await b.newContext({ viewport: { width: W, height: 360 }, locale: 'tr-TR' })).newPage(); if (DIL.length) await p.addInitScript(() => localStorage.setItem('anrufen_lang', 'en')); p.on('pageerror', e => errs.push(e.message));
     // giriş ekranının zamanlayıcıları (150-700 ms) tutulur; __run(ms) o süredeki ilkini çalıştırır
     await p.addInitScript(() => { window.__tq = []; const ST = window.setTimeout; window.setTimeout = (fn, d, ...a) => { if (d >= 150 && d <= 700) { __tq.push([d, fn]); return 0; } return ST(fn, d, ...a); };
       window.__run = ms => { const i = __tq.findIndex(x => x[0] === ms); if (i >= 0) { const [, fn] = __tq.splice(i, 1)[0]; fn(); } };

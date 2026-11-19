@@ -8,6 +8,8 @@
 const { chromium } = require('playwright');
 const { execFileSync, spawn } = require('child_process');
 const fs = require('fs'), path = require('path');
+// DIL=en: İngilizce kip (HTML localStorage anrufen_lang = en; C++ "dil en")
+const DIL = process.env.DIL === 'en' ? ['dil en'] : [];
 const OUT = process.env.OUT || '/tmp/cpp_pencere';
 const F2 = JSON.parse(fs.readFileSync('www/assets/forms2.json', 'utf8'));
 const rect = (f, id) => F2[f].c.find(c => c.id === id).s[0].r;
@@ -58,7 +60,7 @@ const CASES = [
   fs.mkdirSync(OUT, { recursive: true });
   let srv = null, URL = process.env.URL;
   if (!URL) { srv = spawn('python3', ['-m', 'http.server', '8097', '--directory', 'www'], { stdio: 'ignore' }); URL = 'http://localhost:8097/'; await new Promise(r => setTimeout(r, 800)); }
-  const b = await chromium.launch(); const p = await (await b.newContext({ viewport: { width: 640, height: 360 }, deviceScaleFactor: 1, locale: 'tr-TR' })).newPage();
+  const b = await chromium.launch(); const p = await (await b.newContext({ viewport: { width: 640, height: 360 }, deviceScaleFactor: 1, locale: 'tr-TR' })).newPage(); if (DIL.length) await p.addInitScript(() => localStorage.setItem('anrufen_lang', 'en'));
   const errs = []; p.on('pageerror', e => errs.push(e.message));
   await p.goto(URL); await p.waitForTimeout(2500); await p.keyboard.press('Enter');
   await p.click('[data-cls="战士"]'); await p.fill('#cname', 'Kahraman'); await p.click('#cstart');
@@ -79,7 +81,7 @@ const CASES = [
   await p.waitForFunction(() => Game.sceneId === '120005' && Game.player && !Game.transit, null, { timeout: 30000 });
   await p.evaluate(() => { const pl = Game.player, s = stats(); pl.doll.set(look()); pl.hp = s.hp; pl.mp = s.mp; Game.time = 0; pl.t = 0; pl.state = 'idle'; pl.combatT = 0; for (const e of Game.ents) e.t = 0; window.__upd(0); setTarget(null); });
   await p.waitForTimeout(1500);
-  const scen = ['veri www/assets', 'golge 1', 'ekran 640 360', 'arayuz 1', 'tohum 7', 'karakter 战士 人类 male', 'ad Kahraman', 'portre 1001', 'seviye 8',
+  const scen = ['veri www/assets', ...DIL, 'golge 1', 'ekran 640 360', 'arayuz 1', 'tohum 7', 'karakter 战士 人类 male', 'ad Kahraman', 'portre 1001', 'seviye 8',
     `gmbitir 80004 ${path.join(OUT, 'gm.json')}`, 'gorevver 80439', 'esya ekle growthBox 1', 'esya kullan growthBox', 'esya ekle 30016 12', 'esya ekle 30019 4', `esya ekle ${kit.weap} 1`, `esya ekle ${kit.other} 1`,
     'altin 1234', `beceriyukselt ${kit.sk0}`, `beceriyukselt ${kit.sk0}`, 'sahne 120207 3 13', 'tohum 7', 'saatms 1800000000000', 'evcilver 狼', 'sahne 120005 10 25', 'saat0', 'doldur', 'temizle'];
   const sesH = {};   // her durumun ses olayları (dokunuşlar, pencere açılışları)
@@ -102,12 +104,16 @@ const CASES = [
     scen.push('yazi 0', `goruntu ${path.join(OUT, ad + '_yazisiz_cpp.png')}`, 'yazi 1', `goruntu ${path.join(OUT, ad + '_yazili_cpp.png')}`);
     await p.evaluate(() => Win.close()); scen.push('pencere kapat');
   }
+  const txMiss = await p.evaluate(() => [...TX_MISS]);
   await b.close(); if (srv) srv.kill();
   fs.writeFileSync(path.join(OUT, 'senaryo.txt'), scen.join('\n') + '\n');
   execFileSync('native/build/anrufen_test', [path.join(OUT, 'senaryo.txt')], { stdio: ['ignore', 'ignore', 'inherit'], env: Object.assign({}, process.env, { ANRUFEN_TARAYICI_ALFA: '1' }) });
   const run = (lim, list) => { try { return execFileSync('python3', ['tools/test/goruntu_fark.py', OUT, ...list], { env: Object.assign({}, process.env, { SINIR: lim }) }).toString(); } catch (e) { process.exitCode = 1; return e.stdout.toString(); } };
   process.stdout.write('yazısız (piksel):\n' + run(process.env.SINIR || '1', CASES.map(c => c[0] + '_yazisiz')));
   process.stdout.write('yazılı (göz denetimi; yan yana: <ad>_yazili_fark.png):\n' + run('100', CASES.map(c => c[0] + '_yazili')));
+  // İngilizce kipte: çevirisi bulunamayan metinler (C++'ta olup HTML'de olmayan = C++'ta unutulmuş çeviri)
+  if (DIL.length) { const c = JSON.parse(execFileSync('native/build/anrufen_test', ['-'], { input: 'veri www/assets\ndil en\n' + fs.readFileSync(path.join(OUT, 'senaryo.txt'), 'utf8').split('\n').slice(2).join('\n') + '\ndileksik -\n', encoding: 'utf8' }).split('\n').filter(l => l.startsWith('{"eksik"'))[0]).eksik;
+    const fark = c.filter(x => !txMiss.includes(x)); console.log(`çeviri: C++'ta eksik ${c.length}, HTML'de eksik ${txMiss.length}; yalnız C++'ta ${fark.length}` + (fark.length ? ':\n  ' + fark.join('\n  ') : '')); if (fark.length) process.exitCode = 1; }
   // sesler: her durumda dokunuşların ve pencere açılışlarının ses olayları aynı mı
   let sb = 0; for (const [ad] of CASES) { const c = JSON.parse(fs.readFileSync(path.join(OUT, ad + '_ses.json'), 'utf8')).ses;
     if (JSON.stringify(c) !== JSON.stringify(sesH[ad])) { sb++; console.log(`ses FARKLI ${ad}: HTML ${JSON.stringify(sesH[ad])} · C++ ${JSON.stringify(c)}`); } }

@@ -13,6 +13,7 @@
 
 #include "engine/assets.h"
 #include "engine/balance.h"
+#include "engine/lang.h"
 #include "engine/pet.h"
 #include "engine/map.h"
 #include "engine/quests.h"
@@ -177,7 +178,7 @@ class World {
   void gmDungeonBoss();
   void gmDungeonClear();
   void gmDungeonLast();
-  void gmDungeonReset() { P.dgDay.clear(); P.dgN.clear(); toast("Günlük zindan hakları sıfırlandı."); }
+  void gmDungeonReset() { P.dgDay.clear(); P.dgN.clear(); toast(T("Günlük zindan hakları sıfırlandı.", "Daily dungeon entries reset.")); }
   // arayüzden onay isteği (HTML Win.ask'i oyun kodundan çağırır): HUD onay kutusunu açar
   std::string askText; std::function<void()> askYes;
   void ask(const std::string& t, std::function<void()> yes) { askText = t; askYes = std::move(yes); }

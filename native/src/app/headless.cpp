@@ -64,6 +64,7 @@
 //   olustur <ac|dokun x y|yaz <metin>|tus <Backspace|Enter>|ciz [ms]|goruntu <png> [ms]|durum <dosya|->>   karakter oluşturma
 //   sesler <dosya|->                 ses olayları ({"ses":[[ad, ses]|["muzik", parça],…]}; okununca silinir)
 //   karistir <çıktı.wav> <sn> <hız> <t:muzik:ad;t:efekt:ad:ses;t:muzikac:0|1;t:efektac:0|1>   karıştırıcıyı çalıştır, float WAV yaz
+//   dil <tr|en>                      dil (veri yüklüyse o dille baştan yüklenir) · dileksik <dosya|->  çevirisi bulunamayan metinler
 //   yenidunya                        oyunu baştan aç (HTML location.reload; veri yüklü kalır)
 //   kayityaz <dosya|-> · kayitoku <dosya>   kaydın JSON'u (HTML save) · kaydı oku (HTML load/fixSave; satır {"kayit":true|false})
 //   beceriyukselt <beceri no> · becerisifirla <0|1>   beceri penceresinin Yükselt'i · Puanları Sıfırla (1: bedava)
@@ -74,6 +75,7 @@
 #include <climits>
 #include <cstdio>
 #include <map>
+#include <set>
 #include <cstring>
 #include <fstream>
 #include <iostream>
@@ -270,9 +272,13 @@ int main(int argc, char** argv) {
       if (cmd == "veri") {
         std::string p; ss >> p;
         if (p.size() > 4 && p.substr(p.size() - 4) == ".gdp") vfs.mountPack(p); else vfs.mountDir(p);
+        lang().load(vfs);
         assets = Assets(); assets.load(vfs); bal = Balance(); bal.load(vfs, assets.D()); world = std::make_unique<World>(assets, bal);
         fonts.load(vfs); forms = std::make_unique<ui::Forms>(assets, fonts); forms->load(vfs); hud = std::make_unique<ui::Hud>(assets, fonts, *forms);
         std::printf("veri: %s\n", vfs.describe().c_str());
+      } else if (cmd == "dil") {   // dil <tr|en>: veri yüklüyse o dille baştan yüklenir (HTML setLang → sayfa yenilenir)
+        std::string l; ss >> l; lang().en = l == "en";
+        if (world) { world.reset(); bal = Balance(); bal.load(vfs, assets.D()); world = std::make_unique<World>(assets, bal); hud = std::make_unique<ui::Hud>(assets, fonts, *forms); title.reset(); create.reset(); }
       } else if (cmd == "tohum") { uint32_t sd; ss >> sd; rng().seed(sd); }
       else if (cmd == "yenikarakter") { std::string a, c, r, x; int f = 1; ss >> a >> c >> r >> x >> f; W().newChar(a, c, r, x, f); }   // HTML newSave + yüz
       else if (cmd == "baslat") W().start();
@@ -550,7 +556,12 @@ int main(int argc, char** argv) {
         o += "],\"sahne\":\"" + w.sceneId + "\",\"x\":" + num(w.player.x) + ",\"y\":" + num(w.player.y) + ",\"hedef\":" + std::to_string(w.target()) + ",\"konusma\":" + std::to_string(dialog) + sesAlan(w) + "}\n";
         out(f, o);
       }
-      else if (cmd == "sestemizle") W().sounds.clear();   // ses olaylarını sil (karşılaştırmanın başında)
+      else if (cmd == "sestemizle") W().sounds.clear();
+      else if (cmd == "dileksik") {   // çevirisi bulunamayan Türkçe metinler (HTML TX_MISS karşılığı; tekil, sıralı)
+        std::string f; ss >> f; std::set<std::string> u(lang().missing.begin(), lang().missing.end()); std::string o = "{\"eksik\":[";
+        bool first = true; for (const std::string& m : u) { o += (first ? "" : ",") + jq(m); first = false; }
+        out(f, o + "]}\n");
+      }   // ses olaylarını sil (karşılaştırmanın başında)
       else if (cmd == "temizle") { World& w = W(); w.log.clear(); w.floats.clear(); w.zoneT = w.toastT = w.lvlT = w.hurtT = 0; w.toastMsg.clear(); }
       else if (cmd == "can") { double k; ss >> k; W().player.hp = W().stats().hp * k; }
       else if (cmd == "mana") { double k; ss >> k; W().player.mp = W().stats().mp * k; }

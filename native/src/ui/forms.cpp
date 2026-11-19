@@ -1,4 +1,5 @@
 #include "forms.h"
+#include "engine/lang.h"
 
 #include "core/jpeg.h"
 
@@ -67,23 +68,26 @@ void Forms::drawCtrl(engine::Canvas& c, const Xf& xf, const core::Json& ctl, int
 }
 
 // koyu zemin üstünde yazı: gövde yazı tipi (boy + 1), ince koyu dış çizgi, orta taban çizgisi, genişliğe sığdırılır
-void Forms::label(engine::Canvas& c, const Xf& xf, const std::string& s, float x, float y, float w, float h, uint32_t col, Align a, float size) {
-  if (s.empty()) return;
+void Forms::label(engine::Canvas& c, const Xf& xf, const std::string& s0, float x, float y, float w, float h, uint32_t col, Align a, float size) {
+  if (s0.empty()) return;
+  const std::string s = engine::tx(s0);   // HTML: str = tx(String(str))
   const float lx = a == CENTER ? x + w / 2 : a == RIGHT ? x + w - 2 : x + 2, ly = y + h / 2 + 0.5f;
   TextStyle st; st.color = col; st.align = a; st.base = MIDDLE; st.outline = 2.4f * xf.k; st.outlineColor = 0x140802; st.outlineAlpha = 0.8f; st.maxWidth = w * xf.k;
   font_.draw(c, "B", (size + 1) * xf.k, s, xf.X(lx), xf.Y(ly), st);
 }
 // düğme / sekme yazısı: başlık yazı tipi kalın; koyu (siyah) katman rengi altın-parşömene çevrilir (HTML'de yazı rengi verilince de)
-void Forms::btnText(engine::Canvas& c, const Xf& xf, const std::string& s, float x, float y, float w, float h, uint32_t col, bool colIsLayer, float size) {
-  if (s.empty()) return;
+void Forms::btnText(engine::Canvas& c, const Xf& xf, const std::string& s0, float x, float y, float w, float h, uint32_t col, bool colIsLayer, float size) {
+  if (s0.empty()) return;
+  const std::string s = engine::tx(s0);
   const bool dark = !colIsLayer || ((col >> 16) & 255) + ((col >> 8) & 255) + (col & 255) < 200;   // HTML: yazı rengi (dize) verildiğinde de koyu sayılır
   const float sz = size > 0 ? size : std::max(9.f, std::min(14.f, std::round(h * 0.5f)));
   TextStyle st; st.color = dark ? 0xfbe6b0 : col; st.align = CENTER; st.base = MIDDLE; st.outline = 3 * xf.k; st.outlineColor = 0x2a0c03; st.maxWidth = (w - 4) * xf.k; st.fakeBold = true;
   font_.draw(c, "H", sz * xf.k, s, xf.X(x + w / 2), xf.Y(y + h / 2 + 1), st);
 }
 // parşömen üstünde gölgesiz yazı (HTML nText): 13 ve üstü başlık yazı tipi kalın, altı gövde (boy + 1)
-void Forms::text(engine::Canvas& c, const Xf& xf, const std::string& s, float x, float y, uint32_t col, float size, Align a, float w) {
-  if (s.empty()) return;
+void Forms::text(engine::Canvas& c, const Xf& xf, const std::string& s0, float x, float y, uint32_t col, float size, Align a, float w) {
+  if (s0.empty()) return;
+  const std::string s = engine::tx(s0);   // HTML nText: tx(String(s))
   TextStyle st; st.color = col; st.align = a; st.base = MIDDLE; st.maxWidth = w * xf.k;
   if (size >= 13) { st.fakeBold = true; font_.draw(c, "H", size * xf.k, s, xf.X(x), xf.Y(y), st); }
   else font_.draw(c, "B", (size + 1) * xf.k, s, xf.X(x), xf.Y(y), st);

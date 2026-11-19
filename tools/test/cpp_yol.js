@@ -10,6 +10,8 @@
 const { chromium } = require('playwright');
 const { execFileSync, spawn } = require('child_process');
 const fs = require('fs'), path = require('path');
+// DIL=en: İngilizce kip (HTML localStorage anrufen_lang = en; C++ "dil en")
+const DIL = process.env.DIL === 'en' ? ['dil en'] : [];
 const OUT = process.env.OUT || '/tmp/cpp_yol', DT = 1 / 30;
 const MULBERRY = `(a => () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; })`;
 let seed = 12345; const rnd = n => { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return seed % n; };
@@ -17,7 +19,7 @@ let seed = 12345; const rnd = n => { seed = (seed * 1103515245 + 12345) & 0x7fff
   fs.mkdirSync(OUT, { recursive: true }); const yolF = path.join(OUT, 'yol_cpp.txt'); if (fs.existsSync(yolF)) fs.unlinkSync(yolF);
   let srv = null, URL = process.env.URL;
   if (!URL) { srv = spawn('python3', ['-m', 'http.server', '8097', '--directory', 'www'], { stdio: 'ignore' }); URL = 'http://localhost:8097/'; await new Promise(r => setTimeout(r, 800)); }
-  const b = await chromium.launch(); const p = await (await b.newContext({ viewport: { width: 640, height: 360 }, locale: 'tr-TR' })).newPage();
+  const b = await chromium.launch(); const p = await (await b.newContext({ viewport: { width: 640, height: 360 }, locale: 'tr-TR' })).newPage(); if (DIL.length) await p.addInitScript(() => localStorage.setItem('anrufen_lang', 'en'));
   const errs = []; p.on('pageerror', e => errs.push(e.message));
   await p.goto(URL); await p.waitForTimeout(2500); await p.keyboard.press('Enter');
   await p.click('[data-cls="战士"]'); await p.fill('#cname', 'Kahraman'); await p.click('#cstart');
@@ -25,7 +27,7 @@ let seed = 12345; const rnd = n => { seed = (seed * 1103515245 + 12345) & 0x7fff
   await p.evaluate(() => { window.__upd = window.update; window.update = () => {}; window.__snd = []; SFX.play = (n, v = 1) => { if (n) __snd.push([n, v]); }; SFX.Music.play = n => { if (n) __snd.push(['muzik', n]); }; for (const k of ['log', 'toast', 'zone', 'levelUp', 'float', 'hurt']) UI[k] = () => {}; });
   const waitScene = () => p.waitForFunction(() => !Game.transit && Game.player, null, { timeout: 30000 });
   const go = async (sid, x, y) => { await p.evaluate(([s, x, y]) => gotoScene(s, null, [x, y], null), [sid, x, y]); await waitScene(); };
-  const scen = ['veri www/assets'];
+  const scen = ['veri www/assets', ...DIL];
   // 1) A* yolları
   const yolH = [];
   for (const sid of ['120005', '120018', '120004']) {

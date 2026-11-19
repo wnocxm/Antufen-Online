@@ -8,6 +8,8 @@
 const { chromium } = require('playwright');
 const { execFileSync, spawn } = require('child_process');
 const fs = require('fs'), path = require('path');
+// DIL=en: İngilizce kip (HTML localStorage anrufen_lang = en; C++ "dil en")
+const DIL = process.env.DIL === 'en' ? ['dil en'] : [];
 const OUT = process.env.OUT || '/tmp/cpp_arayuz';
 // [ad, sahne, x, y, sınıf, ırk, cinsiyet, portre, seviye, [yükseltme, uzmanlık], hedef (varlık sırası; -1 yok, 'yakın' en yakın canavar,
 //  'kişi' en yakın kişi), can, mana, bekleme [beceri, sn] | null, görev (alınmış görev numaraları)]
@@ -21,7 +23,7 @@ const MULBERRY = `(a => () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imu
   fs.mkdirSync(OUT, { recursive: true });
   let srv = null, URL = process.env.URL;
   if (!URL) { srv = spawn('python3', ['-m', 'http.server', '8097', '--directory', 'www'], { stdio: 'ignore' }); URL = 'http://localhost:8097/'; await new Promise(r => setTimeout(r, 800)); }
-  const b = await chromium.launch(); const p = await (await b.newContext({ viewport: { width: 640, height: 360 }, deviceScaleFactor: 1, locale: 'tr-TR' })).newPage();
+  const b = await chromium.launch(); const p = await (await b.newContext({ viewport: { width: 640, height: 360 }, deviceScaleFactor: 1, locale: 'tr-TR' })).newPage(); if (DIL.length) await p.addInitScript(() => localStorage.setItem('anrufen_lang', 'en'));
   const errs = []; p.on('pageerror', e => errs.push(e.message));
   await p.goto(URL); await p.waitForTimeout(2500); await p.keyboard.press('Enter');
   await p.click('[data-cls="战士"]'); await p.fill('#cname', 'Kahraman'); await p.click('#cstart');
@@ -30,7 +32,7 @@ const MULBERRY = `(a => () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imu
   await p.evaluate(() => { window.__upd = window.update; window.update = () => {}; SFX.play = () => {}; for (const k of ['log', 'toast', 'zone', 'levelUp', 'float', 'hurt']) UI[k] = () => {};
     const C = CanvasRenderingContext2D.prototype; window.__ft = [C.fillText, C.strokeText]; });
   await p.waitForTimeout(10500);   // açılıştaki ipucu mesajları (10 sn) sönsün
-  const scen = ['veri www/assets', 'golge 1', 'ekran 640 360', 'arayuz 1'], names = [];
+  const scen = ['veri www/assets', ...DIL, 'golge 1', 'ekran 640 360', 'arayuz 1'], names = [];
   for (const [ad, sid, x, y, cls, race, sex, face, lv, bec, tg, hp, mp, cd, qs] of CASES) {
     await p.evaluate(([cls, race, sex, face, lv, bec, qs, M]) => {
       const P = Game.P; Object.assign(P, { cls, race, sex, face, name: 'Kahraman', eq: {}, bag: [], gold: 0, xp: 0, lv: 1, sk: {}, adv: 0, quests: {}, done: {} }); gmLevel(lv);
@@ -63,6 +65,7 @@ const MULBERRY = `(a => () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imu
     scen.push('temizle', 'yazi 0', `goruntu ${path.join(OUT, ad + '_yazisiz_cpp.png')}`, 'yazi 1', `goruntu ${path.join(OUT, ad + '_yazili_cpp.png')}`);
     names.push(ad);
   }
+  const txMiss = await p.evaluate(() => [...TX_MISS]);
   await b.close(); if (srv) srv.kill();
   fs.writeFileSync(path.join(OUT, 'senaryo.txt'), scen.join('\n') + '\n');
   execFileSync('native/build/anrufen_test', [path.join(OUT, 'senaryo.txt')], { stdio: ['ignore', 'ignore', 'inherit'], env: Object.assign({}, process.env, { ANRUFEN_TARAYICI_ALFA: '1' }) });
@@ -71,5 +74,8 @@ const MULBERRY = `(a => () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imu
   out += 'yazısız (piksel):\n' + run(process.env.SINIR || '1', names.map(n => n + '_yazisiz'));
   out += 'yazılı (göz denetimi; yan yana: <ad>_yazili_fark.png):\n' + run('100', names.map(n => n + '_yazili'));
   process.stdout.write(out);
+  // İngilizce kipte: çevirisi bulunamayan metinler (C++'ta olup HTML'de olmayan = C++'ta unutulmuş çeviri)
+  if (DIL.length) { const c = JSON.parse(execFileSync('native/build/anrufen_test', ['-'], { input: fs.readFileSync(path.join(OUT, 'senaryo.txt'), 'utf8') + 'dileksik -\n', encoding: 'utf8' }).split('\n').filter(l => l.startsWith('{"eksik"'))[0]).eksik;
+    const fark = c.filter(x => !txMiss.includes(x)); console.log(`çeviri: C++'ta eksik ${c.length}, HTML'de eksik ${txMiss.length}; yalnız C++'ta ${fark.length}` + (fark.length ? ':\n  ' + fark.join('\n  ') : '')); if (fark.length) process.exitCode = 1; }
   if (errs.length) { console.log('HATA', errs); process.exitCode = 1; }
 })();

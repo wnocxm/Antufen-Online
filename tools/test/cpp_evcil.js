@@ -8,6 +8,8 @@
 const { chromium } = require('playwright');
 const { execFileSync, spawn } = require('child_process');
 const fs = require('fs'), path = require('path');
+// DIL=en: İngilizce kip (HTML localStorage anrufen_lang = en; C++ "dil en")
+const DIL = process.env.DIL === 'en' ? ['dil en'] : [];
 const OUT = process.env.OUT || '/tmp/cpp_evcil', DT = 1 / 30, NOW = 1800000000000;
 const MULBERRY = `(a => () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; })`;
 const uid = i => `Pet.list()[${i}] && Pet.list()[${i}].uid`;
@@ -32,7 +34,7 @@ const STEPS = [
   fs.mkdirSync(OUT, { recursive: true });
   let srv = null, URL = process.env.URL;
   if (!URL) { srv = spawn('python3', ['-m', 'http.server', '8097', '--directory', 'www'], { stdio: 'ignore' }); URL = 'http://localhost:8097/'; await new Promise(r => setTimeout(r, 800)); }
-  const b = await chromium.launch(); const p = await (await b.newContext({ viewport: { width: 640, height: 360 }, locale: 'tr-TR' })).newPage();
+  const b = await chromium.launch(); const p = await (await b.newContext({ viewport: { width: 640, height: 360 }, locale: 'tr-TR' })).newPage(); if (DIL.length) await p.addInitScript(() => localStorage.setItem('anrufen_lang', 'en'));
   const errs = []; p.on('pageerror', e => errs.push(e.message));
   await p.goto(URL); await p.waitForTimeout(2500); await p.keyboard.press('Enter');
   await p.click('[data-cls="战士"]'); await p.fill('#cname', 'Kahraman'); await p.click('#cstart');
@@ -60,7 +62,7 @@ const STEPS = [
     else { await p.evaluate(c => { eval(c); }, code); html.push(await p.evaluate(() => __dump())); }
   }
   await b.close(); if (srv) srv.kill();
-  const scen = ['veri www/assets', 'karakter 战士 人类 male', `saatms ${NOW}`, 'seviye 15', 'gmgear', 'olumsuz 1', 'tohum 7', 'sahne 120030 28 15', 'doldur', 'zaman0', 'temizle', 'sestemizle', 'evcildurum -'];
+  const scen = ['veri www/assets', ...DIL, 'karakter 战士 人类 male', `saatms ${NOW}`, 'seviye 15', 'gmgear', 'olumsuz 1', 'tohum 7', 'sahne 120030 28 15', 'doldur', 'zaman0', 'temizle', 'sestemizle', 'evcildurum -'];
   STEPS.forEach(([c, , sec], i) => { if (sec) scen.push(`evcilsavas ${DT} ${sec} ${path.join(OUT, 'savas' + i + '.json')}${c.includes('pasif') ? ' pasif' : ''}`); else scen.push(c, 'evcildurum -'); });
   fs.writeFileSync(path.join(OUT, 'senaryo.txt'), scen.join('\n') + '\n');
   const lines = execFileSync('native/build/anrufen_test', [path.join(OUT, 'senaryo.txt')], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'inherit'] }).split('\n').filter(l => l.startsWith('{')).map(l => JSON.parse(l));

@@ -1,4 +1,5 @@
 #include "balance.h"
+#include "engine/lang.h"
 
 #include <algorithm>
 #include <cmath>
@@ -46,7 +47,9 @@ void Balance::load(const Vfs& vfs, const core::Json& D) {
       hot(u["hot"], x.hot); hot(u["hot2"], x.hot2);
     }
     for (const auto& s : it["st"].obj()) { x.st[s.first] = s.second.num(); x.stOrder.push_back(s.first); }
-    x.desc = it["desc"].str(); x.gfx = it["gfx"].str(); x.price = it["price"].i(0); x.sell = it["sell"].i(0); x.pet = it["pet"].truthy(); x.petJ = it["pet"];
+    x.desc = it["desc"].str(); x.gfx = it["gfx"].str();
+    if (lang().en) { x.name = !x.en.empty() ? x.en : !lang().item(x.name).empty() ? lang().item(x.name) : x.name; x.desc = it["den"].isStr() ? it["den"].str() : tx(x.desc); }   // HTML loadItems
+    x.price = it["price"].i(0); x.sell = it["sell"].i(0); x.pet = it["pet"].truthy(); x.petJ = it["pet"];
     itemIdx_[x.id] = items_.size(); items_.push_back(std::move(x));
   }
   for (const auto& kv : I["shops"].obj()) {
@@ -57,7 +60,7 @@ void Balance::load(const Vfs& vfs, const core::Json& D) {
     if (shops.count(hp.first)) { shops.insert(hp.second); shopTabs[hp.second] = shopTabs[hp.first]; }   // gece elfi tüccarları aynı listeleri satar
   // oyunun kendi eşyaları (HTML game.js ITEMS; tablodakilerden sonra — JS nesne sırası: sayısal numaralar önce)
   auto own = [&](const char* id, const char* nm, int icon, const char* desc, int price, double hp, double mp, bool growth) {
-    Item x; x.id = id; x.name = nm; x.ik = "item"; x.icon = icon; x.desc = desc; x.price = price; x.useHp = hp; x.useMp = mp; x.use = hp || mp; x.growth = growth;
+    Item x; x.id = id; x.name = tx(nm); x.ik = "item"; x.icon = icon; x.desc = tx(desc); x.price = price; x.useHp = hp; x.useMp = mp; x.use = hp || mp; x.growth = growth;
     x.quest = x.id == "quest"; itemIdx_[x.id] = items_.size(); items_.push_back(std::move(x));
   };
   own("hp1", "Zayıf Can İksiri", 1019, "800 can yeniler.", 20, 800, 0, false); own("hp2", "Can İksiri", 1020, "2000 can yeniler.", 80, 2000, 0, false);
@@ -172,18 +175,22 @@ static std::string jsKey(const core::Json& v) { if (v.isStr()) return v.str(); c
 void PetData::load(const core::Json& J) {
   species.clear(); templates.clear(); stages.clear(); skills.clear();
   for (const core::Json& s : J["species"].arr()) {
-    PetSpecies x; x.cn = s["cn"].str(); x.tr = s["tr"].str(); x.en = s["en"].str(); x.egg = s["egg"].str(); x.box = s["box"].str(); x.skill = jsKey(s["skill"]); x.tpl = s["tpl"].i(); x.apk = s["apk"].truthy();
-    for (const core::Json& f : s["forms"].arr()) { PetForm k; k.cn = f["cn"].str(); k.tr = f["tr"].str(); k.en = f["en"].str(); k.look = f["look"].str(); for (const core::Json& t : f["sayTr"].arr()) k.sayTr.push_back(t.str()); x.forms.push_back(std::move(k)); }
-    for (const core::Json& t : s["chatTr"].arr()) x.chatTr.push_back(t.str());
+    PetSpecies x; x.cn = s["cn"].str(); x.tr = s["tr"].str(); x.en = s["en"].str(); if (lang().en && !x.en.empty()) x.tr = x.en;   // .tr: seçili dil
+    x.egg = s["egg"].str(); x.box = s["box"].str(); x.skill = jsKey(s["skill"]); x.tpl = s["tpl"].i(); x.apk = s["apk"].truthy();
+    for (const core::Json& f : s["forms"].arr()) { PetForm k; k.cn = f["cn"].str(); k.tr = f["tr"].str(); k.en = f["en"].str(); k.look = f["look"].str(); if (lang().en && !k.en.empty()) k.tr = k.en;
+      for (const core::Json& t : f[lang().en ? "sayEn" : "sayTr"].arr()) k.sayTr.push_back(t.str());
+      x.forms.push_back(std::move(k));
+    }
+    for (const core::Json& t : s[lang().en ? "chatEn" : "chatTr"].arr()) x.chatTr.push_back(t.str());   // seçili dil
     species.push_back(std::move(x));
   }
   for (const auto& kv : J["templates"].obj()) {
-    const core::Json& t = kv.second; PetTemplate x; x.tr = t["tr"].str(); x.en = t["en"].str(); x.mag = t["cls"].str() == "mag";
+    const core::Json& t = kv.second; PetTemplate x; x.tr = t["tr"].str(); x.en = t["en"].str(); if (lang().en && !x.en.empty()) x.tr = x.en; x.mag = t["cls"].str() == "mag";
     x.hpG = t["hp_growth"].num(); x.mpG = t["mp_growth"].num(); x.patk = t["base_phys_atk"].num(); x.matk = t["base_mag_atk"].num(); x.def = t["base_def"].num(); x.dodge = t["dodge"].num();
     for (const core::Json& k : t["pool"].arr()) x.pool.push_back(jsKey(k));
     templates[std::atoi(kv.first.c_str())] = std::move(x);
   }
   for (const core::Json& s : J["stages"].arr()) stages.push_back({s["cost"].i(), s["lv"].i(1), s["mult"].num(1)});
-  for (const auto& kv : J["skills"].obj()) { const core::Json& k = kv.second; PetSkillInfo x; x.tr = k["tr"][0].str(); x.desc = k["tr"][1].str(); x.en = k["en"][0].str(); x.icon = k["icon"].i(); x.ik = k["ik"].str(); x.kind = k["kind"].str(); skills[kv.first] = std::move(x); }
+  for (const auto& kv : J["skills"].obj()) { const core::Json& k = kv.second; PetSkillInfo x; x.tr = k["tr"][0].str(); x.desc = k["tr"][1].str(); x.en = k["en"][0].str(); if (lang().en) { if (!x.en.empty()) x.tr = x.en; if (k["en"][1].isStr()) x.desc = k["en"][1].str(); } x.icon = k["icon"].i(); x.ik = k["ik"].str(); x.kind = k["kind"].str(); skills[kv.first] = std::move(x); }
 }
 }  // namespace engine

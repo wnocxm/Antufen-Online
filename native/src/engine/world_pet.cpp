@@ -134,16 +134,16 @@ PetRec World::petMake(const PetSpecies& s, const std::string& box) {
 }
 void World::petHatch(const std::string& eggId) {
   const Item* it = bal_.item(eggId); if (!it) return; const PetSpecies* s = bal_.pets.by(it->petJ["egg"].str()); if (!s) return;
-  if (int(petList().size()) >= petSlotsN()) { toast("En fazla " + std::to_string(petSlotsN()) + " evcil hayvan besleyebilirsin (Sözleşme Taşı hakkı artırır)."); return; }
+  if (int(petList().size()) >= petSlotsN()) { toast(T("En fazla " + std::to_string(petSlotsN()) + " evcil hayvan besleyebilirsin (Sözleşme Taşı hakkı artırır).", "You can keep at most " + std::to_string(petSlotsN()) + " pets (a Contract Stone adds one).")); return; }
   const int need = boxRank(it->petJ["box"].str()); std::string box;
   for (const char* b : {"31149", "31147", "30166"}) { const Item* bi = bal_.item(b); if (bi && countItem(b) && boxRank(bi->petJ["box"].str()) >= need) { box = b; break; } }
   const std::string want = it->petJ["box"].str(); const Item* bn = bal_.item(want == "magic" ? "31149" : want == "metal" ? "31147" : "30166");
-  if (box.empty()) { toast(it->name + ": " + (bn ? bn->name : std::string()) + " gerekir."); return; }
+  if (box.empty()) { { const std::string b = bn ? bn->name : std::string(); toast(T(it->name + ": " + b + " gerekir.", it->name + ": requires a " + b + ".")); } return; }
   removeItem(eggId, 1); removeItem(box, 1);
   P.pets.push_back(petMake(*s, bal_.item(box)->petJ["box"].str())); PetRec& p = P.pets.back(); const std::string uid = p.uid;
-  std::string skl; for (const std::string& k : p.sk) skl += (skl.empty() ? "" : ", ") + petSkName(k); if (skl.empty()) skl = "yok";
+  std::string skl; for (const std::string& k : p.sk) skl += (skl.empty() ? "" : ", ") + petSkName(k); if (skl.empty()) skl = T("yok", "none");
   char tal[32]; std::snprintf(tal, sizeof tal, "%g", p.tal);
-  sfx("finish_task"); toast(petName(p) + " yumurtadan çıktı!"); note("Yeni evcil hayvan: " + petName(p) + " (yetenek ×" + tal + "; rastgele beceriler: " + skl + ")", LOG_Q);
+  sfx("finish_task"); toast(petName(p) + T(" yumurtadan çıktı!", " hatched!")); note(T("Yeni evcil hayvan: " + petName(p) + " (yetenek ×" + tal + "; rastgele beceriler: " + skl + ")", "New pet: " + petName(p) + " (talent ×" + tal + "; random skills: " + skl + ")"), LOG_Q);
   questFlag("hatch"); if (P.petOn.empty()) petSummon(uid);
   save();
 }
@@ -152,7 +152,7 @@ void World::petHatch(const std::string& eggId) {
 void World::petSummon(const std::string& uid) {
   PetRec* p = petByUid(uid); if (!p) return;
   if (p->dead && nowMillis() - p->deadAt > 600000) { p->dead = false; p->hp = jsRound(petStats(*p).hp * 0.1); }   // 10 dakika sonra kendiliğinden
-  if (p->dead) { toast(petName(*p) + " ölü; Ejderin Kurtuluşu ile dirilt ya da biraz bekle."); return; }
+  if (p->dead) { toast(petName(*p) + T(" ölü; Ejderin Kurtuluşu ile dirilt ya da biraz bekle.", " is dead; revive it with Dragon's Redemption or wait a while.")); return; }
   P.petOn = uid; petSpawn(); save();
 }
 void World::petDismiss() { P.petOn.clear(); petDespawn(); save(); }
@@ -188,7 +188,7 @@ void World::petHurt(int mi) {
   if (!pet.on) return;
   PetRec* p = petActive(); if (!p) return;
   const PetStats s = petStats(*p); const Ent& m = ents[size_t(mi)];
-  if (random() < s.dodge / 100) { ufloat(-3, "Iska", 0xcfcfcf); return; }
+  if (random() < s.dodge / 100) { ufloat(-3, T("Iska", "Miss"), 0xcfcfcf); return; }
   const double def = s.def * (1 + (pet.buffOn ? pet.buffDef : 0)); const Dmg r = dmgCalc(m.atk, def, 1);
   p->hp -= r.d; pet.combatT = 5; ufloat(-3, "-" + std::to_string(r.d), 0xff8060, 0.9f);
   if (p->hp <= 0) petDie();
@@ -196,8 +196,8 @@ void World::petHurt(int mi) {
 void World::petDie() {
   PetRec* p = petActive(); if (!p) return;
   p->hp = 0; p->dead = true; p->deadAt = nowMillis(); p->joy = std::max(0.0, p->joy - 10);
-  pushFx("特效-血爆死亡", pet.x, pet.y); toast(petName(*p) + " öldü!");
-  note(petName(*p) + " öldü. Ejderin Kurtuluşu ile diriltebilirsin; 10 dakika sonra kendiliğinden dirilir.", LOG_Q);
+  pushFx("特效-血爆死亡", pet.x, pet.y); toast(petName(*p) + T(" öldü!", " died!"));
+  note(petName(*p) + T(" öldü. Ejderin Kurtuluşu ile diriltebilirsin; 10 dakika sonra kendiliğinden dirilir.", " died. Revive it with Dragon's Redemption, or it recovers by itself in 10 minutes."), LOG_Q);
   for (Ent& e : ents) if (e.foe == pet.gen) e.foe = 0;
   P.petOn.clear(); petDespawn(); save();
 }
@@ -337,21 +337,21 @@ void World::petOnKill(const Ent& m, long long xp) {
 }
 void World::petGainLv(PetRec& p) {
   bool up = false; while (p.xp >= petNeedXp(p.lv) && p.lv < P.lv) { p.xp -= petNeedXp(p.lv); p.lv++; up = true; }
-  if (up) { const PetStats s = petStats(p); p.hp = s.hp; p.mp = s.mp; if (pet.on && pet.uid == p.uid) { pushFx("LEVELUP", pet.x, pet.y); ufloat(-3, "Seviye " + std::to_string(p.lv) + "!", 0xffe070, 1.2f); } note(petName(p) + " " + std::to_string(p.lv) + ". seviyeye ulaştı.", LOG_Q); }
+  if (up) { const PetStats s = petStats(p); p.hp = s.hp; p.mp = s.mp; if (pet.on && pet.uid == p.uid) { pushFx("LEVELUP", pet.x, pet.y); ufloat(-3, T("Seviye ", "Level ") + std::to_string(p.lv) + "!", 0xffe070, 1.2f); } note(T(petName(p) + " " + std::to_string(p.lv) + ". seviyeye ulaştı.", petName(p) + " reached level " + std::to_string(p.lv) + "."), LOG_Q); }
   if (p.lv >= P.lv) p.xp = std::min(p.xp, double(petNeedXp(p.lv) - 1));
 }
 
 // ---------------- dönüşüm (幻化) ----------------
 static const int TFBASE[8] = {0, 80, 70, 60, 50, 40, 30, 20};
 World::PetTf World::petTfInfo(const PetRec* main, const PetRec* mat, const std::vector<std::string>& aids) {
-  PetTf r; if (!main) { r.why = "Ana hayvanı seç."; return r; }
-  if (main->st >= 7) { r.why = "En yüksek dönüşüm düzeyinde."; return r; }
+  PetTf r; if (!main) { r.why = T("Ana hayvanı seç.", "Choose the main pet."); return r; }
+  if (main->st >= 7) { r.why = T("En yüksek dönüşüm düzeyinde.", "Already at the highest transformation level."); return r; }
   const int nx = main->st + 1; const PetStage& S = bal_.pets.stages[size_t(nx)]; r.next = nx; r.need = S.lv; r.cost = S.cost;
-  if (!petResting(main)) { r.why = "Ana hayvan dinleniyor olmalı (geri çağır; ölüyse dirilt)."; return r; }
-  if (main->lv < S.lv) { r.why = "Gereken seviye: " + std::to_string(S.lv); return r; }
-  if (!mat) { r.why = "Yardımcı hayvanı seç."; return r; }
-  if (mat->uid == main->uid) { r.why = "Yardımcı hayvan başka olmalı."; return r; }
-  if (!petResting(mat)) { r.why = "Yardımcı hayvan dinleniyor olmalı."; return r; }
+  if (!petResting(main)) { r.why = T("Ana hayvan dinleniyor olmalı (geri çağır; ölüyse dirilt).", "The main pet must be resting (dismiss it; revive it if dead)."); return r; }
+  if (main->lv < S.lv) { r.why = T("Gereken seviye: ", "Required level: ") + std::to_string(S.lv); return r; }
+  if (!mat) { r.why = T("Yardımcı hayvanı seç.", "Choose the helper pet."); return r; }
+  if (mat->uid == main->uid) { r.why = T("Yardımcı hayvan başka olmalı.", "The helper must be another pet."); return r; }
+  if (!petResting(mat)) { r.why = T("Yardımcı hayvan dinleniyor olmalı.", "The helper pet must be resting."); return r; }
   double c = TFBASE[nx] + (mat->sp == main->sp ? 10 : 0) + 5 * mat->st;
   for (const std::string& id : aids) {
     const Item* it = bal_.item(id); if (!it || !it->pet) continue; const core::Json& u = it->petJ;
@@ -366,31 +366,31 @@ int World::petTransform(const std::string& mainUid, const std::string& matUid, c
   std::vector<std::string> aid; for (const std::string& id : aids) if (!id.empty() && countItem(id) > 0) aid.push_back(id);
   const PetTf r = petTfInfo(main, mat, aid);
   if (!r.ok) { toast(r.why); return -1; }
-  if (P.gold < r.cost) { toast("Yeterli altının yok (" + std::to_string(r.cost) + ")."); return -1; }
+  if (P.gold < r.cost) { toast(T("Yeterli altının yok (", "Not enough gold (") + std::to_string(r.cost) + ")."); return -1; }
   P.gold -= r.cost; for (const std::string& id : aid) removeItem(id, 1);
   const std::string mu = mat->uid; P.pets.erase(std::remove_if(P.pets.begin(), P.pets.end(), [&](const PetRec& x) { return x.uid == mu; }), P.pets.end());
   main = petByUid(mainUid);
   const bool okk = random() * 100 < r.chance; const std::string n0 = petName(*main);
   if (okk) {
     main->st = r.next; const PetStats s = petStats(*main); main->hp = s.hp; main->mp = s.mp; sfx("finish_task");
-    toast("Dönüşüm başarılı! " + n0 + " → " + petName(*main) + " (düzey " + std::to_string(main->st) + ")");
-    note(n0 + " dönüşüm düzeyi " + std::to_string(main->st) + "'e ulaştı!", LOG_Q);
+    toast(T("Dönüşüm başarılı! " + n0 + " → " + petName(*main) + " (düzey " + std::to_string(main->st) + ")", "Transformation succeeded! " + n0 + " → " + petName(*main) + " (level " + std::to_string(main->st) + ")"));
+    note(T(n0 + " dönüşüm düzeyi " + std::to_string(main->st) + "'e ulaştı!", n0 + " reached transformation level " + std::to_string(main->st) + "!"), LOG_Q);
   } else {
     if (!r.keep && main->st > 0) main->st--;
-    toast(std::string("Dönüşüm başarısız. ") + (r.keep ? "Soy Rünü düzeyi korudu." : "Düzey: " + std::to_string(main->st)));
-    note(n0 + ": dönüşüm başarısız.", LOG_Q);
+    toast(T(std::string("Dönüşüm başarısız. ") + (r.keep ? "Soy Rünü düzeyi korudu." : "Düzey: " + std::to_string(main->st)), std::string("Transformation failed. ") + (r.keep ? "The Bloodline Rune kept its level." : "Level: " + std::to_string(main->st))));
+    note(n0 + T(": dönüşüm başarısız.", ": transformation failed."), LOG_Q);
   }
   save(); return okk ? 1 : 0;
 }
 // ---------------- beceri aktarma (技能转移) ----------------
 World::PetTf World::petSkInfo(const PetRec* main, const PetRec* mat, const std::vector<std::string>& runes) {
-  PetTf r; if (!main) { r.why = "Ana hayvanı seç."; return r; }
-  if (!mat) { r.why = "Yardımcı hayvanı seç."; return r; }
-  if (mat->uid == main->uid) { r.why = "Yardımcı hayvan başka olmalı."; return r; }
-  if (!petResting(main) || !petResting(mat)) { r.why = "İki hayvan da dinleniyor olmalı."; return r; }
-  if (bal_.pets.by(main->sp)->tpl != bal_.pets.by(mat->sp)->tpl) { r.why = "Yalnız aynı türden (fiziksel, büyü, savunma, destek) hayvanlar beceri aktarabilir."; return r; }
+  PetTf r; if (!main) { r.why = T("Ana hayvanı seç.", "Choose the main pet."); return r; }
+  if (!mat) { r.why = T("Yardımcı hayvanı seç.", "Choose the helper pet."); return r; }
+  if (mat->uid == main->uid) { r.why = T("Yardımcı hayvan başka olmalı.", "The helper must be another pet."); return r; }
+  if (!petResting(main) || !petResting(mat)) { r.why = T("İki hayvan da dinleniyor olmalı.", "Both pets must be resting."); return r; }
+  if (bal_.pets.by(main->sp)->tpl != bal_.pets.by(mat->sp)->tpl) { r.why = T("Yalnız aynı türden (fiziksel, büyü, savunma, destek) hayvanlar beceri aktarabilir.", "Only pets of the same type (physical, magic, defense, support) can transfer skills."); return r; }
   for (const std::string& k : mat->sk) if (std::find(main->sk.begin(), main->sk.end(), k) == main->sk.end()) r.give.push_back(k);   // (doğuştan beceri metin: hiç eşit sayılmaz)
-  if (r.give.empty()) { r.why = "Yardımcının, ana hayvanda olmayan rastgele becerisi yok."; return r; }
+  if (r.give.empty()) { r.why = T("Yardımcının, ana hayvanda olmayan rastgele becerisi yok.", "The helper has no random skill the main pet lacks."); return r; }
   for (const std::string& id : runes) {
     const Item* it = bal_.item(id); if (!it || !it->pet || !it->petJ["sk"].isStr()) continue; const core::Json& u = it->petJ; const int sl = u["slot"].i();
     if (u["sk"].str() == "give" && sl >= 0 && sl < int(mat->sk.size()) && std::find(r.give.begin(), r.give.end(), mat->sk[size_t(sl)]) != r.give.end()) r.gs = sl;
@@ -403,7 +403,7 @@ std::string World::petTransfer(const std::string& mainUid, const std::string& ma
   std::vector<std::string> rn; for (const std::string& id : runes) if (!id.empty() && countItem(id) > 0) rn.push_back(id);
   const PetTf r = petSkInfo(main, mat, rn);
   if (!r.ok) { toast(r.why); return ""; }
-  if (P.gold < r.cost) { toast("Yeterli altının yok (" + std::to_string(r.cost) + ")."); return ""; }
+  if (P.gold < r.cost) { toast(T("Yeterli altının yok (", "Not enough gold (") + std::to_string(r.cost) + ")."); return ""; }
   P.gold -= r.cost; for (const std::string& id : rn) removeItem(id, 1);
   const std::string k = r.gs >= 0 ? mat->sk[size_t(r.gs)] : r.give[size_t(irnd(0, int(r.give.size()) - 1))];
   // yuva: rün yoksa rastgele; 3'ten az rastgele becerisi olan hayvan bazen yeni yuva açar
@@ -412,8 +412,8 @@ std::string World::petTransfer(const std::string& mainUid, const std::string& ma
   if (slot < int(main->sk.size())) main->sk[size_t(slot)] = k; else main->sk.push_back(k);
   const std::string mu = mat->uid; P.pets.erase(std::remove_if(P.pets.begin(), P.pets.end(), [&](const PetRec& x) { return x.uid == mu; }), P.pets.end());
   main = petByUid(mainUid);
-  sfx("finish_task"); toast(petName(*main) + " yeni beceri öğrendi: " + petSkName(k) + (old.empty() ? std::string() : " (" + petSkName(old) + " yerine)"));
-  note("Beceri aktarma: " + petName(*main) + " ← " + petSkName(k), LOG_Q);
+  sfx("finish_task"); toast(T(petName(*main) + " yeni beceri öğrendi: " + petSkName(k) + (old.empty() ? std::string() : " (" + petSkName(old) + " yerine)"), petName(*main) + " learned " + petSkName(k) + (old.empty() ? std::string() : " (replacing " + petSkName(old) + ")")));
+  note(T("Beceri aktarma: ", "Skill transfer: ") + petName(*main) + " ← " + petSkName(k), LOG_Q);
   save(); return k;
 }
 
@@ -421,20 +421,20 @@ std::string World::petTransfer(const std::string& mainUid, const std::string& ma
 bool World::petUseItem(const std::string& id) {
   const Item* it = bal_.item(id); if (!it || !it->pet) return false; const core::Json& u = it->petJ;
   if (u["egg"].truthy()) { petHatch(id); return true; }
-  if (u["box"].truthy()) { toast("Kuluçka kutusu: çantadaki bir yumurtayı kullanınca kendiliğinden kullanılır."); return true; }
-  if (u["tf"].truthy() || u["sk"].truthy()) { toast("Dönüşüm/beceri aktarma eşyası: Evcil hayvan penceresinin Dönüşüm bölümünde ya da Büyülü Canavar Ustası'nda kullanılır."); return true; }
-  if (u["petSlot"].truthy()) { P.petSlots = petSlotsN() + 1; removeItem(id, 1); toast("Evcil hayvan hakkın: " + std::to_string(petSlotsN())); save(); return true; }
+  if (u["box"].truthy()) { toast(T("Kuluçka kutusu: çantadaki bir yumurtayı kullanınca kendiliğinden kullanılır.", "Incubator: used automatically when you use an egg from your bag.")); return true; }
+  if (u["tf"].truthy() || u["sk"].truthy()) { toast(T("Dönüşüm/beceri aktarma eşyası: Evcil hayvan penceresinin Dönüşüm bölümünde ya da Büyülü Canavar Ustası'nda kullanılır.", "Transformation/skill transfer aid: used in the pet window's Transform panel or at the Magic Beast Master.")); return true; }
+  if (u["petSlot"].truthy()) { P.petSlots = petSlotsN() + 1; removeItem(id, 1); toast(T("Evcil hayvan hakkın: ", "Pet slots: ") + std::to_string(petSlotsN())); save(); return true; }
   PetRec* p = nullptr;
   if (u["petRevive"].truthy()) { for (PetRec* x : petList()) if (x->uid == P.petSel && x->dead) { p = x; break; } if (!p) for (PetRec* x : petList()) if (x->dead) { p = x; break; } }
   else p = petActive();
-  if (!p) { toast(u["petRevive"].truthy() ? "Ölü evcil hayvanın yok." : "Önce bir evcil hayvan çağır."); return true; }
+  if (!p) { toast(u["petRevive"].truthy() ? T("Ölü evcil hayvanın yok.", "You have no dead pet.") : T("Önce bir evcil hayvan çağır.", "Summon a pet first.")); return true; }
   const PetStats st = petStats(*p);
-  if (u["petRevive"].truthy()) { p->dead = false; p->hp = jsRound(st.hp * u["petRevive"].num()); toast(petName(*p) + " dirildi."); }
-  else if (u["food"].truthy()) { if (p->sat >= 100) { toast(petName(*p) + " tok."); return true; } p->sat = std::min(100.0, p->sat + u["food"].num()); p->joy = std::min(100.0, p->joy + 10); if (pet.on) ufloat(-3, "Hım hım!", 0x7bff8a); }
-  else if (u["petHp"].truthy()) { if (p->hp >= st.hp) { toast("Canı dolu."); return true; } p->hp = std::min(st.hp, p->hp + u["petHp"].num()); if (pet.on) ufloat(-3, "+" + std::to_string(u["petHp"].i()), 0x7bff8a); }
+  if (u["petRevive"].truthy()) { p->dead = false; p->hp = jsRound(st.hp * u["petRevive"].num()); toast(petName(*p) + T(" dirildi.", " was revived.")); }
+  else if (u["food"].truthy()) { if (p->sat >= 100) { toast(petName(*p) + T(" tok.", " is full.")); return true; } p->sat = std::min(100.0, p->sat + u["food"].num()); p->joy = std::min(100.0, p->joy + 10); if (pet.on) ufloat(-3, T("Hım hım!", "Yum!"), 0x7bff8a); }
+  else if (u["petHp"].truthy()) { if (p->hp >= st.hp) { toast(T("Canı dolu.", "HP is full.")); return true; } p->hp = std::min(st.hp, p->hp + u["petHp"].num()); if (pet.on) ufloat(-3, "+" + std::to_string(u["petHp"].i()), 0x7bff8a); }
   else if (u["petMp"].truthy()) p->mp = std::min(st.mp, p->mp + u["petMp"].num());
-  else if (u["petGift"].isArr()) { const std::string k = u["petGift"][0].str(); const double v = u["petGift"][1].num(); p->gift[k] += v; toast(petName(*p) + ": yetenek +" + std::to_string((long long)v)); }
-  else if (u["petXp"].truthy()) { if (p->lv >= P.lv) { toast("Evcil hayvanın seviyesi senin seviyeni geçemez."); return true; } p->xp += u["petXp"].num(); petGainLv(*p); }
+  else if (u["petGift"].isArr()) { const std::string k = u["petGift"][0].str(); const double v = u["petGift"][1].num(); p->gift[k] += v; toast(petName(*p) + T(": yetenek +", ": talent +") + std::to_string((long long)v)); }
+  else if (u["petXp"].truthy()) { if (p->lv >= P.lv) { toast(T("Evcil hayvanın seviyesi senin seviyeni geçemez.", "Your pet's level can't exceed yours.")); return true; } p->xp += u["petXp"].num(); petGainLv(*p); }
   removeItem(id, 1); save(); return true;
 }
 void World::petRelease(const std::string& uid) {
@@ -445,42 +445,42 @@ void World::petRelease(const std::string& uid) {
 
 // ---------------- GM (HTML Pet.GM) ----------------
 static const char* BOXI(const std::string& b) { return b == "magic" ? "31149" : b == "metal" ? "31147" : "30166"; }
-void World::gmPetEgg(const std::string& cn) { const PetSpecies* s = bal_.pets.by(cn); if (!s) return; addItem(s->egg, 1, true); addItem(BOXI(s->box), 1, true); toast(itemName(s->egg) + " + kutu verildi; çantadan kullan."); }
+void World::gmPetEgg(const std::string& cn) { const PetSpecies* s = bal_.pets.by(cn); if (!s) return; addItem(s->egg, 1, true); addItem(BOXI(s->box), 1, true); toast(itemName(s->egg) + T(" + kutu verildi; çantadan kullan.", " + incubator given; use it from your bag.")); }
 void World::gmPetGive(const std::string& cn) {
   const PetSpecies* s = bal_.pets.by(cn); if (!s) return;
   if (int(petList().size()) >= petSlotsN()) P.petSlots = int(petList().size()) + 1;
   addItem(s->egg, 1, true); addItem("31149", 1, true); petHatch(s->egg);
 }
 static PetRec* gmCur(World& w) { if (PetRec* p = w.petActive()) return p; auto L = w.petList(); return L.empty() ? nullptr : L[0]; }
-void World::gmPetLevel() { PetRec* p = gmCur(*this); if (!p) { toast("Evcil hayvanın yok."); return; } p->lv = P.lv; p->xp = 0; const PetStats s = petStats(*p); p->hp = s.hp; p->mp = s.mp; p->dead = false; toast(petName(*p) + " Sv " + std::to_string(p->lv)); }
+void World::gmPetLevel() { PetRec* p = gmCur(*this); if (!p) { toast(T("Evcil hayvanın yok.", "No pet.")); return; } p->lv = P.lv; p->xp = 0; const PetStats s = petStats(*p); p->hp = s.hp; p->mp = s.mp; p->dead = false; toast(petName(*p) + " " + T("Sv", "Lv") + " " + std::to_string(p->lv)); }
 void World::gmPetCare() {
   for (PetRec* p : petList()) { const PetStats s = petStats(*p); p->dead = false; p->hp = s.hp; p->mp = s.mp; p->sat = 100; p->joy = 100; }
   if (!petActive()) { auto L = petList(); if (!L.empty()) petSummon(L[0]->uid); }
-  toast("Bütün hayvanlar dirildi, doydu, iyileşti.");
+  toast(T("Bütün hayvanlar dirildi, doydu, iyileşti.", "All pets revived, fed and healed."));
 }
-void World::gmPetItems() { for (const auto& x : std::vector<std::pair<const char*, int>>{{"30022", 20}, {"30021", 10}, {"30755", 10}, {"30025", 5}, {"30595", 2}, {"30006", 3}, {"30166", 3}, {"31147", 3}, {"31149", 3}}) addItem(x.first, x.second, true); toast("Evcil hayvan eşyaları verildi."); }
-void World::gmPetHungry() { if (PetRec* p = petActive()) { p->sat = 0; p->joy = 15; toast("Hayvan acıktı (savaşmaz)."); } }
-void World::gmPetClear() { P.pets.clear(); P.petOn.clear(); petDespawn(); toast("Bütün hayvanlar silindi."); }
+void World::gmPetItems() { for (const auto& x : std::vector<std::pair<const char*, int>>{{"30022", 20}, {"30021", 10}, {"30755", 10}, {"30025", 5}, {"30595", 2}, {"30006", 3}, {"30166", 3}, {"31147", 3}, {"31149", 3}}) addItem(x.first, x.second, true); toast(T("Evcil hayvan eşyaları verildi.", "Pet items given.")); }
+void World::gmPetHungry() { if (PetRec* p = petActive()) { p->sat = 0; p->joy = 15; toast(T("Hayvan acıktı (savaşmaz).", "Pet is hungry (won't fight).")); } }
+void World::gmPetClear() { P.pets.clear(); P.petOn.clear(); petDespawn(); toast(T("Bütün hayvanlar silindi.", "All pets removed.")); }
 void World::gmPetStage(int n) {
-  PetRec* p = gmCur(*this); if (!p) { toast("Evcil hayvanın yok."); return; }
+  PetRec* p = gmCur(*this); if (!p) { toast(T("Evcil hayvanın yok.", "No pet.")); return; }
   p->st = n >= 0 ? std::max(0, std::min(7, n)) : (p->st + 1) % 8; const PetStats s = petStats(*p); p->hp = s.hp; p->mp = s.mp;
-  toast(petName(*p) + " · dönüşüm " + std::to_string(p->st) + "/7");
+  toast(petName(*p) + " · " + T("dönüşüm", "transform") + " " + std::to_string(p->st) + "/7");
 }
 void World::gmPetSkills() {
-  PetRec* p = gmCur(*this); if (!p) { toast("Evcil hayvanın yok."); return; }
+  PetRec* p = gmCur(*this); if (!p) { toast(T("Evcil hayvanın yok.", "No pet.")); return; }
   p->sk.clear(); const PetSpecies& s = *bal_.pets.by(p->sp);
   for (int i = 0; i < 6 && p->sk.size() < 3; i++) for (const std::string& k : petRollSkills(s, "magic")) if (p->sk.size() < 3 && std::find(p->sk.begin(), p->sk.end(), k) == p->sk.end()) p->sk.push_back(k);
   std::string L; for (const std::string& k : p->sk) L += (L.empty() ? "" : ", ") + petSkName(k);
-  toast("Rastgele beceriler: " + (L.empty() ? std::string("-") : L));
+  toast(T("Rastgele beceriler: ", "Random skills: ") + (L.empty() ? std::string("-") : L));
 }
 void World::gmPetTf() {
-  PetRec* p = gmCur(*this); if (!p) { toast("Evcil hayvanın yok."); return; }
+  PetRec* p = gmCur(*this); if (!p) { toast(T("Evcil hayvanın yok.", "No pet.")); return; }
   for (const char* id : {"30164", "30730", "31234", "30731", "30749", "30023", "30750", "30751", "30752", "30753"}) addItem(id, 3, true);
   P.gold += 20000;
   if (int(P.pets.size()) + 2 > petSlotsN()) P.petSlots = int(P.pets.size()) + 2;
   const std::string sp = p->sp; const int lv = p->lv;
   for (int i = 0; i < 2; i++) { PetRec q = petMake(*bal_.pets.by(sp), "magic"); q.lv = lv; const PetStats s = petStats(q); q.hp = s.hp; q.mp = s.mp; P.pets.push_back(q); }
-  toast("Dönüşüm eşyaları, 2 yardımcı hayvan ve 20000 altın verildi.");
+  toast(T("Dönüşüm eşyaları, 2 yardımcı hayvan ve 20000 altın verildi.", "Transformation aids, 2 helper pets and 20000 gold given."));
 }
 
 }  // namespace engine

@@ -37,18 +37,19 @@ bool World::dungeonDoor(int region) {
   if (warnT > 0) return true;
   warnT = 3;
   const std::string nm = quests().name(d->cn);
-  if (P.lv < d->lv) { toast(nm + ": " + std::to_string(d->lv) + ". seviyede girilir."); return true; }
-  if (d->req && !P.done.count(d->req)) { const Quest* q = quests().byId(d->req); toast(nm + ": önce \"" + (q ? q->tr.title : std::to_string(d->req)) + "\" görevini bitir."); return true; }
+  if (P.lv < d->lv) { toast(T(nm + ": " + std::to_string(d->lv) + ". seviyede girilir.", nm + ": requires level " + std::to_string(d->lv) + ".")); return true; }
+  if (d->req && !P.done.count(d->req)) { const Quest* q = quests().byId(d->req); { const std::string qn = q ? q->tr.title : std::to_string(d->req); toast(T(nm + ": önce \"" + qn + "\" görevini bitir.", nm + ": first complete \"" + qn + "\".")); } return true; }
   const int left = d->daily ? d->daily - dungeonUsedToday(*d) : std::numeric_limits<int>::max();
-  if (left <= 0) { toast(nm + ": bugünkü giriş hakkın bitti."); return true; }
-  const std::string info = d->train ? "Sınav zindanı: canavarlar zayıf ama çok, yeniden doğar." : "Bugün kalan giriş: " + std::to_string(left) + "/" + std::to_string(d->daily) + ".";
-  ask(nm + " (Sv " + std::to_string(d->lv) + "+) · " + info + " Girilsin mi?", [this, d, copy] { dungeonEnter(*d, copy); });
+  if (left <= 0) { toast(T(nm + ": bugünkü giriş hakkın bitti.", nm + ": no entries left today.")); return true; }
+  const std::string lf = std::to_string(left) + "/" + std::to_string(d->daily);
+  const std::string info = d->train ? T("Sınav zindanı: canavarlar zayıf ama çok, yeniden doğar.", "Training dungeon: many weak monsters that respawn.") : T("Bugün kalan giriş: " + lf + ".", "Entries left today: " + lf + ".");
+  ask(nm + " (" + T("Sv", "Lv") + " " + std::to_string(d->lv) + "+) · " + info + " " + T("Girilsin mi?", "Enter?"), [this, d, copy] { dungeonEnter(*d, copy); });
   return true;
 }
 void World::dungeonEnter(const DungeonDef& d, int copy) {
   if (d.daily) { const std::string day = today.empty() ? utcDay() : today; if (P.dgDay != day) { P.dgDay = day; P.dgN.clear(); } P.dgN[d.id]++; }
   P.dun = CharData::Run(); P.dun.on = true; P.dun.id = d.id; P.dun.copy = copy; P.dun.t = nowMillis();
-  note("Zindana girdin: " + quests().name(d.cn), LOG_Q); sfx("accept_task");
+  note(T("Zindana girdin: ", "Entered dungeon: ") + quests().name(d.cn), LOG_Q); sfx("accept_task");
   const std::string from = sceneId; gotoScene(d.copies[size_t(copy)].scenes[0], from);
 }
 // kapının dışına çık (zindandan çıkış geçidi, sandıktan sonra, ölüm); koşu kapanır
@@ -58,7 +59,7 @@ void World::dungeonLeave(bool dead) {
   if (!d) return;
   const DungeonCopy& k = d->copies[size_t(std::max(0, std::min(int(d->copies.size()) - 1, c)))];
   P.dun = CharData::Run();
-  if (!dead) note("Zindandan çıktın: " + quests().name(d->cn), LOG_Q);
+  if (!dead) note(T("Zindandan çıktın: ", "Left dungeon: ") + quests().name(d->cn), LOG_Q);
   const auto at = dungeonOutside(k);
   if (at.first >= 0) { const int a[2] = {at.first, at.second}; loadScene(k.doorScene, a); } else loadScene(k.doorScene);
 }
@@ -90,16 +91,16 @@ void World::dungeonOnKill(Ent& m) {
     addItem(P.lv > 10 ? "hp2" : "hp1", 3);
     sfx("finish_task"); pushFx("LEVELUP", player.x, player.y);
     const std::string nm = quests().name(d->cn);
-    toast(nm + ": zindan tamamlandı!");
-    note("Zindan sandığı: " + std::to_string(gold) + " altın" + got, LOG_Q);
-    later(1.5, [this, nm] { ask(nm + ": zindan tamamlandı! Zindandan çıkılsın mı?", [this] { dungeonLeave(false); }); });
+    toast(nm + T(": zindan tamamlandı!", ": dungeon cleared!"));
+    note(T("Zindan sandığı: " + std::to_string(gold) + " altın", "Dungeon chest: " + std::to_string(gold) + " gold") + got, LOG_Q);
+    later(1.5, [this, nm] { ask(nm + T(": zindan tamamlandı! Zindandan çıkılsın mı?", ": dungeon cleared! Leave the dungeon?"), [this] { dungeonLeave(false); }); });
   }
   save();
 }
 // ölünce: kapının dışında dirilir, koşu kapanır
 bool World::dungeonOnRevive() {
   if (!dungeonOf(sceneId)) return false;
-  note("Zindanda öldün; kapının dışında dirildin.", LOG_Q); dungeonLeave(true); return true;
+  note(T("Zindanda öldün; kapının dışında dirildin.", "You died in the dungeon and revived outside the gate."), LOG_Q); dungeonLeave(true); return true;
 }
 // kişinin zindan ışınlanmaları (merkeze / merkezden; konuşmada "✦" seçeneği)
 std::vector<std::pair<std::string, const DungeonTp*>> World::dungeonTps(const std::string& cn) const {
@@ -107,7 +108,7 @@ std::vector<std::pair<std::string, const DungeonTp*>> World::dungeonTps(const st
   return {{it->second.label, &it->second}};
 }
 void World::dungeonTpGo(const DungeonTp& t) {
-  if (t.lv && P.lv < t.lv) { toast(std::to_string(t.lv) + ". seviye gerekir."); return; }
+  if (t.lv && P.lv < t.lv) { toast(T(std::to_string(t.lv) + ". seviye gerekir.", "Requires level " + std::to_string(t.lv) + ".")); return; }
   if (t.hasXY) { const int a[2] = {t.x, t.y}; loadScene(t.sid, a); } else gotoScene(t.sid, "");
 }
 
@@ -127,14 +128,14 @@ void World::gmDungeonDoor(const std::string& id, int copy) {
 }
 void World::gmDungeonBoss() {
   for (size_t i = 0; i < ents.size(); i++) if (ents[i].kind == Ent::MOB && !ents[i].dead && ents[i].boss) { killMob(int(i)); return; }
-  toast("Bu haritada boss yok.");
+  toast(T("Bu haritada boss yok.", "No boss on this map."));
 }
 void World::gmDungeonClear() {
   std::vector<int> L; for (size_t i = 0; i < ents.size(); i++) if (ents[i].kind == Ent::MOB && !ents[i].dead && !ents[i].boss) L.push_back(int(i));
   for (int i : L) killMob(i);
 }
 void World::gmDungeonLast() {
-  int c = -1; const DungeonDef* d = dungeonOf(sceneId, &c); if (!d) { toast("Zindanda değilsin."); return; }
+  int c = -1; const DungeonDef* d = dungeonOf(sceneId, &c); if (!d) { toast(T("Zindanda değilsin.", "Not in a dungeon.")); return; }
   const auto& L = d->copies[size_t(c)].scenes; int here = -1; for (size_t i = 0; i < L.size(); i++) if (L[i] == sceneId) here = int(i);
   gotoScene(L[size_t(int(L.size()) - 1 == here ? 0 : int(L.size()) - 1)], "");
 }

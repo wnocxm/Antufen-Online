@@ -2,6 +2,8 @@
 // .cpanel), ui.js (titleOpen, titleTurn, titleGo, bookFrame, renderCreate, drawCreate). Ayrıntı title.h.
 #include "ui/title.h"
 
+#include "engine/lang.h"
+
 #include <algorithm>
 #include <cmath>
 
@@ -35,7 +37,9 @@ void blurShadow(Canvas& c, Fonts& F, Face* f, const std::string& s, float x, flo
   for (int yy = 0; yy < BH; yy++) for (int xx = 0; xx < BW; xx++) if (a[size_t(yy * BW + xx)] > 0.002f) c.blend(X0 + xx, Y0 + yy, 0x000000, a[size_t(yy * BW + xx)]);
 }
 // DOM yazısı: taban çizgisi = satır kutusunun üstü + boy (Alegreya: yükselme 1 em, satır yüksekliği 1,31 em)
-void domText(Canvas& c, Fonts& F, const std::string& fam, float size, const std::string& s, float x, float base, uint32_t col, Align al, int shadow = 0) {
+// (HTML txDom: sayfadaki yazılar seçili dile çevrilir)
+void domText(Canvas& c, Fonts& F, const std::string& fam, float size, const std::string& s0, float x, float base, uint32_t col, Align al, int shadow = 0) {
+  const std::string s = engine::tx(s0);
   Face* f = F.face(fam, size); TextStyle st; st.align = al;
   if (shadow) { st.color = 0x000000; F.draw(c, f, s, x + 1, base + 1, st); }   // text-shadow: 1px 1px 0 #000
   st.color = col; F.draw(c, f, s, x, base, st);
@@ -48,13 +52,13 @@ void Title::open(bool hasSave, const std::string& saveInfo) {
   if (hasSave) items_.push_back({"Devam Et", "p1", saveInfo, "continue"});
   items_.push_back({"Yeni Karakter", "p2", "Bu telefona kaydedilir", "new"});
   items_.push_back({"Çevrimiçi", "p3", "Sunucuda diğer oyuncularla", "online"});
-  items_.push_back({"Dil", "p4", "Türkçe → English", "lang"});
+  items_.push_back({"Dil", "p4", engine::lang().en ? "English → Türkçe" : "Türkçe → English", "lang"});
   idx_ = 0; sure_ = false; busy_ = true; word_.clear(); info_.clear(); frame_ = "closed";
   if (music) music("cover.mid");
   // kitap açılır: kapalı → yarı açık (350 ms) → açık (520 ms) → ilk sayfa (700 ms)
   steps_ = {{0.35, 0}, {0.52, 1}, {0.70, 2}};
 }
-void Title::show() { const Item& it = items_[idx_]; word_ = it.label; frame_ = it.page; info_ = it.info; busy_ = false; }
+void Title::show() { const Item& it = items_[idx_]; word_ = engine::tx(it.label); frame_ = it.page; info_ = engine::tx(it.info); busy_ = false; }   // HTML: tx(it.label), it.info()
 void Title::update(double dt) {
   for (Step& s : steps_) s.t -= dt;
   while (!steps_.empty()) {
@@ -69,16 +73,15 @@ std::string Title::turn(int d) {
   if (busy_ || items_.empty()) return "";
   busy_ = true; sure_ = false; if (sfx) sfx("skill_pageflip", 1);
   idx_ = (idx_ + items_.size() + size_t(d + int(items_.size()))) % items_.size();
-  word_ = items_[idx_].label; info_.clear(); frame_ = d > 0 ? "flipR" : "flipL";
+  word_ = engine::tx(items_[idx_].label); info_.clear(); frame_ = d > 0 ? "flipR" : "flipL";
   steps_.push_back({0.17, 2});
   return "";
 }
 std::string Title::go() {
   if (busy_ || items_.empty()) return "";
   const Item& it = items_[idx_];
-  if (it.act == "new" && hasSave_ && !sure_) { sure_ = true; info_ = "Eski karakter silinecek. Onaylamak için tekrar dokun."; return ""; }
-  if (it.act == "online") { info_ = "Çevrimiçi oyun sonraki adımlarda (sunucu)."; return ""; }
-  if (it.act == "lang") { info_ = "İngilizce sonraki adımlarda."; return ""; }
+  if (it.act == "new" && hasSave_ && !sure_) { sure_ = true; info_ = engine::tx("Eski karakter silinecek. Onaylamak için tekrar dokun."); return ""; }
+  if (it.act == "online") { info_ = engine::T("Çevrimiçi oyun sonraki adımlarda (sunucu).", "Online play comes in a later step (server)."); return ""; }
   return it.act;
 }
 std::string Title::key(const std::string& k) {
@@ -158,11 +161,11 @@ void Title::draw(Canvas& c) {
 }
 
 // ---------------- karakter oluşturma ----------------
-void Create::open() { cls = "战士"; race = "人类"; sex = "male"; face = 1; name = "Kahraman"; msg.clear(); editing = false; if (music) music("cover.mid"); }
+void Create::open() { cls = "战士"; race = "人类"; sex = "male"; face = 1; name = engine::tx("Kahraman"); msg.clear(); editing = false; if (music) music("cover.mid"); }   // HTML: #cname değeri çevrilir (Hero)
 std::string Create::finalName() const {
   std::string s = name; const char* ws = " \t\n\r";
   s.erase(0, s.find_first_not_of(ws) == std::string::npos ? s.size() : s.find_first_not_of(ws)); s.erase(s.find_last_not_of(ws) + 1);
-  if (s.empty()) s = "Kahraman";
+  if (s.empty()) s = "Kahraman";   // HTML: değer boşsa Türkçe "Kahraman" (çevrilmez)
   const std::vector<uint32_t> u = utf8(s); if (u.size() <= 12) return s;   // HTML slice(0, 12)
   std::string o; for (size_t i = 0; i < 12; i++) { const uint32_t c = u[i];
     if (c < 0x80) o += char(c); else if (c < 0x800) { o += char(0xC0 | (c >> 6)); o += char(0x80 | (c & 63)); }
@@ -228,7 +231,7 @@ void Create::draw(Canvas& c, double nowMs) {
   auto bw = [&](const std::string& s, bool on) { return font_.width(on ? "Bb" : "B", 13, s) + 22; };
   float y = PY + 2 + 10;   // 68
   // Ad: etiket metni + giriş kutusu (siyah, 1 px kenar #6a5028, beyaz yazı, iç boşluk 5/8)
-  { const float lw = font_.width("B", 13, "Ad"); domText(c, font_, "B", 13, "Ad", CX, y + 6 + 13, 0xe8dcc0, LEFT);
+  { const float lw = font_.width("B", 13, engine::tx("Ad")); domText(c, font_, "B", 13, "Ad", CX, y + 6 + 13, 0xe8dcc0, LEFT);
     const float ix = CX + lw + 5, iw = CW - lw - 5; const float X0 = jsRoundF(ix), X1 = jsRoundF(ix + iw);
     c.fillRect(X0, y, X1 - X0, 29, 0x000000); c.strokeRect(X0 + 0.5f, y + 0.5f, X1 - X0 - 1, 28, 1, 0x6a5028);
     c.clipRect(X0 + 1, y + 1, std::min(X1 - 1, R - 2) - X0 - 1, 27);
@@ -247,7 +250,7 @@ void Create::draw(Canvas& c, double nowMs) {
     for (const auto& b : row.second) {
       const std::string v = b.first.substr(b.first.find(':') + 1);
       const bool on = (b.first[0] == 'c' && cls == v) || (b.first[0] == 'r' && race == v) || (b.first[0] == 's' && sex == v);
-      const float w = bw(b.second, on); button(x, y, w, 29, b.second, on, b.first); x += w + 5;
+      const std::string lb = engine::tx(b.second); const float w = bw(lb, on); button(x, y, w, 29, lb, on, b.first); x += w + 5;
     }
     y += 29 + 7;
   }

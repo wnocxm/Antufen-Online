@@ -101,7 +101,7 @@ void World::routeStep() {
       if (ents[i].kind != Ent::NPC) continue;
       const auto* L = travelOf(int(i)); if (!L) continue;
       for (const TravelOpt& x : *L) if (x.sid == path[1]) {
-        travelHint = path[1]; toast(quests().name(ents[i].name) + " ile yolculuk: " + quests().name(as_.D()["scenes"][path[1]]["name"].str()));
+        travelHint = path[1]; { const std::string a = quests().name(ents[i].name), b = quests().name(as_.D()["scenes"][path[1]]["name"].str()); toast(T(a + " ile yolculuk: " + b, "Travel with " + a + ": " + b)); }
         walkToEnt(int(i)); return;
       }
     }
@@ -183,11 +183,11 @@ int World::travelCost(int ei, const TravelOpt& x) const {
 }
 std::string World::travelLabel(int ei, const TravelOpt& x) const {
   const int c = travelCost(ei, x);
-  return std::string(x.kind == "tp" ? "Işınlan: " : "Yolculuk: ") + bal_.quests.name(x.name) + (c ? " (" + std::to_string(c) + " altın)" : "");
+  return (x.kind == "tp" ? T("Işınlan: ", "Teleport: ") : T("Yolculuk: ", "Travel: ")) + bal_.quests.name(x.name) + (c ? T(" (" + std::to_string(c) + " altın)", " (" + std::to_string(c) + " gold)") : std::string());
 }
 bool World::travelGo(int ei, const TravelOpt& x) {
   const int c = travelCost(ei, x);
-  if (c && P.gold < c) { toast(std::to_string(c) + " altın gerekir."); return false; }
+  if (c && P.gold < c) { toast(T(std::to_string(c) + " altın gerekir.", "Requires " + std::to_string(c) + " gold.")); return false; }
   P.gold -= c; note(travelLabel(ei, x), LOG_Q); travelHint.clear(); sfx("menusel", 0.6);
   const TravelOpt to = x;   // loadScene varlıkları değiştirir
   if (to.hasXY) { const int a[2] = {to.x, to.y}; loadScene(to.sid, a); } else loadScene(to.sid);

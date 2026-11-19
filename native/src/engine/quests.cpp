@@ -1,4 +1,5 @@
 #include "quests.h"
+#include "engine/lang.h"
 
 #include <algorithm>
 #include <climits>
@@ -43,6 +44,7 @@ void Quests::load(const Vfs& vfs, const core::Json& D) {
       q.items.push_back(x);
     }
     q.tr = readText(j["tr"]); q.en = readText(j["en"]);
+    if (lang().en) q.tr = q.en;   // HTML: İngilizcede görev metinleri EN_Q / quests_gen'in İngilizcesiyle değişir (q.tr = seçili dil)
     idx_[q.id] = q_.size();   // aynı numara iki kez varsa sonraki geçerli (HTML QBY gibi)
     q_.push_back(std::move(q));
   }
@@ -61,6 +63,8 @@ void Quests::load(const Vfs& vfs, const core::Json& D) {
 
 const std::vector<std::string>& Quests::npcScenes(const std::string& cn) const { static const std::vector<std::string> e; auto it = npcSc_.find(cn); return it == npcSc_.end() ? e : it->second; }
 const std::vector<std::string>& Quests::monScenes(const std::string& n) const { static const std::vector<std::string> e; auto it = monSc_.find(n); return it == monSc_.end() ? e : it->second; }
+const std::string& Quests::name(const std::string& cn) const { return name(cn, lang().en); }
+const std::string& Quests::greet(const std::string& cn) const { return greet(cn, lang().en); }
 const std::string& Quests::name(const std::string& cn, bool en) const { auto it = name_[en].find(cn); return it == name_[en].end() ? cn : it->second; }
 const std::string& Quests::greet(const std::string& cn, bool en) const { static const std::string dots = "..."; auto it = greet_[en].find(cn); return it == greet_[en].end() ? dots : it->second; }
 

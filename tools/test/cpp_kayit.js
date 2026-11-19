@@ -11,6 +11,8 @@
 const { chromium } = require('playwright');
 const { execFileSync, spawn } = require('child_process');
 const fs = require('fs'), path = require('path');
+// DIL=en: İngilizce kip (HTML localStorage anrufen_lang = en; C++ "dil en")
+const DIL = process.env.DIL === 'en' ? ['dil en'] : [];
 const OUT = process.env.OUT || '/tmp/cpp_kayit', NOW = 1800000000000;
 const MULBERRY = `(a => () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; })`;
 const CHARS = [['Kahraman', '战士', '人类', 'male', 1], ['Ayşe', '法师', '精灵', 'fema', 3], ['Işıl', '牧师', '人类', 'fema', 8], ['Doğan', '牧师', '精灵', 'male', 5]];
@@ -29,7 +31,7 @@ function diff(a, b, p = '') {
   fs.mkdirSync(OUT, { recursive: true });
   let srv = null, URL = process.env.URL;
   if (!URL) { srv = spawn('python3', ['-m', 'http.server', '8097', '--directory', 'www'], { stdio: 'ignore' }); URL = 'http://localhost:8097/'; await new Promise(r => setTimeout(r, 800)); }
-  const b = await chromium.launch(); const p = await (await b.newContext({ viewport: { width: 640, height: 360 }, locale: 'tr-TR' })).newPage();
+  const b = await chromium.launch(); const p = await (await b.newContext({ viewport: { width: 640, height: 360 }, locale: 'tr-TR' })).newPage(); if (DIL.length) await p.addInitScript(() => localStorage.setItem('anrufen_lang', 'en'));
   const errs = []; p.on('pageerror', e => errs.push(e.message));
   const boot = async save => {   // sayfayı aç (kayıtla ya da kayıtsız), giriş ekranını bekle
     await p.goto(URL); await p.evaluate(s => { localStorage.clear(); if (s) localStorage.setItem('anrufen_save_v1', s); }, save);
@@ -43,7 +45,7 @@ function diff(a, b, p = '') {
     return { altin: P.gold, canta: P.bag.map(x => [x.id, x.n]), eq: srt(P.eq), sk: srt(P.sk), sp: P.sp, can: Game.player.hp, mana: Game.player.mp,
       st: [s.hp, s.mp, s.atk, s.def, s.crit, s.dodge, s.res, s.hpreg, s.mpreg], gorunum: [L.bodyG || '', L.headG || '', L.weapG || ''], kisayol: P.quick.map(q => q || '') }; });
   // checks: [ad, tür, HTML değeri]; src: C++ değerinin yeri ({f: dosya} ya da {l: çıktı satırı, f: okunduysa yazılan dosya})
-  const scen = ['veri www/assets', `saatms ${NOW}`], checks = [], src = []; let lineN = 0;
+  const scen = ['veri www/assets', ...DIL, `saatms ${NOW}`], checks = [], src = []; let lineN = 0;
   const file = n => path.join(OUT, n);
   const cppFile = (c, f) => { checks.push(c); src.push({ f }); }, cppLine = (c, f) => { checks.push(c); src.push({ l: lineN++, f }); };
   // ---------- A: yeni karakter (arayüzden) ----------
@@ -86,7 +88,7 @@ function diff(a, b, p = '') {
   cppFile(['B Devam Et', 'kayit', await hsave()], file('b2_cpp.json')); cppLine(['B Devam Et', 'durum', await hstate()]);
   scen.push('tohum 7', 'baslat', `kayityaz ${file('b2_cpp.json')}`, 'karakterdurum -');
   // ---------- C: C++ kaydı → HTML ----------
-  const cScen = ['veri www/assets', `saatms ${NOW}`, 'tohum 3', 'yenikarakter Zeynep 牧师 精灵 fema 5', 'baslat', 'seviye 22', 'gmgear', 'esya al hp2 2', 'esya ekle 30022 3',
+  const cScen = ['veri www/assets', ...DIL, `saatms ${NOW}`, 'tohum 3', 'yenikarakter Zeynep 牧师 精灵 fema 5', 'baslat', 'seviye 22', 'gmgear', 'esya al hp2 2', 'esya ekle 30022 3',
     'evcilver 小鸡', 'evcilmod support', 'gorevver 1', 'beceriler -', 'dagit 23 0', `kayityaz ${file('c_cpp.json')}`];
   fs.writeFileSync(file('c_senaryo.txt'), cScen.join('\n') + '\n');
   execFileSync('native/build/anrufen_test', [file('c_senaryo.txt')], { stdio: ['ignore', 'ignore', 'inherit'] });

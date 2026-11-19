@@ -136,10 +136,10 @@ std::string World::skLock(const SkillDef& sk) const {
 bool World::skillUp(const SkillDef& sk) {
   const int r = skRank(sk);
   if (!sk.race.empty()) return false;
-  if (r >= (sk.mx ? sk.mx : 10)) { toast("Bu beceri en yüksek kademede."); return false; }
+  if (r >= (sk.mx ? sk.mx : 10)) { toast(T("Bu beceri en yüksek kademede.", "This skill is at its highest rank.")); return false; }
   if (!skLock(sk).empty()) { toast(skLockMsg(sk)); return false; }
   if (P.sp < 1) { toast("Beceri puanın yok. Seviye atlayınca puan kazanırsın."); return false; }
-  P.sp--; P.sk[sk.id] = r + 1; sfx("skill_levelup"); note(sk.name + ": kademe " + std::to_string(r + 1), LOG_Q); clampVitals(); save(); return true;
+  P.sp--; P.sk[sk.id] = r + 1; sfx("skill_levelup"); note(sk.name + ": " + tx("kademe") + " " + std::to_string(r + 1), LOG_Q); clampVitals(); save(); return true;
 }
 // her puan, öğrenilebilir beceriler arasında kademesi en düşük olana (eşitse önceki ağaç / önceki yuva); oyuncu gibi önce bir sonraki
 // ağacı açacak kadar (acemi 35, sınıf 40), sonra en üstteki açık ağaç. spec: hangi uzmanlık (öbürü alınmaz)
@@ -169,10 +169,10 @@ void World::skillAutoSpend(int points, int spec) {
 // puanları sıfırla: Eğitim Kitabı (30092 ya da 30788) harcanır; GM'de bedava
 bool World::skillReset(bool free) {
   int spent = 0; for (const auto& kv : P.sk) spent += kv.second;
-  if (!spent) { toast("Harcanmış beceri puanı yok."); return false; }
-  if (!free && !removeItem("30092") && !removeItem("30788")) { toast("Eğitim Kitabı gerekir (beceri eğitmeninde satılır)."); return false; }
+  if (!spent) { toast(T("Harcanmış beceri puanı yok.", "No skill points spent.")); return false; }
+  if (!free && !removeItem("30092") && !removeItem("30788")) { toast(T("Eğitim Kitabı gerekir (beceri eğitmeninde satılır).", "Requires a Training Book (sold by the skill trainer).")); return false; }
   P.sp += spent; P.sk.clear(); player.buffs.clear(); sfx("skill_levelup");
-  note("Beceri puanları sıfırlandı: " + std::to_string(spent) + " puan geri geldi.", LOG_Q); clampVitals(); save(); return true;
+  note(T("Beceri puanları sıfırlandı: " + std::to_string(spent) + " puan geri geldi.", "Skill points reset: " + std::to_string(spent) + " points returned."), LOG_Q); clampVitals(); save(); return true;
 }
 
 int World::countItem(const std::string& id) const { for (const auto& b : P.bag) if (b.first == id) return b.second; return 0; }
@@ -480,8 +480,8 @@ int World::hitMob(int i, double mult, const HitOpt& o) {
     if (o.burn) { m.burn.on = true; m.burn.t = 6; m.burn.tick = 2; }   // Alev Darbesi: yanma (yığılmaz)
     if (o.freeze && random() * 100 < o.freeze) m.rootT = 2;
     const double now = time;
-    if (o.stun && random() * 100 < o.stun && !(p.stunCd > now)) { m.stunT = 3; p.stunCd = now + 15; ufloat(i, "Sersem", 0xffe070); }
-    if (s.seal && random() * 100 < s.seal && !(p.sealCd > now)) { m.sealT = 3; p.sealCd = now + 10; ufloat(i, "Mühür", 0xc080ff); }
+    if (o.stun && random() * 100 < o.stun && !(p.stunCd > now)) { m.stunT = 3; p.stunCd = now + 15; ufloat(i, T("Sersem", "Stun"), 0xffe070); }
+    if (s.seal && random() * 100 < s.seal && !(p.sealCd > now)) { m.sealT = 3; p.sealCd = now + 10; ufloat(i, T("Mühür", "Sealed"), 0xc080ff); }
     if (s.despair && random() * 100 < s.despair && !(p.despCd > now)) { m.despairT = 6; p.despCd = now + 15; }
     if (r.crit && o.onCrit) o.onCrit(m);
   }
@@ -512,11 +512,11 @@ void World::useSkill(int i) {
   if (gmNoCd) { p.cds.clear(); p.mp = s.mp; }
   { auto c = p.cds.find(sk->id); if (c != p.cds.end() && c->second > 0) return; }
   // Gölge Hükümdarı: şifa ve destek becerileri çalışmaz (orijinal)
-  if ((sk->heal || (sk->buff && sk->sn != 90613)) && anyBuff(p.buffs, "noHeal")) return;
+  if ((sk->heal || (sk->buff && sk->sn != 90613)) && anyBuff(p.buffs, "noHeal")) { note(T("Gölge Hükümdarı etkinken şifa ve destek becerileri çalışmaz.", "Healing and support skills do not work during Shadow Sovereign.")); return; }
   // aç/kapa beceri (Kutsal Akış): etkinse kapanır
   if (sk->toggle) {
     bool on = false; for (const Buff& b : p.buffs) if (b.id == sk->id) on = true;
-    if (on) { p.buffs.erase(std::remove_if(p.buffs.begin(), p.buffs.end(), [&](const Buff& b) { return b.id == sk->id; }), p.buffs.end()); p.cds[sk->id] = sk->cd; return; }
+    if (on) { p.buffs.erase(std::remove_if(p.buffs.begin(), p.buffs.end(), [&](const Buff& b) { return b.id == sk->id; }), p.buffs.end()); note(sk->name + ": " + T("kapandı", "off")); p.cds[sk->id] = sk->cd; return; }
   }
   int arcUid = -1, arcN = 0; for (const Buff& b : p.buffs) if (b.id == "arcane") { arcUid = b.uid; arcN = b.n; break; }
   SkCtx c0{*this, *sk, s, P.lv, nullptr};
@@ -622,7 +622,7 @@ void World::killMob(int i) {
   petOnKill(m, xp);    // evcil hayvanın deneyim payı
   // evcil yumurtası: görünüş ailesi uyan tür varsa küçük olasılıkla (HTML Pet.dropEgg)
   if (const Balance::MobRec* info = bal_.mobInfo(m.name)) if (const std::string* egg = bal_.eggFor(info->look)) {
-    const double ch = m.d->rank == 2 ? 0.25 : m.d->rank ? 0.03 : 0.004; if (random() < ch) { addItem(*egg, 1, true); toast("Ganimet: " + itemName(*egg) + "!"); note("Ganimet: " + itemName(*egg), LOG_Q); }
+    const double ch = m.d->rank == 2 ? 0.25 : m.d->rank ? 0.03 : 0.004; if (random() < ch) { addItem(*egg, 1, true); toast(T("Ganimet: ", "Loot: ") + itemName(*egg) + "!"); note(T("Ganimet: ", "Loot: ") + itemName(*egg), LOG_Q); }
   }
   if (!m.deathFx.empty()) pushFx(m.deathFx, m.x, m.y);
 }
@@ -636,7 +636,7 @@ void World::hurtPlayer(int i) {
   const double mp2hp = buffSum(p.buffs, "mp2hp"), manaShield = buffSum(p.buffs, "manaShield"), mpPerDmg = buffSum(p.buffs, "mpPerDmg"), reflect = buffSum(p.buffs, "reflect");
   const double now = time;
   // Büyücü Bedeni (90611): Karanlık Ahit sırasında %10 hasarı savuştur, hasar kadar mana
-  if (mp2hp && skRankSn(90611) && random() < 0.1) { p.mp = std::min(s.mp, p.mp + r.d); ufloat(-2, "Savuşturuldu", 0x9fd0ff); return; }
+  if (mp2hp && skRankSn(90611) && random() < 0.1) { p.mp = std::min(s.mp, p.mp + r.d); ufloat(-2, T("Savuşturuldu", "Negated"), 0x9fd0ff); return; }
   // Zifiri Perde (90612): Karanlık Ahit dışında, 15 saniyede bir, savunma ve dirençler 6 saniye artar (güçlendirme 210192)
   if (s.veil && !mp2hp && !(p.veilCd > now) && random() * 100 < s.veil) {
     p.veilCd = now + 15; Buff b; b.id = "veil"; b.buff = Vals{{"def", 0.5}, {"res", jsRound(s.res * 0.5)}}; b.t = 6; b.fx = "特效-漆黑之幕"; b.uid = ++fxUid_; p.buffs.push_back(std::move(b));
@@ -648,7 +648,7 @@ void World::hurtPlayer(int i) {
   if (r.d <= 0) return;
   p.hp -= r.d; p.combatT = 5; ufloat(-2, "-" + std::to_string(r.d), 0xff5040); hurtT = 0.4f;
   // Kutsanmış Beden (90603): ölümcül darbeyi olasılıkla savuştur, biraz can
-  if (p.hp <= 0 && s.cheatDeath && random() * 100 < s.cheatDeath) { p.hp = jsRound(s.hp * 0.2); ufloat(-2, "Kutsandı", 0xffe070); return; }
+  if (p.hp <= 0 && s.cheatDeath && random() * 100 < s.cheatDeath) { p.hp = jsRound(s.hp * 0.2); ufloat(-2, T("Kutsandı", "Blessed"), 0xffe070); return; }
   if (p.hp <= 0) { p.hp = 0; p.dead = true; p.deadT = 0; p.state = "dead"; sfx("kill", 0.5); setTarget(-1); died = true; }   // arayüz 1,2 sn sonra ölüm penceresini açar
 }
 

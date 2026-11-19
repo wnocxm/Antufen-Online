@@ -73,7 +73,7 @@ void World::questKill(const std::string& name) {
         // önce görev eşyası kullanılmalıysa (Büyü Emici Küre) kullanılmadan öldürmek sayılmaz
         bool useFirst = false;
         for (const QTarget& y : q.targets) if (y.name == name && y.kind == QTarget::USE) { auto c = st.c.find(y.key()); if ((c == st.c.end() ? 0 : c->second) < y.n) { useFirst = true; break; } }
-        if (useFirst) { note("Önce " + quests().name(x.item) + " kullanılmalıydı."); continue; }
+        if (useFirst) { note(T("Önce " + quests().name(x.item) + " kullanılmalıydı.", "You had to use the " + quests().name(x.item) + " first."), LOG_Q); continue; }
         tgAdd(int(qi), st, x);
       }
       continue;
@@ -103,12 +103,12 @@ bool World::questUseItem(const std::string& id) {
     if (!x) continue;
     { auto c = it->second.c.find(x->key()); if ((c == it->second.c.end() ? 0 : c->second) >= x->n) continue; }
     const int t = target_;
-    if (t < 0 || ents[t].dead || ents[t].name != x->name) { toast("Önce " + quests().name(x->name) + " hedef al."); return false; }
-    if (jsHypot(ents[t].x - player.x, ents[t].y - player.y) > 6) { toast("Çok uzak."); return false; }
+    if (t < 0 || ents[t].dead || ents[t].name != x->name) { toast(T("Önce " + quests().name(x->name) + " hedef al.", "Target " + quests().name(x->name) + " first.")); return false; }
+    if (jsHypot(ents[t].x - player.x, ents[t].y - player.y) > 6) { toast(T("Çok uzak.", "Too far away.")); return false; }
     const int f = pushFx("特效-治疗buff", ents[t].x, ents[t].y); fx[f].follow = t; sfx("skill_juqi");
     removeItem(id); tgAdd(int(qi), it->second, *x); return true;
   }
-  toast("Bunu şimdi kullanamazsın.");
+  toast(T("Bunu şimdi kullanamazsın.", "You cannot use this now."));
   return false;
 }
 

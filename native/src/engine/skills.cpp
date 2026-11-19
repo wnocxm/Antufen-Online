@@ -1,4 +1,5 @@
 #include "skills.h"
+#include "engine/lang.h"
 
 #include <cmath>
 
@@ -177,13 +178,14 @@ void Skills::load(const Vfs& vfs) {
     k.d = &S[std::to_string(k.sn)];
     if (!k.d->isObj()) throw std::runtime_error("skills.json: beceri yok: " + std::to_string(k.sn));
     k.name = (*k.d)["tr"][0].str(); k.nameEn = (*k.d)["en"][0].str(); k.mx = mx ? mx : (*k.d)["mx"].i(10);
+    if (lang().en && !k.nameEn.empty()) k.name = k.nameEn;   // HTML loadSkills: seçili dil
     bySn_[k.sn] = &k;
   };
   for (auto& c : cls_) for (SkillDef& k : c.second) { k.cls = c.first; fill(k, 0); }
   for (auto& r : race_) for (SkillDef& k : r.second) { k.race = r.first; fill(k, 1); }
   for (auto& c : cls_) {
     for (const core::Json& t : J_["trees"][c.first].arr()) {
-      SkillTree T; T.id = t["id"].i(); T.name = t["tr"].str();
+      SkillTree T; T.id = t["id"].i(); T.name = t[lang().code()].str(); if (T.name.empty()) T.name = t["tr"].str();
       for (const core::Json& cell : t["cells"].arr()) {
         auto it = bySn_.find(cell[0].i()); if (it == bySn_.end()) throw std::runtime_error("skills.json: ağaçta tanımsız beceri " + std::to_string(cell[0].i()));
         T.cells.push_back({it->second, cell[1].i()});

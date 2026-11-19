@@ -10,6 +10,8 @@
 const { chromium } = require('playwright');
 const { execFileSync, spawn } = require('child_process');
 const fs = require('fs'), path = require('path');
+// DIL=en: İngilizce kip (HTML localStorage anrufen_lang = en; C++ "dil en")
+const DIL = process.env.DIL === 'en' ? ['dil en'] : [];
 const OUT = process.env.OUT || '/tmp/cpp_savas';
 // [ad, sahne, x, y, sınıf, ırk, cinsiyet, seviye, tohum, saniye, beceri: [sınıf yükseltmesi, uzmanlık] (yoksa yalnız normal saldırı)]
 // x, y = 0: sahnedeki ilk canavar kaydının doğduğu yer (oyuncu canavarların arasında başlar; geçilmezse oyun en yakın boş kareye koyar)
@@ -49,7 +51,7 @@ const MULBERRY = `(a => () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imu
   fs.mkdirSync(OUT, { recursive: true });
   let srv = null, URL = process.env.URL;
   if (!URL) { srv = spawn('python3', ['-m', 'http.server', '8097', '--directory', 'www'], { stdio: 'ignore' }); URL = 'http://localhost:8097/'; await new Promise(r => setTimeout(r, 800)); }
-  const b = await chromium.launch(); const p = await (await b.newContext({ viewport: { width: 780, height: 360 } })).newPage();
+  const b = await chromium.launch(); const p = await (await b.newContext({ viewport: { width: 780, height: 360 } })).newPage(); if (DIL.length) await p.addInitScript(() => localStorage.setItem('anrufen_lang', 'en'));
   const errs = []; p.on('pageerror', e => errs.push(e.message));
   await p.goto(URL); await p.waitForTimeout(2500); await p.keyboard.press('Enter');
   await p.click('[data-cls="战士"]'); await p.fill('#cname', 'GMSavas'); await p.click('#cstart');
@@ -57,7 +59,7 @@ const MULBERRY = `(a => () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imu
   const start = await p.evaluate(() => Game.sceneId);
   // döngü durur; ses çağrıları kaydedilir (C++'ın ses olaylarıyla karşılaştırılır)
   await p.evaluate(() => { window.__upd = window.update; window.update = () => {}; window.__snd = []; SFX.play = (n, v = 1) => { if (n) __snd.push([n, v]); }; SFX.Music.play = n => { if (n) __snd.push(['muzik', n]); }; });
-  const scen = ['veri www/assets', `sahne ${start}`], html = {};
+  const scen = ['veri www/assets', ...DIL, `sahne ${start}`], html = {};
   for (let [ad, sid, x, y, cls, race, sex, lv, seed, sec, bec] of CASES) {
     if (!x && !y) [x, y] = await p.evaluate(s => { const D = Assets.D, e = D.scenes[s].ents.find(e => D.mon[e[0]]); return e[2].slice(0, 2); }, sid);
     const sk = await p.evaluate(([cls, race, sex, lv, seed, M, bec]) => {

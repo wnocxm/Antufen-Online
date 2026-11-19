@@ -18,13 +18,15 @@ static std::vector<std::string> newbie(const std::string& c) {
 }
 static const char* SLOTS[8] = {"weap", "head", "body", "belt", "shoe", "glove", "neck", "ring"};
 
-std::string World::clsTr(const std::string& c) { return c == "法师" ? "Büyücü" : c == "牧师" ? "Kutsal Elçi" : c == "战士" ? "Savaşçı" : c; }
-std::string World::raceTr(const std::string& r) { return r == "精灵" ? "Gece Elfi" : r == "人类" ? "İnsan" : r; }
+// sınıf ve ırk adı seçili dilde (HTML TR.cls / TR.race; İngilizcede EN.cls / EN.race)
+std::string World::clsTr(const std::string& c) { return lang().cls(c); }
+std::string World::raceTr(const std::string& r) { return lang().race(r); }
+// HTML clsName: tx((adv ≥ 2 ? TR.cls2 : adv ≥ 1 ? TR.cls : TR.cls0)[cls])
 std::string World::clsName() const {
   const std::string& c = P.cls;
-  if (P.adv >= 2) return c == "法师" ? "Büyük Büyü Üstadı" : c == "牧师" ? "Seçilmiş" : "Kara Şövalye";
+  if (P.adv >= 2) return tx(c == "法师" ? "Büyük Büyü Üstadı" : c == "牧师" ? "Seçilmiş" : "Kara Şövalye");
   if (P.adv >= 1) return clsTr(c);
-  return c == "法师" ? "Çırak Büyücü" : c == "牧师" ? "Acemi Kutsal Elçi" : "Acemi Savaşçı";
+  return tx(c == "法师" ? "Çırak Büyücü" : c == "牧师" ? "Acemi Kutsal Elçi" : "Acemi Savaşçı");
 }
 
 std::string World::canEquip(const Item& it) const {
@@ -92,18 +94,20 @@ static std::string fmt1(double v) {
 std::string World::skLockMsg(const SkillDef& sk) const {
   const std::string L = skLock(sk); if (L.empty()) return "";
   const core::Json& d = *sk.d;
-  if (L == "adv") { const int c = d["root"]["cls"].i(); return (c == 130004 || c == 130005 || c == 130011) ? "Sınıf yükseltme görevi gerekir (40. seviye)." : "İkinci sınıf yükseltmesi gerekir (80. seviye)."; }
+  if (L == "adv") { const int c = d["root"]["cls"].i(); return tx((c == 130004 || c == 130005 || c == 130011) ? "Sınıf yükseltme görevi gerekir (40. seviye)." : "İkinci sınıf yükseltmesi gerekir (80. seviye)."); }
   if (L == "pts") {
     const core::Json& rt = d["root"]; const SkillTree* T = bal_.skills.tree(rt["tree"].i());
-    return (T ? T->name : std::string()) + " ağacına " + std::to_string(rt["pts"].i()) + " puan gerekir (şu an " + std::to_string(treePts(rt["tree"].i())) + ").";
+    const std::string tn = T ? T->name : std::string(), pts = std::to_string(rt["pts"].i()), have = std::to_string(treePts(rt["tree"].i()));
+    return engine::T(tn + " ağacına " + pts + " puan gerekir (şu an " + have + ").", "Requires " + pts + " points in " + tn + " (now " + have + ").");
   }
-  if (L == "excl") { const SkillDef* o = bal_.skills.bySn(d["root"]["excl"].i()); return (o ? o->name : std::string()) + " seçildi; bu uzmanlık alınamaz."; }
+  if (L == "excl") { const SkillDef* o = bal_.skills.bySn(d["root"]["excl"].i()); const std::string on = o ? o->name : std::string(); return T(on + " seçildi; bu uzmanlık alınamaz.", on + " was chosen; this specialization is closed."); }
   const SkillDef* pk = bal_.skills.bySn(d["pre"][0].i());
-  return "Önce " + (pk ? pk->name : std::string()) + " " + std::to_string(d["pre"][1].i()) + ". kademe.";
+  const std::string pn = pk ? pk->name : std::string(), pr = std::to_string(d["pre"][1].i());
+  return T("Önce " + pn + " " + pr + ". kademe.", "Requires " + pn + " rank " + pr + ".");
 }
 std::string World::skDesc(const SkillDef& sk, int r) const {
   if (!sk.d) return "";
-  const std::string t = (*sk.d)["tr"][1].str(); const int rr = std::max(1, r ? r : skRank(sk));
+  const std::string t = (*sk.d)[lang().code()][1].isStr() ? (*sk.d)[lang().code()][1].str() : (*sk.d)["tr"][1].str(); const int rr = std::max(1, r ? r : skRank(sk));
   std::string mpv;
   if (sk.mpPct) { const Stats s = stats(); SkCtx c{const_cast<World&>(*this), sk, s, P.lv, nullptr, rr}; mpv = std::to_string((long long)jsRound(sk.mpPct(c) * 100)) + "%"; }
   else mpv = fmt1(sk.mp);
@@ -122,7 +126,7 @@ std::string World::skDesc(const SkillDef& sk, int r) const {
 }
 std::string World::skNextDiff(const SkillDef& sk, int r) const {
   if (!sk.d) return "";
-  const std::string t = (*sk.d)["tr"][1].str(); std::vector<std::string> keys; std::set<std::string> seen;
+  const std::string t = (*sk.d)[lang().code()][1].isStr() ? (*sk.d)[lang().code()][1].str() : (*sk.d)["tr"][1].str(); std::vector<std::string> keys; std::set<std::string> seen;
   for (size_t i = 0; i < t.size(); i++) if (t[i] == '{') {
     size_t j = i + 1; while (j < t.size() && (std::isalnum((unsigned char)t[j]) || t[j] == '_')) j++;
     if (j < t.size() && t[j] == '}' && j > i + 1) { const std::string k = t.substr(i + 1, j - i - 1); if ((*sk.d)["c"][k].truthy() && seen.insert(k).second) keys.push_back(k); }

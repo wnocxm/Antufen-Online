@@ -15,7 +15,7 @@ Mantıksal ekran yüksekliği `VH = 360` (genişlik orana göre). Hata ayıklama
 | `forms.js` | `Forms`: `forms.json` (Symbian) + `forms2.json` (APK, anahtar `n_` önekli) arayüz formları; `img(id, res)` → `assets/ui2/` |
 | `net.js` | `Net` (giriş, karakterler, 4 sn'de bir kayıt, WebSocket) ve `Remote` (diğer oyuncular) — bkz. 05 |
 | `audio.js` | `SFX`: 12 APK müziği (`assets/music/*.mp3`, döngü uzunlukları `LOOP`), ses efektleri, sentez yedeği. C++ karşılığı `native/src/engine/audio` (orijinal WAV'lar `assets/music/*.wav` + `seviye.json`, docs/09 › Ses); bir `SFX.play` eklenirse C++'ta da `World::sfx` eklenmeli (`cpp_*` testleri ses olaylarını karşılaştırır) |
-| `i18n.js`, `i18n_data.js` | `LANG` ('tr'/'en'), `tx(metin)` Türkçe → İngilizce (`EN_UI`), `EN_ITEM`, `EN_SKILL`, `EN_Q` (elle görevlerin İngilizcesi) |
+| `i18n.js`, `i18n_data.js` | `LANG` ('tr'/'en'), `tx(metin)` Türkçe → İngilizce (`EN_UI`), `EN_ITEM`, `EN_SKILL`, `EN_Q` (elle görevlerin İngilizcesi). C++ karşılığı `native/src/engine/lang` (veri `assets/dil_en.json` ← `node tools/dil_cikar.js`; docs/09 › İngilizce): EN_UI / EN_RULES / EN_ITEM değişince aracı yeniden çalıştır; koda yeni bir `T(tr, en)` eklenirse C++'ta da aynı İngilizceyle eklenmeli (`DIL=en` testleri karşılaştırır) |
 | `tr.js` | `TR.name` / `TR.scene` ad çevirileri, `trName(cn)`, NPC selamları, **elle yazılmış ilk görevler** (`QUESTS`) |
 | `tr_scenes.js` | Üretilmiş ad çevirileri (`tools/ceviri.py`): harita adları + `N` sözlüğü + görev dosyalarındaki `adlar` + `kaynak/ceviri/adlar/*.json` (görevsiz genel adlar: `sehir_alan`, `zindan`, `ust_60_77`, `ust_80_120`). Yeni ad eklerken bu dosyalara yaz; denetim: `node tools/test/adlar.js` |
 | `quests_gen.js` | Üretilmiş görevler (`tools/gorevler.py`) — bkz. 04 |

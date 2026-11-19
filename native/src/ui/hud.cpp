@@ -1,6 +1,7 @@
 #include "hud.h"
 
 #include <algorithm>
+#include <cctype>
 #include <cmath>
 
 namespace ui {
@@ -21,7 +22,7 @@ const core::Image* Hud::image(const std::string& path) {
 // HTML text(): siyah dış çizgi (lineWidth 2,5, yuvarlak) üstüne dolgu
 void Hud::text(engine::Canvas& c, const std::string& fam, float size, const std::string& s, float x, float y, uint32_t col, Align a, float alpha, float lw) {
   TextStyle st; st.color = col; st.align = a; st.outline = lw; st.alpha = alpha; st.fakeBold = fam == "H";   // HUD'daki başlık yazıları hep kalın (bold FH)
-  font_.draw(c, fam, size, s, x, y, st);
+  font_.draw(c, fam, size, engine::tx(s), x, y, st);   // HTML ui.js text(): s = tx(s)
 }
 
 static float clamp01(float v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
@@ -195,7 +196,7 @@ void Hud::handle(World& w) {
     else w.toast("Bu pencere yakında.");
   }
   if (!w.askText.empty()) { win.ask(w.askText, w.askYes); w.askText.clear(); w.askYes = nullptr; }   // oyun kodunun onay isteği (zindan kapısı, sandık)
-  if (!win.assignReq.empty()) { assign_ = win.assignReq; w.toastMsg = "Bir yuvaya dokun: " + win.assignName; w.toastT = 3; win.assignReq.clear(); win.close(); }
+  if (!win.assignReq.empty()) { assign_ = win.assignReq; w.toastMsg = engine::tx("Bir yuvaya dokun") + ": " + win.assignName; w.toastT = 3; win.assignReq.clear(); win.close(); }
   if (w.dialogEnt >= 0) { win.close(); win.open(w, "npc", w.dialogEnt, w.dialogSay, true); w.dialogEnt = -1; w.dialogSay.clear(); }
   if (w.died) { w.died = false; win.close(); deathAt = now + 1.2; }
   if (deathAt >= 0 && now >= deathAt) { deathAt = -1; if (w.player.dead) win.open(w, "dead"); }
@@ -253,13 +254,15 @@ void Hud::draw(engine::Canvas& c, World& w, bool advance) {
     text(c, "H", 9.5f, w.quests().name(w.sceneName), mx + mw / 2, my + 17, 0xff9a30, CENTER);
     text(c, "B", 8.5f, "(" + std::to_string(int(engine::jsRound(p.x))) + ", " + std::to_string(int(engine::jsRound(p.y))) + ")", mx + mw / 2, my + mh - 9, 0xffb060, CENTER);
     hud_.push_back({mx, my, mw, mh, [this] { request = "map"; }});
-    static const char* B[6][2] = {{"K", "char"}, {"Ç", "bag"}, {"B", "skill"}, {"G", "quest"}, {"H", "map"}, {"A", "sys"}};   // Karakter, Çanta, Beceri, Görev, Harita, Ayarlar
+    static const char* B[6][2] = {{"Karakter", "char"}, {"Çanta", "bag"}, {"Beceri", "skill"}, {"Görev", "quest"}, {"Harita", "map"}, {"Ayarlar", "sys"}};
+    // HTML: tx(ad)[0] büyük harf (Türkçede K Ç B G H A, İngilizcede C B S Q M S)
+    auto initial = [](const std::string& s) { std::string t = engine::tx(s); size_t n = 1; while (n < t.size() && (uint8_t(t[n]) & 0xC0) == 0x80) n++; std::string a = t.substr(0, n); if (a.size() == 1) a[0] = char(std::toupper((unsigned char)a[0])); return a; };
     const core::Image* bi = image("ui2/hud_btn.png"); const float d = 34;
     for (int i = 0; i < 6; i++) {
       const float cx = mx - 22 - (1 - i % 2) * 38, cy = 20 + float(i / 2) * 37;
       if (bi) c.drawImage(*bi, 48, 0, 48, 48, cx - d / 2, cy - d / 2, d, d, 1, true);
       TextStyle st; st.align = CENTER; st.outline = 3; st.outlineColor = 0x5a1c00; st.gradient = true; st.color = 0xfff6c0; st.color2 = 0xf0b040; st.gy0 = cy - 8; st.gy1 = cy + 7;
-      font_.draw(c, "S", 17, B[i][0], cx, cy + 6, st);
+      font_.draw(c, "S", 17, initial(B[i][0]), cx, cy + 6, st);
       const std::string req = B[i][1]; hud_.push_back({cx - d / 2 - 1, cy - d / 2 - 1, d + 2, d + 2, [this, req] { request = req; }});
     } }
   drawTracker(c, w);

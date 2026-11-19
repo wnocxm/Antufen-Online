@@ -69,9 +69,20 @@ int main(int argc, char** argv) {
   // veri aranır: oyunun yanındaki paket (Visual Studio programı build/Release içine koyar), sonra geliştirme klasörü
   if (data.empty()) for (const char* p : {"veri/oyun.gdp", "../veri/oyun.gdp", "../../www/assets", "../../../www/assets", "../www/assets", "www/assets"})
     if (std::filesystem::exists(p)) { data.push_back(p); break; }
+  // ayarlar (kullanıcının uygulama klasöründe ayarlar.json): ses efektleri, müzik, dil. Dil yoksa sistem dili (HTML: tarayıcı dili tr ile
+  // başlamıyorsa İngilizce)
+  std::string prefDir; if (char* pp = SDL_GetPrefPath("Anrufen", "AnrufenOnline")) { prefDir = pp; SDL_free(pp); }
+  const std::string optPath = prefDir + "ayarlar.json";
+  bool optSfx = true, optMusic = true, optEn = false;
+  { bool haveLang = false; const std::string t = readText(optPath);
+    if (!t.empty()) try { const core::Json o = core::Json::parse(t); if (o.has("sfx")) optSfx = o["sfx"].truthy(); if (o.has("music")) optMusic = o["music"].truthy(); if (o["lang"].isStr()) { optEn = o["lang"].str() == "en"; haveLang = true; } } catch (...) {}
+    if (!haveLang) { if (SDL_Locale* L = SDL_GetPreferredLocales()) { if (L[0].language && std::string(L[0].language) != "tr") optEn = true; SDL_free(L); } }   // HTML: navigator.language tr ile başlamıyorsa İngilizce (bilinmiyorsa Türkçe)
+  }
+  auto saveOpts = [&]() { writeSave(optPath, std::string("{\"sfx\":") + (optSfx ? "true" : "false") + ",\"music\":" + (optMusic ? "true" : "false") + ",\"lang\":\"" + (optEn ? "en" : "tr") + "\"}"); };
   Vfs vfs; Assets assets; Balance bal; ui::Fonts fonts;
   try {
     for (const std::string& d : data) { if (d.size() > 4 && d.substr(d.size() - 4) == ".gdp") vfs.mountPack(d); else vfs.mountDir(d); }
+    lang().load(vfs); lang().en = optEn;   // veri seçili dille yüklenir (eşya, beceri, görev adları)
     assets.load(vfs); bal.load(vfs, assets.D()); fonts.load(vfs);
   } catch (const std::exception& e) { std::fprintf(stderr, "Veri yüklenemedi: %s\n", e.what()); return 1; }
   rng().seed(uint32_t(SDL_GetPerformanceCounter()));
@@ -80,12 +91,10 @@ int main(int argc, char** argv) {
 
   SDL_SetHint(SDL_HINT_TOUCH_MOUSE_EVENTS, "0");   // dokunma ayrıca işlenir (fareye çevrilmesin)
   if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) != 0) { std::fprintf(stderr, "SDL: %s\n", SDL_GetError()); return 1; }
-  std::string prefDir; if (char* pp = SDL_GetPrefPath("Anrufen", "AnrufenOnline")) { prefDir = pp; SDL_free(pp); }
   if (savePath.empty()) savePath = prefDir + "kayit.json";
   // ses: aygıt açılamazsa sessiz sürer
   struct Snd { engine::Audio a; int rate = 48000; } snd; snd.a.attach(vfs); SDL_AudioDeviceID adev = 0;
-  const std::string optPath = prefDir + "ayarlar.json";
-  { const std::string t = readText(optPath); if (!t.empty()) try { const core::Json o = core::Json::parse(t); if (o.has("sfx")) snd.a.sfxOn = o["sfx"].truthy(); if (o.has("music")) snd.a.musicOn = o["music"].truthy(); } catch (...) {} }
+  snd.a.sfxOn = optSfx; snd.a.musicOn = optMusic;
   if (SDL_InitSubSystem(SDL_INIT_AUDIO) == 0) {
     SDL_AudioSpec want{}, have{}; want.freq = 48000; want.format = AUDIO_F32SYS; want.channels = 2; want.samples = 1024; want.userdata = &snd;
     want.callback = [](void* ud, Uint8* stream, int len) { auto* s = static_cast<Snd*>(ud); s->a.mix(reinterpret_cast<float*>(stream), len / 8, s->rate); };
@@ -146,7 +155,13 @@ int main(int argc, char** argv) {
     world->newChar(create.finalName(), create.cls, create.race, create.sex, create.face); create.editing = false;
     if (!play()) toTitle();
   };
+  // dil değişince (giriş ekranında Dil, ayarlarda Dil / Language): veri o dille baştan yüklenir, giriş ekranı (HTML setLang → sayfa yenilenir)
+  auto switchLang = [&]() {
+    optEn = !optEn; saveOpts(); lang().en = optEn;
+    world.reset(); hud.reset(); bal = Balance(); bal.load(vfs, assets.D()); toTitle();
+  };
   auto titleAct = [&](const std::string& a) {
+    if (a == "lang") { switchLang(); return; }
     if (a == "continue") { if (!play()) toTitle(); }
     else if (a == "new") { std::error_code ec; std::filesystem::remove(savePath, ec); fresh(); create.open(); mode = CREATE; }   // HTML: localStorage.removeItem
   };
@@ -225,7 +240,7 @@ int main(int argc, char** argv) {
       if (!w.sounds.empty() || hud->win.optChanged) {   // ses olayları karıştırıcıya; ayarlar değiştiyse uygula ve kaydet
         lockA();
         if (hud->win.optChanged) { hud->win.optChanged = false; if (snd.a.sfxOn != hud->win.optSfx) snd.a.setSfx(hud->win.optSfx); if (snd.a.musicOn != hud->win.optMusic) snd.a.setMusic(hud->win.optMusic);
-          const std::string t = std::string("{\"sfx\":") + (snd.a.sfxOn ? "true" : "false") + ",\"music\":" + (snd.a.musicOn ? "true" : "false") + "}"; writeSave(optPath, t); }
+          optSfx = snd.a.sfxOn; optMusic = snd.a.musicOn; saveOpts(); }
         for (const World::SndEv& e : w.sounds) { if (e.music) snd.a.music(e.n); else snd.a.play(e.n, e.v); }
         unlockA(); w.sounds.clear();
       }
@@ -234,7 +249,7 @@ int main(int argc, char** argv) {
       shown = w.logTotal;
       std::string tt = "Anrufen Online · " + w.quests().name(w.sceneName); SDL_SetWindowTitle(win, tt.c_str());
       // ayarlardan istek: giriş ekranına dön (kaydedilmiş) ya da kaydı silip giriş ekranı (HTML location.reload)
-      if (!w.appReq.empty()) { const std::string r = w.appReq; w.appReq.clear(); if (r == "newchar") { std::error_code ec; std::filesystem::remove(savePath, ec); } shown = 0; toTitle(); }
+      if (!w.appReq.empty()) { const std::string r = w.appReq; w.appReq.clear(); if (r == "newchar") { std::error_code ec; std::filesystem::remove(savePath, ec); } shown = 0; if (r == "lang") switchLang(); else toTitle(); }
     }
     if (wantText != bool(SDL_IsTextInputActive())) { if (wantText) SDL_StartTextInput(); else SDL_StopTextInput(); }   // ekran klavyesi: adet, ad
     if (!tex || texW != cw || texH != VH) {

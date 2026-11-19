@@ -74,7 +74,7 @@ void Win::drawMap(engine::Canvas& c, World& w, float vw, float VH) {
   if (area) btn("go", "Otomatik Yol", ox + W - 156);
   btn("npcs", "NPC Listesi", ox + W - 78);
   const core::Json& S = w.assets().D()["scenes"];
-  std::string info = "Şimdi: " + w.quests().name(w.sceneName); uint32_t col = 0xe6cf89;
+  std::string info = engine::tx("Şimdi") + ": " + engine::tx(w.quests().name(w.sceneName)); uint32_t col = 0xe6cf89;
   if (area && !WM_.sel.empty() && WM_.area >= 0) {
     info = w.quests().name(S[WM_.sel]["name"].str());
     for (const core::Json& s : A[size_t(WM_.area)]["scenes"].arr()) if (s["sid"].str() == WM_.sel && s["lv"].isArr()) {
@@ -102,16 +102,16 @@ void Win::drawSys(engine::Canvas& c, World& w, float VH) {
   const float k = VH / 373; const Xf xf = begin(k, safeL + 126 * VH / 320, 0); const std::string f = "n_deadselect";
   longBg(c, xf); F_.text(c, xf, "Ayarlar", 113, 24, 0x7a1c08, 14, CENTER);
   F_.text(c, xf, "Oyun otomatik kaydedilir.", 113, 52, 0x2a1a0a, 11, CENTER, 200);
-  F_.text(c, xf, std::string("C++ sürümü · ") + __DATE__, 113, 70, 0x5a4020, 10, CENTER);
-  const std::string on1 = "Açık", off1 = "Kapalı";
-  const std::pair<const char*, std::string> rows[5] = {{"sfx", "Ses efektleri: " + (optSfx ? on1 : off1)}, {"mus", "Müzik: " + (optMusic ? on1 : off1)}, {"lang", "Dil / Language: Türkçe"},
+  F_.text(c, xf, engine::T("C++ sürümü", "C++ version") + " · " + __DATE__, 113, 70, 0x5a4020, 10, CENTER);
+  const std::string on1 = engine::tx("Açık"), off1 = engine::tx("Kapalı");
+  const std::pair<const char*, std::string> rows[5] = {{"sfx", engine::tx("Ses efektleri") + ": " + (optSfx ? on1 : off1)}, {"mus", engine::tx("Müzik") + ": " + (optMusic ? on1 : off1)}, {"lang", std::string("Dil / Language: ") + (engine::lang().en ? "English" : "Türkçe")},
                                                       {"title", "Giriş ekranına dön"}, {"newc", "Yeni karakter oluştur"}};
   for (int i = 0; i < 5; i++) { const std::string key = std::string("s:") + rows[i].first; row(c, xf, f, DS[i], on(key), rows[i].second, key); }
 }
 void Win::tapSys(World& w, const std::string& id) {
   if (id == "sfx") { optSfx = !optSfx; optChanged = true; }        // HTML SFX.setSfx
   else if (id == "mus") { optMusic = !optMusic; optChanged = true; }   // HTML SFX.setMusic (kapanınca müzik durur, açılınca kaldığı parça)
-  else if (id == "lang") w.toast("İngilizce sonraki adımlarda.");
+  else if (id == "lang") { w.save(); w.appReq = "lang"; }   // HTML: save(); setLang → sayfa yenilenir
   else if (id == "title") { w.save(); w.appReq = "title"; }   // HTML: save(); location.reload()
   else if (id == "newc") ask("Karakterin silinecek ve yeni karakter oluşturacaksın. Emin misin?", [&w] { w.appReq = "newchar"; });   // HTML: kaydı sil, yenile
 }

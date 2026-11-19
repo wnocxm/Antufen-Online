@@ -195,14 +195,14 @@ void Win::drawTask(engine::Canvas& c, World& w, float VH) {
     nDraw(c, xf, f, K2ROWS[i], sel);
     F_.text(c, xf, std::string(avail && st == "new" ? "! " : "") + q.tr.title, r[0] + 12, r[1] + 17, sel ? 0xffffff : st == "soon" ? 0x7a6a50 : 0x3a1c08, 12, LEFT, 190);
     std::string sub; uint32_t col = 0x6a4a14;
-    if (avail) { sub = st == "soon" ? "Sv " + std::to_string(Q.minLv(qi)) : Q.name(q.giver); col = st == "soon" ? 0xa03010 : 0x3a2a14; }
+    if (avail) { sub = st == "soon" ? engine::tx("Sv") + " " + std::to_string(Q.minLv(qi)) : Q.name(q.giver); col = st == "soon" ? 0xa03010 : 0x3a2a14; }
     else { const auto& a = w.P.quests.at(q.id); sub = a.ready ? "Tamam" : q.count ? std::to_string(a.n) + "/" + std::to_string(q.count) : "…"; col = a.ready ? 0x1c6a12 : 0x6a4a14; }
     F_.text(c, xf, sub, r[0] + 204, r[1] + 35, col, 10, RIGHT, 150); hit(xf, id, r[0], r[1], r[2], 50);
   }
   if (list.empty()) { F_.text(c, xf, avail ? "Şu an alınabilecek görev yok." : "Aktif görev yok.", 113, 150, 0x5a4020, 12, CENTER, 200); if (!avail) F_.text(c, xf, "Alınabilir listesine bak.", 113, 168, 0x5a4020, 11, CENTER, 200); }
   // alt: liste seçimi (Aktif / Alınabilir) ve sayfa
   int nA = 0, nN = 0; for (size_t i = 0; i < Q.all().size(); i++) { if (w.P.quests.count(Q.all()[i].id)) nA++; if (w.questState(int(i)) == "new") nN++; }
-  const std::pair<std::string, std::string> modes[2] = {{"act", "Aktif (" + std::to_string(nA) + ")"}, {"avail", "Alınabilir (" + std::to_string(nN) + ")"}};
+  const std::pair<std::string, std::string> modes[2] = {{"act", engine::tx("Aktif") + " (" + std::to_string(nA) + ")"}, {"avail", engine::tx("Alınabilir") + " (" + std::to_string(nN) + ")"}};
   for (int m = 0; m < 2; m++) {
     const float x = m ? 116.f : 10.f; const bool sel = kmode_ == modes[m].first;
     if (const core::Image* I = F_.img(7019, R2)) c.drawImage(*I, 0, 0, 84, 24, xf.X(x), xf.Y(312), 100 * xf.k, 26 * xf.k, sel ? 1 : 0.6f, true);
@@ -217,11 +217,11 @@ void Win::drawTask(engine::Canvas& c, World& w, float VH) {
     std::vector<std::pair<std::string, uint32_t>> L;
     if (avail) {
       const std::string sid = w.npcSceneNear(q.giver);
-      L.push_back({"Veren: " + Q.name(q.giver) + (sid.empty() ? "" : " · " + Q.name(w.assets().D()["scenes"][sid]["name"].str())), 0x2a1608});
-      L.push_back({"Seviye: " + std::to_string(Q.minLv(selQ)) + (st == "soon" ? " · henüz açılmadı" : ""), st == "soon" ? 0xb01808 : 0x0c4208});
-    } else L.push_back({"Teslim: " + Q.name(q.to), 0x2a1608});
+      L.push_back({engine::tx("Veren") + ": " + Q.name(q.giver) + (sid.empty() ? "" : " · " + Q.name(w.assets().D()["scenes"][sid]["name"].str())), 0x2a1608});
+      L.push_back({engine::tx("Seviye") + ": " + std::to_string(Q.minLv(selQ)) + (st == "soon" ? " · " + engine::tx("henüz açılmadı") : std::string()), st == "soon" ? 0xb01808 : 0x0c4208});
+    } else L.push_back({engine::tx("Teslim") + ": " + Q.name(q.to), 0x2a1608});
     for (const auto& l : F_.wrap(q.tr.goal, 190, 10)) L.push_back({l, 0x0c4208});
-    std::string rw = "Ödül: " + std::to_string(q.xp) + " TP · " + std::to_string(q.gold) + " altın"; std::string items;
+    std::string rw = engine::tx("Ödül") + ": " + std::to_string(q.xp) + " " + engine::tx("TP") + " · " + std::to_string(q.gold) + " " + engine::tx("altın"); std::string items;
     for (const Quest::RItem& it : q.items) { if (!w.itemExists(it.id) || (!it.cls.empty() && std::find(it.cls.begin(), it.cls.end(), w.P.cls) == it.cls.end())) continue; items += (items.empty() ? "" : ", ") + w.itemName(it.id) + (it.n > 1 ? " ×" + std::to_string(it.n) : ""); }
     if (!items.empty()) rw += " · " + items;
     for (const auto& l : F_.wrap(rw, 190, 10)) L.push_back({l, 0x6a3a00});
@@ -242,7 +242,7 @@ void Win::tapTask(World& w, const std::string& id) {
   const int qi = ksel_ ? w.quests().indexOf(ksel_) : -1; if (qi < 0) return;
   const Quest& q = Q[size_t(qi)];
   if (id == "walk") { const bool avail = kmode_ == "avail"; close(); if (avail) w.routeToNpc(q.giver); else w.questWalk(qi); return; }
-  if (id == "drop") { const int qid = q.id; const std::string title = q.tr.title; ask(title + ": görev bırakılsın mı?", [&w, this, qid, title] { w.P.quests.erase(qid); ksel_ = 0; w.note("Görev bırakıldı: " + title); }); }
+  if (id == "drop") { const int qid = q.id; const std::string title = q.tr.title; ask(title + ": " + engine::tx("görev bırakılsın mı?"), [&w, this, qid, title] { w.P.quests.erase(qid); ksel_ = 0; w.note(engine::tx("Görev bırakıldı") + ": " + title); }); }
 }
 
 // ---------------- ölüm (NEW_FORM_DEADSELECT) ----------------
@@ -253,9 +253,9 @@ void Win::drawDead(engine::Canvas& c, World& w, float vw, float VH) {
   else if (w.P.done.count(80003) || w.P.quests.count(80003)) where = w.quests().name(w.assets().D()["scenes"]["120005"]["name"].str());
   else where = w.quests().name(w.sceneName);
   longBg(c, xf, 170); F_.text(c, xf, "Öldün", 113, 26, 0xa81808, 15, CENTER);
-  const auto L = F_.wrap("Savaşta yenildin. Canının ve mananın yarısıyla yeniden doğacaksın.", 196, 11);
+  const auto L = F_.wrap(engine::tx("Savaşta yenildin. Canının ve mananın yarısıyla yeniden doğacaksın."), 196, 11);
   for (size_t i = 0; i < L.size(); i++) F_.text(c, xf, L[i], 113, 52 + float(i) * 14, 0x2a1a0a, 11, CENTER, 200);
-  row(c, xf, f, DS[0], true, "Yeniden doğ: " + where, "revive");
+  row(c, xf, f, DS[0], true, engine::tx("Yeniden doğ") + ": " + where, "revive");
 }
 
 // ---------------- onay kutusu (NEW_FORM_DIALOG_YESNO) ----------------

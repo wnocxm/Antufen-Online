@@ -21,10 +21,10 @@ static const std::vector<std::pair<int, const char*>> R2SLOT = {{50093, "head"},
 static const std::vector<int> S2TABS = {50396, 50397, 50398, 50399, 50400, 50872}, S2SLOT = {50402, 50403, 50404, 50405, 50406, 50407};
 static const std::vector<int> H2TABS = {50899, 50900, 50901, 50902, 50903}, H2ROWS = {50334, 50335, 50336, 50337, 50338};
 static const std::vector<std::pair<const char*, const char*>> SLOTN = {{"weap", "Silah"}, {"head", "Başlık"}, {"body", "Zırh"}, {"belt", "Kemer"}, {"shoe", "Ayakkabı"}, {"glove", "Eldiven"}, {"neck", "Kolye"}, {"ring", "Yüzük"}};
-static std::string slotName(const std::string& sl) { for (const auto& s : SLOTN) if (sl == s.first) return s.second; return sl; }
+static std::string slotName(const std::string& sl) { for (const auto& s : SLOTN) if (sl == s.first) return engine::tx(s.second); return sl; }   // HTML: SLOTS yüklemede çevrilir
 static std::string statName(const std::string& k) {
   static const std::map<std::string, std::string> N = {{"atk", "Saldırı"}, {"def", "Savunma"}, {"hp", "Can"}, {"mp", "Mana"}, {"crit", "Kritik %"}, {"dodge", "Kaçınma %"}, {"hpreg", "Can yenileme"}, {"mpreg", "Mana yenileme"}, {"res", "Büyü direnci"}};
-  auto it = N.find(k); return it == N.end() ? k : it->second;
+  auto it = N.find(k); return it == N.end() ? k : engine::tx(it->second);   // HTML: STATN yüklemede çevrilir
 }
 // görev eşyalarının simgeleri (HTML Q_ICONS)
 static int questIcon(const std::string& n) {
@@ -70,11 +70,11 @@ void Win::icon(engine::Canvas& c, const Xf& xf, const std::string& ik, int ic, f
 std::vector<Win::Line> Win::itemLines(World& w, const Item& it) {
   std::vector<Line> L = {{it.name, 0x7a1c08, 12}};
   if (!it.slot.empty()) {
-    L.push_back({slotName(it.slot) + " · " + (it.cls.empty() ? std::string("Tüm sınıflar") : World::clsTr(it.cls)) + " · Sv " + I(it.lv), w.P.lv < it.lv ? 0xc02010u : 0x3a2a14u, 10});
+    L.push_back({slotName(it.slot) + " · " + (it.cls.empty() ? engine::tx("Tüm sınıflar") : World::clsTr(it.cls)) + " · " + engine::tx("Sv") + " " + I(it.lv), w.P.lv < it.lv ? 0xc02010u : 0x3a2a14u, 10});
     std::string st; for (const std::string& k : it.stOrder) st += (st.empty() ? "" : "  ") + statName(k) + " +" + js(it.st.at(k));
     L.push_back({st, 0x1c5a12, 10});
   } else if (!it.desc.empty()) L.push_back({it.desc, 0x3a2a14, 10});
-  L.push_back({"Satış: " + I(it.sell ? it.sell : 1) + " altın", 0x6a4a14, 10});
+  L.push_back({engine::tx("Satış") + ": " + I(it.sell ? it.sell : 1) + " " + engine::tx("altın"), 0x6a4a14, 10});   // HTML: parçalar ayrı çevrilir
   return L;
 }
 bool Win::doubleTap(const std::string& id) {   // aynı şeye 450 ms içinde ikinci dokunuş
@@ -95,7 +95,7 @@ void Win::drawNum(engine::Canvas& c, float vw, float VH) {
     if (const core::Image* im = F_.img(7036, R3)) c.drawImage(*im, 0, 0, 53, 26, xf.X(r[0] + 54), xf.Y(r[1]), 54 * k, 26 * k, 1, true);
     F_.text(c, xf, I(modal_.n), 112, 43, 0xffffff, 14, CENTER); hit(xf, "m50761", r[0], r[1], r[2], r[3], &modal_.hits); }
   for (const auto& b : std::vector<std::pair<int, const char*>>{{50254, "m50758"}, {50255, "m50759"}}) { const auto r = rect(f, b.first); nDraw(c, xf, f, b.first, on(b.second)); hit(xf, b.second, r[0] - 3, r[1] - 3, r[2] + 6, r[3] + 6, &modal_.hits); }
-  if (modal_.unit) F_.text(c, xf, "Toplam: " + I((long long)modal_.n * modal_.unit) + " altın · En fazla: " + I(modal_.max), 113, 68, 0x2a1a0a, 9.5f, CENTER, 200);
+  if (modal_.unit) F_.text(c, xf, engine::tx("Toplam") + ": " + I((long long)modal_.n * modal_.unit) + " " + engine::tx("altın") + " · " + engine::tx("En fazla") + ": " + I(modal_.max), 113, 68, 0x2a1a0a, 9.5f, CENTER, 200);
   for (const auto& b : std::vector<std::pair<int, std::pair<const char*, const char*>>>{{50263, {"Tamam", "m52791"}}, {50264, {"İptal", "m52792"}}}) {
     const auto r = rect(f, b.first);
     if (const core::Image* im = F_.img(7017, R3)) c.drawImage(*im, 0, 0, 84, 24, xf.X(r[0]), xf.Y(r[1]), 84 * k, 24 * k, 1, true);
@@ -218,7 +218,7 @@ void Win::drawRole(engine::Canvas& c, World& w, float VH) {
     const std::vector<std::pair<std::string, std::string>> rows = {{"Tecrübe", I(P.xp) + "/" + I(w.balance().xpNeed(P.lv))}, {"Can", js(std::ceil(p.hp)) + "/" + js(s.hp)}, {"Mana", js(std::floor(p.mp)) + "/" + js(s.mp)},
       {melee ? "Fiz. Saldırı" : "Büyü Saldırı", js(s.atk)}, {"Savunma", js(s.def)}, {"Kritik", js(8 + s.crit) + "%"}, {"Kaçınma", js(s.dodge) + "%"}, {"Büyü direnci", js(s.res)},
       {"Can yenileme", js(s.hpreg)}, {"Mana yenileme", js(s.mpreg)}, {"Altın", I(P.gold)}};
-    for (size_t i = 0; i < rows.size(); i++) { const float y = 96 + float(i) * 19.5f; F_.text(c, xf, rows[i].first + ":", 142, y, 0xa83018, 12, LEFT); F_.text(c, xf, rows[i].second, 240, y, 0x2a1a0a, 12, LEFT, 104); }
+    for (size_t i = 0; i < rows.size(); i++) { const float y = 96 + float(i) * 19.5f; F_.text(c, xf, engine::tx(rows[i].first) + ":", 142, y, 0xa83018, 12, LEFT); F_.text(c, xf, rows[i].second, 240, y, 0x2a1a0a, 12, LEFT, 104); }
   } else if (R_.page == 1) {
     for (const auto& e : R2SLOT) {
       const auto r = rect(f, e.first); nDraw(c, xf, f, e.first, R_.sel == e.second); hit(xf, I(e.first), r[0] + 3, r[1] + 3, 40, 40);
@@ -248,7 +248,7 @@ void Win::drawSkill(engine::Canvas& c, World& w, float VH) {
   const bool race = S_.tree == int(T.size()), life = S_.tree == int(T.size()) + 1;
   skCells_.clear();
   nDraw(c, xf, f, 50408, false); hit(xf, "frame", 126, 0, 227, 320);
-  std::vector<std::string> labels; for (const auto& t : T) labels.push_back(t.name); labels.push_back(J["race"][P.race]["tr"].str()); labels.push_back(J["life"]["tr"].str());
+  std::vector<std::string> labels; for (const auto& t : T) labels.push_back(t.name); const std::string LC = engine::lang().code(); labels.push_back(J["race"][P.race][LC].str()); labels.push_back(J["life"][LC].str());
   tabs(c, xf, f, 50394, S2TABS, labels, S_.tree);
   std::vector<SkCell> cells;
   if (race) { const auto& L = w.balance().skills.race(P.race); for (size_t i = 0; i < L.size(); i++) cells.push_back({&L[i], nullptr, int(i)}); }
@@ -279,31 +279,31 @@ void Win::drawSkill(engine::Canvas& c, World& w, float VH) {
     icon(c, xf, ik.empty() ? "skill" : ik, ic, x + 7, y + 7, 32);
     if (lock) c.fillRect(xf.X(x + 7), xf.Y(y + 7), 32 * xf.k, 32 * xf.k, 0x000000, 0.45f);
     TextStyle st; st.base = TOP;
-    if (lock) { st.color = 0xff5a5a; F_.fonts().draw(c, "Bb", 8.5f * xf.k, "Öğrenil-", xf.X(x + 6), xf.Y(y + 9), st); F_.fonts().draw(c, "Bb", 8.5f * xf.k, "medi", xf.X(x + 6), xf.Y(y + 19), st); }
-    else { st.color = 0x000000; F_.fonts().draw(c, "Bb", 8.5f * xf.k, "Sv" + I(rank), xf.X(x + 9), xf.Y(y + 9), st); st.color = 0xffffff; F_.fonts().draw(c, "Bb", 8.5f * xf.k, "Sv" + I(rank), xf.X(x + 8), xf.Y(y + 8), st); }
+    if (lock) { st.color = 0xff5a5a; F_.fonts().draw(c, "Bb", 8.5f * xf.k, engine::T("Öğrenil-", "Not"), xf.X(x + 6), xf.Y(y + 9), st); F_.fonts().draw(c, "Bb", 8.5f * xf.k, engine::T("medi", "Learned"), xf.X(x + 6), xf.Y(y + 19), st); }
+    else { st.color = 0x000000; F_.fonts().draw(c, "Bb", 8.5f * xf.k, engine::T("Sv", "Lv") + I(rank), xf.X(x + 9), xf.Y(y + 9), st); st.color = 0xffffff; F_.fonts().draw(c, "Bb", 8.5f * xf.k, engine::T("Sv", "Lv") + I(rank), xf.X(x + 8), xf.Y(y + 8), st); }
     hit(xf, key, x, y, 46, 46);
   }
   // ağacın kök şartı tutmuyorsa (sınıf yükseltmesi, önceki ağaca puan, seçilmiş öbür uzmanlık) yazılır
   if (!cells.empty() && cells[0].sk && !race) { const std::string L = w.skLock(*cells[0].sk); if (!L.empty() && L != "pre") F_.text(c, xf, w.skLockMsg(*cells[0].sk), 240, 266, 0xa02010, 9, CENTER, 200); }
-  if (life) F_.text(c, xf, "Meslekler eğitmenlerden öğrenilir.", 240, 266, 0x5a4020, 9, CENTER, 200);
-  F_.text(c, xf, "Beceri puanı: " + I(P.sp), 205, 299, P.sp > 0 ? 0xffe070 : 0xe8dcc0, 12, CENTER);
-  { const std::string t = "Puanları Sıfırla"; const auto r = rect(f, 50430); nDraw(c, xf, f, 50430, on("50430"), &t); hit(xf, "50430", r[0], r[1], r[2], r[3]); }
+  if (life) F_.text(c, xf, engine::T("Meslekler eğitmenlerden öğrenilir.", "Professions are learned from trainers."), 240, 266, 0x5a4020, 9, CENTER, 200);
+  F_.text(c, xf, engine::tx("Beceri puanı") + ": " + I(P.sp), 205, 299, P.sp > 0 ? 0xffe070 : 0xe8dcc0, 12, CENTER);
+  { const std::string t = engine::T("Puanları Sıfırla", "Reset Points"); const auto r = rect(f, 50430); nDraw(c, xf, f, 50430, on("50430"), &t); hit(xf, "50430", r[0], r[1], r[2], r[3]); }
   auto sel = skCells_.find(S_.sel);
   if (sel != skCells_.end()) {
     const SkCell& ce = sel->second; std::vector<Line> L;
     if (ce.job) {
       const core::Json& job = *ce.job; const int t = P.life.count(job["cn"].str()) ? P.life.at(job["cn"].str()) : 0; const core::Json& tier = job["tiers"][size_t(std::max(0, t - 1))];
       nDraw(c, xf, f, 50401, false); hit(xf, "frame", 353, 0, 135, 320);
-      L.push_back({job["tr"].str(), 0x7a1c08, 11}); L.push_back({t ? tier["tr"][0].str() : "Öğrenilmedi", 0x5a4020, 9.5f});
-      for (const auto& l : F_.wrap(tier["tr"][1].str(), 92, 9.5f)) L.push_back({l, 0x2a1a0a, 9.5f});
-      if (t < 5) { L.push_back({"Sonraki kademe:", 0x5a4020, 9.5f}); for (const auto& l : F_.wrap(job["tiers"][size_t(t)]["tr"][1].str(), 92, 9.5f)) L.push_back({l, 0x5a4020, 9.5f}); }
+      const std::string LC = engine::lang().code(); L.push_back({job[LC].str(), 0x7a1c08, 11}); L.push_back({t ? tier[LC][0].str() : engine::T("Öğrenilmedi", "Not learned"), 0x5a4020, 9.5f});
+      for (const auto& l : F_.wrap(tier[LC][1].str(), 92, 9.5f)) L.push_back({l, 0x2a1a0a, 9.5f});
+      if (t < 5) { L.push_back({engine::T("Sonraki kademe:", "Next tier:"), 0x5a4020, 9.5f}); for (const auto& l : F_.wrap(job["tiers"][size_t(t)][LC][1].str(), 92, 9.5f)) L.push_back({l, 0x5a4020, 9.5f}); }
       for (size_t i = 0; i < L.size() && i < 20; i++) F_.text(c, xf, L[i].t, 362, 30 + float(i) * 12.5f, L[i].c, L[i].s, LEFT, 94);
     } else {
       const SkillDef& sk = *ce.sk; const int r = w.skRank(sk), mx = sk.mx ? sk.mx : 10;
       if (sk.race.empty()) actions(c, xf, f, 50401, {50410, 50411}, {{"Yükselt", "up"}, {"Kısayol", "quick"}}); else { nDraw(c, xf, f, 50401, false); hit(xf, "frame", 353, 0, 135, 320); }
-      L.push_back({sk.name, 0x7a1c08, 11}); L.push_back({"Kademe " + I(r) + "/" + I(mx) + (sk.passive() ? " · edilgen" : ""), 0x5a4020, 9.5f});
+      L.push_back({sk.name, 0x7a1c08, 11}); L.push_back({engine::tx("Kademe") + " " + I(r) + "/" + I(mx) + (sk.passive() ? " · " + engine::tx("edilgen") : std::string()), 0x5a4020, 9.5f});
       for (const auto& l : F_.wrap(w.skDesc(sk, r), 92, 9.5f)) L.push_back({l, 0x2a1a0a, 9.5f});
-      if (r && r < mx) { const std::string nx = w.skNextDiff(sk, r); if (!nx.empty()) L.push_back({"Sonraki: " + nx, 0x1a3a7a, 9.5f}); }
+      if (r && r < mx) { const std::string nx = w.skNextDiff(sk, r); if (!nx.empty()) L.push_back({engine::T("Sonraki", "Next") + ": " + nx, 0x1a3a7a, 9.5f}); }
       const std::string lk = w.skLockMsg(sk); if (!lk.empty()) for (const auto& l : F_.wrap(lk, 92, 9.5f)) L.push_back({l, 0xc02010, 9.5f});
       for (size_t i = 0; i < L.size() && i < 15; i++) F_.text(c, xf, L[i].t, 362, (sk.race.empty() ? 118 : 30) + float(i) * 12.5f, L[i].c, L[i].s, LEFT, 94);
     }
@@ -314,7 +314,7 @@ void Win::tapSkill(World& w, const std::string& id) {
   const int n = std::atoi(id.c_str());
   if (id == "50413") { close(); open(w, "hub"); return; }
   for (size_t i = 0; i < S2TABS.size(); i++) if (n == S2TABS[i]) { S_.tree = int(i); S_.sel.clear(); w.sfx("skill_pageflip"); return; }
-  if (id == "50430") { ask("Bütün beceri puanları geri alınsın mı? (Eğitim Kitabı harcanır)", [&w] { w.skillReset(false); }); return; }
+  if (id == "50430") { ask(engine::T("Bütün beceri puanları geri alınsın mı? (Eğitim Kitabı harcanır)", "Reset all skill points? (uses a Training Book)"), [&w] { w.skillReset(false); }); return; }
   if (skCells_.count(id)) { S_.sel = id; w.sfx("menusel", 0.6); return; }
   auto it = skCells_.find(S_.sel); if (it == skCells_.end() || !it->second.sk) return;
   const SkillDef& sk = *it->second.sk;
@@ -355,7 +355,7 @@ void Win::drawShop(engine::Canvas& c, World& w, float vw, float VH) {
     F_.drawCtrl(c, xf, *ctl, sel ? 1 : 0, 0, y - r[1]);
     icon(c, xf, it->ik, it->icon, x + 8, y + 9, 32, bad ? 0.45f : 1);
     F_.text(c, xf, it->name, x + 49, y + 17, bad ? 0x8a7a60 : sel ? 0xffffff : 0x3a1c08, 11, LEFT, 152);
-    if (it->lv) F_.text(c, xf, "Sv " + I(it->lv), x + 49, y + 34, 0x6a5a40, 9.5f, LEFT);
+    if (it->lv) F_.text(c, xf, engine::tx("Sv") + " " + I(it->lv), x + 49, y + 34, 0x6a5a40, 9.5f, LEFT);
     F_.text(c, xf, I(it->price), x + 200, y + 34, w.P.gold < it->price ? 0xc02010 : 0x6a4a14, 11, RIGHT);
     hit(xf, id, x, y, 209, 52);
   }
@@ -370,7 +370,7 @@ void Win::drawShop(engine::Canvas& c, World& w, float vw, float VH) {
     F_.text(c, s, selIt->name, 62, 38, 0x6a0c00, 12.5f, LEFT, 150); F_.text(c, s, I(selIt->price) + " altın", 62, 54, w.P.gold < selIt->price ? 0xb01808 : 0x2a1608, 10.5f, LEFT);
     auto L = itemLines(w, *selIt); L.erase(L.begin());
     const std::string why = selIt->slot.empty() ? std::string() : w.canEquip(*selIt); if (!why.empty()) L.push_back({why, 0xc02010, 10});
-    L.push_back({"Çantada: " + I(w.countItem(H_.sel)), 0x5a4020, 10});
+    L.push_back({engine::tx("Çantada") + ": " + I(w.countItem(H_.sel)), 0x5a4020, 10});
     float y = 80;
     for (const Line& l : L) {
       uint32_t col = l.c;

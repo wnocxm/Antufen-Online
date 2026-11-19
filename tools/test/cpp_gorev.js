@@ -13,6 +13,8 @@
 const { chromium } = require('playwright');
 const { execFileSync, spawn } = require('child_process');
 const fs = require('fs'), path = require('path');
+// DIL=en: İngilizce kip (HTML localStorage anrufen_lang = en; C++ "dil en")
+const DIL = process.env.DIL === 'en' ? ['dil en'] : [];
 const OUT = process.env.OUT || '/tmp/cpp_gorev', STEPS = +(process.env.ADIM || 80), DT = 1 / 30;
 // [ad, sınıf, ırk, cinsiyet, tohum]; başlangıç: insan 120207, gece elfi 120205 (3, 13) — newSave gibi
 const BOTS = [
@@ -111,7 +113,7 @@ const BOT = `window.__bot = (() => {
   fs.mkdirSync(OUT, { recursive: true });
   let srv = null, URL = process.env.URL;
   if (!URL) { srv = spawn('python3', ['-m', 'http.server', '8097', '--directory', 'www'], { stdio: 'ignore' }); URL = 'http://localhost:8097/'; await new Promise(r => setTimeout(r, 800)); }
-  const b = await chromium.launch(); const p = await (await b.newContext({ viewport: { width: 780, height: 360 } })).newPage();
+  const b = await chromium.launch(); const p = await (await b.newContext({ viewport: { width: 780, height: 360 } })).newPage(); if (DIL.length) await p.addInitScript(() => localStorage.setItem('anrufen_lang', 'en'));
   const errs = []; p.on('pageerror', e => errs.push(e.message));
   await p.goto(URL); await p.waitForTimeout(2500); await p.keyboard.press('Enter');
   await p.click('[data-cls="战士"]'); await p.fill('#cname', 'GMGorev'); await p.click('#cstart');
@@ -121,7 +123,7 @@ const BOT = `window.__bot = (() => {
   const waitScene = () => p.waitForFunction(() => !Game.transit && Game.player, null, { timeout: 30000 });
   // 1) açılma seviyeleri
   const lvHtml = await p.evaluate(() => { for (const q of QUESTS) delete q._lv; QNEXT = null; HUBLV = null; return QUESTS.map(q => q.id + ':' + questMinLv(q)).join('\n') + '\n'; });
-  const scen = ['veri www/assets', `gorevseviye ${path.join(OUT, 'seviye.txt')}`], html = {};
+  const scen = ['veri www/assets', ...DIL, `gorevseviye ${path.join(OUT, 'seviye.txt')}`], html = {};
   // 2) botlar
   for (const [ad, cls, race, sex, seed] of BOTS) {
     const start = race === '精灵' ? '120205' : '120207';

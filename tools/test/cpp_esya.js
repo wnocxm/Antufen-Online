@@ -8,13 +8,15 @@
 const { chromium } = require('playwright');
 const { execFileSync, spawn } = require('child_process');
 const fs = require('fs'), path = require('path');
+// DIL=en: İngilizce kip (HTML localStorage anrufen_lang = en; C++ "dil en")
+const DIL = process.env.DIL === 'en' ? ['dil en'] : [];
 const OUT = process.env.OUT || '/tmp/cpp_esya';
 const CHARS = [['savasci', '战士', '人类', 'male'], ['buyucu', '法师', '精灵', 'fema'], ['rahip', '牧师', '人类', 'male']];
 (async () => {
   fs.mkdirSync(OUT, { recursive: true });
   let srv = null, URL = process.env.URL;
   if (!URL) { srv = spawn('python3', ['-m', 'http.server', '8097', '--directory', 'www'], { stdio: 'ignore' }); URL = 'http://localhost:8097/'; await new Promise(r => setTimeout(r, 800)); }
-  const b = await chromium.launch(); const p = await (await b.newContext({ viewport: { width: 640, height: 360 }, locale: 'tr-TR' })).newPage();
+  const b = await chromium.launch(); const p = await (await b.newContext({ viewport: { width: 640, height: 360 }, locale: 'tr-TR' })).newPage(); if (DIL.length) await p.addInitScript(() => localStorage.setItem('anrufen_lang', 'en'));
   const errs = []; p.on('pageerror', e => errs.push(e.message));
   await p.goto(URL); await p.waitForTimeout(2500); await p.keyboard.press('Enter');
   await p.click('[data-cls="战士"]'); await p.fill('#cname', 'Kahraman'); await p.click('#cstart');
@@ -39,8 +41,8 @@ const CHARS = [['savasci', '战士', '人类', 'male'], ['buyucu', '法师', '�
     window.__skillTexts = () => { const P = Game.P, L = CLS[P.cls].skills.concat(RACE_SK[P.race] || []); let o = '';
       for (const sk of L) { const mx = sk.mx || 10; o += `${sk.id}\t${sk.name}\t${skLockMsg(sk)}\n`; for (let r = 1; r <= mx; r++) o += `  ${r}\t${skDesc(sk, r)}\t${r < mx ? Win.__nextDiff(sk, r) : ''}\n`; }
       return o; };
-    // win.js skNextDiff modülün içinde: aynısı (LANG tr)
-    Win.__nextDiff = (sk, r) => { const keys = [...(sk.d.tr[1].matchAll(/\{(\w+)\}/g))].map(m => m[1]).filter(k => sk.d.c[k]), out = [];
+    // win.js skNextDiff modülün içinde: aynısı (seçili dilin şablonu)
+    Win.__nextDiff = (sk, r) => { const keys = [...(sk.d[LANG === 'en' ? 'en' : 'tr'][1].matchAll(/\{(\w+)\}/g))].map(m => m[1]).filter(k => sk.d.c[k]), out = [];
       const fmt = v => Number.isInteger(v) ? String(v) : String(+v.toFixed(1));
       for (const k of [...new Set(keys)]) { const a = skC(sk, k, r), b = skC(sk, k, r + 1); if (a !== b) out.push(`${fmt(a)}→${fmt(b)}`); } return out.join(', '); };
   });
@@ -64,7 +66,7 @@ const CHARS = [['savasci', '战士', '人类', 'male'], ['buyucu', '法师', '�
     const html = [await p.evaluate(() => { __snd = []; return __dump(); })];
     for (const c of ops) { await p.evaluate(c => { __do(c); }, c); html.push(await p.evaluate(() => __dump())); }
     const htmlTxt = await p.evaluate(() => __skillTexts());
-    const scen = ['veri www/assets', `karakter ${cls} ${race} ${sex}`, 'seviye 12', 'temizle', 'sestemizle', 'karakterdurum -'];
+    const scen = ['veri www/assets', ...DIL, `karakter ${cls} ${race} ${sex}`, 'seviye 12', 'temizle', 'sestemizle', 'karakterdurum -'];
     for (const c of ops) scen.push(c, 'karakterdurum -');
     const txtF = path.join(OUT, ad + '_beceri_cpp.txt'); scen.push(`beceriyazilari ${txtF}`);
     fs.writeFileSync(path.join(OUT, ad + '_senaryo.txt'), scen.join('\n') + '\n');
