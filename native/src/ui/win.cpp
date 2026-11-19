@@ -26,6 +26,7 @@ static std::string bard80(const std::string& cls, int lv) {
 }
 
 void Win::open(World& w, const std::string& name, int npc, const std::string& say, bool quiet) {
+  if (cur.empty()) hub_.y = 0;   // HTML: if (!cur) HUB.y = 0
   cur = name; shop_.clear(); w_ = &w;
   if (name == "npc") { npc_ = npc; say_ = say; dq_ = -1; dtrv_ = -1; dkey_.clear(); if (!quiet) w.sfx("request", 0.6); }
   if (name == "task") ksel_ = 0;
@@ -112,17 +113,26 @@ std::pair<std::string, std::vector<Win::Opt>> Win::npcOptions(World& w) {
 
 // ---------------- ana menü (NEW_FORM_V5_MENU): sol sütunda kırmızı düğmeler ----------------
 void Win::drawHub(engine::Canvas& c, World& w, float VH) {
-  (void)w; const Xf xf = begin(VH / 320, safeL, 0); const std::string f = "n_v5_menu";
-  static const char* L[7][2] = {{"role", "Karakter"}, {"skill", "Beceri"}, {"bag", "Çanta"}, {"pet", "Evcil"}, {"task", "Görev"}, {"map", "Harita"}, {"sys", "Sistem"}};
+  const Xf xf = begin(VH / 320, safeL, 0); const std::string f = "n_v5_menu";
+  std::vector<std::pair<std::string, std::string>> L = {{"role", "Karakter"}, {"skill", "Beceri"}, {"bag", "Çanta"}, {"pet", "Evcil"}, {"task", "Görev"}, {"map", "Harita"}, {"sys", "Sistem"}};
+  if (w.isGM()) L.push_back({"gm", "GM"});   // HTML hubItems: GM karakterde 8. düğme
+  const float HUBS = 43, HUBT = 8, HUBA = 312, max = std::max(0.f, float(L.size() - 7) * HUBS);   // düğmeler 43 birim arayla; görünen bant 8..312
+  hub_.y = std::max(0.f, std::min(hub_.y, max)); hub_.on = true; hub_.x = xf.x; hub_.top = xf.y; hub_.w = 126 * xf.k; hub_.h = 320 * xf.k; hub_.k = xf.k; hub_.max = max;
   nDraw(c, xf, f, 50222, false); hit(xf, "frame", 0, 0, 126, 320);
-  c.clipRect(xf.X(0), xf.Y(8), 126 * xf.k, (312 - 8) * xf.k);
-  for (int i = 0; i < 7; i++) {
-    const core::Json* ctl = F_.ctrl(f, HUBB[i]); if (!ctl) continue;
-    const auto r = rect(f, HUBB[i]); const std::string k = L[i][0], label = L[i][1];
-    F_.drawCtrl(c, xf, *ctl, k == cur || on("hub:" + k) ? 1 : 0, 0, 0, &label);
-    hit(xf, "hub:" + k, r[0], std::max(r[1], 8.f), r[2], std::min(r[1] + r[3], 312.f) - std::max(r[1], 8.f));
+  c.clipRect(xf.X(0), xf.Y(HUBT), 126 * xf.k, (HUBA - HUBT) * xf.k);
+  for (size_t i = 0; i < L.size(); i++) {
+    const int j = std::min(int(i), 6); const float dy = float(int(i) - j) * HUBS - hub_.y;
+    const core::Json* ctl = F_.ctrl(f, HUBB[j]); if (!ctl) continue;
+    const auto r = rect(f, HUBB[j]); const std::string k = L[i].first, label = L[i].second;
+    const float y0 = std::max(r[1] + dy, HUBT), y1 = std::min(r[1] + dy + r[3], HUBA); if (y1 - y0 < 2) continue;
+    F_.drawCtrl(c, xf, *ctl, k == cur || on("hub:" + k) ? 1 : 0, 0, dy, &label);
+    if (y1 - y0 > 10) hit(xf, "hub:" + k, r[0], y0, r[2], y1 - y0);
   }
   c.clearClip();
+  // daha aşağıda / yukarıda düğme varsa küçük ok (HTML arrow: rgba(255,214,120,.9))
+  auto arrow = [&](float y, bool up) { c.fillTriangle(xf.X(57), xf.Y(y), xf.X(69), xf.Y(y), xf.X(63), xf.Y(up ? y - 6 : y + 6), 0xffd678, 0.9f); };
+  if (hub_.y < max) arrow(HUBA - 3, false);
+  if (hub_.y > 0) arrow(HUBT + 9, true);
   const auto r = rect(f, 50230); nDraw(c, xf, f, 50230, on("close")); hit(xf, "close", r[0] - 4, r[1], r[2] + 4, r[3]);
 }
 
@@ -315,6 +325,7 @@ bool Win::tap(World& w, float x, float y) {
   const std::string id = h->id; pressed_ = id; pressT_ = clock_;
   if (id.rfind("hub:", 0) == 0) {
     const std::string k = id.substr(4); w.sfx("skill_pageflip");
+    if (k == "gm") { gmReq = true; return true; }   // HTML: UI.open('gm')
     if (k == "task" || k == "role" || k == "bag" || k == "skill" || k == "map" || k == "sys" || k == "pet") { if (k != cur) { close(); open(w, k); } }
     else if (k != cur) w.toast("Bu pencere yakında.");
     return true;

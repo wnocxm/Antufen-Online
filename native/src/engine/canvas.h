@@ -25,6 +25,7 @@ class Canvas {
   void fillRect(float x, float y, float w, float h, uint32_t rgb, float a = 1);
   void strokeRect(float x, float y, float w, float h, float lw, uint32_t rgb, float a = 1);   // çizgi yolun ortasında (HTML strokeRect)
   void fillEllipse(float cx, float cy, float rx, float ry, uint32_t rgb, float a = 1);
+  void fillTriangle(float x0, float y0, float x1, float y1, float x2, float y2, uint32_t rgb, float a = 1);   // kenarı yumuşak (4x4 örnek)
   void strokeEllipse(float cx, float cy, float rx, float ry, float lw, uint32_t rgb, float a = 1);
   // görsel parçası (sx, sy, sw, sh) → hedef dikdörtgen (dx, dy, dw, dh); smooth: yumuşatarak büyüt/küçült (HTML imageSmoothingEnabled)
   void drawImage(const core::Image& src, float sx, float sy, float sw, float sh, float dx, float dy, float dw, float dh,

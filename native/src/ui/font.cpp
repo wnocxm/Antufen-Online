@@ -26,11 +26,17 @@ void Fonts::load(const engine::Vfs& vfs) {
   for (const auto& kv : J["yuzler"].obj()) {
     Face f; f.key = kv.first; const core::Json& m = kv.second;
     f.size = float(m["size"].num()); f.asc = m["asc"].i(); f.desc = m["desc"].i(); f.png = m["png"].str();
-    for (const auto& g : m["g"].obj()) { const core::Json& a = g.second; Glyph G{a[0].i(), a[1].i(), a[2].i(), a[3].i(), a[4].i(), a[5].i(), float(a[6].num())}; f.g[uint32_t(std::stoul(g.first))] = G; }
+    for (const auto& g : m["g"].obj()) { const core::Json& a = g.second; Glyph G{a[0].i(), a[1].i(), a[2].i(), a[3].i(), a[4].i(), a[5].i(), a[6].num()}; f.g[uint32_t(std::stoul(g.first))] = G; }
     const std::string fam = kv.first.substr(0, kv.first.find('_'));
-    for (const auto& k : J["kern"][fam].obj()) { const auto cp = utf8(k.first); if (cp.size() == 2) f.kern[(uint64_t(cp[0]) << 32) | cp[1]] = float(k.second.num()) * f.size; }   // em × boy
+    for (const auto& k : J["kern"][fam].obj()) { const auto cp = utf8(k.first); if (cp.size() == 2) f.kern[(uint64_t(cp[0]) << 32) | cp[1]] = k.second.num() * f.size; }   // em × boy
+    for (const auto& k : J["kernDom"][fam].obj()) { const auto cp = utf8(k.first); if (cp.size() == 2) f.kernDom[(uint64_t(cp[0]) << 32) | cp[1]] = k.second.num() * f.size; }
     byFam_[fam].push_back({f.size, kv.first});
     faces_[kv.first] = std::move(f);
+  }
+  emoji_.clear(); emojiLoaded_ = false;
+  if (J["emoji"].isObj()) {
+    emojiPpem_ = J["emoji"]["ppem"].i(); emojiPng_ = J["emoji"]["png"].str();
+    for (const auto& g : J["emoji"]["g"].obj()) { const core::Json& a = g.second; emoji_[uint32_t(std::stoul(g.first))] = Glyph{a[0].i(), a[1].i(), a[2].i(), a[3].i(), a[4].i(), a[5].i(), a[6].num()}; }
   }
 }
 
@@ -47,14 +53,29 @@ Face* Fonts::face(const std::string& fam, float size) {
   Face& f = faces_[*best]; ensure(f); return &f;
 }
 
-float Fonts::width(Face* f, const std::string& s) {
+float Fonts::width(Face* f, const std::string& s, bool emoji) {
   if (!f) return 0;
-  const auto cps = utf8(s); float w = 0;
+  const auto cps = utf8(s); double w = 0;
   for (size_t i = 0; i < cps.size(); i++) {
+    if (const Glyph* e = emojiOf(cps[i], emoji)) { w += emojiAdv(*e, f->size); continue; }
     auto it = f->g.find(cps[i]); if (it != f->g.end()) w += it->second.adv;
     if (i + 1 < cps.size()) { auto k = f->kern.find((uint64_t(cps[i]) << 32) | cps[i + 1]); if (k != f->kern.end()) w += k->second; }
   }
-  return w;
+  return float(w);
+}
+
+double Fonts::domWidth(Face* f, const std::string& s, bool emoji) {   // tarayıcı: harf ilerlemeleri + DOM harf çiftleri toplanır, sonuç 1/64 px'e yukarı
+  if (!f) return 0;
+  const auto cps = utf8(s); double w = 0;
+  for (size_t i = 0; i < cps.size(); i++) {
+    if (const Glyph* e = emojiOf(cps[i], emoji)) { w += emojiAdv(*e, f->size); continue; }
+    auto it = f->g.find(cps[i]); if (it != f->g.end()) w += it->second.adv;
+    if (i + 1 < cps.size()) {
+      const uint64_t pk = (uint64_t(cps[i]) << 32) | cps[i + 1];
+      auto kd = f->kernDom.find(pk); if (kd != f->kernDom.end()) w += kd->second;   // DOM çift tablosu (Türkçe şekillenme, boşluklu çiftler)
+    }
+  }
+  return std::ceil(w * 64 - 1e-7) / 64;
 }
 
 // Metin önce geçici bir örtü tamponuna dizilir (harfler atlastan; sığdırmada yatayda sıkışır), sonra dış çizgi (örtünün yuvarlak
@@ -62,7 +83,8 @@ float Fonts::width(Face* f, const std::string& s) {
 void Fonts::draw(engine::Canvas& c, Face* f, const std::string& s, float x, float y, const TextStyle& st) {
   if (!enabled || !f || s.empty() || f->img.empty()) return;
   const auto cps = utf8(s);
-  float w = width(f, s); if (w <= 0) return;
+  float w = width(f, s, st.emoji); if (w <= 0) return;
+  std::vector<std::pair<const Glyph*, float>> emo;   // renkli emoji: dolgudan sonra görsel olarak çizilir
   float sx = 1; if (st.maxWidth > 0 && w > st.maxWidth) { sx = st.maxWidth / w; }
   const float W = w * sx;
   const float left = st.align == CENTER ? x - W / 2 : st.align == RIGHT ? x - W : x;
@@ -73,11 +95,26 @@ void Fonts::draw(engine::Canvas& c, Face* f, const std::string& s, float x, floa
   std::vector<float> m(size_t(bw) * bh, 0.f);
   float pen = left;
   for (size_t i = 0; i < cps.size(); i++) {
+    if (const Glyph* e = emojiOf(cps[i], st.emoji)) { emo.push_back({e, pen}); pen += float(emojiAdv(*e, f->size)) * sx; continue; }
     auto it = f->g.find(cps[i]); if (it == f->g.end()) continue;
     const Glyph& g = it->second;
     if (g.w && g.h) {
-      const float gx = pen + g.ox * sx;   // harfin sol üstü (kesirli; en yakın piksele)
-      const int ox = int(std::floor(gx + 0.5f)) - bx, oy = int(std::floor(base + 0.5f)) + g.oy - by;
+      const float gx = pen + g.ox * sx;   // harfin sol üstü (kesirli)
+      const int oy = int(std::floor(base + 0.5f)) + g.oy - by;
+      if (sx == 1) {   // tarayıcı gibi kesirli konum (Skia: 1/4 px adımlı); harf örtüsü yatayda ara değerle kaydırılır
+        const float fl = std::floor(gx); const float fr = std::floor((gx - fl) * 4 + 0.5f) / 4;
+        const int ox = int(fl) - bx + (fr >= 1 ? 1 : 0); const float t = fr >= 1 ? 0 : fr;
+        for (int yy = 0; yy < g.h; yy++) for (int xx = 0; xx <= g.w; xx++) {
+          const int X = ox + xx, Y = oy + yy; if (X < 0 || Y < 0 || X >= bw || Y >= bh) continue;
+          const float a = xx < g.w ? f->img.at(g.x + xx, g.y + yy)[0] / 255.f : 0, b = xx > 0 ? f->img.at(g.x + xx - 1, g.y + yy)[0] / 255.f : 0;
+          const float v = a * (1 - t) + b * t; if (v <= 0) continue;
+          float& d = m[size_t(Y) * bw + X]; d = std::min(1.f, d + v);
+        }
+        pen += float(g.adv) * sx;
+        if (i + 1 < cps.size()) { auto k = f->kern.find((uint64_t(cps[i]) << 32) | cps[i + 1]); if (k != f->kern.end()) pen += float(k->second) * sx; }
+        continue;
+      }
+      const int ox = int(std::floor(gx + 0.5f)) - bx;
       const int gw = std::max(1, int(std::lround(g.w * sx)));
       for (int yy = 0; yy < g.h; yy++) for (int xx = 0; xx < gw; xx++) {
         const int srcx = sx == 1 ? xx : std::min(g.w - 1, int((xx + 0.5f) / sx));
@@ -86,8 +123,8 @@ void Fonts::draw(engine::Canvas& c, Face* f, const std::string& s, float x, floa
         float& d = m[size_t(Y) * bw + X]; d = std::min(1.f, d + v);
       }
     }
-    pen += g.adv * sx;
-    if (i + 1 < cps.size()) { auto k = f->kern.find((uint64_t(cps[i]) << 32) | cps[i + 1]); if (k != f->kern.end()) pen += k->second * sx; }
+    pen += float(g.adv) * sx;
+    if (i + 1 < cps.size()) { auto k = f->kern.find((uint64_t(cps[i]) << 32) | cps[i + 1]); if (k != f->kern.end()) pen += float(k->second) * sx; }
   }
   // yapay kalın: harf sağa doğru ~0,75 px kalınlaşır (tarayıcı kalını olmayan yazı tipinin çizgisini genişletir)
   if (st.fakeBold) for (int yy = 0; yy < bh; yy++) for (int xx = bw - 1; xx > 0; xx--) { float& d = m[size_t(yy) * bw + xx]; d = std::max(d, 0.75f * m[size_t(yy) * bw + xx - 1]); }
@@ -111,6 +148,11 @@ void Fonts::draw(engine::Canvas& c, Face* f, const std::string& s, float x, floa
       col = ch(16) | ch(8) | ch(0);
     }
     c.blend(bx + xx, by + yy, col, v * st.alpha);
+  }
+  if (!emo.empty()) {   // tarayıcı bit eşlem emojiyi boyuna ölçekleyip yumuşatarak çizer (üstü taban çizgisinin 101/109 em üstünde)
+    if (!emojiLoaded_) { emojiLoaded_ = true; try { emojiImg_ = core::decodePNG(vfs_->read(emojiPng_)); } catch (...) { emojiImg_ = core::Image(); } }
+    if (!emojiImg_.empty()) { const float k = f->size / emojiPpem_;
+      for (const auto& e : emo) c.drawImage(emojiImg_, float(e.first->x), float(e.first->y), float(e.first->w), float(e.first->h), e.second + e.first->ox * k * sx, base + e.first->oy * k, e.first->w * k * sx, e.first->h * k, st.alpha, true); }
   }
 }
 

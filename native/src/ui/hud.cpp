@@ -111,7 +111,7 @@ void Hud::drawMinimap(engine::Canvas& c, World& w, float x, float y, float W, fl
   const float cx = float(w.map.px(w.player.x, w.player.y)) * k, cy = float(w.map.py(w.player.x, w.player.y)) * k;
   c.drawImage(mm_, 0, 0, float(mm_.w), float(mm_.h), x + W / 2 - cx, y + H / 2 - cy, float(mm_.w), float(mm_.h));
   auto dot = [&](double ex0, double ey0, uint32_t col, float s) { const float ex = x + W / 2 + (float(w.map.px(ex0, ey0)) * k - cx), ey = y + H / 2 + (float(w.map.py(ex0, ey0)) * k - cy); c.fillRect(ex - 1, ey - 1, s, s, col); };
-  for (const Ent& e : w.ents) { if (e.dead || e.hidden) continue; dot(e.x, e.y, e.kind == Ent::NPC ? (w.npcMark(e.name) ? 0xffd23a : 0x60e070) : 0xff4030, 2); }
+  for (const Ent& e : w.ents) { if (e.dead || e.hidden || e.kind == Ent::GONE) continue; dot(e.x, e.y, e.kind == Ent::NPC ? (w.npcMark(e.name) ? 0xffd23a : 0x60e070) : 0xff4030, 2); }
   dot(w.player.x, w.player.y, 0xffffff, 3);
   for (const auto& r : w.map.regions) {
     if (r.size() < 6 || r[1] != 1) continue;
@@ -194,6 +194,11 @@ void Hud::handle(World& w) {
     else if (r == "map") { win.close(); win.open(w, "map"); }
     else if (r == "sys") { win.close(); win.open(w, "sys"); }
     else w.toast("Bu pencere yakında.");
+  }
+  if (win.gmReq) { win.gmReq = false; if (w.isGM()) { closeAll(); gm.open(); } }   // ana menünün GM düğmesi (HTML UI.open('gm'))
+  if (!gm.req.empty()) {   // GM paneli: hepsini kapat, gerekirse pencere aç (HTML closeAll + Win.open)
+    const std::string r = gm.req; gm.req.clear(); closeAll();
+    if (r == "pet") win.open(w, "pet"); else if (r == "petf:tf") win.openPetF(w, "tf"); else if (r == "petf:sk") win.openPetF(w, "sk");
   }
   if (!w.askText.empty()) { win.ask(w.askText, w.askYes); w.askText.clear(); w.askYes = nullptr; }   // oyun kodunun onay isteği (zindan kapısı, sandık)
   if (!win.assignReq.empty()) { assign_ = win.assignReq; w.toastMsg = engine::tx("Bir yuvaya dokun") + ": " + win.assignName; w.toastT = 3; win.assignReq.clear(); win.close(); }
@@ -316,10 +321,12 @@ void Hud::draw(engine::Canvas& c, World& w, bool advance) {
   if (w.hurtT > 0) { w.hurtT -= step; c.fillRadial(vw_ / 2, VH / 2, VH * 0.3f, vw_ * 0.6f, 0xa00000, 0, std::max(0.f, w.hurtT)); }
   if (p.dead) c.fillRect(0, 0, vw_, VH, 0x280000, 0.45f);
   win.draw(c, w, advance ? 1.f / 60 : 0);
+  gm.draw(c, w);   // GM paneli en üstte (HTML'de sayfa üstü katman)
 }
 
 // ---------------- dokunma ----------------
 bool Hud::press(World& w, int id, float x, float y) {
+  if (gm.on) { if (gmPtr_ < 0) { gmPtr_ = id; gm.press(x, y); } return true; }   // GM paneli bütün ekranı kaplar
   if (win.isOpen()) { wp_ = {true, id, x, y, 0, x, y}; return true; }   // pencere açıkken: bırakınca dokunuş sayılır (kaydırma değilse)
   for (int i = int(hud_.size()) - 1; i >= 0; i--) { const Hit& h = hud_[size_t(i)]; if (x >= h.x && x <= h.x + h.w && y >= h.y && y <= h.y + h.h) { auto fn = h.fn; fn(); return true; } }
   if (x < std::max(vw_ * 0.33f, 240.f) && y > engine::VH * 0.4f && !joy_.on) {   // yürüme kolu: sol alt bölgede herhangi bir yerden başlar
@@ -330,13 +337,24 @@ bool Hud::press(World& w, int id, float x, float y) {
   return false;
 }
 void Hud::move(int id, float x, float y) {
+  if (gm.on && id == gmPtr_) { gm.move(x, y); return; }
   if (wp_.on && id == wp_.id) { wp_.moved += std::fabs(y - wp_.ly) + std::fabs(x - wp_.lx); if (wp_.moved > 6) win.drag(y - wp_.ly, wp_.x, wp_.y); wp_.lx = x; wp_.ly = y; return; }
   if (joy_.on && id == joy_.id) { float dx = x - joy_.ox, dy = y - joy_.oy; const float l = std::hypot(dx, dy); if (l > 48) { dx = dx / l * 48; dy = dy / l * 48; } joy_.dx = dx; joy_.dy = dy; }
 }
 void Hud::release(World& w, int id, float x, float y) {
+  if (id == gmPtr_) { gmPtr_ = -1; if (gm.on) { gm.release(w, x, y); handle(w); } return; }
   if (wp_.on && id == wp_.id) { const WinPtr p = wp_; wp_.on = false; if (p.moved <= 6) win.tap(w, p.x, p.y); return; }
   if (joy_.on && id == joy_.id) joy_.on = false;
   for (size_t i = 0; i < taps_.size(); i++) if (taps_[i].id == id) { const Tap t = taps_[i]; taps_.erase(taps_.begin() + long(i)); if (!assign_.empty()) { assign_.clear(); w.toastT = 0; } if (std::hypot(x - t.x, y - t.y) < 12) tapWorld(w, x, y); break; }
+}
+void Hud::wheel(float dy, float x, float y) {
+  if (gm.on) { gm.wheel(dy); return; }
+  if (win.isOpen()) win.drag(-dy * 0.6f, x, y);   // HTML: Win.drag(-e.deltaY * 0.6, x, y)
+}
+bool Hud::key(World& w, const std::string& k) {
+  if (gm.on && gm.key(w, k)) { handle(w); return true; }
+  if (k == "Escape" && (gm.on || win.isOpen())) { closeAll(); return true; }   // HTML: Escape → UI.closeAll
+  return false;
 }
 void Hud::joy(double& sx, double& sy) const {
   sx = sy = 0; if (joy_.on && std::hypot(joy_.dx, joy_.dy) > 6) { sx = joy_.dx; sy = joy_.dy; }
@@ -347,7 +365,7 @@ void Hud::tapWorld(World& w, float sx, float sy) {
   const double ox = engine::jsRound(w.camX - vw_ / 2), oy = engine::jsRound(w.camY - engine::VH / 2);
   const double Wx = sx + ox, Wy = sy + oy; int best = -1; double bd = 34;
   for (size_t i = 0; i < w.ents.size(); i++) {
-    const Ent& e = w.ents[i]; if (e.dead || e.hidden) continue;
+    const Ent& e = w.ents[i]; if (e.dead || e.hidden || e.kind == Ent::GONE) continue;
     const double d = std::hypot(w.map.px(e.x, e.y) - Wx, (w.map.py(e.x, e.y) - 22) - Wy); if (d < bd) { bd = d; best = int(i); }
   }
   if (best < 0) return;

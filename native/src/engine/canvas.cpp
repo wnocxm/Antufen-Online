@@ -105,6 +105,20 @@ void Canvas::fillEllipse(float cx, float cy, float rx, float ry, uint32_t rgb, f
     if (n) blend(px, py, rgb, a * n / 16.f);
   }
 }
+void Canvas::fillTriangle(float x0, float y0, float x1, float y1, float x2, float y2, uint32_t rgb, float a) {
+  const int X0 = std::max(0, int(std::floor(std::min({x0, x1, x2})))), X1 = std::min(img.w, int(std::ceil(std::max({x0, x1, x2}))));
+  const int Y0 = std::max(0, int(std::floor(std::min({y0, y1, y2})))), Y1 = std::min(img.h, int(std::ceil(std::max({y0, y1, y2}))));
+  auto e = [](float ax, float ay, float bx, float by, float px, float py) { return (bx - ax) * (py - ay) - (by - ay) * (px - ax); };
+  const float s = e(x0, y0, x1, y1, x2, y2) < 0 ? -1.f : 1.f;
+  for (int py = Y0; py < Y1; py++) for (int px = X0; px < X1; px++) {
+    int n = 0;
+    for (int sy = 0; sy < 4; sy++) for (int sx = 0; sx < 4; sx++) {
+      const float u = px + (sx + 0.5f) / 4, v = py + (sy + 0.5f) / 4;
+      n += s * e(x0, y0, x1, y1, u, v) >= 0 && s * e(x1, y1, x2, y2, u, v) >= 0 && s * e(x2, y2, x0, y0, u, v) >= 0;
+    }
+    if (n) blend(px, py, rgb, a * n / 16.f);
+  }
+}
 void Canvas::fillCircleGrad(float cx, float cy, float r, float gx0, float gy0, float r0, float gx1, float gy1, float r1, uint32_t c0, uint32_t c1) {
   if (r <= 0) return;
   const float dx = gx1 - gx0, dy = gy1 - gy0, dr = r1 - r0, A = dx * dx + dy * dy - dr * dr;

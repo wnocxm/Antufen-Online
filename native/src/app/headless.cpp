@@ -65,6 +65,9 @@
 //   sesler <dosya|->                 ses olayları ({"ses":[[ad, ses]|["muzik", parça],…]}; okununca silinir)
 //   karistir <çıktı.wav> <sn> <hız> <t:muzik:ad;t:efekt:ad:ses;t:muzikac:0|1;t:efektac:0|1>   karıştırıcıyı çalıştır, float WAV yaz
 //   dil <tr|en>                      dil (veri yüklüyse o dille baştan yüklenir) · dileksik <dosya|->  çevirisi bulunamayan metinler
+//   surukle <dy> <x> <y>             açık pencerede sürükleme (sol menü, dükkân listesi; HTML Win.drag)
+//   gm <ac|kapat|bas <kimlik>|yaz <rakamlar>|ara <metin>|kaydir <px>|kutular <dosya|->|goruntu <png>|durum <dosya|->>   GM paneli (kimlik: g:lv1, x:dg:boss, s:120005…;
+//                                    kutular: panelin yerleşimi; goruntu: yalnız panel, siyah zeminde)
 //   yenidunya                        oyunu baştan aç (HTML location.reload; veri yüklü kalır)
 //   kayityaz <dosya|-> · kayitoku <dosya>   kaydın JSON'u (HTML save) · kaydı oku (HTML load/fixSave; satır {"kayit":true|false})
 //   beceriyukselt <beceri no> · becerisifirla <0|1>   beceri penceresinin Yükselt'i · Puanları Sıfırla (1: bedava)
@@ -534,6 +537,37 @@ int main(int argc, char** argv) {
         out(f, o);
       }
       else if (cmd == "gorevhazir") { int id, n = 0; ss >> id >> n; QuestSt q; q.n = n; q.ready = true; W().P.quests[id] = q; }   // görev teslime hazır (test)
+      else if (cmd == "gm") {   // GM paneli (HTML #gm)
+        std::string op; ss >> op; ui::Hud& h = *hud; World& w = W();
+        auto panel = [&] { canvas.fill(0, 0, 0); h.gm.draw(canvas, w); };
+        if (op == "ac") { h.closeAll(); h.gm.open(); panel(); }
+        else if (op == "kapat") h.closeAll();
+        else if (op == "bas") { std::string id; ss >> id; panel(); if (!h.gmTap(w, id)) std::printf("gm: düğme yok %s\n", id.c_str()); }
+        else if (op == "sekmesiz") h.gm.clearTab();   // test: hiçbir sekme seçili görünmesin (HTML ilk açılış)
+        else if (op == "toastsil") { w.toastMsg.clear(); w.toastT = 0; }
+        else if (op == "bekle") { double t; ss >> t; for (double k = 0; k < t; k += 0.05) w.runTimers(0.05); }   // yalnız zamanlayıcılar (HTML setTimeout)
+        else if (op == "bayraklar0") { w.god = w.fast = w.gmNoCd = w.gmFreeTravel = false; }
+        else if (op == "yaz") { std::string t; ss >> t; h.gm.typed(t); }
+        else if (op == "ara") { std::string t; std::getline(ss, t); if (!t.empty() && t[0] == ' ') t.erase(0, 1); h.gm.query = t; }
+        else if (op == "kaydir") ss >> h.gm.scroll;
+        else if (op == "kutular") { std::string f; ss >> f; panel(); out(f, h.gm.dump() + "\n"); }
+        else if (op == "goruntu") { std::string f; ss >> f; panel(); godat::writeFile(f, core::encodePNG(canvas.img)); }
+        else if (op == "durum") {
+          std::string f; ss >> f; auto& P = w.P; std::string pets; for (auto* p : w.petList()) pets += (pets.empty() ? "" : ",") + jq(w.petName(*p) + " Sv" + std::to_string(p->lv) + " st" + std::to_string(p->st));
+          std::string qs; for (const auto& kv : P.quests) qs += (qs.empty() ? "" : ",") + std::to_string(kv.first);
+          int spent = 0; for (const auto& kv : P.sk) spent += kv.second;
+          int dummy = 0; for (const Ent& e : w.ents) dummy += e.gmDummy;
+          int eq = 0; for (const auto& kv : P.eq) eq += !kv.second.empty();
+          out(f, "{\"acik\":" + std::string(h.gm.on ? "true" : "false") + ",\"gorunum\":" + jq(h.gm.view) + ",\"sahne\":" + jq(w.sceneId) + ",\"sv\":" + std::to_string(P.lv) +
+                 ",\"altin\":" + std::to_string(P.gold) + ",\"puan\":" + std::to_string(P.sp) + ",\"harcanan\":" + std::to_string(spent) + ",\"ust\":" + std::to_string(P.adv) +
+                 ",\"olumsuz\":" + (w.god ? "true" : "false") + ",\"hizli\":" + (w.fast ? "true" : "false") + ",\"beklemesiz\":" + (w.gmNoCd ? "true" : "false") +
+                 ",\"ucretsiz\":" + (w.gmFreeTravel ? "true" : "false") + ",\"zindan\":" + jq(P.dun.on ? P.dun.id : "") + ",\"hayvan\":[" + pets + "],\"gorev\":[" + qs +
+                 "],\"bitti\":" + std::to_string(P.done.size()) + ",\"kukla\":" + std::to_string(dummy) + ",\"hedefKukla\":" + (w.target() >= 0 && w.ents[size_t(w.target())].gmDummy ? "true" : "false") +
+                 ",\"pencere\":" + jq(h.win.cur) + ",\"bildirim\":" + jq(w.toastT > 0 ? engine::tx(w.toastMsg) : "") + ",\"ekipman\":" + std::to_string(eq) +
+                 ",\"x\":" + num(std::round(w.player.x * 100) / 100) + ",\"y\":" + num(std::round(w.player.y * 100) / 100) + "}\n");
+        }
+      }
+      else if (cmd == "surukle") { float dy, x, y; ss >> dy >> x >> y; hud->win.drag(dy, x, y); }   // pencere listesini sürükle (HTML Win.drag)
       else if (cmd == "pencere") { std::string n; int e = -1; ss >> n >> e; hud->win.close(); if (n == "shop") hud->win.openShop(W(), W().ents.at(size_t(e)).name); else if (n == "petf" || n == "petfs") hud->win.openPetF(W(), n == "petf" ? "tf" : "sk"); else if (n != "kapat") hud->win.open(W(), n, e); }
       else if (cmd == "ciz") { W().draw(canvas, opts); hud->draw(canvas, W(), false); }
       else if (cmd == "dokun") { float x, y; ss >> x >> y; hud->press(W(), 1, x, y); hud->release(W(), 1, x, y); hud->win.clearPressed(); hud->draw(canvas, W(), false); }

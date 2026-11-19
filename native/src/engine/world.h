@@ -29,7 +29,7 @@ using Aura = std::vector<std::pair<std::string, int>>;   // süren etkinin görs
 
 // NPC ve canavarlar tek listede, oluşturulma sırasıyla (HTML Game.ents): zar atışları bu sırayla yapılır
 struct Ent {
-  enum Kind { NPC, MOB } kind = NPC;
+  enum Kind { NPC, MOB, GONE } kind = NPC;   // GONE: HTML'de diziden çıkarılan (GM kuklası); sıra numaraları kaymasın diye yerinde kalır
   std::string id, name;            // NPC: Çince ad (cn); canavar: ad
   double x = 0, y = 0, t = 0;
   int dir = 2;
@@ -37,6 +37,7 @@ struct Ent {
   // NPC
   int anim = 0; bool pickup = false, hidden = false, dummy = false, node = false; double respawnT = 0;
   std::string key; bool boss = false, prog = false;   // canavar: "sahne:kayıt:sıra" (zindan koşusunda kesilenler), zindan boss'u, ilerleme boss'u
+  bool gmDummy = false;                               // GM kuklası (HTML m.gmDummy): kıpırdamaz, saldırmaz
   int foe = 0;                                        // canavarın son vuranı (HTML m.foe): 0 yok, -1 oyuncu, >0 evcil hayvanın çağrılış numarası
   // canavar
   MonDef* d = nullptr;
@@ -288,6 +289,22 @@ class World {
   int giveCount(const Quest& q) const;
   void gmQuestReady(int id);                           // GM: görevi (öncekileriyle) tamamlanmış say
   void gmQuestDone(int id);                            // GM: görevi bitir, ödülünü al
+  // GM (oyun yöneticisi; world_gm.cpp — HTML game.js isGM / gmLevel / gmHeal / ClassGM, ui.js gmX yolculuk düğmeleri)
+  bool isGM() const;                                   // çevrimdışı: adı "GM" ile başlayan karakter (çevrimiçi: sunucu yöneticisi, ağ adımında)
+  void gmLevel(int lv);                                // seviye + seviye yazısı + kayıt (HTML gmLevel; setLevel yalnız değerler)
+  void gmHeal();                                       // can/mana dolu, ölüyse kalkar
+  void gotoSceneAt(const std::string& sid, int x, int y);   // HTML gotoScene(sid, null, [x, y]): kaydet, verilen yere
+  std::vector<int> gmClassChain();                     // sınıf/ırk zincirindeki görevler (HTML ClassGM.chain; görev sırası numaraları)
+  void gmClassReset();                                 // acemiye döndür: şartı tutmayan beceriler geri, zincir sıfır
+  void gmClassFill(int spec);                          // en az 80, iki yükseltme, puanlar oyuncu gibi
+  void gmClassStart();                                 // en az 40 + kendiliğinden alınan görevler
+  void gmStart80();                                    // 80 + 40 yükseltmesi + Bozbalta Şehri
+  void gmDummy();                                      // yanına ölmeyen, kıpırdamayan kukla canavar (hedefli)
+  void gmToggleNoCd();                                 // beklemesiz + manasız beceri
+  void gmToggleFreeTravel();                           // ücretsiz yolculuk
+  void gmWalkTravelNpc();                              // bu haritadaki en yakın yolculuk NPC'sine yürü
+  void after(double s, std::function<void()> fn) { later(s, std::move(fn)); }   // arayüzün gecikmeli işi (HTML setTimeout; oyun saatiyle)
+  void runTimers(double dt);                           // test: yalnız zamanlayıcılar (HTML'de oyun döngüsü durdurulmuşken setTimeout'lar çalışır)
   std::set<std::string> flags;                         // HTML Game.flags (kayda girmez)
   // arayüz olayları (HTML UI.log / toast / float / zone / levelUp / hurt): dünya yazar, arayüz (ui/hud.cpp) çizer ve süreleri işler
   struct LogLine { std::string m; uint32_t c; };

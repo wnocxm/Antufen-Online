@@ -54,6 +54,9 @@ const CASES = [
   ['evcil_taktik', [['pencere', 'pet'], ['dokun', ...at('petcomplex', 50757, kP, 0, PX / kP, PY / kP)]]],
   ['donusum', [['pencere', 'petf']]],
   ['donusum_aktarma', [['pencere', 'petf'], ['dokun', 58 + 404 * kF, 5 + 35 * kF]]],
+  // 15. adım: GM karakterde ana menü 8 düğme (GM en altta), liste kayar; yarı kaydırılmışken iki ok
+  ['menu_gm', [['ad', 'GMKahraman'], ['pencere', 'hub']]],
+  ['menu_gm_kaydir', [['ad', 'GMKahraman'], ['pencere', 'hub'], ['surukle', -30, 40, 150]]],
   ['adet', [['pencere', 'shop', '道具商人（人类）'], ['dokun', (rect('shop', 50334)[0] + 104) * kT, (49 + 26 - 41) * kT], ['dokun', ...at('shopinfo', 50369, kT, 41, Math.min(358, 640 / kT - 229), 70)], ['dokun', ...at('selnum', 50255, 1.3, 0, 172 / 1.3, 96 / 1.3)]]],
 ];
 (async () => {
@@ -91,6 +94,8 @@ const CASES = [
       // pencere açılınca bir kare çizilir (dokunma bölgeleri çizimde kurulur; gerçek oyunda dokunuştan önce hep kare vardır)
       if (a[0] === 'pencere' && a[1] === 'shop') { a[2] = await p.evaluate(cn => { Win.close(); Win.open('shop', { shop: cn }); return Game.ents.findIndex(e => e.cn === cn); }, a[2]); if (a[2] < 0) throw new Error('dükkân yok'); await p.waitForTimeout(150); }
       else if (a[0] === 'pencere') { await p.evaluate(([n, e]) => { Win.close(); Win.open(n, n === 'npc' ? { npc: Game.ents[e] } : {}); }, [a[1], a[2]]); await p.waitForTimeout(150); }
+      else if (a[0] === 'ad') { await p.evaluate(n => { Game.P.name = n; }, a[1]); scen.push(`ad ${a[1]}`); continue; }
+      else if (a[0] === 'surukle') { await p.evaluate(([dy, x, y]) => Win.drag(dy, x, y), [a[1], a[2], a[3]]); await p.waitForTimeout(150); scen.push(`surukle ${a[1]} ${a[2]} ${a[3]}`, 'ciz'); continue; }
       else { await p.evaluate(([x, y]) => Win.tap(x, y), [a[1], a[2]]); await p.waitForTimeout(150); }
       scen.push(a[0] === 'pencere' ? `pencere ${a[1]}${a[2] != null ? ' ' + a[2] : ''}` : `dokun ${a[1]} ${a[2]}`, 'ciz');
     }
@@ -102,7 +107,7 @@ const CASES = [
       await p.screenshot({ path: path.join(OUT, `${ad}_${yazi ? 'yazili' : 'yazisiz'}_html.png`), clip: { x: 0, y: 0, width: 640, height: 360 } });
     }
     scen.push('yazi 0', `goruntu ${path.join(OUT, ad + '_yazisiz_cpp.png')}`, 'yazi 1', `goruntu ${path.join(OUT, ad + '_yazili_cpp.png')}`);
-    await p.evaluate(() => Win.close()); scen.push('pencere kapat');
+    await p.evaluate(() => { Win.close(); Game.P.name = 'Kahraman'; }); scen.push('pencere kapat', 'ad Kahraman');
   }
   const txMiss = await p.evaluate(() => [...TX_MISS]);
   await b.close(); if (srv) srv.kill();

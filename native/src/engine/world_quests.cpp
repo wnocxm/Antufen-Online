@@ -138,13 +138,14 @@ bool World::completeQuest(int qi) {
 void World::classUp(int n) {
   if (P.adv >= n) return;
   P.adv = n; pushFx("LEVELUP", player.x, player.y); sfx("levelup");
-  toast("Sınıf yükseltildi"); note(n >= 2 ? "Sınıf yükseltildi · uzmanlık ağaçları açıldı" : "Sınıf yükseltildi · sınıf beceri ağacı açıldı", LOG_Q); save();
+  // HTML: toast(`${tx('Sınıf yükseltildi')}: ${clsName()}`), log(`… · ${tx(n >= 2 ? 'uzmanlık ağaçları açıldı' : 'sınıf beceri ağacı açıldı')}`)
+  toast(tx("Sınıf yükseltildi") + ": " + clsName()); note(tx("Sınıf yükseltildi") + ": " + clsName() + " · " + tx(n >= 2 ? "uzmanlık ağaçları açıldı" : "sınıf beceri ağacı açıldı"), LOG_Q); save();
 }
 
 // seviyesi gelince kendiliğinden alınan görevler (orijinalde verensiz "gönderilen" görev: 80344 Acemilikten Çıkış)
 void World::autoQuests() {
   const auto& Q = quests().all();
-  for (size_t qi = 0; qi < Q.size(); qi++) if (Q[qi].auto_ && questState(int(qi)) == "new") { acceptQuest(int(qi)); toast("Yeni görev: " + Q[qi].tr.title); }
+  for (size_t qi = 0; qi < Q.size(); qi++) if (Q[qi].auto_ && questState(int(qi)) == "new") { acceptQuest(int(qi)); toast(tx("Yeni görev") + ": " + Q[qi].tr.title); }   // HTML: `${tx('Yeni görev')}: ${q.title}`
 }
 
 std::vector<int> World::questsFor(const std::string& cn) {
@@ -241,7 +242,7 @@ void World::gmQuestReady(int id) {
     const Quest* pq = quests().byId(r); r = pq && !pq->reqAny && !pq->req.empty() ? pq->req[0] : 0;
   }
   if (!P.quests.count(id)) acceptQuest(qi);
-  readyQuest(qi);
+  readyQuest(qi); save();
 }
 void World::gmQuestDone(int id) {
   const int qi = quests().indexOf(id); if (qi < 0 || P.done.count(id)) return;

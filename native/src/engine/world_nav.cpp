@@ -81,7 +81,7 @@ std::vector<std::string> World::scenePath(const std::string& from, const std::st
 
 void World::routeTo(const std::string& sid) {
   if (sid == sceneId) { toast("Zaten buradasın."); return; }
-  if (routePath(sceneId, sid).empty()) { toast("Buradan oraya yürüyerek gidilemiyor."); return; }
+  if (routePath(sceneId, sid).empty()) { if (isGM()) { route.clear(); gotoScene(sid, ""); return; } toast("Buradan oraya yürüyerek gidilemiyor."); return; }   // GM: yolu olmayan haritaya ışınlanır
   route = sid; routeStep();
 }
 void World::routeStep() {

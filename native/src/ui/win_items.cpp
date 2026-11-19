@@ -393,7 +393,8 @@ void Win::tapShop(World& w, const std::string& id) {
   if (id == "buy" && !H_.sel.empty()) buyAsk(w, H_.sel);
 }
 void Win::drag(float dy, float x, float y) {
-  (void)x; (void)y;
+  const bool hubShown = cur == "sys" || cur == "pet" || cur == "map" || cur == "hub";   // sol menü (HTML HUB.r)
+  if (hub_.on && hubShown && x >= hub_.x && x < hub_.x + hub_.w && y >= hub_.top && y < hub_.top + hub_.h) { hub_.y = std::max(0.f, std::min(hub_.max, hub_.y - dy / hub_.k)); return; }
   if (cur != "shop") return;
   const float RH = 53 * nk_; H_.acc += dy;
   while (H_.acc <= -RH) { H_.off++; H_.acc += RH; }

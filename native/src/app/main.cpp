@@ -188,15 +188,23 @@ int main(int argc, char** argv) {
         }
         continue;
       }
+      if (ev.type == SDL_TEXTINPUT && hud->gm.on) { hud->gm.typed(ev.text.text); continue; }   // GM paneli: arama / seviye kutusu
+      if (ev.type == SDL_MOUSEWHEEL) { int mx, my; SDL_GetMouseState(&mx, &my); logical(float(mx), float(my), x, y); hud->wheel(-float(ev.wheel.y) * 100, x, y); continue; }   // HTML deltaY (bir çentik 100)
       if (ev.type == SDL_TEXTINPUT && hud->win.isOpen()) { for (const char* ch = ev.text.text; *ch; ch++) if (*ch >= '0' && *ch <= '9') hud->win.key(std::string(1, *ch)); continue; }   // ekran klavyesi: adet
       if (ev.type == SDL_KEYDOWN) {
         const SDL_Keycode k = ev.key.keysym.sym;
+        if (hud->gm.on) {   // GM paneli: odaktaki kutu tuşları alır (HTML: INPUT'tayken oyun tuşları çalışmaz), Escape hepsini kapatır
+          std::string kn = keyName(k); if (k == SDLK_ESCAPE) kn = "Escape";
+          if (!kn.empty() && SDL_IsTextInputActive() && kn.size() == 1 && kn[0] >= '0' && kn[0] <= '9') kn.clear();   // rakam metin olayından gelir
+          if (!kn.empty() && hud->key(*world, kn)) continue;
+          if (SDL_IsTextInputActive()) continue;
+        }
         if (hud->win.isOpen()) {   // açık onay/adet kutusu tuşları alır (oyun kısayollarına gitmez)
           std::string kn = keyName(k); if (kn == "ArrowLeft" || kn == "ArrowRight") kn.clear();
           if (!kn.empty() && SDL_IsTextInputActive() && kn.size() == 1 && kn[0] >= '0' && kn[0] <= '9') kn.clear();   // rakam metin olayından gelir
           if (!kn.empty() && hud->win.key(kn)) continue;
         }
-        if (k == SDLK_ESCAPE) { if (hud->win.isOpen()) hud->closeAll(); else run = false; }
+        if (k == SDLK_ESCAPE) { if (hud->win.isOpen() || hud->gm.on) hud->closeAll(); else run = false; }
         if (k == SDLK_F12) godat::writeFile("anrufen_ekran.png", core::encodePNG(canvas.img));
         World& w = *world;
         if (k == SDLK_SPACE) { int t = w.target(); if (t < 0 || w.ents[size_t(t)].kind != Ent::MOB || w.ents[size_t(t)].dead) t = w.nearestMob(9); if (t >= 0) w.setTarget(t, true); else w.note("Yakında hedef yok."); }
@@ -226,7 +234,7 @@ int main(int argc, char** argv) {
       World& w = *world;
       const Uint8* k = SDL_GetKeyboardState(nullptr);
       double sx = 0, sy = 0; hud->joy(sx, sy);
-      if (!sx && !sy) {   // klavye: ekran yönünde birim vektör (HTML Input.joy)
+      if (!sx && !sy && !SDL_IsTextInputActive()) {   // klavye: ekran yönünde birim vektör (HTML Input.joy; kutuya yazarken yürünmez)
         double x = 0, y = 0;
         if (k[SDL_SCANCODE_LEFT] || k[SDL_SCANCODE_A]) x -= 1;
         if (k[SDL_SCANCODE_RIGHT] || k[SDL_SCANCODE_D]) x += 1;
@@ -244,7 +252,7 @@ int main(int argc, char** argv) {
         for (const World::SndEv& e : w.sounds) { if (e.music) snd.a.music(e.n); else snd.a.play(e.n, e.v); }
         unlockA(); w.sounds.clear();
       }
-      wantText = hud->win.wantText;
+      wantText = hud->win.wantText || hud->gm.editing || hud->gm.numOpen();
       for (size_t n = std::min(w.logTotal - shown, w.log.size()); n > 0; n--) std::printf("%s\n", w.log[w.log.size() - n].m.c_str());   // günlük konsolda da
       shown = w.logTotal;
       std::string tt = "Anrufen Online · " + w.quests().name(w.sceneName); SDL_SetWindowTitle(win, tt.c_str());

@@ -661,7 +661,7 @@ void World::gainXp(long long n) {
     autoQuests();
     // açılan görevler (HTML questsUnlockedAt: bütün görevlerin açılma seviyesi liste sırasıyla hesaplanır)
     int nq = 0;
-    for (size_t qi = 0; qi < quests().all().size(); qi++) if (quests().minLv(int(qi)) == P.lv && questState(int(qi)) == "new") { note("Yeni görev: " + quests().all()[qi].tr.title + " · " + quests().name(quests().all()[qi].giver), LOG_Q); nq++; }
+    for (size_t qi = 0; qi < quests().all().size(); qi++) if (quests().minLv(int(qi)) == P.lv && questState(int(qi)) == "new") { note(tx("Yeni görev") + ": " + quests().all()[qi].tr.title + " · " + quests().name(quests().all()[qi].giver), LOG_Q); nq++; }
     if (nq) toast(std::to_string(nq) + " yeni görev açıldı");
     save();
   }
@@ -768,6 +768,7 @@ void World::update(double dt, double sx, double sy) {
   for (size_t i = 0; i < ents.size(); i++) {
     Ent& e = ents[i];
     if (e.kind == Ent::NPC) { e.t += dt * TICK * 0.8; if (e.hidden && (e.respawnT -= dt) <= 0) e.hidden = false; continue; }
+    if (e.kind == Ent::GONE) continue;
     e.t += dt * TICK; e.animT += dt * TICK;
     if (e.dead) {
       if (!e.aura.empty()) auraSync(int(i), e.aura, {});
@@ -780,6 +781,7 @@ void World::update(double dt, double sx, double sy) {
       if (e.weakT > 0 && e.weakDef) w.push_back({"weak", "特效-抗性衰减buff"});
       if (e.rootT > 0) w.push_back({"root", "特效-冻结"});
       if (!e.aura.empty() || !w.empty()) auraSync(int(i), e.aura, w); }
+    if (e.gmDummy) { e.state = e.state == "hurt" && e.stateT > 0 ? "hurt" : "idle"; if (e.stateT > 0) e.stateT -= dt; continue; }   // GM kuklası: kıpırdamaz, saldırmaz
     if (e.bleed.on && (e.bleed.tick -= dt) <= 0) {   // Testere Bıçak kanaması
       e.bleed.tick = 2; e.bleed.t -= 2; HitOpt o; o.tick = true; hitMob(int(i), 0.08 * e.bleed.n, o);
       if (e.bleed.on && e.bleed.t <= 0) e.bleed.on = false;
@@ -888,7 +890,7 @@ void World::draw(Canvas& c, const DrawOpts& o) {
     list.push_back({double(ob.depth), 0, i});
   }
   auto visible = [&](double X, double Y) { return !(X < ox - 100 || X > ox + vw + 100 || Y < oy - 20 || Y > oy + vh + 150); };
-  for (size_t i = 0; i < ents.size(); i++) if (visible(map.px(ents[i].x, ents[i].y), map.py(ents[i].x, ents[i].y))) list.push_back({ents[i].x + ents[i].y + 0.01, 1, i});
+  for (size_t i = 0; i < ents.size(); i++) if (ents[i].kind != Ent::GONE && visible(map.px(ents[i].x, ents[i].y), map.py(ents[i].x, ents[i].y))) list.push_back({ents[i].x + ents[i].y + 0.01, 1, i});
   if (visible(map.px(player.x, player.y), map.py(player.x, player.y))) list.push_back({player.x + player.y + 0.01, 2, 0});
   if (pet.on && visible(map.px(pet.x, pet.y), map.py(pet.x, pet.y))) list.push_back({pet.x + pet.y + 0.01, 3, 0});   // evcil hayvan (HTML'de oyuncudan sonra)
   std::stable_sort(list.begin(), list.end(), [](const Item& a, const Item& b) { return a.depth < b.depth; });

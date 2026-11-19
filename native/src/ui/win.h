@@ -37,6 +37,7 @@ class Win {
   bool optChanged = false;                          // ayar değişti (uygulama okuyup sıfırlar)
   void openNpcList(engine::World& w);               // bu haritadaki kişiler (dokununca yürür)
   void openPetF(engine::World& w, const std::string& mode, const std::string& main = "");   // dönüşüm / beceri aktarma
+  bool gmReq = false;                               // ana menünün GM düğmesine dokunuldu (arayüz GM panelini açar)
 
  private:
   engine::World* w_ = nullptr;   // son dokunulan/çizilen dünya (sesler; onay kutusu oyun kodundan da açılır)
@@ -71,6 +72,8 @@ class Win {
   // evcil hayvan penceresi (petcomplex + taktik newpetai) ve dönüşüm / beceri aktarma (fantasize_pet)
   struct { int i = 0, tab = 0, skd = 0, tree = -1; bool ai = false; } PW_;
   struct { std::string mode = "tf", main, mat, a[2]; } TF_;
+  // ana menü kaydırması (HTML HUB: 7 düğmeden uzunsa — GM — sayfa gibi kayar): y form birimi, r ekrandaki alan
+  struct { float y = 0, x = 0, top = 0, w = 0, h = 0, k = 1, max = 0; bool on = false; } hub_;
   // liste penceresi (NPC listesi)
   struct ListRow { std::string label, sub; int ent = -1; };
   std::vector<ListRow> list_; std::string listTitle_; int listOff_ = 0;

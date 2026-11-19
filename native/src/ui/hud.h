@@ -13,13 +13,14 @@
 #include "engine/world.h"
 #include "ui/font.h"
 #include "ui/forms.h"
+#include "ui/gm.h"
 #include "ui/win.h"
 
 namespace ui {
 
 class Hud {
  public:
-  Hud(engine::Assets& as, Fonts& f, Forms& forms) : win(forms), as_(as), font_(f) {}
+  Hud(engine::Assets& as, Fonts& f, Forms& forms) : win(forms), gm(as, f), as_(as), font_(f) {}
   // dünya çizildikten sonra: adlar, işaretler, uçan sayılar, sonra HUD. advance: arayüz sayaçları (HTML'de kare başına 1/60) ilerlesin mi
   void draw(engine::Canvas& c, engine::World& w, bool advance = true);
   double now = 0;   // arayüz saati (sn): mesajların kaybolması
@@ -33,7 +34,11 @@ class Hud {
   std::string request;   // HUD düğmesinin isteği (hub, quest, char, bag, skill, map, sys, talk:<varlık>); çizimde işlenir
   float safeL = 0, safeR = 0;
   Win win;               // pencereler (konuşma, görev listesi, ana menü, ölüm, onay)
-  void closeAll() { win.close(); }
+  GmPanel gm;            // GM paneli (ana menünün GM düğmesi; adı GM ile başlayan karakter)
+  void closeAll() { win.close(); gm.close(); }   // HTML UI.closeAll
+  void wheel(float dy, float x, float y);         // fare tekerleği (HTML: açık penceredeki liste, GM listesi)
+  bool key(engine::World& w, const std::string& k);   // tuş: GM paneli (arama / seviye kutusu), Escape hepsini kapatır
+  bool gmTap(engine::World& w, const std::string& id) { const bool ok = gm.act(w, id); handle(w); return ok; }   // test: GM düğmesine kimlikle bas
 
  private:
   engine::Assets& as_;
@@ -45,6 +50,7 @@ class Hud {
   struct Tap { int id; float x, y; };
   std::vector<Tap> taps_;
   struct WinPtr { bool on = false; int id = -1; float x = 0, y = 0, moved = 0, lx = 0, ly = 0; } wp_;   // pencere açıkken dokunuş
+  int gmPtr_ = -1;       // GM paneline basan parmak
   double deathAt = -1;   // ölüm penceresi bu saatte açılır (HTML UI.death: 1,2 sn sonra)
   std::string assign_;   // kısayola yerleştirilecek (s<n> / i:<eşya>): yuvalar parlar, dokunulan yuvaya yerleşir (HTML UI.startAssign)
   void handle(engine::World& w);

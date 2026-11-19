@@ -2,13 +2,17 @@
 """Yazı atlası: C++ istemcisinin yazı tiplerini (HTML'deki ui.js/win.js/forms.js yazıları) harf tablolarına çevirir.
 
 Kaynak: www/assets/fonts (Alegreya 400/700 gövde, Metamorphous başlık; woff2, latin + latin-ext) ve sistemdeki DejaVu (HTML'de
-"Noto Serif"/serif/sans-serif yedekleri ve ✦ ★ ◎ gibi işaretler). Her (aile, boy) için bir PNG (gri: harfin örtüsü) ve
+"Noto Serif"/serif/sans-serif yedekleri ve ✦ ★ ◎ ✕ gibi işaretler). Her (aile, boy) için bir PNG (gri: harfin örtüsü) ve
 www/assets/fonts/atlas.json: harf yeri, kayması, ilerlemesi, satır ölçüleri, harf çifti aralıkları (kerning).
+İlerlemeler ve harf çifti aralıkları tarayıcı gibi HarfBuzz'la (Pillow RAQM) ve yuvarlanmadan ölçülür (büyük boyda ölçüp küçültülür):
+tarayıcının DOM yerleşimi (GM paneli düğmelerinin genişliği) bunlarla 1/64 px'e kadar aynı çıkar.
+Renkli emoji (GM paneli sekmeleri 🗺 ⚔ 🐾 🎓; Android'deki Noto Color Emoji): fonts/atlas/emoji.png + atlas.json "emoji".
 C++ (native/src/ui/font.cpp) bunları okur; dış çizgi (HTML strokeText) C++'ta harf örtüsünden üretilir.
 Çıktı üretilmiş veridir: elle düzenleme; yazı tipi ya da boy değişince yeniden çalıştır.
   python3 tools/yazi_atlasi.py
 """
 import json
+import math
 import os
 
 from PIL import Image, ImageDraw, ImageFont
@@ -41,8 +45,26 @@ LATIN = [(0x0000, 0x00FF), (0x0131, 0x0131), (0x0152, 0x0153), (0x02BB, 0x02BC),
          (0x2193, 0x2193), (0x2212, 0x2212), (0x2215, 0x2215), (0xFEFF, 0xFEFF), (0xFFFD, 0xFFFD)]
 # karakterler: ASCII, Latin-1, Latin Genişletilmiş-A (Türkçe ve öteki Avrupa harfleri), noktalama, oklar ve oyunda geçen işaretler
 CHARS = [c for c in range(0x20, 0x7F)] + [c for c in range(0xA0, 0x180)] + \
-    [ord(c) for c in '–—‘’‚“”„•…‹›←↑→↓−▲▶▸▼▾◀◎●○■□★☆⚔✦✓✗♥']
+    [ord(c) for c in '–—‘’‚“”„•…‹›←↑→↓−▲▶▸▼▾◀◎●○■□★☆⚔✦✓✗✕♥']
 KERN = [c for c in range(0x21, 0x7F)] + [ord(c) for c in 'ÇçĞğİıÖöŞşÜü']
+SS = 4   # harf görüntüleri bu kat büyük çizilip küçültülür
+EMOJI_FONT = '/usr/share/fonts/truetype/noto/NotoColorEmoji.ttf'
+EMOJI = '🗺⚔🐾🎓'
+EMOJI_PPEM = 109   # Noto Color Emoji'nin tek bit eşlem boyu (136 x 128)
+
+
+def upem(path):
+    """Yazı tipinin em birimi (1000 / 2048): bu boyda ilerlemeler tam sayı birimdir (ölçüm yuvarlamasız)."""
+    for u in (1000, 2048):
+        F = ImageFont.truetype(path, u, layout_engine=ImageFont.Layout.RAQM)
+        if all(abs(F.getlength(c) - round(F.getlength(c))) < 1e-6 for c in 'aAgW.,iMx'): return u
+    return 2048
+
+
+def unit_font(path):
+    """Yazı tipi em biriminde (1 px = 1 birim): ilerleme ve harf çifti aralığı birebir."""
+    u = upem(path)
+    return ImageFont.truetype(path, u, layout_engine=ImageFont.Layout.RAQM), u
 
 
 def in_latin(cp):
@@ -61,6 +83,8 @@ def build(fam, size):
     fe = ImageFont.truetype(ext, size) if ext else None
     ff = ImageFont.truetype(fb, size) if fb else None
     nd = {id(f): f.getmask('') for f in (fl, fe, ff) if f}
+    hi = {id(f): unit_font(path) for f, path in ((fl, lat), (fe, ext), (ff, fb)) if f}
+    big = {id(f): ImageFont.truetype(path, size * SS) for f, path in ((fl, lat), (fe, ext), (ff, fb)) if f}   # harf görüntüsü SS kat büyük çizilir
     asc, desc = fl.getmetrics()
     glyphs = []
     for cp in CHARS:
@@ -71,14 +95,20 @@ def build(fam, size):
         for f in cand:
             if ch == ' ' or not glyph_missing(f, ch, nd[id(f)]): font = f; break
         if not font: continue
-        l, t, r, b = font.getbbox(ch, anchor='ls')
-        adv = font.getlength(ch)
-        w, h = max(0, r - l), max(0, b - t)
+        # tarayıcı (Skia + FreeType): ilerleme = birim × x_scale; x_scale = FT_DivFix(boy × 64, em) 16.16 sabit noktada yuvarlanır
+        U, u = hi[id(font)]; adv = round(U.getlength(ch)) * round(size * 64 * 65536 / u) / 4194304
+        # harf: SS kat büyük, ipucusuza yakın çizilip alan ortalamasıyla küçültülür (tarayıcı Linux'ta yatay ipucu kullanmaz; harfin
+        # kalınlığı ve yeri bozulmaz). Başlangıç noktası tam piksel; kesirli konumu C++ çeyrek piksel kaydırmayla verir.
+        B = big[id(font)]; L4, T4, R4, B4 = B.getbbox(ch, anchor='ls')
+        l, t = math.floor(L4 / SS), math.floor(T4 / SS)
+        w, h = max(0, math.ceil(R4 / SS) - l), max(0, math.ceil(B4 / SS) - t)
         im = None
-        if w and h:
-            im = Image.new('L', (w, h), 0)
-            ImageDraw.Draw(im).text((-l, -t), ch, font=font, fill=255, anchor='ls')
+        if w and h and R4 > L4 and B4 > T4:
+            im = Image.new('L', (w * SS, h * SS), 0)
+            ImageDraw.Draw(im).text((-l * SS, -t * SS), ch, font=B, fill=255, anchor='ls')
+            im = im.resize((w, h), Image.BOX)
             if not im.getbbox(): im, w, h = None, 0, 0
+        else: w = h = 0
         glyphs.append((cp, w, h, l, t, adv, im))
     # raf yerleşimi
     W = 256; x = y = rowh = 0; pos = {}
@@ -92,14 +122,16 @@ def build(fam, size):
     for cp, w, h, l, t, adv, im in glyphs:
         px, py = pos[cp]
         if im: atlas.paste(im, (px, py))
-        g[str(cp)] = [px, py, w, h, l, t, round(adv, 4)]
+        g[str(cp)] = [px, py, w, h, l, t, round(adv, 7)]
     return atlas, {'size': size, 'asc': asc, 'desc': desc, 'g': g}
 
 
-def kerning(fam):
-    """Harf çifti aralıkları em cinsinden (40 px'te ölçülür; yazıda boyla çarpılır): aynı yazı tipi dosyasındaki çiftler."""
-    lat, ext, _ = FAM[fam]; S = 40
-    fl = ImageFont.truetype(lat, S); fe = ImageFont.truetype(ext, S) if ext else None
+def kerning(fam, lang=None):
+    """Harf çifti aralıkları em cinsinden (HarfBuzz/GPOS; em biriminde ölçülür, yazıda boyla çarpılır): aynı yazı tipi dosyasındaki çiftler.
+    lang 'tr': DOM yazısı (sayfa lang="tr"; Türkçe kuralı "fi" bitişik harfini kapatır); tuval yazısı dilsiz şekillenir."""
+    lat, ext, _ = FAM[fam]
+    fl, S = unit_font(lat); fe = unit_font(ext)[0] if ext else None
+    L = {}
     k = {}
     for a in KERN:
         for b2 in KERN:
@@ -107,16 +139,50 @@ def kerning(fam):
             fa = fl if in_latin(a) or not fe else fe
             fbb = fl if in_latin(b2) or not fe else fe
             if fa is not fbb: continue
-            d = fa.getlength(ca + cb) - fa.getlength(ca) - fa.getlength(cb)
-            if abs(d) >= 0.2: k[ca + cb] = round(d / S, 4)
+            if (id(fa), ca) not in L: L[(id(fa), ca)] = fa.getlength(ca)
+            if (id(fbb), cb) not in L: L[(id(fbb), cb)] = fbb.getlength(cb)
+            d = fa.getlength(ca + cb, language=lang) - L[(id(fa), ca)] - L[(id(fbb), cb)]
+            if abs(d) / S >= 0.0001: k[ca + cb] = round(d / S, 5)
     return k
+
+
+def kerning_space(fam):
+    """Boşluklu harf çiftleri (ör. '. '): tarayıcı DOM yazısında uygular, tuval yazısında (fillText) uygulamaz; yalnız DOM genişliği için."""
+    lat, ext, _ = FAM[fam]
+    fl, S = unit_font(lat); fe = unit_font(ext)[0] if ext else None
+    sp = fl.getlength(' '); k = {}
+    for a in sorted(set(KERN) | {c for c in CHARS if c > 0x20 and in_latin(c)}):   # boşluğun yanındaki her harf ve işaret (· – … gibi)
+        ch = chr(a); f = fl if in_latin(a) or not fe else fe
+        if f is not fl: continue
+        la = fl.getlength(ch)
+        for pair in (ch + ' ', ' ' + ch):
+            d = fl.getlength(pair, language='tr') - la - sp
+            if abs(d) / S >= 0.0001: k[pair] = round(d / S, 5)
+    return k
+
+
+def emoji():
+    """Renkli emoji: Noto Color Emoji'nin bit eşlemleri (109 px) tek RGBA görselde; [x, y, g, y, sol, üst (taban çizgisinden), ilerleme]."""
+    F = ImageFont.truetype(EMOJI_FONT, EMOJI_PPEM)
+    ims = []
+    for ch in EMOJI:
+        l, t, r, b = F.getbbox(ch, anchor='ls')
+        im = Image.new('RGBA', (r - l, b - t), (0, 0, 0, 0))
+        ImageDraw.Draw(im).text((-l, -t), ch, font=F, embedded_color=True, anchor='ls')
+        ims.append((ord(ch), l, t, im))
+    W = sum(im.width + 1 for *_, im in ims); H = max(im.height for *_, im in ims)
+    atlas = Image.new('RGBA', (W, H), (0, 0, 0, 0)); meta = {}; x = 0
+    for cp, l, t, im in ims:
+        atlas.paste(im, (x, 0)); meta[str(cp)] = [x, 0, im.width, im.height, l, t, 136]; x += im.width + 1
+    atlas.save(f'{OUT}/emoji.png', optimize=True)
+    return {'png': 'fonts/atlas/emoji.png', 'ppem': EMOJI_PPEM, 'g': meta}
 
 
 def main():
     os.makedirs(OUT, exist_ok=True)
-    out = {}; kern = {}
+    out = {}; kern = {}; kern_dom = {}
     for fam, sizes in SIZES.items():
-        kern[fam] = kerning(fam)
+        kern[fam] = kerning(fam); kern_dom[fam] = {**kerning(fam, 'tr'), **kerning_space(fam)}   # DOM: Türkçe çiftler + boşluklu çiftler
         for s in sizes:
             key = f'{fam}_{s:g}'
             atlas, meta = build(fam, s)
@@ -124,7 +190,7 @@ def main():
             meta['png'] = f'fonts/atlas/{key}.png'
             out[key] = meta
     with open(FD + '/atlas.json', 'w', encoding='utf-8') as f:
-        json.dump({'kaynak': 'tools/yazi_atlasi.py (elle düzenleme)', 'kern': kern, 'yuzler': out}, f, ensure_ascii=False, separators=(',', ':'))
+        json.dump({'kaynak': 'tools/yazi_atlasi.py (elle düzenleme)', 'kern': kern, 'kernDom': kern_dom, 'yuzler': out, 'emoji': emoji()}, f, ensure_ascii=False, separators=(',', ':'))
     tot = sum(os.path.getsize(f'{OUT}/{k}.png') for k in out)
     print(f'atlas: {len(out)} yüz, {sum(len(v["g"]) for v in out.values())} harf, PNG {tot // 1024} KB, json {os.path.getsize(FD + "/atlas.json") // 1024} KB')
 

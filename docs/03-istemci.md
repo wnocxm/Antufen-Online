@@ -156,6 +156,7 @@ Sekmeler (`#gtools` `v:maps|dg|pet`, `drawGmSys`, `gmX` in `ui.js`):
   - Her tür için "Hayvanı ver" (doğrudan kuluçka, hak doluysa hak artar) ve "Yumurta + kutu".
   - Üstte "Pencereyi aç", "Seviyeme çek", "Dirilt + doyur + iyileştir", "Evcil eşyaları ver" (mama, iksir, diriltme, Sözleşme Taşı, İç Öz, kutular), "Acıktır" (aç hayvan savaşmaz testi), "Hepsini sil".
   - **Dönüşüm ağacı** satırı: "Sonraki biçim" / "Temel biçim" (`stage`), "3 rastgele beceri" (`skills`), "Dönüşüm malzemesi" (`tf`: yardımcı eşyalar, aynı türden 2 yardımcı hayvan, 20000 altın), "Dönüşüm penceresi" / "Beceri aktarma" (`petf` / `petfs`).
+**C++ sürümü** (`native/src/ui/gm.cpp`, `engine/world_gm.cpp`; docs/09 › GM paneli): aynı panel tuvale çizilir, yerleşim tarayıcınınkiyle birebir; `node tools/test/cpp_gm.js` kutu kutu, piksel ve 41 düğmenin sonucunu karşılaştırır. Bu panele bir düğme eklenirse C++'a da eklenmeli (test kutu sayısını karşılaştırır).
 Test: `tools/test/gm.js` panel düğmelerine gerçekten basar (görüntüler `OUT_zindan.png`, `OUT_evcil.png`, `OUT_panda.png`, `OUT_atesdevi.png`, `OUT_aktarma.png`, `OUT_sinif.png`; Ateş Devi'nin 8 biçimini sırayla geçer).
 
 ## Arayüz notları
