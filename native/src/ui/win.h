@@ -2,7 +2,7 @@
 // item_info), ölüm (deadselect), onay kutusu (dialog_yesno). Pencereler 320 (konuşma ve ölüm 373) birim yüksekliğe göre tasarlanmış,
 // ekran yüksekliğine ölçeklenir; görseller yumuşatılarak büyütülür. 8. adım (win_items.cpp): çanta (bag_2), karakter (player), beceri
 // ağacı (skilltree), dükkân (shop + shopinfo), adet kutusu (selnum). 9. adım (win_map.cpp): dünya haritası, ayarlar, NPC listesi.
-// Henüz yok: evcil — menüden seçilince "yakında".
+// 11. adım (win_pet.cpp): evcil hayvan, taktik, dönüşüm / beceri aktarma.
 #pragma once
 #include <functional>
 #include <map>
@@ -35,6 +35,7 @@ class Win {
   std::string assignReq, assignName;                // kısayola yerleştirme isteği (HUD yuvaya dokunulmasını bekler)
   bool optSfx = true, optMusic = true;              // ayarlar (ses sistemi gelince kullanılır)
   void openNpcList(engine::World& w);               // bu haritadaki kişiler (dokununca yürür)
+  void openPetF(engine::World& w, const std::string& mode, const std::string& main = "");   // dönüşüm / beceri aktarma
 
  private:
   Forms& F_;
@@ -64,6 +65,9 @@ class Win {
   // dünya haritası (wm/wm.json): kıta → bölge → bulunduğun harita
   struct { std::string mode = "world"; int area = -1; std::string sel; } WM_;
   core::Json wm_; bool wmLoaded_ = false;
+  // evcil hayvan penceresi (petcomplex + taktik newpetai) ve dönüşüm / beceri aktarma (fantasize_pet)
+  struct { int i = 0, tab = 0, skd = 0, tree = -1; bool ai = false; } PW_;
+  struct { std::string mode = "tf", main, mat, a[2]; } TF_;
   // liste penceresi (NPC listesi)
   struct ListRow { std::string label, sub; int ent = -1; };
   std::vector<ListRow> list_; std::string listTitle_; int listOff_ = 0;
@@ -103,6 +107,12 @@ class Win {
   void drawNum(engine::Canvas& c, float vw, float VH);
   void buyAsk(engine::World& w, const std::string& id);
   void sellAsk(engine::World& w, const std::string& id);
+  // win_pet.cpp
+  void petSprite(engine::Canvas& c, engine::World& w, const Xf& xf, const std::string& look, float x, float y, float ww, float hh, float sc, float alpha = 1);
+  void drawPet(engine::Canvas& c, engine::World& w, float VH);
+  void tapPet(engine::World& w, const std::string& id);
+  void drawPetF(engine::Canvas& c, engine::World& w, float vw, float VH);
+  void tapPetF(engine::World& w, const std::string& id);
   // win_map.cpp
   const core::Json& wm(engine::World& w);
   void drawMap(engine::Canvas& c, engine::World& w, float vw, float VH);

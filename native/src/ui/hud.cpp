@@ -61,15 +61,41 @@ void Hud::drawNames(engine::Canvas& c, World& w, bool advance) {
   }
   { const float X = float(w.map.px(w.player.x, w.player.y) - ox), Y = float(w.map.py(w.player.x, w.player.y) - oy);
     if (!(X < -60 || X > vw_ + 60 || Y < -20 || Y > engine::VH + 100)) text(c, "B", 10, w.P.name, X, Y - 64, 0xffe48a, CENTER); }
+  if (w.pet.on) if (engine::PetRec* p = w.petActive()) {   // evcil hayvan: ad + seviye, can çubuğu, konuşma balonu
+    const float X = float(w.map.px(w.pet.x, w.pet.y) - ox), Y = float(w.map.py(w.pet.x, w.pet.y) - oy);
+    if (!(X < -60 || X > vw_ + 60 || Y < -20 || Y > engine::VH + 100)) {
+      const auto st = w.petStats(*p);
+      text(c, "B", 10, w.petName(*p) + " Sv" + std::to_string(p->lv), X, Y - 52, 0x8fe3ff, CENTER);
+      c.fillRect(X - 14, Y - 48, 28, 3, 0x000000); c.fillRect(X - 14, Y - 48, 28 * float(std::max(0.0, p->hp / st.hp)), 3, 0x30c040);
+      if (w.pet.sayT > 0) bubble(c, w.pet.say, X, Y - 62, float(w.pet.sayT));
+    }
+  }
   // uçan sayılar: 1,1 sn yükselir, son 0,3 sn'de solar
   for (int i = int(w.floats.size()) - 1; i >= 0; i--) {
     World::FloatText& f = w.floats[size_t(i)];
     if (advance) f.t += 1.f / 60;
     if (f.t > 1.1f) { w.floats.erase(w.floats.begin() + i); continue; }
-    const double ex = f.ent == -2 ? w.player.x : w.ents[size_t(f.ent)].x, ey = f.ent == -2 ? w.player.y : w.ents[size_t(f.ent)].y;
+    const double ex = f.ent == -2 ? w.player.x : f.ent == -3 ? w.pet.x : w.ents[size_t(f.ent)].x, ey = f.ent == -2 ? w.player.y : f.ent == -3 ? w.pet.y : w.ents[size_t(f.ent)].y;
     const float X = float(w.map.px(ex, ey) - ox), Y = float(w.map.py(ex, ey) - oy - 50 - f.t * 26);
     text(c, "Bb", std::round(12 * f.s), f.txt, X, Y, f.c, CENTER, f.t < 0.8f ? 1 : (1.1f - f.t) / 0.3f);
   }
+}
+
+// konuşma balonu (HTML ui.js bubble): 130 px'e sarılır, en çok 4 satır; açık parşömen kutu, koyu kenar, alta küçük üçgen
+void Hud::bubble(engine::Canvas& c, const std::string& s, float x, float y, float t) {
+  const float a = std::min(1.f, t); std::vector<std::string> lines; std::string ln; size_t b = 0;
+  while (true) { const size_t sp = s.find(' ', b); const std::string w = s.substr(b, sp == std::string::npos ? std::string::npos : sp - b); const std::string n = ln.empty() ? w : ln + " " + w;
+    if (font_.width("B", 10, n) > 130 && !ln.empty()) { lines.push_back(ln); ln = w; } else ln = n; if (sp == std::string::npos) break; b = sp + 1; }
+  if (!ln.empty()) lines.push_back(ln);
+  if (lines.size() > 4) lines.resize(4);
+  float mw = 0; for (const auto& l : lines) mw = std::max(mw, font_.width("B", 10, l));
+  const float w = std::min(140.f, mw) + 10, h = float(lines.size()) * 12 + 6, bx = std::round(x - w / 2), by = std::round(y - h);
+  c.fillRect(bx, by, w, h, 0xfaf4e2, 0.92f * a); c.strokeRect(bx + 0.5f, by + 0.5f, w - 1, h - 1, 1, 0x6a5030, a);
+  for (int py = int(by + h); py < int(by + h + 5) + 1; py++) for (int px = int(x - 5); px <= int(x + 5); px++) {   // üçgen (4×4 alt örnek)
+    int n = 0; for (int sy = 0; sy < 4; sy++) for (int sx = 0; sx < 4; sx++) { const float X = px + (sx + 0.5f) / 4, Y = py + (sy + 0.5f) / 4 - (by + h); n += Y >= 0 && Y <= 5 && std::fabs(X - x) <= 4 * (1 - Y / 5); }
+    if (n) c.blend(px, py, 0xfaf4e2, 0.92f * a * n / 16.f);
+  }
+  for (size_t i = 0; i < lines.size(); i++) text(c, "B", 10, lines[i], x, by + 13 + float(i) * 12, 0x2a1a0a, CENTER, a, 0);
 }
 
 // ---------------- küçük harita (HTML drawMinimap): zemin 0,18 ölçekte, kişiler/canavarlar nokta, geçitler mor ----------------

@@ -3,6 +3,7 @@
 // (tools/test/cpp_savas.js). Beceriler (useSkill), güçlendirmeler, süren etkiler (kanama, yanma, çürüme), Büyü Hayali burada;
 // beceri tanımları skills.cpp; görevler world_quests.cpp (veri quests.cpp); yol bulma world_nav.cpp; eşyalar world_items.cpp; zindanlar world_dungeon.cpp. Henüz yok: evcil hayvan.
 #pragma once
+#include <cmath>
 #include <functional>
 #include <map>
 #include <memory>
@@ -12,6 +13,7 @@
 
 #include "engine/assets.h"
 #include "engine/balance.h"
+#include "engine/pet.h"
 #include "engine/map.h"
 #include "engine/quests.h"
 #include "engine/rng.h"
@@ -34,6 +36,7 @@ struct Ent {
   // NPC
   int anim = 0; bool pickup = false, hidden = false, dummy = false, node = false; double respawnT = 0;
   std::string key; bool boss = false, prog = false;   // canavar: "sahne:kayıt:sıra" (zindan koşusunda kesilenler), zindan boss'u, ilerleme boss'u
+  int foe = 0;                                        // canavarın son vuranı (HTML m.foe): 0 yok, -1 oyuncu, >0 evcil hayvanın çağrılış numarası
   // canavar
   MonDef* d = nullptr;
   double hp = 0, maxHp = 0, atk = 0, def = 0, homeX = 0, homeY = 0;
@@ -83,6 +86,8 @@ struct CharData {
   // zindan koşusu (HTML P.dun; yoksa on false): kesilen canavarlar bu koşuda doğmaz; günlük giriş sayacı (HTML P.dg)
   struct Run { bool on = false; std::string id; int copy = 0; std::set<std::string> cleared; bool boss = false; } dun;
   std::string dgDay; std::map<std::string, int> dgN;
+  // evcil hayvanlar (HTML P.pets, petOn, petMode, petSlots, petSel)
+  std::vector<PetRec> pets; std::string petOn, petMode = "attack", petSel; int petSlots = 0;
 };
 
 struct Stats { double hp = 0, mp = 0, atk = 0, def = 0, crit = 0, dodge = 0, hpreg = 0, mpreg = 0, res = 0, dr = 0, spd = 0, goldUp = 0, lifeEl = 0,
@@ -172,6 +177,43 @@ class World {
   std::string askText; std::function<void()> askYes;
   void ask(const std::string& t, std::function<void()> yes) { askText = t; askYes = std::move(yes); }
   double warnT = 0;                                         // uyarı bildirimini tekrarlamama (HTML Game.warnT)
+  // evcil hayvanlar (HTML pet.js; world_pet.cpp)
+  PetEnt pet;                                               // çağrılmış hayvanın varlığı (on false: yok)
+  double nowMs = -1;                                        // gerçek saat yerine (ms, test); -1: saat (ölüm/diriliş süresi, kimlik)
+  std::vector<PetRec*> petList();                           // geçerli türden hayvanlar
+  PetRec* petActive();
+  PetRec* petByUid(const std::string& uid);
+  int petSlotsN() const { return P.petSlots ? P.petSlots : 2; }
+  struct PetStats { double hp, mp, patk, matk, def, dodge, crit, range; bool mag; };
+  PetStats petStats(const PetRec& p) const;
+  std::string petName(const PetRec& p) const;
+  const PetForm& petForm(const PetRec& p) const;
+  std::vector<std::string> petSkills(const PetRec& p) const;   // doğuştan + rastgeleler
+  std::string petSkName(const std::string& k) const;
+  long long petNeedXp(int L) const { return (long long)std::floor(bal_.xpNeed(L) * 0.5); }
+  void petHatch(const std::string& eggId);
+  void petSummon(const std::string& uid);
+  void petDismiss();
+  void petSpawn();
+  void petDespawn();
+  void petUpdate(double dt);
+  void petHurt(int mob);                                    // canavar hayvana vurdu
+  void petOnKill(const Ent& m, long long xp);
+  void petGainLv(PetRec& p);
+  bool petUseItem(const std::string& id);
+  void petRelease(const std::string& uid);
+  void petSetMode(const std::string& m) { P.petMode = m; }
+  bool petResting(const PetRec* p) const { return p && !p->dead && P.petOn != p->uid; }
+  struct PetTf { bool ok = false, keep = false; std::string why; int next = 0, need = 0, cost = 0; double chance = 0; std::vector<std::string> give; int gs = -1, ls = -1; };
+  PetTf petTfInfo(const PetRec* main, const PetRec* mat, const std::vector<std::string>& aids);
+  int petTransform(const std::string& mainUid, const std::string& matUid, const std::vector<std::string>& aids);   // 1 başarı, 0 başarısız, -1 olmadı
+  PetTf petSkInfo(const PetRec* main, const PetRec* mat, const std::vector<std::string>& runes);
+  std::string petTransfer(const std::string& mainUid, const std::string& matUid, const std::vector<std::string>& runes);
+  std::vector<std::string> petRollSkills(const PetSpecies& s, const std::string& box);
+  PetRec petMake(const PetSpecies& s, const std::string& box);
+  // GM (HTML Pet.GM)
+  void gmPetEgg(const std::string& cn); void gmPetGive(const std::string& cn); void gmPetLevel(); void gmPetCare(); void gmPetItems();
+  void gmPetHungry(); void gmPetClear(); void gmPetStage(int n); void gmPetSkills(); void gmPetTf();
   static std::string clsTr(const std::string& cls);        // Savaşçı, Büyücü, Kutsal Elçi
   static std::string raceTr(const std::string& race);      // İnsan, Gece Elfi
   void clampVitals();
@@ -251,6 +293,12 @@ class World {
   int sceneGen = 0;   // her sahne yüklemesinde artar (arayüz önbellekleri: küçük harita)
 
  private:
+  double petSatT_ = 0, petJoyT_ = 0;   // evcil tokluk/mutluluk sayaçları (HTML pet.js modül değişkenleri)
+  void petHit(int mob, double mult, bool mag, bool both, double add, double taunt, double slow, double weak, bool side);
+  bool petSkill(const std::string& k, int t);
+  int petPickTarget();
+  void petDie();
+  double nowMillis() const;
   Assets& as_;
   Balance& bal_;
   const core::Json* scene_ = nullptr;

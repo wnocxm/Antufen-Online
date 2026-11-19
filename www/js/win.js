@@ -524,7 +524,7 @@ const Win = (() => {
   // hayvan görselini küçültüp kutuya sığdır
   function petSprite(ctx, L, x, y, w, h, sc, alpha = 1) {
     const sp = Game.map.sprite(L); if (!sp.ok) { if (!PW.pre[L]) { PW.pre[L] = 1; Assets.preload([L]); } return; }
-    ctx.save(); ctx.globalAlpha = alpha; ctx.beginPath(); ctx.rect(x, y, w, h); ctx.clip(); ctx.translate(x + w / 2, y + h - 3); ctx.scale(sc, sc); sp.draw(ctx, 2, Game.time * TICK, 0, 0); ctx.restore();
+    ctx.save(); ctx.beginPath(); ctx.rect(x, y, w, h); ctx.clip(); ctx.translate(x + w / 2, y + h - 3); ctx.scale(sc, sc); sp.draw(ctx, 2, Game.time * TICK, 0, 0, false, alpha); ctx.restore();   // saydamlık drawParts'a (önceden globalAlpha'yı sıfırlıyordu: ulaşılmamış biçimler soluk çıkmıyordu; C++ karşılaştırmasında bulundu)
   }
   function drawPet2(ctx, vw, VH) {
     const k = VH / 290, f = 'n_petcomplex', L = Pet.list(); if (PW.i >= L.length) PW.i = 0; const p = L[PW.i];

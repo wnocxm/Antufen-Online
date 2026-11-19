@@ -52,6 +52,9 @@
 //   zindankapi <id> [kopya] · zindangir <id> [kopya]   GM: zindan kapısının önüne · doğrudan içeri (sayaç artmaz)
 //   kapi <bölge> · evet               kapı bölgesine basılmış say (onay kutusu sorulur) · onay kutusunda Tamam
 //   gmboss · gmtemizle · gmsonkat · gmsifirla · zindancik · dirilt · gun <YYYY-MM-DD> · isinla <kişi adı>
+//   evcilver <tür> · evcilyumurta <tür> · evcilcagir <sıra> · evcilgeri · evcilmod <attack|counter|support|free|idle> · evcilsec <sıra> · evcilbirak <sıra>
+//   evcilgm <seviye|bakim|esya|ac|sil|asama [n]|beceri|tf> · evcildonusum <ana> <yardımcı> [eşya,…] · evcilaktar <ana> <yardımcı> [rün,…]
+//   saatms <ms> (gerçek saat yerine) · evcilcan <oran> · evcildurum <dosya|-> · evcilsavas <dt> <sn> <dosya> [pasif]  otomatik savaş (pasif: oyuncu saldırmaz), her saniye oyuncu + hayvan + canavarlar
 //   geciste <bölge> <dt>             oyuncuyu geçidin ortasına koyup bir kare ilerlet · zindandurum <dosya|->  zindan durumu (JSON)
 //   esya <al|sat|giy|cikar|kullan|ekle|sil> <eşya|yuva> [adet]   eşya işlemi (HTML buyItem, sellItem, equip, unequip, useItem, addItem, removeItem)
 //   gmgear · altin <n>               GM: seviyeye uygun en iyi ekipman · altın
@@ -87,6 +90,24 @@ static void out(const std::string& f, const std::string& text) {
 }
 static std::string jq(const std::string& x) { std::string o = "\""; for (char c : x) { if (c == '"' || c == '\\') o += '\\'; o += c; } return o + "\""; }   // JSON dizgisi
 static std::string num(double v) { char b[64]; std::snprintf(b, sizeof b, "%.17g", v); return b; }   // tam hassasiyet (karşılaştırma)
+
+// evcil hayvan durumu: hayvanlar, çağrılmış olan, varlık, oyuncu, canavarlar (cpp_evcil.js)
+static std::string petRec(World& w) {
+  std::string o = "{\"pets\":["; bool f = true;
+  for (PetRec* p : w.petList()) {
+    std::string sk; for (const std::string& k : p->sk) sk += (sk.empty() ? "" : ",") + jq(k);
+    o += (f ? "" : ",") + std::string("[") + jq(p->sp) + "," + std::to_string(p->st) + ",[" + sk + "]," + std::to_string(p->lv) + "," + num(p->xp) + "," + num(p->hp) + "," + num(p->mp) + "," + num(p->sat) + "," + num(p->joy) + "," + num(p->tal) + "," + (p->dead ? "true" : "false") + "]"; f = false;
+  }
+  int on = -1; { auto L = w.petList(); for (size_t i = 0; i < L.size(); i++) if (L[i]->uid == w.P.petOn) on = int(i); }
+  o += "],\"on\":" + std::to_string(on) + ",\"mod\":" + jq(w.P.petMode) + ",\"hak\":" + std::to_string(w.petSlotsN());
+  if (w.pet.on) o += ",\"ent\":[" + num(w.pet.x) + "," + num(w.pet.y) + "," + jq(w.pet.state) + "," + std::to_string(w.pet.dir) + "," + std::to_string(w.pet.tg) + "]"; else o += ",\"ent\":null";
+  double mhp = 0; int alive = 0, onPet = 0; for (const Ent& e : w.ents) if (e.kind == Ent::MOB) { if (!e.dead) { alive++; mhp += e.hp; } if (!e.dead && w.pet.on && e.foe == w.pet.gen) onPet++; }
+  std::string bag; for (size_t i = 0; i < w.P.bag.size(); i++) bag += (i ? "," : "") + std::string("[") + jq(w.P.bag[i].first) + "," + std::to_string(w.P.bag[i].second) + "]";
+  std::string bf; for (const Buff& b : w.player.buffs) bf += (bf.empty() ? "" : ",") + jq(b.id);
+  o += ",\"oyuncu\":[" + num(w.player.hp) + "," + num(w.player.mp) + "," + std::to_string(w.P.lv) + "," + std::to_string(w.P.xp) + "," + std::to_string(w.P.gold) + "],\"guc\":[" + bf + "],\"canavar\":[" + std::to_string(alive) + "," + num(mhp) + "," + std::to_string(onPet) + "]";
+  o += ",\"canta\":[" + bag + "],\"ileti\":" + jq(w.log.empty() ? std::string() : w.log.back().m) + ",\"bildirim\":" + jq(w.toastMsg) + ",\"bayrak\":" + (w.flags.count("hatch") ? "true" : "false") + "}";
+  return o;
+}
 
 // görev durumu (iz satırı): seviye, deneyim, altın, yükseltme, çanta, sürmekte olan görevler (sayaçlarıyla), bitmiş görevler
 static std::string questRec(World& w, const std::string& tag) {
@@ -332,6 +353,36 @@ int main(int argc, char** argv) {
       else if (cmd == "bekleme") { std::string id; double t; ss >> id >> t; W().player.cds[id] = t; }
       else if (cmd == "gorevver") { int id; ss >> id; W().P.quests[id] = QuestSt(); }   // görevi doğrudan alınmış say (test)
       else if (cmd == "jpeg") { std::string a, b; ss >> a >> b; godat::writeFile(b, core::encodePNG(core::decodeJPEG(godat::readFile(a)))); }   // JPEG → PNG (çözücü denetimi)
+      else if (cmd == "evcilver") { std::string cn; ss >> cn; W().gmPetGive(cn); }
+      else if (cmd == "evcilyumurta") { std::string cn; ss >> cn; W().gmPetEgg(cn); }
+      else if (cmd == "evcilcagir") { int i; ss >> i; auto L = W().petList(); if (i >= 0 && i < int(L.size())) W().petSummon(L[size_t(i)]->uid); }
+      else if (cmd == "evcilgeri") W().petDismiss();
+      else if (cmd == "evcilmod") { std::string m; ss >> m; W().petSetMode(m); }
+      else if (cmd == "evcilsec") { int i; ss >> i; auto L = W().petList(); W().P.petSel = i >= 0 && i < int(L.size()) ? L[size_t(i)]->uid : ""; }
+      else if (cmd == "evcilbirak") { int i; ss >> i; auto L = W().petList(); if (i >= 0 && i < int(L.size())) W().petRelease(L[size_t(i)]->uid); }
+      else if (cmd == "evcilgm") {   // GM: seviye, bakim, esya, ac, sil, asama [n], beceri, tf
+        std::string op; int n = -1; ss >> op >> n; World& w = W();
+        if (op == "seviye") w.gmPetLevel(); else if (op == "bakim") w.gmPetCare(); else if (op == "esya") w.gmPetItems(); else if (op == "ac") w.gmPetHungry();
+        else if (op == "sil") w.gmPetClear(); else if (op == "asama") w.gmPetStage(n); else if (op == "beceri") w.gmPetSkills(); else if (op == "tf") w.gmPetTf();
+      }
+      else if (cmd == "evcildonusum" || cmd == "evcilaktar") {   // <ana sıra> <yardımcı sıra> [eşya,eşya]
+        int a1, b1; std::string ids; ss >> a1 >> b1 >> ids; World& w = W(); auto L = w.petList(); std::vector<std::string> v; std::istringstream is(ids); std::string t; while (std::getline(is, t, ',')) if (!t.empty()) v.push_back(t);
+        const std::string ma = a1 >= 0 && a1 < int(L.size()) ? L[size_t(a1)]->uid : "", mb = b1 >= 0 && b1 < int(L.size()) ? L[size_t(b1)]->uid : "";
+        if (cmd == "evcildonusum") w.petTransform(ma, mb, v); else w.petTransfer(ma, mb, v);
+      }
+      else if (cmd == "saatms") ss >> W().nowMs;
+      else if (cmd == "evcilcan") { double k; ss >> k; if (PetRec* p = W().petActive()) p->hp = W().petStats(*p).hp * k; }
+      else if (cmd == "evcildurum") { std::string f; ss >> f; out(f, petRec(W()) + "\n"); }
+      else if (cmd == "evcilsavas") {   // otomatik savaş (savas oto gibi), her saniye oyuncu + hayvan + canavarlar
+        double dt, sec; std::string f, mode; ss >> dt >> sec >> f >> mode; World& w = W();
+        const int steps = int(sec / dt + 0.5), per = int(1 / dt + 0.5); std::string tr = "[\n"; bool first = true;
+        for (int k = 1; k <= steps; k++) {
+          if (mode != "pasif" && (w.target() < 0 || w.ents[w.target()].dead)) { const int m = w.nearestMob(8); if (m >= 0) w.setTarget(m, true); }   // pasif: oyuncu saldırmaz
+          w.update(dt);
+          if (k % per == 0) { tr += std::string(first ? "" : ",\n") + petRec(w); first = false; }
+        }
+        out(f, tr + "\n]\n");
+      }
       else if (cmd == "zindankapi") { std::string id; int c = 0; ss >> id >> c; W().gmDungeonDoor(id, c); }   // GM: zindan kapısının önüne
       else if (cmd == "zindangir") { std::string id; int c = 0; ss >> id >> c; W().gmDungeonEnter(id, c); }    // GM: doğrudan içeri
       else if (cmd == "kapi") { int r; ss >> r; W().warnT = 0; W().dungeonDoor(r); }                           // kapı bölgesine basılmış say
@@ -394,7 +445,7 @@ int main(int argc, char** argv) {
         out(f, o);
       }
       else if (cmd == "gorevhazir") { int id, n = 0; ss >> id >> n; QuestSt q; q.n = n; q.ready = true; W().P.quests[id] = q; }   // görev teslime hazır (test)
-      else if (cmd == "pencere") { std::string n; int e = -1; ss >> n >> e; hud->win.close(); if (n == "shop") hud->win.openShop(W(), W().ents.at(size_t(e)).name); else if (n != "kapat") hud->win.open(W(), n, e); }
+      else if (cmd == "pencere") { std::string n; int e = -1; ss >> n >> e; hud->win.close(); if (n == "shop") hud->win.openShop(W(), W().ents.at(size_t(e)).name); else if (n == "petf" || n == "petfs") hud->win.openPetF(W(), n == "petf" ? "tf" : "sk"); else if (n != "kapat") hud->win.open(W(), n, e); }
       else if (cmd == "ciz") { W().draw(canvas, opts); hud->draw(canvas, W(), false); }
       else if (cmd == "dokun") { float x, y; ss >> x >> y; hud->press(W(), 1, x, y); hud->release(W(), 1, x, y); hud->win.clearPressed(); hud->draw(canvas, W(), false); }
       else if (cmd == "konus") { int e; ss >> e; W().talkTo(e); hud->draw(canvas, W(), false); }

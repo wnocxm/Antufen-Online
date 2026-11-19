@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "core/json.h"
+#include "engine/pet.h"
 #include "engine/quests.h"
 #include "engine/skills.h"
 #include "engine/vfs.h"
@@ -31,6 +32,7 @@ struct Item {
   std::string id, slot, cls, name, en, desc, gfx; int lv = 0, icon = 0, price = 0, sell = 0; std::string ik; std::map<std::string, double> st;
   std::vector<std::string> stOrder;   // st anahtarları dosyadaki sırayla (bilgi satırı)
   bool use = false, qt = false, growth = false, pet = false, quest = false; double useHp = 0, useMp = 0;
+  core::Json petJ;   // evcil eşyası alanları (egg, box, food, petHp, petMp, petRevive, petSlot, petGift, petXp, tf, add, below, sk, slot)
   struct Hot { std::string res; double amt = 0, sec = 0; } hot, hot2;
 };
 
@@ -67,6 +69,7 @@ class Balance {
   std::vector<DungeonDef> dungeons;
   std::map<std::string, std::pair<std::string, std::pair<int, int>>> dungeonExit;   // "sahne:bölge" → yanlış bağlı geçidin gerçek hedefi (sahne, x, y)
   std::map<std::string, DungeonTp> dungeonTp;                                        // kişi adı → ışınlanma
+  PetData pets;                                                                      // evcil hayvanlar (pets.json)
 
  private:
   const core::Json* D_ = nullptr;

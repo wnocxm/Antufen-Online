@@ -183,7 +183,7 @@ std::string World::itemName(const std::string& id) const { const Item* it = bal_
 void World::useItem(const std::string& id) {
   const Item* it = bal_.item(id); Player& p = player; const Stats s = stats();
   if (!it || !countItem(id) || p.dead) return;
-  if (it->pet) { toast("Evcil hayvanlar yakında."); return; }
+  if (it->pet) { petUseItem(id); return; }   // evcil hayvan eşyaları
   if (!it->slot.empty()) { equip(id); return; }
   if (!it->use) { if (it->growth) openGrowthBox(id); return; }
   if (it->qt) { questUseItem(id); return; }
@@ -297,6 +297,7 @@ void World::loadScene(const std::string& sid, const int* arrive) {
   player = Player(); player.x = px; player.y = py; player.t = random() * 20;   // HTML new Player (Ent: t = Math.random() * 20)
   player.look = keep.cls.empty() ? Look{} : keep; player.doll.set(as_, player.look);
   const Stats s = stats(); player.hp = hp > 0 ? std::min(hp, s.hp) : s.hp; player.mp = mp > 0 ? std::min(mp, s.mp) : s.mp;
+  petSpawn();   // çağrılmış evcil hayvan sahibinin yanında (HTML Pet.spawn: oyuncudan hemen sonra)
   camX = map.px(player.x, player.y); camY = map.py(player.x, player.y);
   arriveT = 1.5;
 }
@@ -374,6 +375,7 @@ template <class E> bool World::stepTo(E& e, double tx, double ty, double sp, dou
   else { moveEnt(e, 0, jsSign(dy) * std::min(st, std::fabs(dy))); e.dir = dirOf(0, dy); if (std::fabs(e.y - oy) < 1e-4) e.ax = std::fabs(dx) > eps ? 'x' : 0; }
   return std::fabs(tx - e.x) <= eps && std::fabs(ty - e.y) <= eps;
 }
+template bool World::stepTo<PetEnt>(PetEnt&, double, double, double, double);   // evcil hayvan (world_pet.cpp)
 
 // ---------------- efektler ----------------
 int World::pushFx(const std::string& name, double x, double y, int dir, bool glow) {
@@ -463,7 +465,7 @@ int World::hitMob(int i, double mult, const HitOpt& o) {
   if (dmgUp) d = jsRound(d * (1 + dmgUp / 100));                  // Büyü Darbesi katları
   if (dmgOut) d = jsRound(d * std::min(1.0, dmgOut));             // Element Bağışı sırasında hasar düşer
   const int dd = int(std::max(1.0, d));
-  m.hp -= dd; m.aggro = true; m.state = "hurt"; m.animT = 0; m.stateT = 0.3;
+  m.hp -= dd; m.aggro = true; m.state = "hurt"; m.animT = 0; m.stateT = 0.3; if (!(m.tauntT > 0)) m.foe = -1;   // son vuran: oyuncu
   if (o.slow) m.slowT = o.slow;
   ufloat(i, (r.crit ? "!" : "") + std::to_string(dd), r.crit ? 0xffd040 : o.tick ? 0xd8b0ff : 0xffffff, r.crit ? 1.3f : 1);
   if (!o.tick) {
@@ -607,6 +609,7 @@ void World::killMob(int i) {
   else if (!m.d->passive && random() < 0.025) { const std::string g = randomGear(std::max(1, m.d->lv)); if (!g.empty()) { addItem(g, 1, true); note("Ganimet: " + itemName(g), LOG_LOOT); } }
   questKill(m.name);   // görev sayaçları ve toplama zarları (HTML'deki yerinde: ganimetten sonra, evcil yumurtasından önce)
   dungeonOnKill(m);    // zindan: kesilen canavar bu koşuda doğmaz, son boss sandığı
+  petOnKill(m, xp);    // evcil hayvanın deneyim payı
   // evcil yumurtası: görünüş ailesi uyan tür varsa küçük olasılıkla (HTML Pet.dropEgg)
   if (const Balance::MobRec* info = bal_.mobInfo(m.name)) if (const std::string* egg = bal_.eggFor(info->look)) {
     const double ch = m.d->rank == 2 ? 0.25 : m.d->rank ? 0.03 : 0.004; if (random() < ch) { addItem(*egg, 1, true); toast("Ganimet: " + itemName(*egg) + "!"); note("Ganimet: " + itemName(*egg), LOG_Q); }
@@ -749,6 +752,7 @@ void World::update(double dt, double sx, double sy) {
     if (p.state == "move") p.t += went * 8 / STRIDE; else p.t += dt * TICK;
     checkExits();
   }
+  petUpdate(dt);   // evcil hayvan (HTML Pet.update: oyuncudan sonra, canavarlardan önce)
   // NPC'ler ve canavarlar (oluşturulma sırasıyla)
   for (size_t i = 0; i < ents.size(); i++) {
     Ent& e = ents[i];
@@ -792,14 +796,23 @@ void World::update(double dt, double sx, double sy) {
     if (e.aggro && (dh > 12 || p.dead)) { e.aggro = false; e.hp = e.maxHp; }
     if (e.state == "hurt" || e.state == "attack") continue;
     if (e.tauntT > 0) e.tauntT -= dt;
-    const double df = dp;   // hedef: oyuncu (evcil hayvan sonraki adımda)
+    // hedef: son vuran (evcil hayvan da olabilir); hayvan yoksa oyuncu
+    const bool toPet = e.foe > 0 && pet.on && e.foe == pet.gen;
+    const double fx0 = toPet ? pet.x : p.x, fy0 = toPet ? pet.y : p.y, df = jsHypot(fx0 - e.x, fy0 - e.y);
     if (e.aggro && !p.dead) {
-      if (df > 1.3) { if (!(e.rootT > 0)) { stepTo(e, p.x, p.y, sp, dt); e.state = "move"; } }
+      if (df > 1.3) { if (!(e.rootT > 0)) { stepTo(e, fx0, fy0, sp, dt); e.state = "move"; } }
       else {
-        e.dir = dirOf(p.x - e.x, p.y - e.y);
+        e.dir = dirOf(fx0 - e.x, fy0 - e.y);
         if (e.atkT <= 0 && !(e.sealT > 0)) {
           e.atkT = 1.6; e.state = "attack"; e.animT = 0; e.stateT = 0.5;
-          later(0.3, [this, i]() { Ent& m = ents[i]; if (m.dead || jsHypot(player.x - m.x, player.y - m.y) >= 1.9) return; hurtPlayer(int(i)); });
+          const int gen = toPet ? pet.gen : 0;
+          later(0.3, [this, i, gen]() {
+            Ent& m = ents[i];
+            if (!gen) { if (m.dead || jsHypot(player.x - m.x, player.y - m.y) >= 1.9) return; hurtPlayer(int(i)); return; }
+            if (!pet.on || pet.gen != gen) return;   // vurulacak hayvan geri çağrıldı / öldü
+            if (m.dead || jsHypot(pet.x - m.x, pet.y - m.y) >= 1.9) return;
+            petHurt(int(i));
+          });
         } else e.state = "idle";
       }
     } else {
@@ -865,10 +878,11 @@ void World::draw(Canvas& c, const DrawOpts& o) {
   auto visible = [&](double X, double Y) { return !(X < ox - 100 || X > ox + vw + 100 || Y < oy - 20 || Y > oy + vh + 150); };
   for (size_t i = 0; i < ents.size(); i++) if (visible(map.px(ents[i].x, ents[i].y), map.py(ents[i].x, ents[i].y))) list.push_back({ents[i].x + ents[i].y + 0.01, 1, i});
   if (visible(map.px(player.x, player.y), map.py(player.x, player.y))) list.push_back({player.x + player.y + 0.01, 2, 0});
+  if (pet.on && visible(map.px(pet.x, pet.y), map.py(pet.x, pet.y))) list.push_back({pet.x + pet.y + 0.01, 3, 0});   // evcil hayvan (HTML'de oyuncudan sonra)
   std::stable_sort(list.begin(), list.end(), [](const Item& a, const Item& b) { return a.depth < b.depth; });
   for (const Item& it : list) {
     if (it.kind == 0) { const MapObj& ob = map.objs[it.i]; ob.sp->draw(c, ob.anim, tt, int(ob.X - ox), int(ob.Y - oy)); continue; }
-    const double ex2 = it.kind == 1 ? ents[it.i].x : player.x, ey2 = it.kind == 1 ? ents[it.i].y : player.y;
+    const double ex2 = it.kind == 1 ? ents[it.i].x : it.kind == 3 ? pet.x : player.x, ey2 = it.kind == 1 ? ents[it.i].y : it.kind == 3 ? pet.y : player.y;
     const int X = int(jsRound(map.px(ex2, ey2) - ox)), Y = int(jsRound(map.py(ex2, ey2) - oy));
     // hedef halkası (canavar kırmızı, kişi yeşil) ve ayak gölgesi kesirli konumda, kenarı yumuşak (HTML ctx.ellipse)
     const double Xf = map.px(ex2, ey2) - ox, Yf = map.py(ex2, ey2) - oy;
@@ -878,6 +892,14 @@ void World::draw(Canvas& c, const DrawOpts& o) {
       if (o.shadows && !(e.kind == Ent::NPC && e.hidden)) c.fillEllipse(float(Xf), float(Yf), 11, 5, 0x000000, 0.35f);
       if (e.kind == Ent::MOB) drawMob(c, e, X, Y);
       else if (!e.hidden && e.sp && e.sp->ok()) e.sp->draw(c, std::min(e.anim, e.sp->animCount() - 1), e.t, X, Y);
+    } else if (it.kind == 3) {   // HTML PetEnt.draw: saldırı / yürüme / durma kareleri, yön
+      if (o.shadows) c.fillEllipse(float(Xf), float(Yf), 11, 5, 0x000000, 0.35f);
+      if (pet.sp && pet.sp->ok()) {
+        const int a = pet.state == "attack" ? 2 : pet.state == "move" ? 1 : 0; int anim = a * 4 + pet.dir;
+        if (anim >= pet.sp->animCount() || !pet.sp->A()["a"][anim].size()) anim = pet.dir;
+        const double t = pet.state == "attack" ? std::min(pet.animT, double(pet.sp->animLen(anim) - 1)) : pet.t;
+        pet.sp->draw(c, anim, t, X, Y);
+      }
     } else {
       if (o.shadows) c.fillEllipse(float(Xf), float(Yf), 11, 5, 0x000000, 0.35f);
       drawPlayer(c, X, Y);

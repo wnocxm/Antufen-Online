@@ -124,6 +124,10 @@ Kullanıcı onayladı (zindanlardan sonra). Orijinal sistem dört aşamada kurul
   - `petf` / `petfs`: dönüşüm ve beceri aktarma penceresini açar.
 - Tür satırları: şablon, kutu, doğuştan beceri ve 7. biçim adı. Arama biçim adlarında da çalışır.
 
+## C++ sürümü (19.11)
+- `native/src/engine/world_pet.cpp` + `pet.h` (mantık, HTML pet.js ile aynı sıra ve zar), `native/src/ui/win_pet.cpp` (pencereler). Veri aynı `pets.json`. GM: `gmPet*` (test modunda `evcilgm …`). Karşılaştırma: `node tools/test/cpp_evcil.js` (46 adım birebir), pencereler `cpp_pencere.js`. Ayrıntı docs/09 › Evcil hayvanlar.
+- pet.js değişirse world_pet.cpp da aynı değişikliği almalı ve `cpp_evcil.js` yeniden çalıştırılmalı.
+
 ## Görsel denetim
 - `node tools/test/evcil_kolaj.js`: bütün türlerin 8 biçimi, beceri simgesi ve yumurtaları tek görselde.
 - `LOOKS='a,b' node tools/test/gorunus.js`: herhangi görünüşleri yan yana karşılaştırır.

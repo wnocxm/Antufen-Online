@@ -32,7 +32,7 @@ const core::Image* Assets::sheet(const std::string& file, int bmp, int palId) {
   std::unique_ptr<core::Image> img;
   const std::string path = "sheets/" + sk + ".png";
   if (vfs_->exists(path)) {
-    img = std::make_unique<core::Image>(core::decodePNG(vfs_->read(path)));
+    img = std::make_unique<core::Image>(core::decodePNG(vfs_->read(path))); img->canvas = true;   // HTML'de paletle boyanmış tuval
     // ANRUFEN_TARAYICI_ALFA=1: tarayıcının yarı saydam piksellerdeki yuvarlamasını taklit et (yalnız HTML karşılaştırma testi; docs/09)
     static const bool browserAlpha = std::getenv("ANRUFEN_TARAYICI_ALFA") != nullptr;
     if (browserAlpha) for (size_t i = 0; i < img->px.size(); i += 4) {
@@ -92,6 +92,26 @@ void Sprite::draw(Canvas& c, int anim, double t, int x, int y, bool mirror, floa
   const core::Image* S = as_->sheet(r[0].str(), r[1].i(), r[3].i()); if (!S) return;
   const int f = frameOf(anim, t); if (f < 0) return;
   drawParts(c, *A_, f, {S}, x, y, mirror, alpha, glow);
+}
+
+void Sprite::drawScaled(Canvas& c, int anim, double t, float x, float y, float k, float alpha, bool smooth) {
+  if (!ok_) return;
+  const core::Json& r = *r_;
+  const core::Image* S = as_->sheet(r[0].str(), r[1].i(), r[3].i()); if (!S) return;
+  const int f = frameOf(anim, t); if (f < 0) return;
+  for (const core::Json& p : (*A_)["f"][f].arr()) {
+    const core::Json& m = (*A_)["m"][p[0].i()]; if (!m.isArr()) continue;
+    const int flags = p[1].i(), w = m[2].i(), h = m[3].i(), px = p[2].i(), py = p[3].i(); const bool fx = flags & 1, fv = flags & 2;
+    const int left = fx ? px - w : px, top = fv ? py - h : py;
+    if (!fx && !fv) { c.drawImage(*S, float(m[0].i()), float(m[1].i()), float(w), float(h), x + left * k, y + top * k, w * k, h * k, alpha, smooth); continue; }
+    core::Image part; part.w = w; part.h = h; part.px.resize(size_t(w) * h * 4); part.canvas = S->canvas;   // aynalı parça: aynalanmış kopyadan
+    for (int yy = 0; yy < h; yy++) for (int xx = 0; xx < w; xx++) {
+      const int sx = m[0].i() + (fx ? w - 1 - xx : xx), sy = m[1].i() + (fv ? h - 1 - yy : yy);
+      if (sx < 0 || sy < 0 || sx >= S->w || sy >= S->h) continue;
+      const uint8_t* q = S->at(sx, sy); uint8_t* d = part.at(xx, yy); for (int i = 0; i < 4; i++) d[i] = q[i];
+    }
+    c.drawImage(part, 0, 0, float(w), float(h), x + left * k, y + top * k, w * k, h * k, alpha, smooth);
+  }
 }
 
 // ---------------- Paperdoll ----------------

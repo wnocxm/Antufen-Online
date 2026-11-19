@@ -56,6 +56,7 @@ class Hud {
   const core::Image* image(const std::string& path);
   void text(engine::Canvas& c, const std::string& fam, float size, const std::string& s, float x, float y, uint32_t col, Align a = LEFT, float alpha = 1, float lw = 2.5f);
   void drawNames(engine::Canvas& c, engine::World& w, bool advance);
+  void bubble(engine::Canvas& c, const std::string& s, float x, float y, float t);
   void drawMinimap(engine::Canvas& c, engine::World& w, float x, float y, float W, float H);
   void drawTracker(engine::Canvas& c, engine::World& w);
   void drawSlot(engine::Canvas& c, engine::World& w, const std::string& sl, float x, float y, float k);

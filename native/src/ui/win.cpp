@@ -31,6 +31,7 @@ void Win::open(World& w, const std::string& name, int npc, const std::string& sa
   if (name == "task") ksel_ = 0;
   if (name == "shop") { H_.tab = 0; H_.sel.clear(); H_.off = 0; }
   if (name == "map") { WM_.mode = "world"; WM_.sel.clear(); }
+  if (name == "pet") { auto L = w.petList(); for (size_t i = 0; i < L.size(); i++) if (L[i]->uid == w.P.petOn) PW_.i = int(i); }
   B_.sel.clear(); B_.page = 0;
   if (name == "bag") w.questFlag("openBag");
 }
@@ -81,7 +82,12 @@ std::pair<std::string, std::vector<Win::Opt>> Win::npcOptions(World& w) {
     return {txt, o};
   }
   if (w.balance().shops.count(cn)) { Opt e; e.t = "Alışveriş"; e.a = "shop"; e.c = 0xffe070; o.push_back(e); }
-  if (cn == "魔法兽强化大师") for (const char* t : {"✦ Dönüşüm", "✦ Beceri aktarma"}) { Opt e; e.t = t; e.a = "soon"; o.push_back(e); }
+  if (cn == "魔法兽强化大师") {   // orijinal: 幻化 / 技能转移 düğmeleri
+    Opt a; a.t = "✦ Dönüşüm"; a.a = "petf"; a.s = "tf"; Opt b; b.t = "✦ Beceri aktarma"; b.a = "petf"; b.s = "sk";
+    Opt h; h.t = "Dönüşüm ve beceri aktarma nedir?"; h.a = "say";
+    h.s = "Dönüşüm, bir evcil hayvanın özünü alıp başka birini evrimleştiren özel bir törendir. İki hayvan da dinleniyor olmalı. Evcil hayvan penceresinde Dönüşüm'ü seç, evrimleşecek hayvanı ana yuvaya, malzeme hayvanı yardımcı yuvaya koy. Başarılı olursa ana hayvanın dönüşüm düzeyi artar, gücü de artar; başarısız olursa düzeyi bir düşer. Yardımcı eşyalar başarı şansını artırır ya da düşüşü önler. Yardımcı hayvan her durumda kaybolur. Beceri aktarma da buna benzer: ana hayvan, yardımcı hayvanın bir becerisini öğrenir. Yalnız aynı türden (fiziksel, savunma, büyü, destek) hayvanlar beceri aktarabilir ve hangi becerinin geçeceği şansa bağlıdır.";
+    o.push_back(a); o.push_back(b); o.push_back(h);
+  }
   for (int qi : w.questsFor(cn)) {
     const Quest& q = Q.all()[size_t(qi)]; const std::string st = w.questState(qi);
     const bool cc = st == "new" && !q.reqAny && q.req.size() == 1 && q.req[0] == 80344;   // Ozan: "Sınıf değiştirmek istiyorum!" sınıfın giriş görevini verir
@@ -147,6 +153,7 @@ void Win::tapNpc(World& w, const std::string& id) {
   if (e.a == "back") { dq_ = -1; return; }
   if (e.a == "say") { say_ = e.s; return; }
   if (e.a == "soon") { w.toast("Bu bölüm yakında."); return; }
+  if (e.a == "petf") { openPetF(w, e.s); return; }
   if (e.a == "dtp") { close(); const auto L = w.dungeonTps(e.s); if (!L.empty()) w.dungeonTpGo(*L[0].second); return; }
   if (e.a == "shop") { const std::string cn = w.ents[size_t(n)].name; close(); openShop(w, cn); return; }
   if (e.a == "tp") { close(); w.questTeleport(e.qi); return; }
@@ -276,7 +283,9 @@ void Win::draw(engine::Canvas& c, World& w, float dt) {
   else if (cur == "shop") drawShop(c, w, vw, VH);
   else if (cur == "dead") drawDead(c, w, vw, VH);
   else if (cur == "list") drawList(c, w, VH);
+  else if (cur == "petf") drawPetF(c, w, vw, VH);
   if (cur == "sys") { drawHub(c, w, VH); drawSys(c, w, VH); }
+  else if (cur == "pet") { drawHub(c, w, VH); drawPet(c, w, VH); }
   else if (cur == "map") { drawMap(c, w, vw, VH); drawHub(c, w, VH); }
   if (cur == "hub") drawHub(c, w, VH);
   if (modal_.on) drawModal(c, vw, VH);
@@ -303,12 +312,14 @@ bool Win::tap(World& w, float x, float y) {
   const std::string id = h->id; pressed_ = id; pressT_ = clock_;
   if (id.rfind("hub:", 0) == 0) {
     const std::string k = id.substr(4);
-    if (k == "task" || k == "role" || k == "bag" || k == "skill" || k == "map" || k == "sys") { if (k != cur) { close(); open(w, k); } }
+    if (k == "task" || k == "role" || k == "bag" || k == "skill" || k == "map" || k == "sys" || k == "pet") { if (k != cur) { close(); open(w, k); } }
     else if (k != cur) w.toast("Bu pencere yakında.");
     return true;
   }
   if (id == "close") { close(); return true; }
   if (cur == "sys") { if (id.rfind("s:", 0) == 0) tapSys(w, id.substr(2)); return true; }
+  if (cur == "pet") { tapPet(w, id); return true; }
+  if (cur == "petf") { tapPetF(w, id); return true; }
   if (cur == "map") { tapMap(w, id); return true; }
   if (cur == "list") { tapList(w, id); return true; }
   if (cur == "bag") tapBag(w, id);

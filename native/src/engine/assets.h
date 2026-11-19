@@ -49,6 +49,8 @@ class Sprite {
   int frameOf(int anim, double t) const;   // -1: yok
   int animLen(int anim) const;
   void draw(Canvas& c, int anim, double t, int x, int y, bool mirror = false, float alpha = 1.f);
+  // ölçekli (pencerelerde: HTML'de dönüşümlü tuvale drawImage): (x, y) ekran kökü, k ölçek, smooth yumuşatma
+  void drawScaled(Canvas& c, int anim, double t, float x, float y, float k, float alpha = 1.f, bool smooth = true);
   const core::Json& A() const { return *A_; }
 
  private:

@@ -14,6 +14,7 @@ const rect = (f, id) => F2[f].c.find(c => c.id === id).s[0].r;
 // form biriminden ekrana (win.js nBegin): x = safeL + fx·k, y = (fy - oy)·k
 const at = (f, id, k, oy = 0, dx = 0, dy = 0) => { const r = rect(f, id); return [(r[0] + dx + r[2] / 2) * k, (r[1] + dy + r[3] / 2 - oy) * k]; };
 const kN = 360 / 373, kT = 360 / 320;
+const kP = 360 / 290, PX = 126 * 360 / 320, PY = Math.round((360 - 259 * kP) / 2), kF = Math.min(360 / 330, 640 / 495);   // evcil penceresi, dönüşüm penceresi
 // dünya haritası (win.js mapRect, 640×360): görünüm alanı ve Guanlin'in bölgesi, o bölgede başka bir harita
 const WMD = JSON.parse(fs.readFileSync('www/assets/wm/wm.json', 'utf8'));
 const MW = 544, MH = 344, MOX = 82, MOY = 8, MVX = MOX + 4, MVY = MOY + 4, MVW = MW - 8, MVH = MH - 4 - 36, MBY = MOY + MH - 36 + 3;
@@ -44,6 +45,13 @@ const CASES = [
   ['harita_bolge', [['pencere', 'map'], ['dokun', ...areaAt], ['dokun', ...scAt]]],
   ['harita_yerel', [['pencere', 'map'], ['dokun', MOX + 8 + 35, MBY + 15]]],
   ['ayarlar', [['pencere', 'sys']]],
+  // 11. adım: evcil hayvan (Bilgi, Beceriler, Ağaç, Taktik), dönüşüm / beceri aktarma
+  ['evcil', [['pencere', 'pet']]],
+  ['evcil_beceri', [['pencere', 'pet'], ['dokun', PX + (14 + 66 + 31) * kP, PY + 140 * kP]]],
+  ['evcil_agac', [['pencere', 'pet'], ['dokun', PX + (14 + 132 + 31) * kP, PY + 140 * kP]]],
+  ['evcil_taktik', [['pencere', 'pet'], ['dokun', ...at('petcomplex', 50757, kP, 0, PX / kP, PY / kP)]]],
+  ['donusum', [['pencere', 'petf']]],
+  ['donusum_aktarma', [['pencere', 'petf'], ['dokun', 58 + 404 * kF, 5 + 35 * kF]]],
   ['adet', [['pencere', 'shop', '道具商人（人类）'], ['dokun', (rect('shop', 50334)[0] + 104) * kT, (49 + 26 - 41) * kT], ['dokun', ...at('shopinfo', 50369, kT, 41, Math.min(358, 640 / kT - 229), 70)], ['dokun', ...at('selnum', 50255, 1.3, 0, 172 / 1.3, 96 / 1.3)]]],
 ];
 (async () => {
@@ -66,14 +74,14 @@ const CASES = [
   await p.evaluate(([M, kit]) => { const P = Game.P; Object.assign(P, { cls: '战士', race: '人类', sex: 'male', face: '1001', name: 'Kahraman', eq: {}, bag: [], gold: 0, xp: 0, lv: 1, sk: {}, sp: 0, adv: 0, quests: {}, done: {}, quick: QUICK0.slice() }); gmLevel(8);
     ClassGM.done(80004); P.quests[80439] = { n: 0, ready: false };
     addItem('growthBox', 1, true); useItem('growthBox'); addItem('30016', 12, true); addItem('30019', 4, true); addItem(kit.weap, 1, true); addItem(kit.other, 1, true); P.gold = 1234;
-    skillUp(SKBYSN[kit.sk0]); skillUp(SKBYSN[kit.sk0]); Math.random = eval(M)(7); }, [`(a => () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; })`, kit]);
+    skillUp(SKBYSN[kit.sk0]); skillUp(SKBYSN[kit.sk0]); Math.random = eval(M)(7); Date.now = () => 1800000000000; Pet.GM.give('狼'); }, [`(a => () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; })`, kit]);
   await p.evaluate(() => gotoScene('120005', null, [10, 25], null));
   await p.waitForFunction(() => Game.sceneId === '120005' && Game.player && !Game.transit, null, { timeout: 30000 });
   await p.evaluate(() => { const pl = Game.player, s = stats(); pl.doll.set(look()); pl.hp = s.hp; pl.mp = s.mp; Game.time = 0; pl.t = 0; pl.state = 'idle'; pl.combatT = 0; for (const e of Game.ents) e.t = 0; window.__upd(0); setTarget(null); });
   await p.waitForTimeout(1500);
   const scen = ['veri www/assets', 'golge 1', 'ekran 640 360', 'arayuz 1', 'tohum 7', 'karakter 战士 人类 male', 'ad Kahraman', 'portre 1001', 'seviye 8',
     `gmbitir 80004 ${path.join(OUT, 'gm.json')}`, 'gorevver 80439', 'esya ekle growthBox 1', 'esya kullan growthBox', 'esya ekle 30016 12', 'esya ekle 30019 4', `esya ekle ${kit.weap} 1`, `esya ekle ${kit.other} 1`,
-    'altin 1234', `beceriyukselt ${kit.sk0}`, `beceriyukselt ${kit.sk0}`, 'tohum 7', 'sahne 120005 10 25', 'saat0', 'doldur', 'temizle'];
+    'altin 1234', `beceriyukselt ${kit.sk0}`, `beceriyukselt ${kit.sk0}`, 'sahne 120207 3 13', 'tohum 7', 'saatms 1800000000000', 'evcilver 狼', 'sahne 120005 10 25', 'saat0', 'doldur', 'temizle'];
   for (const [ad, acts] of CASES) {
     for (const a of acts) {
       // pencere açılınca bir kare çizilir (dokunma bölgeleri çizimde kurulur; gerçek oyunda dokunuştan önce hep kare vardır)

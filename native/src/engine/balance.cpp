@@ -46,7 +46,7 @@ void Balance::load(const Vfs& vfs, const core::Json& D) {
       hot(u["hot"], x.hot); hot(u["hot2"], x.hot2);
     }
     for (const auto& s : it["st"].obj()) { x.st[s.first] = s.second.num(); x.stOrder.push_back(s.first); }
-    x.desc = it["desc"].str(); x.gfx = it["gfx"].str(); x.price = it["price"].i(0); x.sell = it["sell"].i(0); x.pet = it["pet"].truthy();
+    x.desc = it["desc"].str(); x.gfx = it["gfx"].str(); x.price = it["price"].i(0); x.sell = it["sell"].i(0); x.pet = it["pet"].truthy(); x.petJ = it["pet"];
     itemIdx_[x.id] = items_.size(); items_.push_back(std::move(x));
   }
   for (const auto& kv : I["shops"].obj()) {
@@ -109,6 +109,7 @@ void Balance::load(const Vfs& vfs, const core::Json& D) {
   if (vfs.exists("pets.json")) {
     const core::Json P = core::Json::parse(vfs.readText("pets.json"));
     for (const core::Json& s : P["species"].arr()) if (!s["apk"].truthy()) eggFam_.push_back({lookFamily(s["forms"][0]["look"].str()), s["egg"].str()});
+    pets.load(P);
   }
 }
 
@@ -164,4 +165,25 @@ const std::string* Balance::eggFor(const std::string& look) const {
   return nullptr;
 }
 
+}  // namespace engine
+
+namespace engine {
+static std::string jsKey(const core::Json& v) { if (v.isStr()) return v.str(); const double d = v.num(); return std::floor(d) == d ? std::to_string((long long)d) : std::to_string(d); }
+void PetData::load(const core::Json& J) {
+  species.clear(); templates.clear(); stages.clear(); skills.clear();
+  for (const core::Json& s : J["species"].arr()) {
+    PetSpecies x; x.cn = s["cn"].str(); x.tr = s["tr"].str(); x.en = s["en"].str(); x.egg = s["egg"].str(); x.box = s["box"].str(); x.skill = jsKey(s["skill"]); x.tpl = s["tpl"].i(); x.apk = s["apk"].truthy();
+    for (const core::Json& f : s["forms"].arr()) { PetForm k; k.cn = f["cn"].str(); k.tr = f["tr"].str(); k.en = f["en"].str(); k.look = f["look"].str(); for (const core::Json& t : f["sayTr"].arr()) k.sayTr.push_back(t.str()); x.forms.push_back(std::move(k)); }
+    for (const core::Json& t : s["chatTr"].arr()) x.chatTr.push_back(t.str());
+    species.push_back(std::move(x));
+  }
+  for (const auto& kv : J["templates"].obj()) {
+    const core::Json& t = kv.second; PetTemplate x; x.tr = t["tr"].str(); x.en = t["en"].str(); x.mag = t["cls"].str() == "mag";
+    x.hpG = t["hp_growth"].num(); x.mpG = t["mp_growth"].num(); x.patk = t["base_phys_atk"].num(); x.matk = t["base_mag_atk"].num(); x.def = t["base_def"].num(); x.dodge = t["dodge"].num();
+    for (const core::Json& k : t["pool"].arr()) x.pool.push_back(jsKey(k));
+    templates[std::atoi(kv.first.c_str())] = std::move(x);
+  }
+  for (const core::Json& s : J["stages"].arr()) stages.push_back({s["cost"].i(), s["lv"].i(1), s["mult"].num(1)});
+  for (const auto& kv : J["skills"].obj()) { const core::Json& k = kv.second; PetSkillInfo x; x.tr = k["tr"][0].str(); x.desc = k["tr"][1].str(); x.en = k["en"][0].str(); x.icon = k["icon"].i(); x.ik = k["ik"].str(); x.kind = k["kind"].str(); skills[kv.first] = std::move(x); }
+}
 }  // namespace engine
