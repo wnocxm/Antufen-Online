@@ -35,7 +35,7 @@ void Win::open(World& w, const std::string& name, int npc, const std::string& sa
   if (name == "pet") { auto L = w.petList(); for (size_t i = 0; i < L.size(); i++) if (L[i]->uid == w.P.petOn) PW_.i = int(i); }
   B_.sel.clear(); B_.page = 0;
   if (!quiet) w.sfx("menu_appear", 0.5);   // HTML: her pencere açılışında
-  if (name == "bag") w.questFlag("openBag");
+  if (name == "bag") w.cmd({"flag", {"openBag"}});
 }
 void Win::close() { cur.clear(); npc_ = -1; say_.clear(); modal_ = Modal(); shop_.clear(); wantText = false; }
 void Win::ask(const std::string& text, std::function<void()> onYes) { modal_.on = true; modal_.text = text; modal_.yes = std::move(onYes); snd("menu_appear", 0.4); }
@@ -165,17 +165,17 @@ void Win::tapNpc(World& w, const std::string& id) {
   if (e.a == "say") { say_ = e.s; return; }
   if (e.a == "soon") { w.toast("Bu bölüm yakında."); return; }
   if (e.a == "petf") { openPetF(w, e.s); return; }
-  if (e.a == "dtp") { close(); const auto L = w.dungeonTps(e.s); if (!L.empty()) w.dungeonTpGo(*L[0].second); return; }
+  if (e.a == "dtp") { close(); w.cmd({"dtp", {e.s}}); return; }
   if (e.a == "shop") { const std::string cn = w.ents[size_t(n)].name; close(); openShop(w, cn); return; }
-  if (e.a == "tp") { close(); w.questTeleport(e.qi); return; }
+  if (e.a == "tp") { close(); w.cmd({"qtp", {std::to_string(e.qi)}}); return; }
   if (e.a == "trv") { dtrv_ = 0; return; }
   if (e.a == "tmore") { dtrv_++; return; }
   if (e.a == "tback") { dtrv_ = -1; return; }
-  if (e.a == "tgo") { const auto* L = w.travelOf(n); if (!L) return; const engine::TravelOpt x = (*L)[size_t(e.tv)]; const int c = w.travelCost(n, x); if (c && w.P.gold < c) { w.toast(std::to_string(c) + " altın gerekir."); return; } close(); w.travelGo(n, x); return; }
-  if (e.a == "accept") { const int qi = dq_; dq_ = -1; const std::string cn = w.ents[size_t(n)].name; close(); w.dialogAccept(qi, cn); return; }   // görev alınınca pencere kapanır
+  if (e.a == "tgo") { const auto* L = w.travelOf(n); if (!L) return; const engine::TravelOpt x = (*L)[size_t(e.tv)]; const int c = w.travelCost(n, x); if (c && w.P.gold < c) { w.toast(std::to_string(c) + " altın gerekir."); return; } close(); w.cmd({"travel", {std::to_string(n), std::to_string(e.tv)}}); return; }
+  if (e.a == "accept") { const int qi = dq_; dq_ = -1; const std::string cn = w.ents[size_t(n)].name; close(); w.cmd({"accept", {std::to_string(qi), cn}}); return; }   // görev alınınca pencere kapanır
   if (e.a == "complete") {
     const int qi = dq_; dq_ = -1; const Quest& q = w.quests().all()[size_t(qi)];
-    w.completeQuest(qi); if (e.ch >= 0 && size_t(e.ch) < q.tr.choice.size()) say_ = q.tr.choice[size_t(e.ch)].second;
+    w.cmd({"complete", {std::to_string(qi)}}); if (e.ch >= 0 && size_t(e.ch) < q.tr.choice.size()) say_ = q.tr.choice[size_t(e.ch)].second;
     return;
   }
 }
@@ -251,8 +251,8 @@ void Win::tapTask(World& w, const std::string& id) {
   if (id == "more") { koff_ = koff_ + 5 >= int(list.size()) ? 0 : koff_ + 5; return; }
   const int qi = ksel_ ? w.quests().indexOf(ksel_) : -1; if (qi < 0) return;
   const Quest& q = Q[size_t(qi)];
-  if (id == "walk") { const bool avail = kmode_ == "avail"; close(); if (avail) w.routeToNpc(q.giver); else w.questWalk(qi); return; }
-  if (id == "drop") { const int qid = q.id; const std::string title = q.tr.title; ask(title + ": " + engine::tx("görev bırakılsın mı?"), [&w, this, qid, title] { w.P.quests.erase(qid); ksel_ = 0; w.note(engine::tx("Görev bırakıldı") + ": " + title); }); }
+  if (id == "walk") { const bool avail = kmode_ == "avail"; close(); if (avail) w.cmd({"routeNpc", {q.giver}}); else w.cmd({"questWalk", {std::to_string(qi)}}); return; }
+  if (id == "drop") { const int qid = q.id; const std::string title = q.tr.title; ask(title + ": " + engine::tx("görev bırakılsın mı?"), [&w, this, qid] { w.cmd({"dropQuest", {std::to_string(qid)}}); ksel_ = 0; }); }
 }
 
 // ---------------- ölüm (NEW_FORM_DEADSELECT) ----------------
@@ -342,7 +342,7 @@ bool Win::tap(World& w, float x, float y) {
   else if (cur == "task") tapTask(w, id);
   else if (cur == "skill") tapSkill(w, id);
   else if (cur == "shop") tapShop(w, id);
-  else if (cur == "dead" && id == "revive") { close(); w.revive(); }
+  else if (cur == "dead" && id == "revive") { close(); w.cmd({"revive", {}}); }
   return true;
 }
 

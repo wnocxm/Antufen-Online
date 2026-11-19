@@ -8,6 +8,7 @@ namespace engine {
 
 // HTML isGM: çevrimdışı adı "GM" ile başlayan karakter (büyük/küçük harf fark etmez); çevrimiçi sunucudaki yönetici (ağ adımında)
 bool World::isGM() const {
+  if (online) return admin;   // HTML: Net.on ? Net.admin : /^GM/i
   const std::string& n = P.name;
   return n.size() >= 2 && (n[0] == 'G' || n[0] == 'g') && (n[1] == 'M' || n[1] == 'm');
 }

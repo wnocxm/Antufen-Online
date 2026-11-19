@@ -668,7 +668,25 @@ void World::gainXp(long long n) {
 }
 
 // ---------------- güncelleme (HTML update) ----------------
-void World::update(double dt, double sx, double sy) {
+// yön kolu → karo yönü (istemci): ekrandaki yöne en yakın karo ekseni (açılar 27,6° / 152,4° / 207,6° / 332,4°); sınırda titremesin diye
+// son yöne küçük öncelik. Ağda bu yön gönderilir (açı hesabı yalnız istemcide; sunucu yönle benzetir; docs/10-ag.md).
+int World::joyDir(double sx, double sy) {
+  if (!sx && !sy) { lastJoyDir_ = -1; return -1; }
+  const double ang = std::atan2(sy, sx); int best = 0; double bd = 9;
+  for (int i = 0; i < 4; i++) {
+    const double aa = std::atan2(DIR4[i][0] * HH + DIR4[i][1] * HH, DIR4[i][0] * HW - DIR4[i][1] * HW);
+    double d = std::fabs(std::atan2(std::sin(ang - aa), std::cos(ang - aa))); if (i == lastJoyDir_) d -= 0.25;
+    if (d < bd) { bd = d; best = i; }
+  }
+  lastJoyDir_ = best;
+  return best;
+}
+
+void World::update(double dt, double sx, double sy) { step(dt, joyDir(sx, sy)); }
+
+void World::step(double dt, int dir) {
+  tick++;
+  if (clockMs >= 0) clockMs += dt * 1000;   // oyun saati (çevrimiçi)
   time += dt; if (arriveT > 0) arriveT -= dt; if (warnT > 0) warnT -= dt;
   for (int i = int(timers_.size()) - 1; i >= 0; i--) {   // zamanlayıcılar: sondan başa (HTML gibi; yeni eklenenler bu karede çalışmaz)
     if (size_t(i) >= timers_.size()) continue;
@@ -713,20 +731,12 @@ void World::update(double dt, double sx, double sy) {
     }
     bool moving = false;
     const double run = RUN * (1 + s.spd) * (fast ? 2.6 : 1);   // koşu hızı (GM hızlı: ×2,6)
-    if (sx || sy) {   // yön kolu: yolu, bekleyen beceriyi, kişiye/haritaya yürüyüşü ve saldırıyı bırakır
+    if (dir >= 0 && dir < 4) {   // yön kolu: yolu, bekleyen beceriyi, kişiye/haritaya yürüyüşü ve saldırıyı bırakır
       engage_ = false; p.pending = -1; p.pathOn = false; p.path.clear(); goTarget = -1; route.clear(); routeNpc.clear(); routeQuest = 0;
-      // ekrandaki yöne en yakın karo ekseni (açılar 27,6° / 152,4° / 207,6° / 332,4°); sınırda titremesin diye son yöne küçük öncelik
-      const double ang = std::atan2(sy, sx); int best = 0; double bd = 9;
-      for (int i = 0; i < 4; i++) {
-        const double aa = std::atan2(DIR4[i][0] * HH + DIR4[i][1] * HH, DIR4[i][0] * HW - DIR4[i][1] * HW);
-        double d = std::fabs(std::atan2(std::sin(ang - aa), std::cos(ang - aa))); if (i == lastJoyDir_) d -= 0.25;
-        if (d < bd) { bd = d; best = i; }
-      }
-      lastJoyDir_ = best;
+      const int best = dir;
       const double sp = run * dt;
       moveEnt(p, DIR4[best][0] * sp, DIR4[best][1] * sp); p.dir = dirOf(DIR4[best][0], DIR4[best][1]); moving = true;
     } else {
-      lastJoyDir_ = -1;
       if (p.state != "attack" && p.state != "cast") {
         const int ti = target_;
         if (p.pending >= 0 && ti >= 0 && !ents[ti].dead) {   // menzil dışında kalan beceri: yaklaş, menzile girince kullan

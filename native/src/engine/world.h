@@ -13,6 +13,7 @@
 
 #include "engine/assets.h"
 #include "engine/balance.h"
+#include "engine/cmd.h"
 #include "engine/lang.h"
 #include "engine/pet.h"
 #include "engine/map.h"
@@ -123,7 +124,9 @@ class World {
   void setChar(const std::string& cls, const std::string& race, const std::string& sex);
   void setLevel(int lv);                                               // HTML gmLevel
   // sx, sy: ekran yönünde girdi (klavye: x*21, y*11*1.9; joystick: çubuk vektörü); ikisi de 0 ise durur
-  void update(double dt, double sx = 0, double sy = 0);
+  void update(double dt, double sx = 0, double sy = 0);   // = step(dt, joyDir(sx, sy))
+  int joyDir(double sx, double sy);                       // yön kolu → karo yönü (−1 yok, 0-3; istemci)
+  void step(double dt, int dir);                          // benzetim adımı: girdi yalnız karo yönü (ağda gönderilen)
   void draw(Canvas& c, const DrawOpts& o = {});
   void resetClock();   // test: zaman ve bütün animasyon sayaçları 0 (HTML karşılaştırması için)
 
@@ -181,8 +184,9 @@ class World {
   void gmDungeonLast();
   void gmDungeonReset() { P.dgDay.clear(); P.dgN.clear(); toast(T("Günlük zindan hakları sıfırlandı.", "Daily dungeon entries reset.")); }
   // arayüzden onay isteği (HTML Win.ask'i oyun kodundan çağırır): HUD onay kutusunu açar
+  // oyun kodunun onay isteği (zindan kapısı, sandık): arayüz kutuyu açar, "Evet" komut olur (ask <numara>; sunucu da aynı isteği bekletir)
   std::string askText; std::function<void()> askYes;
-  void ask(const std::string& t, std::function<void()> yes) { askText = t; askYes = std::move(yes); }
+  void ask(const std::string& t, std::function<void()> yes) { const int id = ++askSeq_; asks_[id] = std::move(yes); askText = t; askYes = [this, id] { cmd({"ask", {std::to_string(id)}}); }; }
   // ses (HTML SFX.play / SFX.Music.play): olaylar sırayla birikir; uygulama karıştırıcıya verir (engine/audio), test modu yazar (sesler)
   struct SndEv { std::string n; double v; bool music; };
   std::vector<SndEv> sounds;
@@ -203,6 +207,9 @@ class World {
   // evcil hayvanlar (HTML pet.js; world_pet.cpp)
   PetEnt pet;                                               // çağrılmış hayvanın varlığı (on false: yok)
   double nowMs = -1;                                        // gerçek saat yerine (ms, test); -1: saat (ölüm/diriliş süresi, kimlik)
+  double clockMs = -1;                                      // oyun saati (çevrimiçi: sunucudan başlar, her adımda dt kadar ilerler; ≥0 ise duvar saati yerine)
+  std::string dayStr() const;                               // UTC gün (YYYY-MM-DD): test günü (today), oyun saati ya da duvar saati
+  uint64_t digest() const;                                  // dünya özeti (ağ: istemci ve sunucu aynı adımda karşılaştırır; docs/10-ag.md)
   std::vector<PetRec*> petList();                           // geçerli türden hayvanlar
   PetRec* petActive();
   PetRec* petByUid(const std::string& uid);
@@ -305,6 +312,13 @@ class World {
   void gmWalkTravelNpc();                              // bu haritadaki en yakın yolculuk NPC'sine yürü
   void after(double s, std::function<void()> fn) { later(s, std::move(fn)); }   // arayüzün gecikmeli işi (HTML setTimeout; oyun saatiyle)
   void runTimers(double dt);                           // test: yalnız zamanlayıcılar (HTML'de oyun döngüsü durdurulmuşken setTimeout'lar çalışır)
+  // komutlar (world_net.cpp; docs/10-ag.md): arayüz dünyayı yalnız cmd ile değiştirir
+  long long tick = 0;                                  // benzetim adımı sayacı (step artırır; komutlar bu numarayla kaydedilir)
+  bool online = false, admin = false;                  // çevrimiçi; hesap yönetici mi (GM: çevrimiçi yönetici, çevrimdışı adı GM ile başlayan)
+  std::function<void(const Cmd&)> onCmd;              // arayüzün her komutu (çevrimiçi: sunucuya gider; test: kayıt)
+  void cmd(const Cmd& c);                              // arayüzden: bildir + uygula
+  bool exec(const Cmd& c);                             // uygula (sunucu, yeniden oynatma); false: bilinmeyen / izinsiz
+  void gmAct(const std::string& id);                   // GM paneli düğmesinin dünyadaki işi (g:…, x:…, s:…, n:<seviye>)
   std::set<std::string> flags;                         // HTML Game.flags (kayda girmez)
   // arayüz olayları (HTML UI.log / toast / float / zone / levelUp / hurt): dünya yazar, arayüz (ui/hud.cpp) çizer ve süreleri işler
   struct LogLine { std::string m; uint32_t c; };
@@ -346,6 +360,7 @@ class World {
   std::vector<uint8_t> extraBlock_;
   struct Timer { double t; std::function<void()> fn; };
   std::vector<Timer> timers_;
+  int askSeq_ = 0; std::map<int, std::function<void()>> asks_;   // bekleyen onay istekleri
   int lastJoyDir_ = -1, target_ = -1, fxUid_ = 0;
   bool startSet_ = false; double startX_ = 0, startY_ = 0, startHp_ = 0, startMp_ = 0;   // start(): loadScene kayıttaki yer/can/manayla
   bool goPending_ = false; std::function<void()> goFn_;   // geçitten geçiş / zindandan çıkış (kare sonunda; HTML'de eşzamansız)

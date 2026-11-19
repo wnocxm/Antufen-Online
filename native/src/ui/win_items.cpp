@@ -122,13 +122,13 @@ void Win::buyAsk(World& w, const std::string& id) {
   const Item* it = w.balance().item(id); if (!it || !it->price) return;
   const long long can = w.P.gold / it->price;
   if (can < 1) { w.toast("Yeterli altının yok."); return; }
-  if (!it->slot.empty()) { ask(it->name + ": " + I(it->price) + " altın. Satın alınsın mı?", [&w, id] { w.buyItem(id, 1); }); return; }   // ekipman tek tek
-  askNum(it->name, int(std::min<long long>(999, can)), [&w, id](int n) { w.buyItem(id, n); }, it->price);   // yığılabilen her eşya: adet sorulur
+  if (!it->slot.empty()) { ask(it->name + ": " + I(it->price) + " altın. Satın alınsın mı?", [&w, id] { w.cmd({"buy", {id, "1"}}); }); return; }   // ekipman tek tek
+  askNum(it->name, int(std::min<long long>(999, can)), [&w, id](int n) { w.cmd({"buy", {id, std::to_string(n)}}); }, it->price);   // yığılabilen her eşya: adet sorulur
 }
 void Win::sellAsk(World& w, const std::string& id) {   // birden çok varsa satarken de adet sorulur
   const Item* it = w.balance().item(id); const int n = w.countItem(id); if (!it) return;
-  if (n <= 1 || !it->slot.empty()) { w.sellItem(id); return; }
-  askNum(it->name, n, [&w, id](int k) { w.sellItem(id, k); }, it->sell ? it->sell : std::max(1, it->price / 10));
+  if (n <= 1 || !it->slot.empty()) { w.cmd({"sell", {id, "1"}}); return; }
+  askNum(it->name, n, [&w, id](int k) { w.cmd({"sell", {id, std::to_string(k)}}); }, it->sell ? it->sell : std::max(1, it->price / 10));
 }
 
 // ---------------- çanta (NEW_FORM_BAG_2): 5 sekme, 20 yuva, sayfa okları, altta bilgi kutusu ya da doluluk + altın ----------------
@@ -191,15 +191,15 @@ void Win::tapBag(World& w, const std::string& id) {
     const size_t k = size_t(B_.page * per + n - 50007); w.sfx("menusel", 0.6);
     if (k >= items.size() || items[k].first.rfind("q:", 0) == 0) { B_.sel.clear(); return; }
     const std::string e = items[k].first;
-    if (B_.sel == e && doubleTap(e)) { w.useItem(e); return; }   // çift dokunuş: kullan / giy
+    if (B_.sel == e && doubleTap(e)) { w.cmd({"item", {e}}); return; }   // çift dokunuş: kullan / giy
     B_.sel = e; lastTapId_ = e; lastTapT_ = clock_; return;
   }
   if (B_.sel.empty()) return;
   const Item* it = w.balance().item(B_.sel); if (!it) return;
-  if (id == "use") { w.useItem(B_.sel); return; }
+  if (id == "use") { w.cmd({"item", {B_.sel}}); return; }
   if (id == "sell" && !shop_.empty()) { sellAsk(w, B_.sel); return; }
   if (id == "quick") { if (it->use) { assignReq = "i:" + B_.sel; assignName = it->name; close(); } return; }
-  if (id == "del") { const std::string sid = B_.sel, nm = it->name; ask(nm + ": yok edilsin mi?", [&w, this, sid, nm] { w.removeItem(sid, w.countItem(sid)); B_.sel.clear(); w.note(nm + " yok edildi."); }); }
+  if (id == "del") { const std::string sid = B_.sel, nm = it->name; ask(nm + ": yok edilsin mi?", [&w, this, sid] { w.cmd({"drop", {sid}}); B_.sel.clear(); }); }
 }
 
 // ---------------- karakter (NEW_FORM_PLAYER): Özellik ve Ekipman sayfaları ----------------
@@ -236,7 +236,7 @@ void Win::tapRole(World& w, const std::string& id) {
   if (id == "50104") { close(); open(w, "hub"); return; }
   for (size_t i = 0; i < R2TABS.size(); i++) if (n == R2TABS[i]) { R_.page = int(i); R_.sel.clear(); w.sfx("skill_pageflip"); return; }
   for (const auto& e : R2SLOT) if (n == e.first) { R_.sel = e.second; w.sfx("menusel", 0.6); return; }
-  if (id == "uneq" && !R_.sel.empty() && !w.eqOf(R_.sel).empty()) { w.unequip(R_.sel); return; }
+  if (id == "uneq" && !R_.sel.empty() && !w.eqOf(R_.sel).empty()) { w.cmd({"unequip", {R_.sel}}); return; }
   if (id == "swap") { close(); openBag(w, 0, ""); }
 }
 
@@ -314,11 +314,11 @@ void Win::tapSkill(World& w, const std::string& id) {
   const int n = std::atoi(id.c_str());
   if (id == "50413") { close(); open(w, "hub"); return; }
   for (size_t i = 0; i < S2TABS.size(); i++) if (n == S2TABS[i]) { S_.tree = int(i); S_.sel.clear(); w.sfx("skill_pageflip"); return; }
-  if (id == "50430") { ask(engine::T("Bütün beceri puanları geri alınsın mı? (Eğitim Kitabı harcanır)", "Reset all skill points? (uses a Training Book)"), [&w] { w.skillReset(false); }); return; }
+  if (id == "50430") { ask(engine::T("Bütün beceri puanları geri alınsın mı? (Eğitim Kitabı harcanır)", "Reset all skill points? (uses a Training Book)"), [&w] { w.cmd({"skillReset", {}}); }); return; }
   if (skCells_.count(id)) { S_.sel = id; w.sfx("menusel", 0.6); return; }
   auto it = skCells_.find(S_.sel); if (it == skCells_.end() || !it->second.sk) return;
   const SkillDef& sk = *it->second.sk;
-  if (id == "up") { w.skillUp(sk); return; }
+  if (id == "up") { w.cmd({"skillUp", {std::to_string(sk.sn)}}); return; }
   if (id == "quick") {
     int i = -1; const auto& L = w.skills(); for (size_t k = 0; k < L.size(); k++) if (&L[k] == &sk) i = int(k);
     if (sk.passive() || i < 0) w.toast("Edilgen beceriler kısayola konmaz."); else if (!w.skRank(sk)) w.toast("Önce beceriyi öğren.");

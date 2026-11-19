@@ -65,6 +65,8 @@
 //   sesler <dosya|->                 ses olayları ({"ses":[[ad, ses]|["muzik", parça],…]}; okununca silinir)
 //   karistir <çıktı.wav> <sn> <hız> <t:muzik:ad;t:efekt:ad:ses;t:muzikac:0|1;t:efektac:0|1>   karıştırıcıyı çalıştır, float WAV yaz
 //   dil <tr|en>                      dil (veri yüklüyse o dille baştan yüklenir) · dileksik <dosya|->  çevirisi bulunamayan metinler
+//   agbot <sn> <bot tohumu> <kayit.json>   ağ sınaması: bu karakterin kaydından başlayıp bot oynar (yön + komut kaydı, özetler)
+//   agoyna <kayit.json> [rapor|-]     kaydı yeni dünyada yeniden oynat (sunucu gibi); rapor: aynı/farklı özet sayısı, ilk fark
 //   surukle <dy> <x> <y>             açık pencerede sürükleme (sol menü, dükkân listesi; HTML Win.drag)
 //   gm <ac|kapat|bas <kimlik>|yaz <rakamlar>|ara <metin>|kaydir <px>|kutular <dosya|->|goruntu <png>|durum <dosya|->>   GM paneli (kimlik: g:lv1, x:dg:boss, s:120005…;
 //                                    kutular: panelin yerleşimi; goruntu: yalnız panel, siyah zeminde)
@@ -94,6 +96,7 @@
 #include "engine/world.h"
 #include "ui/font.h"
 #include "ui/forms.h"
+#include "app/agtest.h"
 #include "ui/hud.h"
 #include "ui/title.h"
 #include "engine/audio.h"
@@ -566,6 +569,17 @@ int main(int argc, char** argv) {
                  ",\"pencere\":" + jq(h.win.cur) + ",\"bildirim\":" + jq(w.toastT > 0 ? engine::tx(w.toastMsg) : "") + ",\"ekipman\":" + std::to_string(eq) +
                  ",\"x\":" + num(std::round(w.player.x * 100) / 100) + ",\"y\":" + num(std::round(w.player.y * 100) / 100) + "}\n");
         }
+      }
+      else if (cmd == "agbot") {   // ağ sınaması (app/agtest.cpp)
+        double sn; unsigned bt; std::string f; ss >> sn >> bt >> f; uint64_t d = 0;
+        const std::string rec = agtest::botRun(assets, bal, W().saveJson(), 7, 1.8e12, sn, bt, &d);
+        godat::writeFile(f, std::vector<uint8_t>(rec.begin(), rec.end()));
+        std::printf("agbot: %s · özet %016llx\n", core::Json::parse(rec)["son"].str().c_str(), (unsigned long long)d);
+      }
+      else if (cmd == "agoyna") {
+        std::string f, o; ss >> f >> o; const auto raw = godat::readFile(f); uint64_t d = 0;
+        const std::string r = agtest::replay(assets, bal, core::Json::parse(std::string(raw.begin(), raw.end())), &d);
+        out(o.empty() ? "-" : o, r + "\n"); std::printf("agoyna: son özet %016llx\n", (unsigned long long)d);
       }
       else if (cmd == "surukle") { float dy, x, y; ss >> dy >> x >> y; hud->win.drag(dy, x, y); }   // pencere listesini sürükle (HTML Win.drag)
       else if (cmd == "pencere") { std::string n; int e = -1; ss >> n >> e; hud->win.close(); if (n == "shop") hud->win.openShop(W(), W().ents.at(size_t(e)).name); else if (n == "petf" || n == "petfs") hud->win.openPetF(W(), n == "petf" ? "tf" : "sk"); else if (n != "kapat") hud->win.open(W(), n, e); }

@@ -65,13 +65,13 @@ target_link_libraries(godat_pack PRIVATE godat)
 
 # Motor (pencereden bağımsız): PNG/JSON, sanal dosya sistemi, tuval, varlıklar, harita, dünya
 add_library(motor STATIC src/core/png.cpp src/core/jpeg.cpp src/core/json.cpp src/engine/vfs.cpp src/engine/canvas.cpp
-            src/engine/assets.cpp src/engine/map.cpp src/engine/balance.cpp src/engine/skills.cpp src/engine/quests.cpp src/engine/world.cpp src/engine/world_quests.cpp src/engine/world_nav.cpp src/engine/world_items.cpp src/engine/world_dungeon.cpp src/engine/world_pet.cpp src/engine/world_save.cpp src/engine/world_gm.cpp src/engine/audio.cpp src/engine/lang.cpp
+            src/engine/assets.cpp src/engine/map.cpp src/engine/balance.cpp src/engine/skills.cpp src/engine/quests.cpp src/engine/world.cpp src/engine/world_quests.cpp src/engine/world_nav.cpp src/engine/world_items.cpp src/engine/world_dungeon.cpp src/engine/world_pet.cpp src/engine/world_save.cpp src/engine/world_gm.cpp src/engine/world_net.cpp src/engine/audio.cpp src/engine/lang.cpp
             src/ui/font.cpp src/ui/hud.cpp src/ui/forms.cpp src/ui/win.cpp src/ui/win_items.cpp src/ui/win_map.cpp src/ui/win_pet.cpp src/ui/title.cpp src/ui/gm.cpp)
 target_include_directories(motor PUBLIC src)
 target_link_libraries(motor PUBLIC godat)
 
 # Ekransız test modu (SDL gerekmez): senaryo → ekran görüntüsü, durum
-add_executable(anrufen_test src/app/headless.cpp)
+add_executable(anrufen_test src/app/headless.cpp src/app/agtest.cpp)
 target_link_libraries(anrufen_test PRIVATE motor)
 
 # Pencereli oyun: SDL2 kaynağı depoda (third_party/SDL2, sürüm ve kaynak: third_party/README.md)

@@ -404,62 +404,33 @@ bool GmPanel::act(World& w, const std::string& id) {
   return false;
 }
 
-// HTML #gtools / #glist tıklamaları (ui.js gtools dinleyicisi, gmX, data-s)
+// HTML #gtools / #glist tıklamaları (ui.js gtools dinleyicisi, gmX, data-s). Dünyaya dokunan kısım komut olur (gm <düğme>;
+// World::gmAct, sunucuda yönetici denetimi); panelin kendi işi (sekme, kapanma, pencere açma) burada kalır.
 void GmPanel::tap(World& w, const std::string& id) {
   editing = id == "gq";
   if (id == "gq") return;
   if (id == "close") { req = "close"; return; }
-  if (id == "n:ok") { const int n = num_.typed.empty() ? 0 : std::atoi(num_.typed.c_str()); num_.on = false; if (n) w.gmLevel(n); return; }   // HTML: +prompt(...) → if (n) gmLevel(n)
+  if (id == "n:ok") { const int n = num_.typed.empty() ? 0 : std::atoi(num_.typed.c_str()); num_.on = false; if (n) w.cmd({"gm", {"n:" + std::to_string(n)}}); return; }   // HTML: +prompt(...) → if (n) gmLevel(n)
   if (id == "n:no") { num_.on = false; return; }
-  auto& P = w.P;
   if (id.rfind("g:", 0) == 0) {
     if (!w.isGM()) return;
     const std::string a = id.substr(2);
-    if (a == "lv1") w.gmLevel(P.lv + 1); else if (a == "lv10") w.gmLevel(P.lv + 10);
-    else if (a == "lvset") { num_.on = true; num_.fresh = true; num_.typed = std::to_string(P.lv); }   // HTML prompt(…, P.lv)
-    else if (a == "gold") { P.gold += 100000; w.save(); } else if (a == "heal") w.gmHeal(); else if (a == "god") w.god = !w.god; else if (a == "fast") w.fast = !w.fast;
-    else if (a == "gear") w.gmGear(); else if (a == "sp") { P.sp += 20; w.save(); }
-    else if (a.rfind("v:", 0) == 0) {
+    if (a == "lvset") { num_.on = true; num_.fresh = true; num_.typed = std::to_string(w.P.lv); return; }   // HTML prompt(…, P.lv)
+    if (a.rfind("v:", 0) == 0) {
       view = a.substr(2); query.clear(); tabOn_ = view; scroll = 0;
       placeholder_ = view == "maps" ? "Harita ara: ad ya da numara…" : view == "dg" ? "Zindan ara…" : view == "cls" ? "Görev ara…" : "Tür ara…";
+      return;
     }
-    return;
+    w.cmd({"gm", {id}}); return;
   }
-  if (id.rfind("s:", 0) == 0) { req = "close"; w.player.pathOn = false; w.player.path.clear(); w.gotoScene(id.substr(2), ""); return; }
+  if (id.rfind("s:", 0) == 0) { req = "close"; w.cmd({"gm", {id}}); return; }
   if (id.rfind("x:", 0) != 0) return;
-  std::vector<std::string> p; { std::string cur; for (char ch : id.substr(2)) { if (ch == ':') { p.push_back(cur); cur.clear(); } else cur += ch; } p.push_back(cur); }
-  while (p.size() < 4) p.push_back("");
-  const std::string &a = p[0], &b = p[1], &cc = p[2], &d = p[3];
-  if (a == "dg") {
-    if (b == "in" || b == "door") { req = "close"; const std::string dd = cc; const int k = std::atoi(d.c_str()); const bool in = b == "in"; w.after(0.2, [&w, dd, k, in] { if (in) w.gmDungeonEnter(dd, k); else w.gmDungeonDoor(dd, k); }); return; }
-    if (b == "last") { req = "close"; w.gmDungeonLast(); return; }
-    if (b == "leave") { req = "close"; if (w.dungeonOf(w.sceneId)) w.dungeonLeave(false); return; }
-    if (b == "boss") w.gmDungeonBoss(); else if (b == "clear") w.gmDungeonClear(); else if (b == "reset") w.gmDungeonReset();
-  } else if (a == "tv") {
-    if (b == "free") w.gmToggleFreeTravel();
-    else if (b == "axe") { req = "close"; w.after(0.2, [&w] { w.gotoSceneAt("120156", 50, 39); }); return; }
-    else { req = "close"; w.gmWalkTravelNpc(); return; }
-  } else if (a == "cls") {
-    if (b == "start80") { req = "close"; w.after(0.2, [&w] { w.gmStart80(); }); return; }
-    if (b == "go") { req = "close"; const int qi = w.quests().indexOf(std::atoi(cc.c_str())); if (qi >= 0) w.after(0.2, [&w, qi] { w.questWalk(qi); }); return; }
-    if (b == "ready") w.gmQuestReady(std::atoi(cc.c_str()));
-    else if (b == "done") w.gmQuestDone(std::atoi(cc.c_str()));
-    else if (b == "fill") w.gmClassFill(std::atoi(cc.c_str()));
-    else if (b == "up") w.classUp(1);
-    else if (b == "up2") { w.classUp(1); w.classUp(2); }
-    else if (b == "reset") w.gmClassReset();
-    else if (b == "resetPts") w.skillReset(true);
-    else if (b == "start") w.gmClassStart();
-    else if (b == "dummy") w.gmDummy();
-    else if (b == "nocd") w.gmToggleNoCd();
-  } else if (a == "pet") {
-    if (b == "win") { req = "pet"; return; }
-    if (b == "petf" || b == "petfs") { req = b == "petf" ? "petf:tf" : "petf:sk"; return; }
-    if (b == "give") w.gmPetGive(cc); else if (b == "egg") w.gmPetEgg(cc);
-    else if (b == "stage0") w.gmPetStage(0); else if (b == "stage") w.gmPetStage(-1);
-    else if (b == "level") w.gmPetLevel(); else if (b == "care") w.gmPetCare(); else if (b == "items") w.gmPetItems();
-    else if (b == "hungry") w.gmPetHungry(); else if (b == "clear") w.gmPetClear(); else if (b == "skills") w.gmPetSkills(); else if (b == "tf") w.gmPetTf();
-  }
+  // pencere açanlar yalnız arayüz; paneli kapatanlar (HTML closeAll) önce kapanır
+  if (id == "x:pet:win") { req = "pet"; return; }
+  if (id == "x:pet:petf" || id == "x:pet:petfs") { req = id == "x:pet:petf" ? "petf:tf" : "petf:sk"; return; }
+  static const char* CLOSE[] = {"x:dg:in:", "x:dg:door:", "x:dg:last", "x:dg:leave", "x:tv:axe", "x:tv:near", "x:cls:start80", "x:cls:go:"};
+  for (const char* pre : CLOSE) if (id.rfind(pre, 0) == 0) { req = "close"; break; }
+  w.cmd({"gm", {id}});
 }
 
 std::string GmPanel::dump() const {

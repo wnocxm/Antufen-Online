@@ -73,6 +73,7 @@ std::string base36(long long v) { const char* D = "0123456789abcdefghijklmnopqrs
 
 double World::nowMillis() const {
   if (nowMs >= 0) return nowMs;
+  if (clockMs >= 0) return std::floor(clockMs);   // oyun saati (JS Date.now gibi tam milisaniye)
   return double(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count());
 }
 

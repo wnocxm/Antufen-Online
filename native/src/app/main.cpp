@@ -165,6 +165,7 @@ int main(int argc, char** argv) {
     if (a == "continue") { if (!play()) toTitle(); }
     else if (a == "new") { std::error_code ec; std::filesystem::remove(savePath, ec); fresh(); create.open(); mode = CREATE; }   // HTML: localStorage.removeItem
   };
+  const double STEP = 1.0 / 60; double simAcc = 0;   // sabit benzetim adımı ve biriken süre
   while (run) {
     SDL_Event ev;
     while (SDL_PollEvent(&ev)) {
@@ -207,11 +208,11 @@ int main(int argc, char** argv) {
         if (k == SDLK_ESCAPE) { if (hud->win.isOpen() || hud->gm.on) hud->closeAll(); else run = false; }
         if (k == SDLK_F12) godat::writeFile("anrufen_ekran.png", core::encodePNG(canvas.img));
         World& w = *world;
-        if (k == SDLK_SPACE) { int t = w.target(); if (t < 0 || w.ents[size_t(t)].kind != Ent::MOB || w.ents[size_t(t)].dead) t = w.nearestMob(9); if (t >= 0) w.setTarget(t, true); else w.note("Yakında hedef yok."); }
-        if (k >= SDLK_1 && k <= SDLK_6) w.useSkill(int(k - SDLK_1));
-        if (k == SDLK_q) w.useItem("hp1");
-        if (k == SDLK_e) w.useItem("mp1");
-        if (k == SDLK_TAB) w.cycleTarget();
+        if (k == SDLK_SPACE) { int t = w.target(); if (t < 0 || w.ents[size_t(t)].kind != Ent::MOB || w.ents[size_t(t)].dead) t = w.nearestMob(9); if (t >= 0) w.cmd({"target", {std::to_string(t), "1"}}); else w.note("Yakında hedef yok."); }
+        if (k >= SDLK_1 && k <= SDLK_6) w.cmd({"skill", {std::to_string(int(k - SDLK_1))}});
+        if (k == SDLK_q) w.cmd({"item", {"hp1"}});
+        if (k == SDLK_e) w.cmd({"item", {"mp1"}});
+        if (k == SDLK_TAB) w.cmd({"cycle", {}});
       }
       if (ev.type == SDL_MOUSEBUTTONDOWN && ev.button.button == SDL_BUTTON_LEFT) { logical(float(ev.button.x), float(ev.button.y), x, y); hud->press(*world, -1, x, y); }
       if (ev.type == SDL_MOUSEMOTION && (ev.motion.state & SDL_BUTTON_LMASK)) { logical(float(ev.motion.x), float(ev.motion.y), x, y); hud->move(-1, x, y); }
@@ -242,7 +243,9 @@ int main(int argc, char** argv) {
         if (k[SDL_SCANCODE_DOWN] || k[SDL_SCANCODE_S]) y += 1;
         sx = x * 21; sy = y * 11 * 1.9;
       }
-      w.update(dt, sx, sy);
+      // benzetim sabit adımla (1/60 sn; ekran hızından bağımsız, ağda istemci ve sunucu aynı adımları yürütür — docs/10-ag.md)
+      simAcc = std::min(simAcc + dt, 0.25);
+      while (simAcc >= STEP - 1e-9) { w.step(STEP, w.joyDir(sx, sy)); simAcc -= STEP; }
       w.draw(canvas);
       hud->now += dt; hud->draw(canvas, w);
       if (!w.sounds.empty() || hud->win.optChanged) {   // ses olayları karıştırıcıya; ayarlar değiştiyse uygula ve kaydet

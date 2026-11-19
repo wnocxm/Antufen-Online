@@ -124,20 +124,20 @@ void Win::tapPet(World& w, const std::string& id) {
   if (id == "p:x") { close(); return; }
   if (id == "p:next") { if (!L.empty()) PW_.i = (PW_.i + 1) % int(L.size()); PW_.tree = -1; PW_.skd = 0; return; }
   if (id == "p:aix") { PW_.ai = false; return; }
-  if (id.rfind("p:m:", 0) == 0) { w.petSetMode(id.substr(4)); PW_.ai = false; return; }
+  if (id.rfind("p:m:", 0) == 0) { w.cmd({"petMode", {id.substr(4)}}); PW_.ai = false; return; }
   if (id.rfind("p:tab:", 0) == 0) { PW_.tab = std::atoi(id.c_str() + 6); PW_.tree = -1; w.sfx("skill_pageflip", 0.5); return; }
   if (id.rfind("p:sk:", 0) == 0) { PW_.skd = std::atoi(id.c_str() + 5); return; }
   if (id.rfind("p:tr:", 0) == 0) { const int i = std::atoi(id.c_str() + 5); PW_.tree = PW_.tree == i ? -1 : i; return; }
   if (!p) return;
-  if (id == "p:on") { if (w.P.petOn == p->uid) w.petDismiss(); else w.petSummon(p->uid); return; }
+  if (id == "p:on") { w.cmd({"petOn", {p->uid}}); return; }
   if (id == "p:ai") { PW_.ai = !PW_.ai; return; }
   if (id == "p:tf") { openPetF(w, "tf", p->uid); return; }
   if (id == "p:feed") {
     if (!w.countItem("30022")) { w.toast(T("Biluo Meyven yok (Hayvan Terbiyecisi satar).", "No Biluo Fruit (Beast Tamers sell it).")); return; }
     if (w.P.petOn != p->uid) { w.toast(T("Beslemek için önce çağır.", "Summon it first to feed it.")); return; }
-    w.useItem("30022"); return;
+    w.cmd({"item", {"30022"}}); return;
   }
-  if (id == "p:rel") { const std::string uid = p->uid; ask(T(w.petName(*p) + " serbest bırakılsın mı? Geri dönmez.", "Release " + w.petName(*p) + "? It won't come back."), [&w, this, uid] { w.petRelease(uid); PW_.i = 0; }); }
+  if (id == "p:rel") { const std::string uid = p->uid; ask(T(w.petName(*p) + " serbest bırakılsın mı? Geri dönmez.", "Release " + w.petName(*p) + "? It won't come back."), [&w, this, uid] { w.cmd({"petRelease", {uid}}); PW_.i = 0; }); }
 }
 
 // ---------------- dönüşüm (幻化) / beceri aktarma (技能转移) ----------------
@@ -225,7 +225,7 @@ void Win::tapPetF(World& w, const std::string& id) {
     const std::string mn = w.petName(*m), sn = w.petName(*s), mu = TF_.main, su = TF_.mat;
     ask(sk ? T(sn + " kaybolacak ve becerisi " + mn + "'e geçecek. Emin misin?", sn + " will be lost and its skill passed to " + mn + ". Are you sure?")
            : T(sn + " kaybolacak. Başarı şansı %" + jsNum(info.chance) + ". Dönüştürülsün mü?", sn + " will be lost. Success chance " + jsNum(info.chance) + "%. Transform?"),
-        [&w, this, sk, mu, su, aids] { if (sk) w.petTransfer(mu, su, aids); else w.petTransform(mu, su, aids); TF_.mat.clear(); });
+        [&w, this, sk, mu, su, aids] { engine::Cmd c{sk ? "petSk" : "petTf", {mu, su}}; c.a.insert(c.a.end(), aids.begin(), aids.end()); w.cmd(c); TF_.mat.clear(); });
   }
 }
 

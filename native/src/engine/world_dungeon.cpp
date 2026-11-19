@@ -14,9 +14,19 @@ const DungeonDef* World::dungeonOf(const std::string& sid, int* copy) const {
   for (const DungeonDef& d : bal_.dungeons) for (size_t c = 0; c < d.copies.size(); c++) for (const std::string& s : d.copies[c].scenes) if (s == sid) { if (copy) *copy = int(c); return &d; }
   return nullptr;
 }
-static std::string utcDay() { std::time_t t = std::time(nullptr); char b[16]; std::strftime(b, sizeof b, "%Y-%m-%d", std::gmtime(&t)); return b; }
+std::string World::dayStr() const {   // HTML new Date().toISOString().slice(0, 10)
+  if (!today.empty()) return today;
+  const std::time_t t = clockMs >= 0 ? std::time_t(clockMs / 1000) : std::time(nullptr);
+  char b[16]; std::tm tmv{};
+#ifdef _WIN32
+  gmtime_s(&tmv, &t);
+#else
+  gmtime_r(&t, &tmv);
+#endif
+  std::strftime(b, sizeof b, "%Y-%m-%d", &tmv); return b;
+}
 int World::dungeonUsedToday(const DungeonDef& d) const {
-  const std::string day = today.empty() ? utcDay() : today;
+  const std::string day = dayStr();
   if (P.dgDay != day) return 0;
   auto it = P.dgN.find(d.id); return it == P.dgN.end() ? 0 : it->second;
 }
@@ -47,7 +57,7 @@ bool World::dungeonDoor(int region) {
   return true;
 }
 void World::dungeonEnter(const DungeonDef& d, int copy) {
-  if (d.daily) { const std::string day = today.empty() ? utcDay() : today; if (P.dgDay != day) { P.dgDay = day; P.dgN.clear(); } P.dgN[d.id]++; }
+  if (d.daily) { const std::string day = dayStr(); if (P.dgDay != day) { P.dgDay = day; P.dgN.clear(); } P.dgN[d.id]++; }
   P.dun = CharData::Run(); P.dun.on = true; P.dun.id = d.id; P.dun.copy = copy; P.dun.t = nowMillis();
   note(T("Zindana girdin: ", "Entered dungeon: ") + quests().name(d.cn), LOG_Q); sfx("accept_task");
   const std::string from = sceneId; gotoScene(d.copies[size_t(copy)].scenes[0], from);

@@ -87,7 +87,7 @@ void Win::drawMap(engine::Canvas& c, World& w, float vw, float VH) {
 void Win::tapMap(World& w, const std::string& id) {
   if (id == "npcs") { close(); openNpcList(w); return; }
   if (id == "sw") { w.sfx("skill_pageflip"); WM_.sel.clear(); WM_.mode = WM_.mode == "area" ? "world" : WM_.mode == "world" ? "local" : "world"; return; }
-  if (id == "go") { if (WM_.sel.empty()) { w.toast("Önce haritadan bir yer seç."); return; } const std::string t = WM_.sel; close(); w.routeQuest = 0; w.routeNpc.clear(); w.routeTo(t); return; }
+  if (id == "go") { if (WM_.sel.empty()) { w.toast("Önce haritadan bir yer seç."); return; } const std::string t = WM_.sel; close(); w.cmd({"routeTo", {t}}); return; }
   if (id.rfind("area:", 0) == 0) {
     const int n = std::atoi(id.c_str() + 5); const auto& A = wm(w)["areas"].arr();
     for (size_t i = 0; i < A.size(); i++) if (A[i]["i"].i() == n) { WM_.area = int(i); WM_.mode = "area"; WM_.sel.clear(); w.sfx("skill_pageflip"); }
@@ -141,7 +141,7 @@ void Win::drawList(engine::Canvas& c, World& w, float VH) {
 }
 void Win::tapList(World& w, const std::string& id) {
   if (id == "more") { listOff_ += 4; if (listOff_ >= int(list_.size())) listOff_ = 0; return; }
-  for (int i = 0; i < 5; i++) if (std::to_string(N2ROWS[i]) == id && listOff_ + i < int(list_.size())) { const int e = list_[size_t(listOff_ + i)].ent; close(); if (e >= 0) w.walkToEnt(e); return; }
+  for (int i = 0; i < 5; i++) if (std::to_string(N2ROWS[i]) == id && listOff_ + i < int(list_.size())) { const int e = list_[size_t(listOff_ + i)].ent; close(); if (e >= 0) w.cmd({"walk", {std::to_string(e)}}); return; }
 }
 
 }  // namespace ui

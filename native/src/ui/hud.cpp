@@ -172,12 +172,12 @@ void Hud::drawSlot(engine::Canvas& c, World& w, const std::string& sl, float x, 
 void Hud::attack(World& w) {
   int t = w.target();
   if (!(t >= 0 && w.ents[size_t(t)].kind == Ent::MOB && !w.ents[size_t(t)].dead)) t = w.nearestMob(9);
-  if (t >= 0) w.setTarget(t, true); else w.note("Yakında hedef yok.");
+  if (t >= 0) w.cmd({"target", {std::to_string(t), "1"}}); else w.note("Yakında hedef yok.");
 }
 void Hud::quick(World& w, int i) {
   if (i < 0 || i >= int(w.P.quick.size())) return;
   const std::string& sl = w.P.quick[size_t(i)]; if (sl.empty()) return;
-  if (sl[0] == 's') w.useSkill(std::atoi(sl.c_str() + 1)); else w.useItem(sl.substr(2));
+  if (sl[0] == 's') w.cmd({"skill", {sl.substr(1)}}); else w.cmd({"item", {sl.substr(2)}});
 }
 
 // ---------------- HUD (HTML drawHud) ----------------
@@ -185,7 +185,7 @@ void Hud::quick(World& w, int i) {
 void Hud::handle(World& w) {
   if (!request.empty()) {
     const std::string r = request; request.clear();
-    if (r.rfind("talk:", 0) == 0) w.talkTo(std::atoi(r.c_str() + 5));
+    if (r.rfind("talk:", 0) == 0) w.cmd({"talk", {r.substr(5)}});
     else if (r == "hub") win.open(w, "hub");
     else if (r == "quest") { win.close(); win.open(w, "task"); }
     else if (r == "char") { win.close(); win.open(w, "role"); }
@@ -282,7 +282,7 @@ void Hud::draw(engine::Canvas& c, World& w, bool advance) {
     const float pulse = assign_.empty() ? 0 : 0.5f + 0.5f * std::sin(float(now) * 1000 / 160);
     auto slotAt = [&](double cx, double cy, double r, int qi, std::function<void()> fn) {
       if (!assign_.empty()) c.fillEllipse(cx, cy, r + 5, r + 5, 0xffd250, 0.25f + 0.35f * pulse);
-      if (!assign_.empty()) fn = [this, &w, qi] { w.assignQuick(assign_, qi); assign_.clear(); w.sfx("repair", 0.5); w.save(); w.toastMsg = "Kısayola yerleşti."; w.toastT = 1.5f; };
+      if (!assign_.empty()) fn = [this, &w, qi] { w.cmd({"quick", {assign_, std::to_string(qi)}}); assign_.clear(); w.sfx("repair", 0.5); w.toastMsg = "Kısayola yerleşti."; w.toastT = 1.5f; };
       if (ring) { const double ww = r * 2 + 8; c.drawImage(*ring, 0, 0, float(ring->w), float(ring->h), cx - ww / 2, cy - ww / 2, ww, ww); }
       const double ir = r * 0.66; c.clipCircle(cx, cy, ir); c.fillRect(cx - ir, cy - ir, ir * 2, ir * 2, 0x0c0805);
       drawSlot(c, w, qi < int(P.quick.size()) ? P.quick[size_t(qi)] : "", cx - ir, cy - ir, ir * 2 / 32); c.clearClip();
@@ -304,7 +304,7 @@ void Hud::draw(engine::Canvas& c, World& w, bool advance) {
     const float tx0 = float(ax - 142 * HS), ty0 = float(ay + 22 * HS);
     c.fillEllipse(tx0, ty0, 14, 14, 0x0c0805, 0.8f); c.strokeEllipse(tx0, ty0, 14, 14, 1.5f, 0xb89a50);
     text(c, "S", 13, "◎", tx0, ty0 + 5, 0xffe48a, CENTER);
-    hud_.push_back({tx0 - 18, ty0 - 18, 36, 36, [&w] { w.cycleTarget(); }}); }
+    hud_.push_back({tx0 - 18, ty0 - 18, 36, 36, [&w] { w.cmd({"cycle", {}}); }}); }
   // orta alt: yarı saydam mesaj kutusu (son 10 sn, en çok 5 satır)
   { std::vector<const Log*> L; for (const Log& l : logs_) if (now - l.t < 10) L.push_back(&l);
     if (L.size() > 5) L.erase(L.begin(), L.end() - 5);
@@ -369,8 +369,8 @@ void Hud::tapWorld(World& w, float sx, float sy) {
     const double d = std::hypot(w.map.px(e.x, e.y) - Wx, (w.map.py(e.x, e.y) - 22) - Wy); if (d < bd) { bd = d; best = int(i); }
   }
   if (best < 0) return;
-  if (w.ents[size_t(best)].kind == Ent::MOB) { w.setTarget(best, w.target() == best); return; }
-  if (w.target() != best) { w.setTarget(best); w.sfx("menusel", 0.5); return; }
+  if (w.ents[size_t(best)].kind == Ent::MOB) { w.cmd({"target", {std::to_string(best), w.target() == best ? "1" : "0"}}); return; }
+  if (w.target() != best) { w.cmd({"target", {std::to_string(best), "0"}}); w.sfx("menusel", 0.5); return; }
   request = "talk:" + std::to_string(best);
 }
 

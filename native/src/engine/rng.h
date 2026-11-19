@@ -11,6 +11,7 @@ class Rng {
  public:
   explicit Rng(uint32_t seed = 0x5EED1234u) : a_(seed) {}
   void seed(uint32_t s) { a_ = s; }
+  uint32_t state() const { return a_; }   // ağ: dünya özeti ve eşitleme
   double next() {   // [0, 1) — mulberry32 (JS: Math.imul ve >>> ile aynı 32 bit işlemler)
     a_ += 0x6D2B79F5u;
     uint32_t t = (a_ ^ (a_ >> 15)) * (1u | a_);
