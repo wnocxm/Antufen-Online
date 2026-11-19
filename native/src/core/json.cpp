@@ -1,6 +1,7 @@
 #include "json.h"
 
 #include <algorithm>
+#include <cstdio>
 #include <cstdlib>
 #include <stdexcept>
 
@@ -100,6 +101,57 @@ void Json::set(const std::string& key, Json v) {
   index_ = std::make_shared<std::unordered_map<std::string, size_t>>(index_ ? *index_ : std::unordered_map<std::string, size_t>());   // paylaşılan dizini ayır
   (*index_)[key] = obj_.size(); obj_.emplace_back(key, std::move(v));
 }
+void Json::erase(const std::string& key) {
+  if (!has(key)) return;
+  std::vector<std::pair<std::string, Json>> keep; for (auto& kv : obj_) if (kv.first != key) keep.push_back(std::move(kv));
+  obj_ = std::move(keep); index_ = std::make_shared<std::unordered_map<std::string, size_t>>();
+  for (size_t k = 0; k < obj_.size(); k++) (*index_)[obj_[k].first] = k;
+}
+
+// JS Number#toString (JSON.stringify): en kısa geri okunabilir rakamlar; üs 21 ve üstünde ya da −7 ve altında üslü yazım
+std::string jsNumStr(double v) {
+  if (!(v == v)) return "NaN";
+  if (v - v != 0) return v > 0 ? "Infinity" : "-Infinity";
+  if (v == 0) return "0";
+  char b[48]; int p = 1;
+  for (; p <= 17; p++) { std::snprintf(b, sizeof b, "%.*e", p - 1, v); if (std::strtod(b, nullptr) == v) break; }
+  std::string t = b, sign; if (t[0] == '-') { sign = "-"; t = t.substr(1); }
+  const size_t e = t.find('e'); std::string d; for (size_t k = 0; k < e; k++) if (t[k] != '.') d += t[k];
+  while (d.size() > 1 && d.back() == '0') d.pop_back();
+  const int n = std::atoi(t.c_str() + e + 1) + 1, k = int(d.size());
+  std::string o;
+  if (k <= n && n <= 21) o = d + std::string(size_t(n - k), '0');
+  else if (0 < n && n <= 21) o = d.substr(0, size_t(n)) + "." + d.substr(size_t(n));
+  else if (-6 < n && n <= 0) o = "0." + std::string(size_t(-n), '0') + d;
+  else o = d.substr(0, 1) + (k > 1 ? "." + d.substr(1) : std::string()) + "e" + (n - 1 >= 0 ? "+" : "-") + std::to_string(std::abs(n - 1));
+  return sign + o;
+}
+static void dumpNum(std::string& o, double v) {
+  if (!(v == v) || v - v != 0) { o += "null"; return; }
+  o += jsNumStr(v);
+}
+static void dumpStr(std::string& o, const std::string& s) {
+  o += '"';
+  for (unsigned char c : s) {
+    if (c == '"') o += "\\\""; else if (c == '\\') o += "\\\\";
+    else if (c == '\b') o += "\\b"; else if (c == '\f') o += "\\f"; else if (c == '\n') o += "\\n"; else if (c == '\r') o += "\\r"; else if (c == '\t') o += "\\t";
+    else if (c < 0x20) { char b[8]; std::snprintf(b, sizeof b, "\\u%04x", c); o += b; }
+    else o += char(c);
+  }
+  o += '"';
+}
+static void dumpTo(std::string& o, const Json& j) {
+  switch (j.type()) {
+    case Json::Type::Null: o += "null"; break;
+    case Json::Type::Bool: o += j.b() ? "true" : "false"; break;
+    case Json::Type::Number: dumpNum(o, j.num()); break;
+    case Json::Type::String: dumpStr(o, j.str()); break;
+    case Json::Type::Array: { o += '['; bool f = true; for (const Json& x : j.arr()) { if (!f) o += ','; f = false; dumpTo(o, x); } o += ']'; break; }
+    case Json::Type::Object: { o += '{'; bool f = true; for (auto* kv : jsOrder(j)) { if (!f) o += ','; f = false; dumpStr(o, kv->first); o += ':'; dumpTo(o, kv->second); } o += '}'; break; }
+  }
+}
+std::string Json::dump() const { std::string o; dumpTo(o, *this); return o; }
+
 bool Json::has(const std::string& key) const { return type_ == Type::Object && index_ && index_->count(key); }
 
 bool jsIntKey(const std::string& k) {

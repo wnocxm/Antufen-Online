@@ -66,6 +66,8 @@ class Paperdoll {
   void set(Assets& as, const Look& look);
   int animLen(const std::string& act, int anim) const;
   void draw(Canvas& c, const std::string& act, int anim, double t, int x, int y, float alpha = 1.f) const;
+  // büyütülmüş (HTML ctx.translate + ctx.scale altında draw: karakter oluşturmadaki önizleme ×2,2); smooth false: en yakın komşu
+  void drawScaled(Canvas& c, const std::string& act, int anim, double t, float x, float y, float k, bool smooth = false) const;
 
  private:
   struct Layer { const core::Json* A = nullptr; std::vector<const core::Json*> L; };

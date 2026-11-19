@@ -39,7 +39,7 @@ void World::acceptQuest(int qi) {
   QuestSt st; st.ready = q.type == "talk"; P.quests[q.id] = st;
   for (const auto& a : q.accItems) if (!countItem(a.first)) addItem(a.first, a.second);
   if (q.type == "special" && flags.count(q.flag)) P.quests[q.id].ready = true;
-  note("Görev alındı: " + q.tr.title, LOG_Q);
+  note("Görev alındı: " + q.tr.title, LOG_Q); save();
 }
 
 void World::readyQuest(int qi) {
@@ -131,14 +131,14 @@ bool World::completeQuest(int qi) {
   gainXp(q.xp);
   if (q.xp || q.gold) note("Ödül: " + std::to_string(q.xp) + " TP" + (q.gold ? ", " + std::to_string(q.gold) + " altın" : ""), LOG_Q);
   if (q.adv) classUp(q.adv);
-  return true;
+  save(); return true;
 }
 
 // sınıf yükseltmesi (40: sınıf ağacı, 80: uzmanlık ağaçları)
 void World::classUp(int n) {
   if (P.adv >= n) return;
   P.adv = n; pushFx("LEVELUP", player.x, player.y);
-  toast("Sınıf yükseltildi"); note(n >= 2 ? "Sınıf yükseltildi · uzmanlık ağaçları açıldı" : "Sınıf yükseltildi · sınıf beceri ağacı açıldı", LOG_Q);
+  toast("Sınıf yükseltildi"); note(n >= 2 ? "Sınıf yükseltildi · uzmanlık ağaçları açıldı" : "Sınıf yükseltildi · sınıf beceri ağacı açıldı", LOG_Q); save();
 }
 
 // seviyesi gelince kendiliğinden alınan görevler (orijinalde verensiz "gönderilen" görev: 80344 Acemilikten Çıkış)
@@ -169,7 +169,7 @@ int World::tpQuestOf(const std::string& cn) {
 // ışınlanma görevi: gidilen yer "ev" olur (ölünce orada doğulur)
 void World::questTeleport(int qi) {
   const Quest& q = quests().all()[size_t(qi)];
-  P.hasHome = true; P.homeScene = q.tpScene; P.homeXY = q.tpHasXY; P.homeX = q.tpX; P.homeY = q.tpY;
+  P.hasHome = true; P.homeScene = q.tpScene; P.homeXY = q.tpHasXY; P.homeX = q.tpX; P.homeY = q.tpY; save();
   if (q.tpHasXY) { const int a[2] = {q.tpX, q.tpY}; loadScene(q.tpScene, a); } else loadScene(q.tpScene);
 }
 

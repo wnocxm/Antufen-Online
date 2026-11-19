@@ -45,13 +45,13 @@ void World::unequip(const std::string& slot) {
 void World::buyItem(const std::string& id, int n) {
   const Item* it = bal_.item(id); if (!it) return;
   const long long cost = (long long)it->price * n; if (P.gold < cost) { toast("Yeterli altının yok."); return; }
-  P.gold -= cost; addItem(id, n, true); note(it->name + " ×" + std::to_string(n) + " satın alındı (−" + std::to_string(cost) + " altın).", LOG_LOOT);
+  P.gold -= cost; addItem(id, n, true); note(it->name + " ×" + std::to_string(n) + " satın alındı (−" + std::to_string(cost) + " altın).", LOG_LOOT); save();
 }
 void World::sellItem(const std::string& id, int n) {
   const Item* it = bal_.item(id); n = std::min(n, countItem(id));
   if (!it || it->quest || n < 1 || !removeItem(id, n)) return;
   const long long g = (long long)(it->sell ? it->sell : std::max(1, it->price / 10)) * n; P.gold += g;
-  note(it->name + (n > 1 ? " ×" + std::to_string(n) : std::string()) + " satıldı (+" + std::to_string(g) + " altın).", LOG_LOOT);
+  note(it->name + (n > 1 ? " ×" + std::to_string(n) : std::string()) + " satıldı (+" + std::to_string(g) + " altın).", LOG_LOOT); save();
 }
 void World::openGrowthBox(const std::string& id) {
   removeItem(id);
@@ -65,7 +65,7 @@ void World::refreshLook() {
   Look l = player.look; l.cls = P.cls; l.race = P.race; l.sex = P.sex;
   auto G = [&](const char* sl) { const Item* it = bal_.item(eqOf(sl)); return it ? it->gfx : std::string(); };
   l.bodyG = G("body"); l.headG = G("head"); l.weapG = G("weap");
-  setLook(l);
+  setLook(l); save();
 }
 void World::gmGear() {
   for (const char* sl : SLOTS) {

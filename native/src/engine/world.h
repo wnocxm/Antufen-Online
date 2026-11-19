@@ -84,10 +84,15 @@ struct CharData {
   bool hasHome = false; std::string homeScene; bool homeXY = false; int homeX = 0, homeY = 0;   // ölünce doğulan yer (ışınlanma görevi)
   std::map<std::string, int> life;                       // yaşam meslekleri (meslek → kademe; sistem sonraki adımda)
   // zindan koşusu (HTML P.dun; yoksa on false): kesilen canavarlar bu koşuda doğmaz; günlük giriş sayacı (HTML P.dg)
-  struct Run { bool on = false; std::string id; int copy = 0; std::set<std::string> cleared; bool boss = false; } dun;
+  struct Run { bool on = false; std::string id; int copy = 0; std::set<std::string> cleared; bool boss = false; double t = 0; } dun;   // t: giriş saati (ms)
   std::string dgDay; std::map<std::string, int> dgN;
   // evcil hayvanlar (HTML P.pets, petOn, petMode, petSlots, petSel)
   std::vector<PetRec> pets; std::string petOn, petMode = "attack", petSel; int petSlots = 0;
+  bool petsSeen = false;   // HTML Pet.list() kayıtta pets: [] oluşturur (hayvansız karakterde de)
+  // kayıt (HTML P; world_save.cpp): son kaydedilen harita, yer, can, mana; raw: okunan kaydın kendisi (C++'ın tutmadığı alanlar
+  // — sunucu kimliği id, gear, qitems, flags … — aynen geri yazılır; hangi isteğe bağlı alanların kayıtta olduğu da buradan)
+  std::string scene; double x = 3, y = 13, hp = 1e9, mp = 1e9;
+  core::Json raw;
 };
 
 struct Stats { double hp = 0, mp = 0, atk = 0, def = 0, crit = 0, dodge = 0, hpreg = 0, mpreg = 0, res = 0, dr = 0, spd = 0, goldUp = 0, lifeEl = 0,
@@ -176,6 +181,17 @@ class World {
   // arayüzden onay isteği (HTML Win.ask'i oyun kodundan çağırır): HUD onay kutusunu açar
   std::string askText; std::function<void()> askYes;
   void ask(const std::string& t, std::function<void()> yes) { askText = t; askYes = std::move(yes); }
+  // kayıt (HTML newSave, save, load, fixSave, fixSkills, ui.js start; world_save.cpp). Biçim HTML'deki kayıtla aynı JSON (localStorage
+  // 'anrufen_save_v1' ve sunucu): iki sürüm birbirinin kaydını okur.
+  void newChar(const std::string& name, const std::string& cls, const std::string& race, const std::string& sex, int face);   // HTML newSave + yüz
+  core::Json saveJson();                            // kaydın JSON'u (oyuncu varsa harita, yer, can, mana ondan; HTML save)
+  bool loadSave(const core::Json& s);               // HTML fixSave + Game.P = s; false: geçersiz kayıt (v ≠ 1)
+  void fixSkills();                                 // şartı tutmayan ya da kademesi aşan becerilerin puanını geri ver
+  void start();                                     // HTML start: kayıttaki harita ve yer, kendiliğinden alınan görevler, ilk giriş ipuçları
+  void save();                                      // HTML save(): saveFn varsa kaydın metnini ona verir
+  std::function<void(const std::string&)> saveFn;   // uygulama: dosyaya yazar; test: yok
+  double saveT = 0;                                 // 8 sn'de bir kayıt (HTML Game.saveT)
+  std::string appReq;                               // uygulamaya istek: "title" (giriş ekranına dön), "newchar" (kaydı sil, giriş ekranı)
   double warnT = 0;                                         // uyarı bildirimini tekrarlamama (HTML Game.warnT)
   // evcil hayvanlar (HTML pet.js; world_pet.cpp)
   PetEnt pet;                                               // çağrılmış hayvanın varlığı (on false: yok)
@@ -202,7 +218,7 @@ class World {
   void petGainLv(PetRec& p);
   bool petUseItem(const std::string& id);
   void petRelease(const std::string& uid);
-  void petSetMode(const std::string& m) { P.petMode = m; }
+  void petSetMode(const std::string& m) { P.petMode = m; save(); }
   bool petResting(const PetRec* p) const { return p && !p->dead && P.petOn != p->uid; }
   struct PetTf { bool ok = false, keep = false; std::string why; int next = 0, need = 0, cost = 0; double chance = 0; std::vector<std::string> give; int gs = -1, ls = -1; };
   PetTf petTfInfo(const PetRec* main, const PetRec* mat, const std::vector<std::string>& aids);
@@ -306,6 +322,7 @@ class World {
   struct Timer { double t; std::function<void()> fn; };
   std::vector<Timer> timers_;
   int lastJoyDir_ = -1, target_ = -1, fxUid_ = 0;
+  bool startSet_ = false; double startX_ = 0, startY_ = 0, startHp_ = 0, startMp_ = 0;   // start(): loadScene kayıttaki yer/can/manayla
   bool goPending_ = false; std::function<void()> goFn_;   // geçitten geçiş / zindandan çıkış (kare sonunda; HTML'de eşzamansız)
   void dungeonOnLoad(const std::string& sid);
   void dungeonTune(Ent& m);

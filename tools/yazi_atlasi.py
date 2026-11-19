@@ -29,7 +29,7 @@ FAM = {
 HALF = lambda a, b: [x / 2 for x in range(int(a * 2), int(b * 2) + 1)]   # yarım boy adımlarıyla (pencereler ekrana ölçeklenir)
 SIZES = {
     'B': HALF(7, 18),
-    'Bb': HALF(7, 18),
+    'Bb': HALF(7, 18) + [24],                               # 24: giriş ekranındaki seçili sözcük (#tword)
     'H': HALF(9, 20),
     'S': [13, 14, 17, 18, 20, 28],
     'N': [6, 7, 8, 9, 10, 11, 12],                         # kısayol yuvası içindeki kilit/bekleme yazıları yuvanın ölçeğiyle büyür

@@ -58,6 +58,12 @@
 //   geciste <bölge> <dt>             oyuncuyu geçidin ortasına koyup bir kare ilerlet · zindandurum <dosya|->  zindan durumu (JSON)
 //   esya <al|sat|giy|cikar|kullan|ekle|sil> <eşya|yuva> [adet]   eşya işlemi (HTML buyItem, sellItem, equip, unequip, useItem, addItem, removeItem)
 //   gmgear · altin <n>               GM: seviyeye uygun en iyi ekipman · altın
+//   yenikarakter <ad> <sınıf> <ırk> <cinsiyet> <yüz 1-8> · baslat   yeni karakter (HTML newSave) · kayıttan başla (HTML start)
+//   giris <ac 0|1 [bilgi]|surum <metin>|tus <ArrowLeft|ArrowRight|Enter>|dokun x y|kaydir x0 x1 y|bekle <sn>|bitir|goruntu <png>|durum <dosya|->>
+//                                    giriş ekranı (kayıt var mı, "Ad · Sınıf · Seviye n"); eylem satırı {"eylem":"continue|new"}
+//   olustur <ac|dokun x y|yaz <metin>|tus <Backspace|Enter>|ciz [ms]|goruntu <png> [ms]|durum <dosya|->>   karakter oluşturma
+//   yenidunya                        oyunu baştan aç (HTML location.reload; veri yüklü kalır)
+//   kayityaz <dosya|-> · kayitoku <dosya>   kaydın JSON'u (HTML save) · kaydı oku (HTML load/fixSave; satır {"kayit":true|false})
 //   beceriyukselt <beceri no> · becerisifirla <0|1>   beceri penceresinin Yükselt'i · Puanları Sıfırla (1: bedava)
 //   kisayol <yuva> <sıra>            kısayol halkasına yerleştir (s<n> beceri, i:<eşya>)
 //   beceriyazilari <dosya>           her becerinin kilit iletisi, her kademedeki açıklaması ve sonraki kademe farkı
@@ -82,6 +88,7 @@
 #include "ui/font.h"
 #include "ui/forms.h"
 #include "ui/hud.h"
+#include "ui/title.h"
 
 using namespace engine;
 
@@ -244,6 +251,7 @@ int main(int argc, char** argv) {
   Vfs vfs; Assets assets; Balance bal; std::unique_ptr<World> world; Canvas canvas; canvas.resize(640, VH);
   DrawOpts opts; std::string line; int ln = 0; bool hudOn = false;
   ui::Fonts fonts; std::unique_ptr<ui::Forms> forms; std::unique_ptr<ui::Hud> hud;
+  std::unique_ptr<ui::Title> title; std::unique_ptr<ui::Create> create;   // giriş ekranı, karakter oluşturma
   auto W = [&]() -> World& { if (!world) throw godat::Error("önce veri"); return *world; };
   try {
     while (std::getline(*in, line)) {
@@ -256,6 +264,40 @@ int main(int argc, char** argv) {
         fonts.load(vfs); forms = std::make_unique<ui::Forms>(assets, fonts); forms->load(vfs); hud = std::make_unique<ui::Hud>(assets, fonts, *forms);
         std::printf("veri: %s\n", vfs.describe().c_str());
       } else if (cmd == "tohum") { uint32_t sd; ss >> sd; rng().seed(sd); }
+      else if (cmd == "yenikarakter") { std::string a, c, r, x; int f = 1; ss >> a >> c >> r >> x >> f; W().newChar(a, c, r, x, f); }   // HTML newSave + yüz
+      else if (cmd == "baslat") W().start();
+      else if (cmd == "giris" || cmd == "olustur") {   // giriş ekranı / karakter oluşturma (HTML #title, #create)
+        if (!title) { title = std::make_unique<ui::Title>(assets, fonts, *forms); create = std::make_unique<ui::Create>(assets, fonts, *forms); }
+        std::string op; ss >> op; std::string act;
+        if (cmd == "giris") {
+          if (op == "ac") { int k = 0; ss >> k; std::string info; std::getline(ss, info); if (!info.empty() && info[0] == ' ') info.erase(0, 1); title->open(k != 0, info); }
+          else if (op == "surum") { std::string v; std::getline(ss, v); title->version = v.empty() ? v : v.substr(1); }
+          else if (op == "tus") { std::string k; ss >> k; act = title->key(k); }
+          else if (op == "dokun") { float x, y; ss >> x >> y; title->press(x, y); act = title->release(x, y); }
+          else if (op == "kaydir") { float a, b2, y; ss >> a >> b2 >> y; title->press(a, y); act = title->release(b2, y); }
+          else if (op == "bekle") { double t; ss >> t; title->update(t); }
+          else if (op == "bitir") title->settle();
+          else if (op == "goruntu") { std::string f; ss >> f; title->draw(canvas); godat::writeFile(f, core::encodePNG(canvas.img)); }
+          else if (op == "durum") { std::string f; ss >> f; out(f, "{\"sozcuk\":" + jq(title->word()) + ",\"bilgi\":" + jq(title->info()) + ",\"kare\":" + jq(title->frame()) + ",\"mesgul\":" + (title->busy() ? "true" : "false") + "}\n"); }
+          if (!act.empty()) std::printf("{\"eylem\":%s}\n", jq(act).c_str());
+        } else {
+          if (op == "ac") create->open();
+          else if (op == "dokun") { float x, y; ss >> x >> y; create->draw(canvas, 0); act = create->tap(x, y); }   // dokunma bölgeleri çizimde kurulur
+          else if (op == "yaz") { std::string t; std::getline(ss, t); if (!t.empty() && t[0] == ' ') t.erase(0, 1); create->text(t); }
+          else if (op == "tus") { std::string k; ss >> k; create->key(k); }
+          else if (op == "goruntu") { std::string f; double ms = 0; ss >> f >> ms; create->draw(canvas, ms); godat::writeFile(f, core::encodePNG(canvas.img)); }
+          else if (op == "ciz") { double ms = 0; ss >> ms; create->draw(canvas, ms); }
+          else if (op == "durum") { std::string f; ss >> f; out(f, "{\"sinif\":" + jq(create->cls) + ",\"irk\":" + jq(create->race) + ",\"cins\":" + jq(create->sex) + ",\"yuz\":" + std::to_string(create->face) + ",\"ad\":" + jq(create->finalName()) + ",\"yaziyor\":" + (create->editing ? "true" : "false") + "}\n"); }
+          if (!act.empty()) std::printf("{\"eylem\":%s}\n", jq(act).c_str());
+        }
+      }
+      else if (cmd == "yenidunya") { world = std::make_unique<World>(assets, bal); hud = std::make_unique<ui::Hud>(assets, fonts, *forms); }   // oyunu baştan aç (HTML sayfayı yenile; veri aynı)   // HTML start: kayıttaki harita ve yer
+      else if (cmd == "kayityaz") { std::string f; ss >> f; out(f, W().saveJson().dump() + "\n"); }   // kaydın JSON'u (HTML save + localStorage)
+      else if (cmd == "kayitoku") {   // kayıt dosyasını oku (HTML load → fixSave); sonuç satırı {"kayit":true|false}
+        std::string f; ss >> f; const godat::Bytes b = godat::readFile(f); bool ok = false;
+        try { ok = W().loadSave(core::Json::parse(std::string(b.begin(), b.end()))); } catch (const std::exception&) { ok = false; }
+        std::printf("{\"kayit\":%s}\n", ok ? "true" : "false");
+      }
       else if (cmd == "karakter") { std::string c, r, s; ss >> c >> r >> s; W().P = CharData(); W().flags.clear(); W().setChar(c, r, s); }   // yeni karakter (Sv 1, altın 0, çanta boş)
       else if (cmd == "seviye") { int lv; ss >> lv; W().setLevel(lv); }
       else if (cmd == "doldur") { const Stats s = W().stats(); W().player.hp = s.hp; W().player.mp = s.mp; }

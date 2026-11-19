@@ -77,7 +77,7 @@ double World::nowMillis() const {
 }
 
 // ---------------- kayıt ve nitelikler ----------------
-std::vector<PetRec*> World::petList() { std::vector<PetRec*> L; for (PetRec& p : P.pets) if (bal_.pets.by(p.sp)) L.push_back(&p); return L; }
+std::vector<PetRec*> World::petList() { P.petsSeen = true; std::vector<PetRec*> L; for (PetRec& p : P.pets) if (bal_.pets.by(p.sp)) L.push_back(&p); return L; }
 PetRec* World::petActive() { for (PetRec* p : petList()) if (p->uid == P.petOn) return p; return nullptr; }
 PetRec* World::petByUid(const std::string& uid) { for (PetRec* p : petList()) if (p->uid == uid) return p; return nullptr; }
 const PetForm& World::petForm(const PetRec& p) const {
@@ -145,6 +145,7 @@ void World::petHatch(const std::string& eggId) {
   char tal[32]; std::snprintf(tal, sizeof tal, "%g", p.tal);
   toast(petName(p) + " yumurtadan çıktı!"); note("Yeni evcil hayvan: " + petName(p) + " (yetenek ×" + tal + "; rastgele beceriler: " + skl + ")", LOG_Q);
   questFlag("hatch"); if (P.petOn.empty()) petSummon(uid);
+  save();
 }
 
 // ---------------- çağırma ----------------
@@ -152,9 +153,9 @@ void World::petSummon(const std::string& uid) {
   PetRec* p = petByUid(uid); if (!p) return;
   if (p->dead && nowMillis() - p->deadAt > 600000) { p->dead = false; p->hp = jsRound(petStats(*p).hp * 0.1); }   // 10 dakika sonra kendiliğinden
   if (p->dead) { toast(petName(*p) + " ölü; Ejderin Kurtuluşu ile dirilt ya da biraz bekle."); return; }
-  P.petOn = uid; petSpawn();
+  P.petOn = uid; petSpawn(); save();
 }
-void World::petDismiss() { P.petOn.clear(); petDespawn(); }
+void World::petDismiss() { P.petOn.clear(); petDespawn(); save(); }
 void World::petDespawn() {
   pet.on = false; pet.tg = -1;
   player.buffs.erase(std::remove_if(player.buffs.begin(), player.buffs.end(), [](const Buff& b) { return b.id == "petaura"; }), player.buffs.end());
@@ -198,7 +199,7 @@ void World::petDie() {
   pushFx("特效-血爆死亡", pet.x, pet.y); toast(petName(*p) + " öldü!");
   note(petName(*p) + " öldü. Ejderin Kurtuluşu ile diriltebilirsin; 10 dakika sonra kendiliğinden dirilir.", LOG_Q);
   for (Ent& e : ents) if (e.foe == pet.gen) e.foe = 0;
-  P.petOn.clear(); petDespawn();
+  P.petOn.clear(); petDespawn(); save();
 }
 // hedef seçimi (taktik modu)
 int World::petPickTarget() {
@@ -379,7 +380,7 @@ int World::petTransform(const std::string& mainUid, const std::string& matUid, c
     toast(std::string("Dönüşüm başarısız. ") + (r.keep ? "Soy Rünü düzeyi korudu." : "Düzey: " + std::to_string(main->st)));
     note(n0 + ": dönüşüm başarısız.", LOG_Q);
   }
-  return okk ? 1 : 0;
+  save(); return okk ? 1 : 0;
 }
 // ---------------- beceri aktarma (技能转移) ----------------
 World::PetTf World::petSkInfo(const PetRec* main, const PetRec* mat, const std::vector<std::string>& runes) {
@@ -413,7 +414,7 @@ std::string World::petTransfer(const std::string& mainUid, const std::string& ma
   main = petByUid(mainUid);
   toast(petName(*main) + " yeni beceri öğrendi: " + petSkName(k) + (old.empty() ? std::string() : " (" + petSkName(old) + " yerine)"));
   note("Beceri aktarma: " + petName(*main) + " ← " + petSkName(k), LOG_Q);
-  return k;
+  save(); return k;
 }
 
 // ---------------- eşyalar: kuluçka, mama, iksir, diriltme, sözleşme taşı, yetenek meyvesi, deneyim ----------------
@@ -422,7 +423,7 @@ bool World::petUseItem(const std::string& id) {
   if (u["egg"].truthy()) { petHatch(id); return true; }
   if (u["box"].truthy()) { toast("Kuluçka kutusu: çantadaki bir yumurtayı kullanınca kendiliğinden kullanılır."); return true; }
   if (u["tf"].truthy() || u["sk"].truthy()) { toast("Dönüşüm/beceri aktarma eşyası: Evcil hayvan penceresinin Dönüşüm bölümünde ya da Büyülü Canavar Ustası'nda kullanılır."); return true; }
-  if (u["petSlot"].truthy()) { P.petSlots = petSlotsN() + 1; removeItem(id, 1); toast("Evcil hayvan hakkın: " + std::to_string(petSlotsN())); return true; }
+  if (u["petSlot"].truthy()) { P.petSlots = petSlotsN() + 1; removeItem(id, 1); toast("Evcil hayvan hakkın: " + std::to_string(petSlotsN())); save(); return true; }
   PetRec* p = nullptr;
   if (u["petRevive"].truthy()) { for (PetRec* x : petList()) if (x->uid == P.petSel && x->dead) { p = x; break; } if (!p) for (PetRec* x : petList()) if (x->dead) { p = x; break; } }
   else p = petActive();
@@ -434,12 +435,12 @@ bool World::petUseItem(const std::string& id) {
   else if (u["petMp"].truthy()) p->mp = std::min(st.mp, p->mp + u["petMp"].num());
   else if (u["petGift"].isArr()) { const std::string k = u["petGift"][0].str(); const double v = u["petGift"][1].num(); p->gift[k] += v; toast(petName(*p) + ": yetenek +" + std::to_string((long long)v)); }
   else if (u["petXp"].truthy()) { if (p->lv >= P.lv) { toast("Evcil hayvanın seviyesi senin seviyeni geçemez."); return true; } p->xp += u["petXp"].num(); petGainLv(*p); }
-  removeItem(id, 1); return true;
+  removeItem(id, 1); save(); return true;
 }
 void World::petRelease(const std::string& uid) {
   auto it = std::find_if(P.pets.begin(), P.pets.end(), [&](const PetRec& x) { return x.uid == uid; }); if (it == P.pets.end()) return;
   if (P.petOn == uid) petDismiss();
-  P.pets.erase(std::find_if(P.pets.begin(), P.pets.end(), [&](const PetRec& x) { return x.uid == uid; }));
+  P.pets.erase(std::find_if(P.pets.begin(), P.pets.end(), [&](const PetRec& x) { return x.uid == uid; })); save();
 }
 
 // ---------------- GM (HTML Pet.GM) ----------------

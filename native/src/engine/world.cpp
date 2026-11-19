@@ -139,7 +139,7 @@ bool World::skillUp(const SkillDef& sk) {
   if (r >= (sk.mx ? sk.mx : 10)) { toast("Bu beceri en yüksek kademede."); return false; }
   if (!skLock(sk).empty()) { toast(skLockMsg(sk)); return false; }
   if (P.sp < 1) { toast("Beceri puanın yok. Seviye atlayınca puan kazanırsın."); return false; }
-  P.sp--; P.sk[sk.id] = r + 1; note(sk.name + ": kademe " + std::to_string(r + 1), LOG_Q); clampVitals(); return true;
+  P.sp--; P.sk[sk.id] = r + 1; note(sk.name + ": kademe " + std::to_string(r + 1), LOG_Q); clampVitals(); save(); return true;
 }
 // her puan, öğrenilebilir beceriler arasında kademesi en düşük olana (eşitse önceki ağaç / önceki yuva); oyuncu gibi önce bir sonraki
 // ağacı açacak kadar (acemi 35, sınıf 40), sonra en üstteki açık ağaç. spec: hangi uzmanlık (öbürü alınmaz)
@@ -172,7 +172,7 @@ bool World::skillReset(bool free) {
   if (!spent) { toast("Harcanmış beceri puanı yok."); return false; }
   if (!free && !removeItem("30092") && !removeItem("30788")) { toast("Eğitim Kitabı gerekir (beceri eğitmeninde satılır)."); return false; }
   P.sp += spent; P.sk.clear(); player.buffs.clear();
-  note("Beceri puanları sıfırlandı: " + std::to_string(spent) + " puan geri geldi.", LOG_Q); clampVitals(); return true;
+  note("Beceri puanları sıfırlandı: " + std::to_string(spent) + " puan geri geldi.", LOG_Q); clampVitals(); save(); return true;
 }
 
 int World::countItem(const std::string& id) const { for (const auto& b : P.bag) if (b.first == id) return b.second; return 0; }
@@ -280,8 +280,10 @@ void World::loadScene(const std::string& sid, const int* arrive) {
     }
   }
   // oyuncu: verilen yer, yoksa giriş bölgesinin (tür 0) ortası; geçilmezse giriş bölgesinin köşesi, o da olmazsa en yakın boş kare
-  int px = int(player.x), py = int(player.y); bool have = false;
-  if (arrive) { px = arrive[0]; py = arrive[1]; have = true; }
+  // kayıttan başlarken (HTML start → loadScene(P.scene)): kayıttaki yer (kesirli), can ve mana
+  double px = int(player.x), py = int(player.y); bool have = false;
+  if (startSet_) { px = startX_; py = startY_; have = true; }
+  else if (arrive) { px = arrive[0]; py = arrive[1]; have = true; }
   else for (const auto& r : map.regions) if (r.size() >= 6 && r[1] == 0) { px = int(jsRound((r[2] + r[4]) / 2.0)); py = int(jsRound((r[3] + r[5]) / 2.0)); have = true; break; }
   (void)have;
   if (blocked(px, py)) {
@@ -297,9 +299,11 @@ void World::loadScene(const std::string& sid, const int* arrive) {
   player = Player(); player.x = px; player.y = py; player.t = random() * 20;   // HTML new Player (Ent: t = Math.random() * 20)
   player.look = keep.cls.empty() ? Look{} : keep; player.doll.set(as_, player.look);
   const Stats s = stats(); player.hp = hp > 0 ? std::min(hp, s.hp) : s.hp; player.mp = mp > 0 ? std::min(mp, s.mp) : s.mp;
+  if (startSet_) { player.hp = std::min(startHp_, s.hp); player.mp = std::min(startMp_, s.mp); startSet_ = false; }   // HTML Math.min(P.hp, s.hp)
   petSpawn();   // çağrılmış evcil hayvan sahibinin yanında (HTML Pet.spawn: oyuncudan hemen sonra)
   camX = map.px(player.x, player.y); camY = map.py(player.x, player.y);
   arriveT = 1.5;
+  save();
 }
 
 const std::vector<int>* arrivalNear(const std::vector<std::vector<int>>& regs, int idx) {
@@ -315,6 +319,7 @@ const std::vector<int>* arrivalNear(const std::vector<std::vector<int>>& regs, i
 
 // geçitten geçiş (HTML gotoScene + arrivalNear): hedef sahnede bizim sahneye dönen geçidin yanındaki giriş bölgesi
 void World::gotoScene(const std::string& sid, const std::string& fromSid) {
+  save();   // HTML: Game.transit = true; save()
   const core::Json& sc = as_.D()["scenes"][sid];
   GameMap tmp; tmp.load(as_, sc["map"].str());
   const auto& regs = tmp.regions; int backIdx = -1;
@@ -653,6 +658,7 @@ void World::gainXp(long long n) {
     int nq = 0;
     for (size_t qi = 0; qi < quests().all().size(); qi++) if (quests().minLv(int(qi)) == P.lv && questState(int(qi)) == "new") { note("Yeni görev: " + quests().all()[qi].tr.title + " · " + quests().name(quests().all()[qi].giver), LOG_Q); nq++; }
     if (nq) toast(std::to_string(nq) + " yeni görev açıldı");
+    save();
   }
 }
 
@@ -836,6 +842,7 @@ void World::update(double dt, double sx, double sy) {
   }
   fx.erase(std::remove_if(fx.begin(), fx.end(), [](const Fx& f) { return f.done; }), fx.end());
   camX = map.px(p.x, p.y); camY = map.py(p.x, p.y) - 40;   // kamera karaktere kilitli
+  saveT += dt; if (saveT > 8) { saveT = 0; save(); }   // HTML Game.saveT
   if (goPending_) { goPending_ = false; auto fn = std::move(goFn_); goFn_ = nullptr; if (fn) fn(); }   // geçit: kare bitti, yeni harita
 }
 

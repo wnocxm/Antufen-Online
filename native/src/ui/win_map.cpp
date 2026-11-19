@@ -101,7 +101,7 @@ void Win::drawSys(engine::Canvas& c, World& w, float VH) {
   (void)w;
   const float k = VH / 373; const Xf xf = begin(k, safeL + 126 * VH / 320, 0); const std::string f = "n_deadselect";
   longBg(c, xf); F_.text(c, xf, "Ayarlar", 113, 24, 0x7a1c08, 14, CENTER);
-  F_.text(c, xf, "Kayıt sistemi sonraki adımlarda.", 113, 52, 0x2a1a0a, 11, CENTER, 200);
+  F_.text(c, xf, "Oyun otomatik kaydedilir.", 113, 52, 0x2a1a0a, 11, CENTER, 200);
   F_.text(c, xf, std::string("C++ sürümü · ") + __DATE__, 113, 70, 0x5a4020, 10, CENTER);
   const std::string on1 = "Açık", off1 = "Kapalı";
   const std::pair<const char*, std::string> rows[5] = {{"sfx", "Ses efektleri: " + (optSfx ? on1 : off1)}, {"mus", "Müzik: " + (optMusic ? on1 : off1)}, {"lang", "Dil / Language: Türkçe"},
@@ -112,7 +112,8 @@ void Win::tapSys(World& w, const std::string& id) {
   if (id == "sfx") optSfx = !optSfx;
   else if (id == "mus") optMusic = !optMusic;
   else if (id == "lang") w.toast("İngilizce sonraki adımlarda.");
-  else if (id == "title" || id == "newc") w.toast("Giriş ekranı ve karakter oluşturma sonraki adımlarda.");
+  else if (id == "title") { w.save(); w.appReq = "title"; }   // HTML: save(); location.reload()
+  else if (id == "newc") ask("Karakterin silinecek ve yeni karakter oluşturacaksın. Emin misin?", [&w] { w.appReq = "newchar"; });   // HTML: kaydı sil, yenile
 }
 
 // ---------------- NPC listesi: konuşma parşömeni, 4'erli sayfa; dokununca kişiye yürür ----------------

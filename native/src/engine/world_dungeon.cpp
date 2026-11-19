@@ -47,7 +47,7 @@ bool World::dungeonDoor(int region) {
 }
 void World::dungeonEnter(const DungeonDef& d, int copy) {
   if (d.daily) { const std::string day = today.empty() ? utcDay() : today; if (P.dgDay != day) { P.dgDay = day; P.dgN.clear(); } P.dgN[d.id]++; }
-  P.dun = CharData::Run(); P.dun.on = true; P.dun.id = d.id; P.dun.copy = copy;
+  P.dun = CharData::Run(); P.dun.on = true; P.dun.id = d.id; P.dun.copy = copy; P.dun.t = nowMillis();
   note("Zindana girdin: " + quests().name(d.cn), LOG_Q);
   const std::string from = sceneId; gotoScene(d.copies[size_t(copy)].scenes[0], from);
 }
@@ -65,7 +65,7 @@ void World::dungeonLeave(bool dead) {
 // harita yüklenince: zindanın içindeysek koşu kaydı olsun (yeniden açılan oyun, GM ışınlanması); dışarıdaysak kapanır
 void World::dungeonOnLoad(const std::string& sid) {
   int c = -1; const DungeonDef* d = dungeonOf(sid, &c);
-  if (d) { if (!P.dun.on || P.dun.id != d->id) { P.dun = CharData::Run(); P.dun.on = true; P.dun.id = d->id; P.dun.copy = c; } }
+  if (d) { if (!P.dun.on || P.dun.id != d->id) { P.dun = CharData::Run(); P.dun.on = true; P.dun.id = d->id; P.dun.copy = c; P.dun.t = nowMillis(); } }
   else if (P.dun.on) P.dun = CharData::Run();
 }
 // canavar değerleri: sınav zindanında zayıf; zindan boss'u tek kişiyle yenilebilir (alan boss'unun ×18 canı yerine ×8, ×1,8 saldırısı yerine ×1,2)
@@ -94,6 +94,7 @@ void World::dungeonOnKill(Ent& m) {
     note("Zindan sandığı: " + std::to_string(gold) + " altın" + got, LOG_Q);
     later(1.5, [this, nm] { ask(nm + ": zindan tamamlandı! Zindandan çıkılsın mı?", [this] { dungeonLeave(false); }); });
   }
+  save();
 }
 // ölünce: kapının dışında dirilir, koşu kapanır
 bool World::dungeonOnRevive() {
@@ -114,7 +115,7 @@ void World::dungeonTpGo(const DungeonTp& t) {
 void World::gmDungeonEnter(const std::string& id, int copy) {   // seviye/ön görev/günlük sınır olmadan doğrudan içeri (sayaç artmaz)
   for (const DungeonDef& d : bal_.dungeons) if (d.id == id) {
     const int c = std::min(copy, int(d.copies.size()) - 1);
-    P.dun = CharData::Run(); P.dun.on = true; P.dun.id = d.id; P.dun.copy = c; gotoScene(d.copies[size_t(c)].scenes[0], ""); return;
+    P.dun = CharData::Run(); P.dun.on = true; P.dun.id = d.id; P.dun.copy = c; P.dun.t = nowMillis(); gotoScene(d.copies[size_t(c)].scenes[0], ""); return;
   }
 }
 void World::gmDungeonDoor(const std::string& id, int copy) {

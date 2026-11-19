@@ -45,6 +45,7 @@ Otomatik yol: `routeTo(sid)` sahneler arası (`scenePath`), `routeToNpc(cn)`, `w
 - `data.json`: `scenes[sid] = {name, map, lv, lvr:[min,max], exits:[[bölge, ad, hedefSid]], ents:[[id, ad, konum]], music, kind}`, `cit` (NPC), `mon` (canavar), `reg` (görsel kayıt), `palidx`.
 - Kayıt (`SAVE_KEY = 'anrufen_save_v1'`, `newSave`): `{v, name, cls, race, sex, lv, xp, gold, hp, mp, gear, eq, bag:[{id,n}], quests:{id:{n,ready}}, done:{id:true}, qitems, scene, x, y, quick, sk:{becerId:kademe}, sp, flags, home, adv}` (`adv`: sınıf yükseltme). `fixSave` eski kayıtları düzeltir (sınıf yükseltilmemişse sınıf ağacı puanlarını geri verir). Çevrimiçiyse `save()` → `Net.save`.
 - Başlangıç: insan `120207`, elf `120205` (acemi kampları).
+- **C++ sürümü aynı kaydı kullanır** (`native/src/engine/world_save.cpp`, docs/09 › 12. adım): HTML kaydını C++ okur, C++ kaydını HTML okur (`tools/test/cpp_kayit.js`). Kayıt alanı eklerken iki tarafa da ekle. Not: `Pet.list()` kayda `pets: []` ekler; `Game.flags` (görev bayrakları) kayda girmez.
 
 ## Savaş
 - Harita değişince bekleyen zamanlayıcılar (`later`: canavar darbesi, beceri vuruşu) silinir (`loadScene`; 18.11, C++ karşılaştırmasında bulundu: önceki haritanın canavarı yeni haritada vurabiliyordu).

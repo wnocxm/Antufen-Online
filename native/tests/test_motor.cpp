@@ -27,6 +27,14 @@ int main(int argc, char** argv) {
   CHECK(j["t"].b() && j["n"].isNull() && j["yok"].isNull() && j["a"][9].isNull(), "JSON: olmayan değer null");
   bool threw = false; try { Json::parse("{\"a\":}"); } catch (const std::exception&) { threw = true; }
   CHECK(threw, "JSON: bozuk metin hata verir");
+  { // JSON yazma = JS JSON.stringify (sayılar Number#toString, anahtar sırası: tam sayı anahtarlar önce)
+    bool ok = true; const std::pair<double, const char*> N[] = {{30, "30"}, {0.1, "0.1"}, {1e21, "1e+21"}, {1e-7, "1e-7"}, {123.456, "123.456"}, {-0.000001, "-0.000001"},
+      {1.0 / 3, "0.3333333333333333"}, {9007199254740994.0, "9007199254740994"}, {1e9, "1000000000"}, {5e-324, "5e-324"}, {1.7976931348623157e308, "1.7976931348623157e+308"}};
+    for (const auto& x : N) if (core::jsNumStr(x.first) != x.second) { ok = false; std::printf("  %s ≠ %s\n", core::jsNumStr(x.first).c_str(), x.second); }
+    CHECK(ok, "JSON: sayı yazımı JS ile aynı");
+    Json o = Json::parse(R"({"b":1,"10":[true,null,"a\"\n"],"2":{"x":-0.5},"a":"ç"})");
+    CHECK(o.dump() == R"({"2":{"x":-0.5},"10":[true,null,"a\"\n"],"b":1,"a":"ç"})", "JSON: yazma (anahtar sırası, kaçış)");
+  }
 
   core::Image im; im.w = 3; im.h = 2; im.px = {255,0,0,255, 0,255,0,128, 0,0,255,0, 1,2,3,4, 5,6,7,8, 9,10,11,12};
   core::Image back = core::decodePNG(core::encodePNG(im));

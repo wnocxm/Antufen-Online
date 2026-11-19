@@ -1,4 +1,5 @@
-// Küçük JSON okuyucu (oyunun veri dosyaları için: data.json, ani.json, haritalar …). Metne yazma yok; yüklemeden sonra değer yazılabilir (set).
+// Küçük JSON okuyucu/yazıcı (oyunun veri dosyaları: data.json, ani.json, haritalar …; kayıt dosyası). Yazma: dump() = JS JSON.stringify
+// (JS anahtar sırası, sayı en kısa geri okunabilir biçimde; NaN/sonsuz null).
 // Kullanım: core::Json v = core::Json::parse(metin); v["reg"]["特效-刀光"][0].str(); v["w"].num();
 #pragma once
 #include <cstdint>
@@ -43,7 +44,13 @@ class Json {
   Json* mut(const std::string& key);
   void set(const std::string& key, Json v);
   static Json number(double v) { Json j; j.type_ = Type::Number; j.num_ = v; return j; }
-  static Json array(std::vector<Json> a) { Json j; j.type_ = Type::Array; j.arr_ = std::move(a); return j; }
+  static Json array(std::vector<Json> a = {}) { Json j; j.type_ = Type::Array; j.arr_ = std::move(a); return j; }
+  static Json text(std::string s) { Json j; j.type_ = Type::String; j.str_ = std::move(s); return j; }
+  static Json boolean(bool b) { Json j; j.type_ = Type::Bool; j.bool_ = b; return j; }
+  static Json object() { Json j; j.type_ = Type::Object; return j; }
+  void push(Json v) { if (type_ == Type::Array) arr_.push_back(std::move(v)); }   // diziye ekle
+  void erase(const std::string& key);                                              // nesneden sil (JS delete)
+  std::string dump() const;                                                        // JSON.stringify
 
  private:
   friend class JsonParser;
@@ -59,5 +66,7 @@ class Json {
 // JS nesnesinin anahtar sırası (Object.keys / for…in / Object.entries): tam sayı biçimli anahtarlar önce (artan), sonra ötekiler ekleme sırasıyla
 std::vector<const std::pair<std::string, Json>*> jsOrder(const Json& o);
 bool jsIntKey(const std::string& k);
+// JS String(sayı) / Number#toString: 30 → "30", 0.1 → "0.1", 1e21 → "1e+21"
+std::string jsNumStr(double v);
 
 }  // namespace core

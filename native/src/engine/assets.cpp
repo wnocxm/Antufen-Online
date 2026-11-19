@@ -149,5 +149,29 @@ void Paperdoll::draw(Canvas& c, const std::string& act, int anim, double t, int 
   for (const core::Json* r : lay.L) sheets.push_back(r ? as_->sheet((*r)[0].str(), (*r)[1].i(), (*r)[3].i()) : nullptr);
   drawParts(c, *lay.A, f, sheets, x, y, false, alpha);
 }
+void Paperdoll::drawScaled(Canvas& c, const std::string& act, int anim, double t, float x, float y, float k, bool smooth) const {
+  auto it = layers_.find(act); if (it == layers_.end() || !it->second.A) return;
+  const Layer& lay = it->second; const core::Json& A = *lay.A; const core::Json& seq = A["a"][anim]; if (!seq.size()) return;
+  int tot = 0; for (const core::Json& s : seq.arr()) tot += std::max(1, s[1].i());
+  int kk = int(std::floor(t)) % tot, f = seq[0][0].i();
+  for (const core::Json& s : seq.arr()) { kk -= std::max(1, s[1].i()); if (kk < 0) { f = s[0].i(); break; } }
+  std::vector<const core::Image*> sheets;
+  for (const core::Json* r : lay.L) sheets.push_back(r ? as_->sheet((*r)[0].str(), (*r)[1].i(), (*r)[3].i()) : nullptr);
+  for (const core::Json& p : A["f"][f].arr()) {
+    const core::Json& m = A["m"][p[0].i()]; if (!m.isArr()) continue;
+    const core::Image* S = sheets.size() > 1 ? (size_t(m[4].i()) < sheets.size() ? sheets[m[4].i()] : nullptr) : (sheets.empty() ? nullptr : sheets[0]);
+    if (!S) continue;
+    const int flags = p[1].i(), w = m[2].i(), h = m[3].i(), px = p[2].i(), py = p[3].i(); const bool fx = flags & 1, fv = flags & 2;
+    const int left = fx ? px - w : px, top = fv ? py - h : py;
+    if (!fx && !fv) { c.drawImage(*S, float(m[0].i()), float(m[1].i()), float(w), float(h), x + left * k, y + top * k, w * k, h * k, 1, smooth); continue; }
+    core::Image part; part.w = w; part.h = h; part.px.resize(size_t(w) * h * 4); part.canvas = S->canvas;   // aynalı parça: aynalanmış kopyadan
+    for (int yy = 0; yy < h; yy++) for (int xx = 0; xx < w; xx++) {
+      const int sx = m[0].i() + (fx ? w - 1 - xx : xx), sy = m[1].i() + (fv ? h - 1 - yy : yy);
+      if (sx < 0 || sy < 0 || sx >= S->w || sy >= S->h) continue;
+      const uint8_t* q = S->at(sx, sy); uint8_t* d = part.at(xx, yy); for (int i = 0; i < 4; i++) d[i] = q[i];
+    }
+    c.drawImage(part, 0, 0, float(w), float(h), x + left * k, y + top * k, w * k, h * k, 1, smooth);
+  }
+}
 
 }  // namespace engine
