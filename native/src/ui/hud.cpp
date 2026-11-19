@@ -196,7 +196,7 @@ void Hud::handle(World& w) {
   }
   if (!w.askText.empty()) { win.ask(w.askText, w.askYes); w.askText.clear(); w.askYes = nullptr; }   // oyun kodunun onay isteği (zindan kapısı, sandık)
   if (!win.assignReq.empty()) { assign_ = win.assignReq; w.toastMsg = "Bir yuvaya dokun: " + win.assignName; w.toastT = 3; win.assignReq.clear(); win.close(); }
-  if (w.dialogEnt >= 0) { win.close(); win.open(w, "npc", w.dialogEnt, w.dialogSay); w.dialogEnt = -1; w.dialogSay.clear(); }
+  if (w.dialogEnt >= 0) { win.close(); win.open(w, "npc", w.dialogEnt, w.dialogSay, true); w.dialogEnt = -1; w.dialogSay.clear(); }
   if (w.died) { w.died = false; win.close(); deathAt = now + 1.2; }
   if (deathAt >= 0 && now >= deathAt) { deathAt = -1; if (w.player.dead) win.open(w, "dead"); }
 }
@@ -274,7 +274,7 @@ void Hud::draw(engine::Canvas& c, World& w, bool advance) {
     const float pulse = assign_.empty() ? 0 : 0.5f + 0.5f * std::sin(float(now) * 1000 / 160);
     auto slotAt = [&](double cx, double cy, double r, int qi, std::function<void()> fn) {
       if (!assign_.empty()) c.fillEllipse(cx, cy, r + 5, r + 5, 0xffd250, 0.25f + 0.35f * pulse);
-      if (!assign_.empty()) fn = [this, &w, qi] { w.assignQuick(assign_, qi); assign_.clear(); w.toastMsg = "Kısayola yerleşti."; w.toastT = 1.5f; };
+      if (!assign_.empty()) fn = [this, &w, qi] { w.assignQuick(assign_, qi); assign_.clear(); w.sfx("repair", 0.5); w.save(); w.toastMsg = "Kısayola yerleşti."; w.toastT = 1.5f; };
       if (ring) { const double ww = r * 2 + 8; c.drawImage(*ring, 0, 0, float(ring->w), float(ring->h), cx - ww / 2, cy - ww / 2, ww, ww); }
       const double ir = r * 0.66; c.clipCircle(cx, cy, ir); c.fillRect(cx - ir, cy - ir, ir * 2, ir * 2, 0x0c0805);
       drawSlot(c, w, qi < int(P.quick.size()) ? P.quick[size_t(qi)] : "", cx - ir, cy - ir, ir * 2 / 32); c.clearClip();
@@ -349,7 +349,7 @@ void Hud::tapWorld(World& w, float sx, float sy) {
   }
   if (best < 0) return;
   if (w.ents[size_t(best)].kind == Ent::MOB) { w.setTarget(best, w.target() == best); return; }
-  if (w.target() != best) { w.setTarget(best); return; }
+  if (w.target() != best) { w.setTarget(best); w.sfx("menusel", 0.5); return; }
   request = "talk:" + std::to_string(best);
 }
 

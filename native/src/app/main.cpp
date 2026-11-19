@@ -2,6 +2,8 @@
 // Akış (HTML ui.js boot): giriş ekranı (kayıt varsa Devam Et) → Yeni Karakter → karakter oluşturma → oyun. Kayıt HTML'dekiyle aynı JSON,
 // kullanıcının uygulama klasöründe (SDL_GetPrefPath: Windows %APPDATA%/Anrufen/AnrufenOnline, Android uygulama verisi) "kayit.json";
 // 8 sn'de bir, olaylarda (görev, alışveriş, harita …) ve çıkışta/arka plana geçerken yazılır. Ayarlar › Giriş ekranına dön / Yeni karakter.
+// Ses (engine/audio, HTML audio.js): müzik ve efektler SDL ses aygıtında karıştırılır; Ayarlar › Ses efektleri / Müzik aç-kapa
+// aynı klasörde "ayarlar.json"a yazılır (HTML localStorage anrufen_audio). Arka planda ses durur.
 //   anrufen [--veri <klasör|paket.gdp>]… [--kayit <dosya>]
 // Geliştirme kısa yolu (giriş ekranı atlanır, kayıt yazılmaz): [--sahne <numara>] [--sinif 战士|法师|牧师] [--irk 人类|精灵]
 //   [--cinsiyet male|fema] [--seviye <n>] [--uzmanlik 0|1] [--ad <ad>]   (seviye: puanlar oyuncu gibi dağıtılır; 40'ta sınıf, 80'de ikincisi)
@@ -24,6 +26,7 @@
 #include "core/json.h"
 #include "core/png.h"
 #include "engine/assets.h"
+#include "engine/audio.h"
 #include "engine/balance.h"
 #include "engine/vfs.h"
 #include "engine/world.h"
@@ -77,15 +80,32 @@ int main(int argc, char** argv) {
 
   SDL_SetHint(SDL_HINT_TOUCH_MOUSE_EVENTS, "0");   // dokunma ayrıca işlenir (fareye çevrilmesin)
   if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) != 0) { std::fprintf(stderr, "SDL: %s\n", SDL_GetError()); return 1; }
-  if (savePath.empty()) { if (char* pp = SDL_GetPrefPath("Anrufen", "AnrufenOnline")) { savePath = std::string(pp) + "kayit.json"; SDL_free(pp); } else savePath = "kayit.json"; }
+  std::string prefDir; if (char* pp = SDL_GetPrefPath("Anrufen", "AnrufenOnline")) { prefDir = pp; SDL_free(pp); }
+  if (savePath.empty()) savePath = prefDir + "kayit.json";
+  // ses: aygıt açılamazsa sessiz sürer
+  struct Snd { engine::Audio a; int rate = 48000; } snd; snd.a.attach(vfs); SDL_AudioDeviceID adev = 0;
+  const std::string optPath = prefDir + "ayarlar.json";
+  { const std::string t = readText(optPath); if (!t.empty()) try { const core::Json o = core::Json::parse(t); if (o.has("sfx")) snd.a.sfxOn = o["sfx"].truthy(); if (o.has("music")) snd.a.musicOn = o["music"].truthy(); } catch (...) {} }
+  if (SDL_InitSubSystem(SDL_INIT_AUDIO) == 0) {
+    SDL_AudioSpec want{}, have{}; want.freq = 48000; want.format = AUDIO_F32SYS; want.channels = 2; want.samples = 1024; want.userdata = &snd;
+    want.callback = [](void* ud, Uint8* stream, int len) { auto* s = static_cast<Snd*>(ud); s->a.mix(reinterpret_cast<float*>(stream), len / 8, s->rate); };
+    adev = SDL_OpenAudioDevice(nullptr, 0, &want, &have, SDL_AUDIO_ALLOW_FREQUENCY_CHANGE);
+    if (adev) { snd.rate = have.freq; SDL_PauseAudioDevice(adev, 0); } else std::fprintf(stderr, "Ses aygıtı açılamadı: %s\n", SDL_GetError());
+  }
+  // ses olayları ana iş parçacığından karıştırıcıya (aygıt kilitliyken)
+  auto lockA = [&]() { if (adev) SDL_LockAudioDevice(adev); }; auto unlockA = [&]() { if (adev) SDL_UnlockAudioDevice(adev); };
+  auto sfxNow = [&](const std::string& n, double v) { lockA(); snd.a.play(n, v); unlockA(); };
+  auto musicNow = [&](const std::string& n) { lockA(); snd.a.music(n); unlockA(); };
 
   // oyun durumu: dünya ve arayüzü her "sayfa yenilemede" (giriş ekranına dönüş) baştan kurulur (HTML location.reload)
   std::unique_ptr<World> world; std::unique_ptr<ui::Hud> hud;
   ui::Title title(assets, fonts, forms); ui::Create create(assets, fonts, forms); title.version = buildVersion();
+  title.sfx = create.sfx = sfxNow; title.music = create.music = musicNow;
   enum Mode { TITLE, CREATE, PLAY } mode = TITLE;
   auto fresh = [&]() {
     world = std::make_unique<World>(assets, bal); hud = std::make_unique<ui::Hud>(assets, fonts, forms);
     if (!dev) world->saveFn = [&savePath](const std::string& t) { writeSave(savePath, t); };
+    hud->win.optSfx = snd.a.sfxOn; hud->win.optMusic = snd.a.musicOn;   // ayarlar penceresi
   };
   // giriş ekranı: kayıt varsa okunur (HTML load → fixSave) ve Devam Et'te gösterilir
   auto toTitle = [&]() {
@@ -134,7 +154,8 @@ int main(int argc, char** argv) {
     SDL_Event ev;
     while (SDL_PollEvent(&ev)) {
       if (ev.type == SDL_QUIT) run = false;
-      if (ev.type == SDL_APP_WILLENTERBACKGROUND || ev.type == SDL_APP_TERMINATING) { if (mode == PLAY) world->save(); }   // telefon: arka plana geçerken kaydet
+      if (ev.type == SDL_APP_WILLENTERBACKGROUND || ev.type == SDL_APP_TERMINATING) { if (mode == PLAY) world->save(); if (adev) SDL_PauseAudioDevice(adev, 1); }   // telefon: arka plana geçerken kaydet, ses durur
+      if (ev.type == SDL_APP_DIDENTERFOREGROUND && adev) SDL_PauseAudioDevice(adev, 0);
       float x, y;
       if (mode != PLAY) {   // giriş ekranı / oluşturma: fare, dokunma, tuşlar, yazı
         bool down = false, up = false;
@@ -201,6 +222,13 @@ int main(int argc, char** argv) {
       w.update(dt, sx, sy);
       w.draw(canvas);
       hud->now += dt; hud->draw(canvas, w);
+      if (!w.sounds.empty() || hud->win.optChanged) {   // ses olayları karıştırıcıya; ayarlar değiştiyse uygula ve kaydet
+        lockA();
+        if (hud->win.optChanged) { hud->win.optChanged = false; if (snd.a.sfxOn != hud->win.optSfx) snd.a.setSfx(hud->win.optSfx); if (snd.a.musicOn != hud->win.optMusic) snd.a.setMusic(hud->win.optMusic);
+          const std::string t = std::string("{\"sfx\":") + (snd.a.sfxOn ? "true" : "false") + ",\"music\":" + (snd.a.musicOn ? "true" : "false") + "}"; writeSave(optPath, t); }
+        for (const World::SndEv& e : w.sounds) { if (e.music) snd.a.music(e.n); else snd.a.play(e.n, e.v); }
+        unlockA(); w.sounds.clear();
+      }
       wantText = hud->win.wantText;
       for (size_t n = std::min(w.logTotal - shown, w.log.size()); n > 0; n--) std::printf("%s\n", w.log[w.log.size() - n].m.c_str());   // günlük konsolda da
       shown = w.logTotal;
@@ -217,6 +245,7 @@ int main(int argc, char** argv) {
     SDL_RenderClear(ren); SDL_RenderCopy(ren, tex, nullptr, nullptr); SDL_RenderPresent(ren);
   }
   if (mode == PLAY && world) world->save();
+  if (adev) SDL_CloseAudioDevice(adev);
   if (tex) SDL_DestroyTexture(tex);
   SDL_DestroyRenderer(ren); SDL_DestroyWindow(win); SDL_Quit();
   return 0;

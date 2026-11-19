@@ -2,6 +2,7 @@
 // drawCreate). HTML'de bu iki ekran sayfa öğeleri (DOM); C++ aynı yerleri, boyları ve görselleri tuvale çizer (yerler 640×360'ta
 // tarayıcıdan ölçüldü; genişlik değişince HTML'deki gibi ortalanır). Karşılaştırma: tools/test/cpp_giris.js.
 #pragma once
+#include <functional>
 #include <string>
 #include <vector>
 
@@ -28,6 +29,8 @@ class Title {
   std::string turn(int d);                 // önceki / sonraki sözcük
   std::string go();                        // seçili sözcüğü uygula
   std::string version;                     // sağ altta "Sürüm …"
+  std::function<void(const std::string&, double)> sfx;   // ses efekti (HTML SFX.play)
+  std::function<void(const std::string&)> music;         // müzik (HTML SFX.Music.play)
   std::string word() const { return word_; }
   std::string info() const { return info_; }
   bool busy() const { return busy_; }
@@ -58,6 +61,8 @@ class Create {
   std::string finalName() const;                // HTML: kırpılmış, boşsa "Kahraman", en çok 12 harf
   bool editing = false;                         // ad kutusu odakta (ekran klavyesi açık olmalı)
   std::string cls = "战士", race = "人类", sex = "male", name = "Kahraman", msg; int face = 1;
+  std::function<void(const std::string&, double)> sfx;   // düğme sesi (HTML: sayfadaki her düğmeye tıklama "menusel")
+  std::function<void(const std::string&)> music;
 
  private:
   engine::Assets& as_; Fonts& font_; Forms& forms_;

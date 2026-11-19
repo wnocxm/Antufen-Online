@@ -188,7 +188,7 @@ std::string World::travelLabel(int ei, const TravelOpt& x) const {
 bool World::travelGo(int ei, const TravelOpt& x) {
   const int c = travelCost(ei, x);
   if (c && P.gold < c) { toast(std::to_string(c) + " altın gerekir."); return false; }
-  P.gold -= c; note(travelLabel(ei, x), LOG_Q); travelHint.clear();
+  P.gold -= c; note(travelLabel(ei, x), LOG_Q); travelHint.clear(); sfx("menusel", 0.6);
   const TravelOpt to = x;   // loadScene varlıkları değiştirir
   if (to.hasXY) { const int a[2] = {to.x, to.y}; loadScene(to.sid, a); } else loadScene(to.sid);
   return true;

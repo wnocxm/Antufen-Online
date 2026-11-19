@@ -62,6 +62,8 @@
 //   giris <ac 0|1 [bilgi]|surum <metin>|tus <ArrowLeft|ArrowRight|Enter>|dokun x y|kaydir x0 x1 y|bekle <sn>|bitir|goruntu <png>|durum <dosya|->>
 //                                    giriş ekranı (kayıt var mı, "Ad · Sınıf · Seviye n"); eylem satırı {"eylem":"continue|new"}
 //   olustur <ac|dokun x y|yaz <metin>|tus <Backspace|Enter>|ciz [ms]|goruntu <png> [ms]|durum <dosya|->>   karakter oluşturma
+//   sesler <dosya|->                 ses olayları ({"ses":[[ad, ses]|["muzik", parça],…]}; okununca silinir)
+//   karistir <çıktı.wav> <sn> <hız> <t:muzik:ad;t:efekt:ad:ses;t:muzikac:0|1;t:efektac:0|1>   karıştırıcıyı çalıştır, float WAV yaz
 //   yenidunya                        oyunu baştan aç (HTML location.reload; veri yüklü kalır)
 //   kayityaz <dosya|-> · kayitoku <dosya>   kaydın JSON'u (HTML save) · kaydı oku (HTML load/fixSave; satır {"kayit":true|false})
 //   beceriyukselt <beceri no> · becerisifirla <0|1>   beceri penceresinin Yükselt'i · Puanları Sıfırla (1: bedava)
@@ -89,6 +91,7 @@
 #include "ui/forms.h"
 #include "ui/hud.h"
 #include "ui/title.h"
+#include "engine/audio.h"
 
 using namespace engine;
 
@@ -99,6 +102,12 @@ static std::string jq(const std::string& x) { std::string o = "\""; for (char c 
 static std::string num(double v) { char b[64]; std::snprintf(b, sizeof b, "%.17g", v); return b; }   // tam hassasiyet (karşılaştırma)
 
 // evcil hayvan durumu: hayvanlar, çağrılmış olan, varlık, oyuncu, canavarlar (cpp_evcil.js)
+// ses olayları alanı (,"ses":[[ad, ses]|["muzik", parça],…]); okununca silinir (HTML testlerinde SFX.play / Music.play kaydı)
+static std::string sesAlan(World& w) {
+  std::string o = ",\"ses\":[";
+  for (size_t i = 0; i < w.sounds.size(); i++) { const World::SndEv& e = w.sounds[i]; o += (i ? "," : "") + (e.music ? "[\"muzik\"," + jq(e.n) + "]" : "[" + jq(e.n) + "," + num(e.v) + "]"); }
+  w.sounds.clear(); return o + "]";
+}
 static std::string petRec(World& w) {
   std::string o = "{\"pets\":["; bool f = true;
   for (PetRec* p : w.petList()) {
@@ -112,7 +121,7 @@ static std::string petRec(World& w) {
   std::string bag; for (size_t i = 0; i < w.P.bag.size(); i++) bag += (i ? "," : "") + std::string("[") + jq(w.P.bag[i].first) + "," + std::to_string(w.P.bag[i].second) + "]";
   std::string bf; for (const Buff& b : w.player.buffs) bf += (bf.empty() ? "" : ",") + jq(b.id);
   o += ",\"oyuncu\":[" + num(w.player.hp) + "," + num(w.player.mp) + "," + std::to_string(w.P.lv) + "," + std::to_string(w.P.xp) + "," + std::to_string(w.P.gold) + "],\"guc\":[" + bf + "],\"canavar\":[" + std::to_string(alive) + "," + num(mhp) + "," + std::to_string(onPet) + "]";
-  o += ",\"canta\":[" + bag + "],\"ileti\":" + jq(w.log.empty() ? std::string() : w.log.back().m) + ",\"bildirim\":" + jq(w.toastMsg) + ",\"bayrak\":" + (w.flags.count("hatch") ? "true" : "false") + "}";
+  o += ",\"canta\":[" + bag + "],\"ileti\":" + jq(w.log.empty() ? std::string() : w.log.back().m) + ",\"bildirim\":" + jq(w.toastMsg) + ",\"bayrak\":" + (w.flags.count("hatch") ? "true" : "false") + sesAlan(w) + "}";
   return o;
 }
 
@@ -235,7 +244,7 @@ static std::string questBot(World& w, const core::Json& D, int steps, double dt)
     std::string dn; for (int id : w.P.done) dn += (dn.empty() ? "" : ",") + std::to_string(id);
     tr += std::string(step ? ",\n" : "") + "{\"adim\":" + std::to_string(step) + ",\"eylem\":\"" + act + "\",\"sahne\":\"" + w.sceneId + "\",\"lv\":" + std::to_string(w.P.lv) +
           ",\"xp\":" + std::to_string(w.P.xp) + ",\"altin\":" + std::to_string(w.P.gold) + ",\"ust\":" + std::to_string(w.P.adv) + ",\"canta\":\"" + bag +
-          "\",\"gorev\":\"" + qs + "\",\"bitti\":\"" + dn + "\",\"x\":" + num(w.player.x) + ",\"y\":" + num(w.player.y) + "}";
+          "\",\"gorev\":\"" + qs + "\",\"bitti\":\"" + dn + "\",\"x\":" + num(w.player.x) + ",\"y\":" + num(w.player.y) + sesAlan(w) + "}";
   }
   // son: bütün kişilerin baş işaretleri (ad sırasıyla)
   std::vector<std::string> cns; for (const auto* kv : core::jsOrder(D["scenes"])) for (const core::Json& e : kv->second["ents"].arr()) if (D["mon"][std::to_string(e[0].i())].isNull()) cns.push_back(e[1].str());
@@ -252,6 +261,7 @@ int main(int argc, char** argv) {
   DrawOpts opts; std::string line; int ln = 0; bool hudOn = false;
   ui::Fonts fonts; std::unique_ptr<ui::Forms> forms; std::unique_ptr<ui::Hud> hud;
   std::unique_ptr<ui::Title> title; std::unique_ptr<ui::Create> create;   // giriş ekranı, karakter oluşturma
+  std::vector<World::SndEv> uiSnd;   // giriş ekranı / oluşturma sesleri (sesler komutu yazar)
   auto W = [&]() -> World& { if (!world) throw godat::Error("önce veri"); return *world; };
   try {
     while (std::getline(*in, line)) {
@@ -267,7 +277,11 @@ int main(int argc, char** argv) {
       else if (cmd == "yenikarakter") { std::string a, c, r, x; int f = 1; ss >> a >> c >> r >> x >> f; W().newChar(a, c, r, x, f); }   // HTML newSave + yüz
       else if (cmd == "baslat") W().start();
       else if (cmd == "giris" || cmd == "olustur") {   // giriş ekranı / karakter oluşturma (HTML #title, #create)
-        if (!title) { title = std::make_unique<ui::Title>(assets, fonts, *forms); create = std::make_unique<ui::Create>(assets, fonts, *forms); }
+        if (!title) {
+          title = std::make_unique<ui::Title>(assets, fonts, *forms); create = std::make_unique<ui::Create>(assets, fonts, *forms);
+          title->sfx = create->sfx = [&uiSnd](const std::string& n, double v) { uiSnd.push_back({n, v, false}); };
+          title->music = create->music = [&uiSnd](const std::string& n) { uiSnd.push_back({n, 1, true}); };
+        }
         std::string op; ss >> op; std::string act;
         if (cmd == "giris") {
           if (op == "ac") { int k = 0; ss >> k; std::string info; std::getline(ss, info); if (!info.empty() && info[0] == ' ') info.erase(0, 1); title->open(k != 0, info); }
@@ -290,6 +304,33 @@ int main(int argc, char** argv) {
           else if (op == "durum") { std::string f; ss >> f; out(f, "{\"sinif\":" + jq(create->cls) + ",\"irk\":" + jq(create->race) + ",\"cins\":" + jq(create->sex) + ",\"yuz\":" + std::to_string(create->face) + ",\"ad\":" + jq(create->finalName()) + ",\"yaziyor\":" + (create->editing ? "true" : "false") + "}\n"); }
           if (!act.empty()) std::printf("{\"eylem\":%s}\n", jq(act).c_str());
         }
+      }
+      else if (cmd == "sesler") {   // ses olayları (HTML SFX.play / Music.play çağrıları sırayla): [ad, ses] ya da ["muzik", parça]; okununca silinir
+        std::string f; ss >> f; std::string o = "{\"ses\":[";
+        std::vector<World::SndEv> all = uiSnd; uiSnd.clear(); if (world) { all.insert(all.end(), world->sounds.begin(), world->sounds.end()); world->sounds.clear(); }
+        for (size_t i = 0; i < all.size(); i++) o += (i ? "," : "") + (all[i].music ? "[\"muzik\"," + jq(all[i].n) + "]" : "[" + jq(all[i].n) + "," + num(all[i].v) + "]");
+        out(f, o + "]}\n");
+      }
+      else if (cmd == "karistir") {   // karıştırıcı denetimi: karistir <çıktı.wav> <sn> <hız> <t:olay[:a[:b]];…>  olay: muzik ad · efekt ad ses · muzikac 0|1 · efektac 0|1
+        std::string f, ev; double sec = 1; int rate = 48000; ss >> f >> sec >> rate >> ev;
+        engine::Audio A; A.attach(vfs); struct E { double t; std::string k, a, b; }; std::vector<E> L;
+        for (size_t p = 0; p < ev.size();) { size_t q = ev.find(';', p); if (q == std::string::npos) q = ev.size(); std::string it = ev.substr(p, q - p); p = q + 1;
+          std::vector<std::string> x; for (size_t a = 0; a <= it.size();) { size_t b = it.find(':', a); if (b == std::string::npos) b = it.size(); x.push_back(it.substr(a, b - a)); a = b + 1; }
+          if (x.size() >= 2) L.push_back({std::stod(x[0]), x[1], x.size() > 2 ? x[2] : "", x.size() > 3 ? x[3] : ""}); }
+        const long total = long(sec * rate); std::vector<float> buf(size_t(total) * 2); long done = 0; size_t ei = 0;
+        while (done < total) {
+          while (ei < L.size() && long(std::ceil(L[ei].t * rate / 128 - 1e-9)) * 128 <= done) {   // HTML suspend: işlem bloğu (128) sınırında
+            const E& e = L[ei++];
+            if (e.k == "muzik") A.music(e.a); else if (e.k == "efekt") A.play(e.a, e.b.empty() ? 1 : std::stod(e.b));
+            else if (e.k == "muzikac") A.setMusic(e.a == "1"); else if (e.k == "efektac") A.setSfx(e.a == "1");
+          }
+          long next = total; if (ei < L.size()) next = std::min(next, std::max(done + 1, long(std::ceil(L[ei].t * rate / 128 - 1e-9)) * 128));
+          const int n = int(std::min<long>(next - done, 4096)); A.mix(buf.data() + size_t(done) * 2, n, rate); done += n;
+        }
+        // float WAV (biçim 3, stereo 32 bit)
+        std::string w = "RIFF"; auto put32 = [&](uint32_t v) { for (int i = 0; i < 4; i++) w += char((v >> (8 * i)) & 255); }; auto put16 = [&](uint16_t v) { w += char(v & 255); w += char(v >> 8); }; put32(uint32_t(36 + total * 8)); w += "WAVEfmt "; put32(16); put16(3); put16(2); put32(uint32_t(rate)); put32(uint32_t(rate * 8)); put16(8); put16(32); w += "data"; put32(uint32_t(total * 8));
+        w.append(reinterpret_cast<const char*>(buf.data()), buf.size() * sizeof(float));
+        godat::writeFile(f, godat::Bytes(w.begin(), w.end()));
       }
       else if (cmd == "yenidunya") { world = std::make_unique<World>(assets, bal); hud = std::make_unique<ui::Hud>(assets, fonts, *forms); }   // oyunu baştan aç (HTML sayfayı yenile; veri aynı)   // HTML start: kayıttaki harita ve yer
       else if (cmd == "kayityaz") { std::string f; ss >> f; out(f, W().saveJson().dump() + "\n"); }   // kaydın JSON'u (HTML save + localStorage)
@@ -373,7 +414,7 @@ int main(int argc, char** argv) {
             tr += std::string(k > per ? ",\n" : "") + "{\"s\":" + num(k * dt) + ",\"hp\":" + num(w.player.hp) + ",\"mp\":" + num(w.player.mp) + ",\"lv\":" + std::to_string(w.P.lv) +
                   ",\"xp\":" + std::to_string(w.P.xp) + ",\"altin\":" + std::to_string(w.P.gold) + ",\"x\":" + num(w.player.x) + ",\"y\":" + num(w.player.y) +
                   ",\"hedef\":" + std::to_string(t) + ",\"hedefCan\":" + num(t >= 0 ? w.ents[t].hp : -1) + ",\"canli\":" + std::to_string(alive) +
-                  ",\"canavarX\":" + num(sx) + ",\"canavarY\":" + num(sy) + ",\"olu\":" + (w.player.dead ? "true" : "false") + ",\"canta\":\"" + bag + "\",\"canavarCan\":" + num(mh) + ",\"guc\":\"" + guc + "\"}";
+                  ",\"canavarX\":" + num(sx) + ",\"canavarY\":" + num(sy) + ",\"olu\":" + (w.player.dead ? "true" : "false") + ",\"canta\":\"" + bag + "\",\"canavarCan\":" + num(mh) + ",\"guc\":\"" + guc + "\"" + sesAlan(w) + "}";
           }
         }
         out(f, tr + "\n]\n");
@@ -451,7 +492,7 @@ int main(int argc, char** argv) {
         for (size_t i = 0; i < w.P.bag.size(); i++) o += (i ? "," : "") + std::string("[") + q(w.P.bag[i].first) + "," + std::to_string(w.P.bag[i].second) + "]";
         o += "],\"mobs\":["; f1 = true;
         for (const Ent& e : w.ents) if (e.kind == Ent::MOB) { o += (f1 ? "" : ",") + std::string("[") + q(e.name) + "," + num(e.hp) + "," + num(e.maxHp) + "," + num(e.atk) + "," + num(e.def) + "," + (e.boss ? "true" : "false") + "," + (e.dead ? "true" : "false") + "]"; f1 = false; }
-        o += "],\"ileti\":" + q(w.log.empty() ? std::string() : w.log.back().m) + ",\"bildirim\":" + q(w.toastMsg) + ",\"soru\":" + q(w.askText) + "}\n";
+        o += "],\"ileti\":" + q(w.log.empty() ? std::string() : w.log.back().m) + ",\"bildirim\":" + q(w.toastMsg) + ",\"soru\":" + q(w.askText) + sesAlan(w) + "}\n";
         out(f, o);
       }
       else if (cmd == "esya") {
@@ -483,7 +524,7 @@ int main(int argc, char** argv) {
         o += ",\"st\":[" + num(s.hp) + "," + num(s.mp) + "," + num(s.atk) + "," + num(s.def) + "," + num(s.crit) + "," + num(s.dodge) + "," + num(s.res) + "," + num(s.hpreg) + "," + num(s.mpreg) + "]";
         o += ",\"gorunum\":[" + q(w.player.look.bodyG) + "," + q(w.player.look.headG) + "," + q(w.player.look.weapG) + "],\"kisayol\":[";
         for (size_t i = 0; i < w.P.quick.size(); i++) o += (i ? "," : "") + q(w.P.quick[i]);
-        o += "],\"ileti\":" + q(w.log.empty() ? std::string() : w.log.back().m) + ",\"bildirim\":" + q(w.toastMsg) + "}\n";
+        o += "],\"ileti\":" + q(w.log.empty() ? std::string() : w.log.back().m) + ",\"bildirim\":" + q(w.toastMsg) + sesAlan(w) + "}\n";
         out(f, o);
       }
       else if (cmd == "gorevhazir") { int id, n = 0; ss >> id >> n; QuestSt q; q.n = n; q.ready = true; W().P.quests[id] = q; }   // görev teslime hazır (test)
@@ -506,9 +547,10 @@ int main(int argc, char** argv) {
           if (w.dialogEnt >= 0) { dialog = w.dialogEnt; w.dialogEnt = -1; }
           if (w.sceneId != last) { last = w.sceneId; o += std::string(first ? "" : ",") + "[\"" + w.sceneId + "\"," + num(w.player.x) + "," + num(w.player.y) + "]"; first = false; }
         }
-        o += "],\"sahne\":\"" + w.sceneId + "\",\"x\":" + num(w.player.x) + ",\"y\":" + num(w.player.y) + ",\"hedef\":" + std::to_string(w.target()) + ",\"konusma\":" + std::to_string(dialog) + "}\n";
+        o += "],\"sahne\":\"" + w.sceneId + "\",\"x\":" + num(w.player.x) + ",\"y\":" + num(w.player.y) + ",\"hedef\":" + std::to_string(w.target()) + ",\"konusma\":" + std::to_string(dialog) + sesAlan(w) + "}\n";
         out(f, o);
       }
+      else if (cmd == "sestemizle") W().sounds.clear();   // ses olaylarını sil (karşılaştırmanın başında)
       else if (cmd == "temizle") { World& w = W(); w.log.clear(); w.floats.clear(); w.zoneT = w.toastT = w.lvlT = w.hurtT = 0; w.toastMsg.clear(); }
       else if (cmd == "can") { double k; ss >> k; W().player.hp = W().stats().hp * k; }
       else if (cmd == "mana") { double k; ss >> k; W().player.mp = W().stats().mp * k; }

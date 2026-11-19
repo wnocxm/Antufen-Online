@@ -20,12 +20,12 @@ const CHARS = [['savasci', '战士', '人类', 'male'], ['buyucu', '法师', '�
   await p.click('[data-cls="战士"]'); await p.fill('#cname', 'Kahraman'); await p.click('#cstart');
   await p.waitForFunction(() => window.__G && window.__G.player, null, { timeout: 30000 }); await p.waitForTimeout(800);
   await p.evaluate(() => {
-    window.__upd = window.update; window.update = () => {}; SFX.play = () => {}; for (const k of ['zone', 'levelUp', 'float', 'hurt']) UI[k] = () => {};
+    window.__upd = window.update; window.update = () => {}; window.__snd = []; SFX.play = (n, v = 1) => { if (n) __snd.push([n, v]); }; SFX.Music.play = n => { if (n) __snd.push(['muzik', n]); }; for (const k of ['zone', 'levelUp', 'float', 'hurt']) UI[k] = () => {};
     window.__t = { log: '', toast: '' }; UI.log = m => { __t.log = m; }; UI.toast = m => { __t.toast = m; };
     // C++ karakterdurum ile aynı biçim
     window.__dump = () => { const P = Game.P, s = stats(), L = look(), srt = o => Object.fromEntries(Object.keys(o).filter(k => o[k] != null && o[k] !== '').sort().map(k => [k, o[k]]));
       return { altin: P.gold, canta: P.bag.map(x => [x.id, x.n]), eq: srt(P.eq), sk: srt(P.sk), sp: P.sp, can: Game.player.hp, mana: Game.player.mp,
-        st: [s.hp, s.mp, s.atk, s.def, s.crit, s.dodge, s.res, s.hpreg, s.mpreg], gorunum: [L.bodyG || '', L.headG || '', L.weapG || ''], kisayol: P.quick.map(q => q || ''), ileti: __t.log, bildirim: __t.toast }; };
+        st: [s.hp, s.mp, s.atk, s.def, s.crit, s.dodge, s.res, s.hpreg, s.mpreg], gorunum: [L.bodyG || '', L.headG || '', L.weapG || ''], kisayol: P.quick.map(q => q || ''), ileti: __t.log, bildirim: __t.toast, ses: __snd.splice(0) }; };
     window.__do = c => { const [op, a, n] = c.split(' '), P = Game.P;
       if (op === 'esya') { const [, o, id, k] = c.split(' '), m = k ? +k : 1;
         if (o === 'al') buyItem(id, m); else if (o === 'sat') sellItem(id, m); else if (o === 'giy') equip(id); else if (o === 'cikar') unequip(id);
@@ -61,10 +61,10 @@ const CHARS = [['savasci', '战士', '人类', 'male'], ['buyucu', '法师', '�
       'esya sat 30016 2', `esya sat ${pick.weap} 1`, `esya sat ${pick.other} 1`, 'esya kullan hp1', 'can 0.5', 'esya kullan hp1', 'esya kullan mp1',
       `beceriyukselt ${pick.sk0}`, `beceriyukselt ${pick.sk0}`, `beceriyukselt ${pick.sk1}`, `beceriyukselt ${pick.lock}`, 'becerisifirla 0', 'esya ekle 30092 1', 'becerisifirla 0',
       'gmgear', 'altin 10', 'esya al 30016 1', 'kisayol i:hp1 3', 'kisayol s0 5', 'esya sil hp1 3'];
-    const html = [await p.evaluate(() => __dump())];
+    const html = [await p.evaluate(() => { __snd = []; return __dump(); })];
     for (const c of ops) { await p.evaluate(c => { __do(c); }, c); html.push(await p.evaluate(() => __dump())); }
     const htmlTxt = await p.evaluate(() => __skillTexts());
-    const scen = ['veri www/assets', `karakter ${cls} ${race} ${sex}`, 'seviye 12', 'temizle', 'karakterdurum -'];
+    const scen = ['veri www/assets', `karakter ${cls} ${race} ${sex}`, 'seviye 12', 'temizle', 'sestemizle', 'karakterdurum -'];
     for (const c of ops) scen.push(c, 'karakterdurum -');
     const txtF = path.join(OUT, ad + '_beceri_cpp.txt'); scen.push(`beceriyazilari ${txtF}`);
     fs.writeFileSync(path.join(OUT, ad + '_senaryo.txt'), scen.join('\n') + '\n');

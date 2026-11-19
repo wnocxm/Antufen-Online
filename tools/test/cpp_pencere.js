@@ -63,7 +63,7 @@ const CASES = [
   await p.goto(URL); await p.waitForTimeout(2500); await p.keyboard.press('Enter');
   await p.click('[data-cls="战士"]'); await p.fill('#cname', 'Kahraman'); await p.click('#cstart');
   await p.waitForFunction(() => window.__G && window.__G.player, null, { timeout: 30000 }); await p.waitForTimeout(800);
-  await p.evaluate(() => { window.__upd = window.update; window.update = () => {}; SFX.play = () => {}; for (const k of ['log', 'toast', 'zone', 'levelUp', 'float', 'hurt']) UI[k] = () => {};
+  await p.evaluate(() => { window.__upd = window.update; window.update = () => {}; window.__snd = []; SFX.play = (n, v = 1) => { if (n) __snd.push([n, v]); }; SFX.Music.play = n => { if (n) __snd.push(['muzik', n]); }; for (const k of ['log', 'toast', 'zone', 'levelUp', 'float', 'hurt']) UI[k] = () => {};
     const C = CanvasRenderingContext2D.prototype; window.__ft = [C.fillText, C.strokeText]; });
   await p.waitForTimeout(10500);   // açılış ipuçları sönsün
   // durum: Sv 8 insan savaşçı, Guanlin'e varmış (80004 bitti), Domuz Avı (80439) alınmış
@@ -82,7 +82,9 @@ const CASES = [
   const scen = ['veri www/assets', 'golge 1', 'ekran 640 360', 'arayuz 1', 'tohum 7', 'karakter 战士 人类 male', 'ad Kahraman', 'portre 1001', 'seviye 8',
     `gmbitir 80004 ${path.join(OUT, 'gm.json')}`, 'gorevver 80439', 'esya ekle growthBox 1', 'esya kullan growthBox', 'esya ekle 30016 12', 'esya ekle 30019 4', `esya ekle ${kit.weap} 1`, `esya ekle ${kit.other} 1`,
     'altin 1234', `beceriyukselt ${kit.sk0}`, `beceriyukselt ${kit.sk0}`, 'sahne 120207 3 13', 'tohum 7', 'saatms 1800000000000', 'evcilver 狼', 'sahne 120005 10 25', 'saat0', 'doldur', 'temizle'];
+  const sesH = {};   // her durumun ses olayları (dokunuşlar, pencere açılışları)
   for (const [ad, acts] of CASES) {
+    await p.evaluate(() => { __snd = []; }); scen.push('sestemizle');
     for (const a of acts) {
       // pencere açılınca bir kare çizilir (dokunma bölgeleri çizimde kurulur; gerçek oyunda dokunuştan önce hep kare vardır)
       if (a[0] === 'pencere' && a[1] === 'shop') { a[2] = await p.evaluate(cn => { Win.close(); Win.open('shop', { shop: cn }); return Game.ents.findIndex(e => e.cn === cn); }, a[2]); if (a[2] < 0) throw new Error('dükkân yok'); await p.waitForTimeout(150); }
@@ -90,6 +92,7 @@ const CASES = [
       else { await p.evaluate(([x, y]) => Win.tap(x, y), [a[1], a[2]]); await p.waitForTimeout(150); }
       scen.push(a[0] === 'pencere' ? `pencere ${a[1]}${a[2] != null ? ' ' + a[2] : ''}` : `dokun ${a[1]} ${a[2]}`, 'ciz');
     }
+    sesH[ad] = await p.evaluate(() => __snd.splice(0)); scen.push(`sesler ${path.join(OUT, ad + '_ses.json')}`);
     await p.waitForTimeout(1200);   // görseller yüklensin, basılı vurgusu sönsün
     for (const yazi of [0, 1]) {
       await p.evaluate(on => { const C = CanvasRenderingContext2D.prototype; if (on) [C.fillText, C.strokeText] = window.__ft; else C.fillText = C.strokeText = () => {}; }, yazi);
@@ -105,5 +108,9 @@ const CASES = [
   const run = (lim, list) => { try { return execFileSync('python3', ['tools/test/goruntu_fark.py', OUT, ...list], { env: Object.assign({}, process.env, { SINIR: lim }) }).toString(); } catch (e) { process.exitCode = 1; return e.stdout.toString(); } };
   process.stdout.write('yazısız (piksel):\n' + run(process.env.SINIR || '1', CASES.map(c => c[0] + '_yazisiz')));
   process.stdout.write('yazılı (göz denetimi; yan yana: <ad>_yazili_fark.png):\n' + run('100', CASES.map(c => c[0] + '_yazili')));
+  // sesler: her durumda dokunuşların ve pencere açılışlarının ses olayları aynı mı
+  let sb = 0; for (const [ad] of CASES) { const c = JSON.parse(fs.readFileSync(path.join(OUT, ad + '_ses.json'), 'utf8')).ses;
+    if (JSON.stringify(c) !== JSON.stringify(sesH[ad])) { sb++; console.log(`ses FARKLI ${ad}: HTML ${JSON.stringify(sesH[ad])} · C++ ${JSON.stringify(c)}`); } }
+  console.log(sb ? `ses: ${sb} durum farklı` : `ses: ${CASES.length} durumun hepsi aynı (${Object.values(sesH).reduce((a, x) => a + x.length, 0)} olay)`); if (sb) process.exitCode = 1;
   if (errs.length) { console.log('HATA', errs); process.exitCode = 1; }
 })();

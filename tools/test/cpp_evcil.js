@@ -38,7 +38,7 @@ const STEPS = [
   await p.click('[data-cls="战士"]'); await p.fill('#cname', 'Kahraman'); await p.click('#cstart');
   await p.waitForFunction(() => window.__G && window.__G.player, null, { timeout: 30000 }); await p.waitForTimeout(800);
   await p.evaluate(([M, NOW]) => {
-    window.__upd = window.update; window.update = () => {}; SFX.play = () => {}; for (const k of ['zone', 'levelUp', 'float', 'hurt']) UI[k] = () => {};
+    window.__upd = window.update; window.update = () => {}; window.__snd = []; SFX.play = (n, v = 1) => { if (n) __snd.push([n, v]); }; SFX.Music.play = n => { if (n) __snd.push(['muzik', n]); }; for (const k of ['zone', 'levelUp', 'float', 'hurt']) UI[k] = () => {};
     window.__t = { log: '', toast: '' }; UI.log = m => { __t.log = m; }; UI.toast = m => { __t.toast = m; };
     window.__now = NOW; Date.now = () => window.__now;
     const P = Game.P; Object.assign(P, { cls: '战士', race: '人类', sex: 'male', lv: 1, xp: 0, gold: 0, bag: [], eq: {}, sk: {}, sp: 0, adv: 0, quests: {}, done: {}, pets: [], petOn: null, petMode: null, petSlots: null, petSel: null }); delete P.home;
@@ -47,20 +47,20 @@ const STEPS = [
       return { pets: L.map(q => [q.sp, q.st || 0, (q.sk || []).map(String), q.lv, q.xp, q.hp, q.mp, q.sat, q.joy, q.tal, !!q.dead]), on: L.findIndex(q => q.uid === P.petOn), mod: P.petMode || 'attack', hak: Pet.slots(),
         ent: e ? [e.x, e.y, e.state, e.dir, e.tg ? Game.ents.indexOf(e.tg) : -1] : null, oyuncu: [pl.hp, pl.mp, P.lv, P.xp, P.gold], guc: pl.buffs.map(x => x.id),
         canavar: [mobs.filter(m => !m.dead).length, mobs.filter(m => !m.dead).reduce((a, m) => a + m.hp, 0), mobs.filter(m => !m.dead && e && m.foe === e).length],
-        canta: P.bag.map(x => [x.id, x.n]), ileti: __t.log, bildirim: __t.toast, bayrak: !!Game.flags.hatch }; };
+        canta: P.bag.map(x => [x.id, x.n]), ileti: __t.log, bildirim: __t.toast, bayrak: !!Game.flags.hatch, ses: __snd.splice(0) }; };
     window.__fight = (sec, DT, pas) => { const out = [], per = Math.round(1 / DT), n = Math.round(sec / DT);
       for (let k = 1; k <= n; k++) { if (!pas && (!Game.target || Game.target.dead)) { const m = nearestMob(8); if (m) setTarget(m, true); } window.__upd(DT); if (k % per === 0) out.push(__dump()); }
       return out; };
   }, [MULBERRY, NOW]);
   await p.evaluate(M => { Math.random = eval(M)(7); gotoScene('120030', null, [28, 15], null); }, MULBERRY); await p.waitForFunction(() => Game.sceneId === '120030' && !Game.transit, null, { timeout: 30000 });
   await p.evaluate(() => { const pl = Game.player, s = stats(); pl.hp = s.hp; pl.mp = s.mp; Game.time = 0; __t.log = ''; __t.toast = ''; });
-  const html = [await p.evaluate(() => __dump())];
+  const html = [await p.evaluate(() => { __snd = []; return __dump(); })];
   for (const [c, code, sec] of STEPS) {
     if (sec) html.push(await p.evaluate(([s, DT, pas]) => __fight(s, DT, pas), [sec, DT, c.includes('pasif')]));
     else { await p.evaluate(c => { eval(c); }, code); html.push(await p.evaluate(() => __dump())); }
   }
   await b.close(); if (srv) srv.kill();
-  const scen = ['veri www/assets', 'karakter 战士 人类 male', `saatms ${NOW}`, 'seviye 15', 'gmgear', 'olumsuz 1', 'tohum 7', 'sahne 120030 28 15', 'doldur', 'zaman0', 'temizle', 'evcildurum -'];
+  const scen = ['veri www/assets', 'karakter 战士 人类 male', `saatms ${NOW}`, 'seviye 15', 'gmgear', 'olumsuz 1', 'tohum 7', 'sahne 120030 28 15', 'doldur', 'zaman0', 'temizle', 'sestemizle', 'evcildurum -'];
   STEPS.forEach(([c, , sec], i) => { if (sec) scen.push(`evcilsavas ${DT} ${sec} ${path.join(OUT, 'savas' + i + '.json')}${c.includes('pasif') ? ' pasif' : ''}`); else scen.push(c, 'evcildurum -'); });
   fs.writeFileSync(path.join(OUT, 'senaryo.txt'), scen.join('\n') + '\n');
   const lines = execFileSync('native/build/anrufen_test', [path.join(OUT, 'senaryo.txt')], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'inherit'] }).split('\n').filter(l => l.startsWith('{')).map(l => JSON.parse(l));

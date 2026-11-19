@@ -50,6 +50,7 @@ void Title::open(bool hasSave, const std::string& saveInfo) {
   items_.push_back({"Çevrimiçi", "p3", "Sunucuda diğer oyuncularla", "online"});
   items_.push_back({"Dil", "p4", "Türkçe → English", "lang"});
   idx_ = 0; sure_ = false; busy_ = true; word_.clear(); info_.clear(); frame_ = "closed";
+  if (music) music("cover.mid");
   // kitap açılır: kapalı → yarı açık (350 ms) → açık (520 ms) → ilk sayfa (700 ms)
   steps_ = {{0.35, 0}, {0.52, 1}, {0.70, 2}};
 }
@@ -66,7 +67,7 @@ void Title::update(double dt) {
 void Title::settle() { for (Step& s : steps_) s.t = 0; update(0); }
 std::string Title::turn(int d) {
   if (busy_ || items_.empty()) return "";
-  busy_ = true; sure_ = false;
+  busy_ = true; sure_ = false; if (sfx) sfx("skill_pageflip", 1);
   idx_ = (idx_ + items_.size() + size_t(d + int(items_.size()))) % items_.size();
   word_ = items_[idx_].label; info_.clear(); frame_ = d > 0 ? "flipR" : "flipL";
   steps_.push_back({0.17, 2});
@@ -93,14 +94,23 @@ void Title::press(float x, float y) { px_ = x; py_ = y; down_ = true; }
 std::string Title::release(float x, float y) {
   if (!down_) return "";
   down_ = false;
-  const float dx = x - px_;
-  if (std::fabs(dx) > 50) return turn(dx < 0 ? 1 : -1);   // HTML: kaydırma (pointerup'ta, tıklamadan önce)
+  const float dx = x - px_; std::string act;
+  if (std::fabs(dx) > 50) act = turn(dx < 0 ? 1 : -1);   // HTML: kaydırma (pointerup'ta, tıklamadan önce)
+  // tıklama: basılan ve bırakılan öğe aynıysa (HTML click); oklar ve kitap düğme (sayfadaki her düğme "menusel" çalar), sözcük değil
   float bx, by, bw, bh; int sx, sy; bookRect(bx, by, bw, bh, sx, sy);
-  auto in = [&](float rx, float ry, float rw, float rh) { return px_ >= rx && px_ < rx + rw && py_ >= ry && py_ < ry + rh && x >= rx && x < rx + rw && y >= ry && y < ry + rh; };
-  if (in(W_ / 2 - 128, 156, 30, 30)) return turn(-1);
-  if (in(W_ / 2 + 98, 156, 30, 30)) return turn(1);
-  if (in(bx, by, bw, bh) || in(W_ / 2 - 95, 150, 190, 40)) return go();
-  return "";
+  auto which = [&](float X, float Y) {
+    auto in = [&](float rx, float ry, float rw, float rh) { return X >= rx && X < rx + rw && Y >= ry && Y < ry + rh; };
+    if (in(W_ / 2 - 128, 156, 30, 30)) return 1;
+    if (in(W_ / 2 + 98, 156, 30, 30)) return 2;
+    if (in(bx, by, bw, bh)) return 3;
+    if (in(W_ / 2 - 95, 150, 190, 40)) return 4;
+    return 0;
+  };
+  const int a = which(px_, py_);
+  if (!a || a != which(x, y)) return act;
+  if (a != 4 && sfx) sfx("menusel", 0.6);
+  const std::string r = a == 1 ? turn(-1) : a == 2 ? turn(1) : go();
+  return r.empty() ? act : r;
 }
 void Title::draw(Canvas& c) {
   const float W = float(c.w()), H = 360; W_ = W;
@@ -148,7 +158,7 @@ void Title::draw(Canvas& c) {
 }
 
 // ---------------- karakter oluşturma ----------------
-void Create::open() { cls = "战士"; race = "人类"; sex = "male"; face = 1; name = "Kahraman"; msg.clear(); editing = false; }
+void Create::open() { cls = "战士"; race = "人类"; sex = "male"; face = 1; name = "Kahraman"; msg.clear(); editing = false; if (music) music("cover.mid"); }
 std::string Create::finalName() const {
   std::string s = name; const char* ws = " \t\n\r";
   s.erase(0, s.find_first_not_of(ws) == std::string::npos ? s.size() : s.find_first_not_of(ws)); s.erase(s.find_last_not_of(ws) + 1);
@@ -180,6 +190,7 @@ bool Create::key(const std::string& k) {
 std::string Create::tap(float x, float y) {
   for (const Hit& h : hits_) if (x >= h.x && x < h.x + h.w && y >= h.y && y < h.y + h.h) {
     editing = h.id == "name"; caretT_ = 0;
+    if (!editing && sfx) sfx("menusel", 0.6);   // sayfadaki düğmeler (ad kutusu düğme değil)
     if (h.id.rfind("cls:", 0) == 0) cls = h.id.substr(4);
     else if (h.id.rfind("race:", 0) == 0) race = h.id.substr(5);
     else if (h.id.rfind("sex:", 0) == 0) sex = h.id.substr(4);

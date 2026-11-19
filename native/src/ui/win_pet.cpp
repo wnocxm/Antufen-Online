@@ -119,7 +119,7 @@ void Win::tapPet(World& w, const std::string& id) {
   if (id == "p:next") { if (!L.empty()) PW_.i = (PW_.i + 1) % int(L.size()); PW_.tree = -1; PW_.skd = 0; return; }
   if (id == "p:aix") { PW_.ai = false; return; }
   if (id.rfind("p:m:", 0) == 0) { w.petSetMode(id.substr(4)); PW_.ai = false; return; }
-  if (id.rfind("p:tab:", 0) == 0) { PW_.tab = std::atoi(id.c_str() + 6); PW_.tree = -1; return; }
+  if (id.rfind("p:tab:", 0) == 0) { PW_.tab = std::atoi(id.c_str() + 6); PW_.tree = -1; w.sfx("skill_pageflip", 0.5); return; }
   if (id.rfind("p:sk:", 0) == 0) { PW_.skd = std::atoi(id.c_str() + 5); return; }
   if (id.rfind("p:tr:", 0) == 0) { const int i = std::atoi(id.c_str() + 5); PW_.tree = PW_.tree == i ? -1 : i; return; }
   if (!p) return;
@@ -193,7 +193,7 @@ void Win::tapPetF(World& w, const std::string& id) {
   auto L = w.petList();
   auto cyc = [](const std::vector<std::string>& c, const std::string& cur) -> std::string { if (c.empty()) return ""; auto it = std::find(c.begin(), c.end(), cur); if (it == c.end()) return c[0]; ++it; return it == c.end() ? std::string() : *it; };
   if (id == "f:x") { close(); return; }
-  if (id.rfind("f:mode:", 0) == 0) { TF_.mode = id.substr(7); TF_.a[0].clear(); TF_.a[1].clear(); return; }
+  if (id.rfind("f:mode:", 0) == 0) { TF_.mode = id.substr(7); TF_.a[0].clear(); TF_.a[1].clear(); w.sfx("skill_pageflip", 0.5); return; }
   if (id == "f:main") {
     std::vector<std::string> c; for (PetRec* x : L) if (w.petResting(x)) c.push_back(x->uid);
     if (c.empty()) { w.toast("Dinlenen hayvanın yok (çağrılmış hayvanı geri çağır)."); return; }

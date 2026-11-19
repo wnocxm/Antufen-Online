@@ -86,14 +86,14 @@ void Win::drawMap(engine::Canvas& c, World& w, float vw, float VH) {
 }
 void Win::tapMap(World& w, const std::string& id) {
   if (id == "npcs") { close(); openNpcList(w); return; }
-  if (id == "sw") { WM_.sel.clear(); WM_.mode = WM_.mode == "area" ? "world" : WM_.mode == "world" ? "local" : "world"; return; }
+  if (id == "sw") { w.sfx("skill_pageflip"); WM_.sel.clear(); WM_.mode = WM_.mode == "area" ? "world" : WM_.mode == "world" ? "local" : "world"; return; }
   if (id == "go") { if (WM_.sel.empty()) { w.toast("Önce haritadan bir yer seç."); return; } const std::string t = WM_.sel; close(); w.routeQuest = 0; w.routeNpc.clear(); w.routeTo(t); return; }
   if (id.rfind("area:", 0) == 0) {
     const int n = std::atoi(id.c_str() + 5); const auto& A = wm(w)["areas"].arr();
-    for (size_t i = 0; i < A.size(); i++) if (A[i]["i"].i() == n) { WM_.area = int(i); WM_.mode = "area"; WM_.sel.clear(); }
+    for (size_t i = 0; i < A.size(); i++) if (A[i]["i"].i() == n) { WM_.area = int(i); WM_.mode = "area"; WM_.sel.clear(); w.sfx("skill_pageflip"); }
     return;
   }
-  if (id.rfind("sc:", 0) == 0) WM_.sel = id.substr(3);
+  if (id.rfind("sc:", 0) == 0) { WM_.sel = id.substr(3); w.sfx("menusel", 0.6); }
 }
 
 // ---------------- ayarlar (NEW_FORM_DEADSELECT parşömeni + satırlar); ana menü solda açık ----------------
@@ -109,8 +109,8 @@ void Win::drawSys(engine::Canvas& c, World& w, float VH) {
   for (int i = 0; i < 5; i++) { const std::string key = std::string("s:") + rows[i].first; row(c, xf, f, DS[i], on(key), rows[i].second, key); }
 }
 void Win::tapSys(World& w, const std::string& id) {
-  if (id == "sfx") optSfx = !optSfx;
-  else if (id == "mus") optMusic = !optMusic;
+  if (id == "sfx") { optSfx = !optSfx; optChanged = true; }        // HTML SFX.setSfx
+  else if (id == "mus") { optMusic = !optMusic; optChanged = true; }   // HTML SFX.setMusic (kapanınca müzik durur, açılınca kaldığı parça)
   else if (id == "lang") w.toast("İngilizce sonraki adımlarda.");
   else if (id == "title") { w.save(); w.appReq = "title"; }   // HTML: save(); location.reload()
   else if (id == "newc") ask("Karakterin silinecek ve yeni karakter oluşturacaksın. Emin misin?", [&w] { w.appReq = "newchar"; });   // HTML: kaydı sil, yenile

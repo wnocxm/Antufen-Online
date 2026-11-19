@@ -85,7 +85,7 @@ bool Win::doubleTap(const std::string& id) {   // aynı şeye 450 ms içinde iki
 
 // ---------------- adet kutusu (NEW_FORM_SELNUM) ----------------
 void Win::askNum(const std::string& title, int max, std::function<void(int)> onOk, int unit) {
-  modal_ = Modal(); modal_.on = true; modal_.num = true; modal_.title = title; modal_.max = std::max(1, max); modal_.n = 1; modal_.ok = std::move(onOk); modal_.unit = unit;
+  modal_ = Modal(); modal_.on = true; modal_.num = true; modal_.title = title; modal_.max = std::max(1, max); modal_.n = 1; modal_.ok = std::move(onOk); modal_.unit = unit; snd("menu_appear", 0.4);
 }
 void Win::drawNum(engine::Canvas& c, float vw, float VH) {
   const float k = 1.3f; const Xf xf = begin(k, std::round((vw - 227 * k) / 2), std::round((VH - 129 * k) / 2)); const std::string f = "n_selnum";
@@ -184,11 +184,11 @@ void Win::drawBag(engine::Canvas& c, World& w, float VH) {
 void Win::tapBag(World& w, const std::string& id) {
   const auto items = bagItems(w); const int per = 20, n = std::atoi(id.c_str());
   if (id == "50030") { close(); open(w, "hub"); return; }
-  for (size_t i = 0; i < B2TABS.size(); i++) if (n == B2TABS[i]) { B_.cat = int(i); B_.page = 0; B_.sel.clear(); return; }
+  for (size_t i = 0; i < B2TABS.size(); i++) if (n == B2TABS[i]) { B_.cat = int(i); B_.page = 0; B_.sel.clear(); w.sfx("skill_pageflip"); return; }
   if (id == "50027") { B_.page = std::max(0, B_.page - 1); return; }
   if (id == "50028") { B_.page = std::min(std::max(0, int((items.size() + per - 1) / per) - 1), B_.page + 1); return; }
   if (n >= 50007 && n < 50027) {
-    const size_t k = size_t(B_.page * per + n - 50007);
+    const size_t k = size_t(B_.page * per + n - 50007); w.sfx("menusel", 0.6);
     if (k >= items.size() || items[k].first.rfind("q:", 0) == 0) { B_.sel.clear(); return; }
     const std::string e = items[k].first;
     if (B_.sel == e && doubleTap(e)) { w.useItem(e); return; }   // çift dokunuş: kullan / giy
@@ -234,8 +234,8 @@ void Win::drawRole(engine::Canvas& c, World& w, float VH) {
 void Win::tapRole(World& w, const std::string& id) {
   const int n = std::atoi(id.c_str());
   if (id == "50104") { close(); open(w, "hub"); return; }
-  for (size_t i = 0; i < R2TABS.size(); i++) if (n == R2TABS[i]) { R_.page = int(i); R_.sel.clear(); return; }
-  for (const auto& e : R2SLOT) if (n == e.first) { R_.sel = e.second; return; }
+  for (size_t i = 0; i < R2TABS.size(); i++) if (n == R2TABS[i]) { R_.page = int(i); R_.sel.clear(); w.sfx("skill_pageflip"); return; }
+  for (const auto& e : R2SLOT) if (n == e.first) { R_.sel = e.second; w.sfx("menusel", 0.6); return; }
   if (id == "uneq" && !R_.sel.empty() && !w.eqOf(R_.sel).empty()) { w.unequip(R_.sel); return; }
   if (id == "swap") { close(); openBag(w, 0, ""); }
 }
@@ -313,9 +313,9 @@ void Win::drawSkill(engine::Canvas& c, World& w, float VH) {
 void Win::tapSkill(World& w, const std::string& id) {
   const int n = std::atoi(id.c_str());
   if (id == "50413") { close(); open(w, "hub"); return; }
-  for (size_t i = 0; i < S2TABS.size(); i++) if (n == S2TABS[i]) { S_.tree = int(i); S_.sel.clear(); return; }
+  for (size_t i = 0; i < S2TABS.size(); i++) if (n == S2TABS[i]) { S_.tree = int(i); S_.sel.clear(); w.sfx("skill_pageflip"); return; }
   if (id == "50430") { ask("Bütün beceri puanları geri alınsın mı? (Eğitim Kitabı harcanır)", [&w] { w.skillReset(false); }); return; }
-  if (skCells_.count(id)) { S_.sel = id; return; }
+  if (skCells_.count(id)) { S_.sel = id; w.sfx("menusel", 0.6); return; }
   auto it = skCells_.find(S_.sel); if (it == skCells_.end() || !it->second.sk) return;
   const SkillDef& sk = *it->second.sk;
   if (id == "up") { w.skillUp(sk); return; }
@@ -382,12 +382,12 @@ void Win::drawShop(engine::Canvas& c, World& w, float vw, float VH) {
 }
 void Win::tapShop(World& w, const std::string& id) {
   const int n = std::atoi(id.c_str());
-  for (size_t i = 0; i < H2TABS.size(); i++) if (n == H2TABS[i]) { H_.tab = int(i); H_.sel.clear(); H_.off = 0; return; }
+  for (size_t i = 0; i < H2TABS.size(); i++) if (n == H2TABS[i]) { H_.tab = int(i); H_.sel.clear(); H_.off = 0; w.sfx("skill_pageflip"); return; }
   for (size_t i = 0; i < H2ROWS.size(); i++) if (n == H2ROWS[i]) {
     const auto items = shopItems(w); const size_t k = size_t(H_.off) + i; if (k >= items.size()) return;
     const std::string it = items[k];
     if (H_.sel == it && doubleTap(it)) { buyAsk(w, it); return; }
-    H_.sel = it; lastTapId_ = it; lastTapT_ = clock_; return;
+    H_.sel = it; lastTapId_ = it; lastTapT_ = clock_; w.sfx("menusel", 0.6); return;
   }
   if (id == "sellmode") { const std::string sh = shop_; close(); openBag(w, B_.cat, sh); return; }
   if (id == "buy" && !H_.sel.empty()) buyAsk(w, H_.sel);

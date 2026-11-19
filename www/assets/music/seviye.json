@@ -1,0 +1,17 @@
+{
+ "kaynak": "tools/muzik_cpp.py (elle düzenleme)",
+ "kazanc": {
+  "akadiya_music.mid": 0.4713,
+  "alica_music.mid": 0.5227,
+  "church_music.mid": 0.4153,
+  "cover.mid": 0.5537,
+  "grassland.mid": 0.4713,
+  "hole_music.mid": 0.3617,
+  "nufengshan_music.mid": 0.4813,
+  "shengbeishan_music.mid": 0.3008,
+  "sliva_music.mid": 0.4713,
+  "snowmountain_music.mid": 0.4447,
+  "startown_music.mid": 0.3874,
+  "sunnyforrest_music.mid": 0.4501
+ }
+}

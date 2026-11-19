@@ -39,12 +39,12 @@ void World::acceptQuest(int qi) {
   QuestSt st; st.ready = q.type == "talk"; P.quests[q.id] = st;
   for (const auto& a : q.accItems) if (!countItem(a.first)) addItem(a.first, a.second);
   if (q.type == "special" && flags.count(q.flag)) P.quests[q.id].ready = true;
-  note("Görev alındı: " + q.tr.title, LOG_Q); save();
+  note("Görev alındı: " + q.tr.title, LOG_Q); sfx("accept_task"); save();
 }
 
 void World::readyQuest(int qi) {
   const Quest& q = quests().all()[size_t(qi)];
-  P.quests[q.id].ready = true;
+  P.quests[q.id].ready = true; sfx("message");
   toast("Görev tamamlandı: " + q.tr.title); note(q.tr.title + " tamam. " + quests().name(q.to) + " ile konuş.", LOG_Q);
 }
 
@@ -105,7 +105,7 @@ bool World::questUseItem(const std::string& id) {
     const int t = target_;
     if (t < 0 || ents[t].dead || ents[t].name != x->name) { toast("Önce " + quests().name(x->name) + " hedef al."); return false; }
     if (jsHypot(ents[t].x - player.x, ents[t].y - player.y) > 6) { toast("Çok uzak."); return false; }
-    const int f = pushFx("特效-治疗buff", ents[t].x, ents[t].y); fx[f].follow = t;
+    const int f = pushFx("特效-治疗buff", ents[t].x, ents[t].y); fx[f].follow = t; sfx("skill_juqi");
     removeItem(id); tgAdd(int(qi), it->second, *x); return true;
   }
   toast("Bunu şimdi kullanamazsın.");
@@ -122,7 +122,7 @@ void World::questFlag(const std::string& f) {
 bool World::completeQuest(int qi) {
   const Quest& q = quests().all()[size_t(qi)];
   if (q.type == "deliver") { if (giveCount(q) < q.count) { toast(q.tr.item + ": " + std::to_string(giveCount(q)) + "/" + std::to_string(q.count)); return false; } takeGive(q); }
-  P.quests.erase(q.id); P.done.insert(q.id);
+  P.quests.erase(q.id); P.done.insert(q.id); sfx("finish_task");
   if (q.gold) P.gold += (long long)jsRound(q.gold * (1 + stats().goldUp / 100));
   for (const Quest::RItem& it : q.items) {
     if (!itemExists(it.id) || (!it.cls.empty() && std::find(it.cls.begin(), it.cls.end(), P.cls) == it.cls.end())) continue;
@@ -137,7 +137,7 @@ bool World::completeQuest(int qi) {
 // sınıf yükseltmesi (40: sınıf ağacı, 80: uzmanlık ağaçları)
 void World::classUp(int n) {
   if (P.adv >= n) return;
-  P.adv = n; pushFx("LEVELUP", player.x, player.y);
+  P.adv = n; pushFx("LEVELUP", player.x, player.y); sfx("levelup");
   toast("Sınıf yükseltildi"); note(n >= 2 ? "Sınıf yükseltildi · uzmanlık ağaçları açıldı" : "Sınıf yükseltildi · sınıf beceri ağacı açıldı", LOG_Q); save();
 }
 
@@ -181,7 +181,7 @@ void World::pickupNode(int ei) {
     const QTarget* x = nullptr; for (const QTarget& y : q.targets) if (y.kind == QTarget::NODE && y.name == n.name) { x = &y; break; }
     if (!x) continue;
     { auto c = it->second.c.find(x->key()); if ((c == it->second.c.end() ? 0 : c->second) >= x->n) continue; }
-    tgAdd(int(qi), it->second, *x); n.hidden = true; n.respawnT = 20; return;
+    sfx("coin", 0.7); tgAdd(int(qi), it->second, *x); n.hidden = true; n.respawnT = 20; return;
   }
   for (size_t qi = 0; qi < Q.size(); qi++) {
     const Quest& q = Q[qi]; if (q.type != "pickup" || q.node != n.name) continue;
@@ -190,15 +190,15 @@ void World::pickupNode(int ei) {
     if (it->second.n >= q.count) readyQuest(int(qi));
     return;
   }
-  dialogEnt = ei; dialogSay = quests().greet(n.name);   // görev yok: kişinin sözü (HTML UI.say)
+  openDialog(ei, quests().greet(n.name));   // görev yok: kişinin sözü (HTML UI.say)
 }
 
 // kişiye dokun (HTML interact): toplama noktası, görev nesnesi; "kullan/ver" ve konuşma görevleri tamamlanır; sonra konuşma penceresi
 void World::interact(int ei) {
   Ent& e = ents[size_t(ei)]; if (e.kind != Ent::NPC) return;
   player.dir = dirOf(e.x - player.x, e.y - player.y);
-  if (e.node) { dialogEnt = ei; dialogSay = "Bu bir toplama noktası. Madencilik ve toplama meslekleri yakında eklenecek."; return; }
-  if (e.dummy) { dialogEnt = ei; dialogSay = quests().name(e.name) + ": eğitim alanı sergisi."; return; }
+  if (e.node) { openDialog(ei, "Bu bir toplama noktası. Madencilik ve toplama meslekleri yakında eklenecek."); return; }
+  if (e.dummy) { openDialog(ei, quests().name(e.name) + ": eğitim alanı sergisi."); return; }
   if (e.pickup) { pickupNode(ei); return; }
   const auto& Q = quests().all();
   for (size_t qi = 0; qi < Q.size(); qi++) {   // hedefi bir kişi olan "kullan/ver" görevleri (iksiri Gary'ye içir)
@@ -209,7 +209,7 @@ void World::interact(int ei) {
     auto it = P.quests.find(Q[qi].id);
     if (it != P.quests.end() && !it->second.ready && Q[qi].type == "talk" && Q[qi].to == e.name) it->second.ready = true;
   }
-  dialogEnt = ei; dialogSay.clear();   // konuşma penceresi (HTML UI.dialog)
+  openDialog(ei, "");   // konuşma penceresi (HTML UI.dialog)
 }
 
 // konuşmada "Kabul": ışınlanma görevinde oraya gidilir; görevi veren aynı zamanda alansa konuşma görevi hemen hazır

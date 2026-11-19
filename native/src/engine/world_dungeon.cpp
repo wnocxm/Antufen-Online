@@ -48,7 +48,7 @@ bool World::dungeonDoor(int region) {
 void World::dungeonEnter(const DungeonDef& d, int copy) {
   if (d.daily) { const std::string day = today.empty() ? utcDay() : today; if (P.dgDay != day) { P.dgDay = day; P.dgN.clear(); } P.dgN[d.id]++; }
   P.dun = CharData::Run(); P.dun.on = true; P.dun.id = d.id; P.dun.copy = copy; P.dun.t = nowMillis();
-  note("Zindana girdin: " + quests().name(d.cn), LOG_Q);
+  note("Zindana girdin: " + quests().name(d.cn), LOG_Q); sfx("accept_task");
   const std::string from = sceneId; gotoScene(d.copies[size_t(copy)].scenes[0], from);
 }
 // kapının dışına çık (zindandan çıkış geçidi, sandıktan sonra, ölüm); koşu kapanır
@@ -88,7 +88,7 @@ void World::dungeonOnKill(Ent& m) {
       const std::string g = randomGear(std::max(1, L + 2)); if (!g.empty()) { addItem(g, 1, true); got += ", " + itemName(g); }
     }
     addItem(P.lv > 10 ? "hp2" : "hp1", 3);
-    pushFx("LEVELUP", player.x, player.y);
+    sfx("finish_task"); pushFx("LEVELUP", player.x, player.y);
     const std::string nm = quests().name(d->cn);
     toast(nm + ": zindan tamamlandı!");
     note("Zindan sandığı: " + std::to_string(gold) + " altın" + got, LOG_Q);

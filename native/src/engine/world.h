@@ -181,6 +181,11 @@ class World {
   // arayüzden onay isteği (HTML Win.ask'i oyun kodundan çağırır): HUD onay kutusunu açar
   std::string askText; std::function<void()> askYes;
   void ask(const std::string& t, std::function<void()> yes) { askText = t; askYes = std::move(yes); }
+  // ses (HTML SFX.play / SFX.Music.play): olaylar sırayla birikir; uygulama karıştırıcıya verir (engine/audio), test modu yazar (sesler)
+  struct SndEv { std::string n; double v; bool music; };
+  std::vector<SndEv> sounds;
+  void sfx(const std::string& n, double v = 1) { if (n.empty()) return; if (sounds.size() > 4000) sounds.erase(sounds.begin(), sounds.begin() + 2000); sounds.push_back({n, v, false}); }
+  void music(const std::string& n) { if (!n.empty()) sounds.push_back({n, 1, true}); }
   // kayıt (HTML newSave, save, load, fixSave, fixSkills, ui.js start; world_save.cpp). Biçim HTML'deki kayıtla aynı JSON (localStorage
   // 'anrufen_save_v1' ve sunucu): iki sürüm birbirinin kaydını okur.
   void newChar(const std::string& name, const std::string& cls, const std::string& race, const std::string& sex, int face);   // HTML newSave + yüz
@@ -258,6 +263,8 @@ class World {
   void revive();                                   // ölünce: can/mananın yarısıyla evde (ya da haritanın girişinde) doğ
   // arayüze istekler: konuşma penceresi (kişi; say doluysa yalnız söz), ölüm penceresi
   int dialogEnt = -1; std::string dialogSay; bool died = false;
+  // konuşma penceresi açılır (HTML UI.dialog / UI.say → Win.open('npc'): "request" ve "menu_appear" sesleri burada; arayüz sessiz açar)
+  void openDialog(int ei, const std::string& say) { dialogEnt = ei; dialogSay = say; sfx("request", 0.6); sfx("menu_appear", 0.5); }
 
   // görevler (HTML game.js › Görevler; world_quests.cpp). qi: görev listesindeki sıra (Quests::all)
   Quests& quests() { return bal_.quests; }

@@ -120,7 +120,7 @@ function diff(a, b, p = '') {
     if (x.l == null) return JSON.parse(fs.readFileSync(x.f, 'utf8'));
     const L = lines[x.l];
     if (checks[i][1] === 'oku') return L.kayit ? JSON.parse(fs.readFileSync(x.f, 'utf8')) : null;
-    delete L.ileti; delete L.bildirim; return L;   // durum: iletiler HTML'de arayüzün içinde (karşılaştırılmaz)
+    delete L.ileti; delete L.bildirim; delete L.ses; return L;   // durum: iletiler HTML'de arayüzün içinde; sesler öteki testlerde (karşılaştırılmaz)
   });
   let bad = 0;
   checks.forEach(([n, kind, h], i) => {

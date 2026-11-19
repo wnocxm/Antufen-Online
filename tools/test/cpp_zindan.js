@@ -38,7 +38,7 @@ const STEPS = [
   await p.click('[data-cls="战士"]'); await p.fill('#cname', 'Kahraman'); await p.click('#cstart');
   await p.waitForFunction(() => window.__G && window.__G.player, null, { timeout: 30000 }); await p.waitForTimeout(800);
   await p.evaluate(M => {
-    window.__upd = window.update; window.update = () => {}; SFX.play = () => {}; for (const k of ['zone', 'levelUp', 'float', 'hurt']) UI[k] = () => {};
+    window.__upd = window.update; window.update = () => {}; window.__snd = []; SFX.play = (n, v = 1) => { if (n) __snd.push([n, v]); }; SFX.Music.play = n => { if (n) __snd.push(['muzik', n]); }; for (const k of ['zone', 'levelUp', 'float', 'hurt']) UI[k] = () => {};
     window.__t = { log: '', toast: '' }; UI.log = m => { __t.log = m; }; UI.toast = m => { __t.toast = m; };
     window.__ask = null; Win.ask = (t, y) => { __ask = { t, y }; };
     window.__loads = 0; const L0 = loadScene; window.loadScene = async (...a) => { const r = await L0(...a); window.__loads++; return r; };
@@ -47,9 +47,9 @@ const STEPS = [
     window.__dump = () => { const P = Game.P, pl = Game.player;
       return { sahne: Game.sceneId, x: pl.x, y: pl.y, dun: P.dun ? [P.dun.id, P.dun.copy, Object.keys(P.dun.cleared).length, P.dun.boss] : null,
         dg: P.dg ? Object.entries(P.dg.n).sort() : [], altin: P.gold, canta: P.bag.map(x => [x.id, x.n]),
-        mobs: Game.ents.filter(e => e.kind === 'mob').map(m => [m.name, m.hp, m.maxHp, m.atk, m.def, !!m.boss, !!m.dead]), ileti: __t.log, bildirim: __t.toast, soru: __ask ? __ask.t : '' }; };
+        mobs: Game.ents.filter(e => e.kind === 'mob').map(m => [m.name, m.hp, m.maxHp, m.atk, m.def, !!m.boss, !!m.dead]), ileti: __t.log, bildirim: __t.toast, soru: __ask ? __ask.t : '', ses: __snd.splice(0) }; };
   }, MULBERRY);
-  const html = [await p.evaluate(() => __dump())];
+  const html = [await p.evaluate(() => { __snd = []; return __dump(); })];
   for (const [, code, load] of STEPS) {
     const n0 = await p.evaluate(() => window.__loads);
     await p.evaluate(c => { eval(c); }, code);
@@ -58,7 +58,7 @@ const STEPS = [
     html.push(await p.evaluate(() => __dump()));
   }
   await b.close(); if (srv) srv.kill();
-  const scen = ['veri www/assets', 'karakter 战士 人类 male', 'sahne 120207 3 13', 'seviye 30', 'gmgear', 'olumsuz 1', 'tohum 7', 'temizle', 'zindandurum -'];
+  const scen = ['veri www/assets', 'karakter 战士 人类 male', 'sahne 120207 3 13', 'seviye 30', 'gmgear', 'olumsuz 1', 'tohum 7', 'temizle', 'sestemizle', 'zindandurum -'];
   for (const [c] of STEPS) scen.push(c, 'zindandurum -');
   fs.writeFileSync(path.join(OUT, 'senaryo.txt'), scen.join('\n') + '\n');
   const cpp = execFileSync('native/build/anrufen_test', [path.join(OUT, 'senaryo.txt')], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'inherit'] }).split('\n').filter(l => l.startsWith('{')).map(l => JSON.parse(l));

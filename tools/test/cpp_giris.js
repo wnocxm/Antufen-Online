@@ -36,12 +36,15 @@ const CREATE = [
   fs.mkdirSync(OUT, { recursive: true });
   let srv = null, URL = process.env.URL;
   if (!URL) { srv = spawn('python3', ['-m', 'http.server', '8097', '--directory', 'www'], { stdio: 'ignore' }); URL = 'http://localhost:8097/'; await new Promise(r => setTimeout(r, 800)); }
-  const b = await chromium.launch(); const errs = [], scen = ['veri www/assets', 'giris surum Sürüm 11190635'], states = [], names = [];
+  const b = await chromium.launch(); const errs = [], scen = ['veri www/assets', 'giris surum Sürüm 11190635'], states = [], names = [], sesH = {};
   const page = async (W, save) => {
     const p = await (await b.newContext({ viewport: { width: W, height: 360 }, locale: 'tr-TR' })).newPage(); p.on('pageerror', e => errs.push(e.message));
     // giriş ekranının zamanlayıcıları (150-700 ms) tutulur; __run(ms) o süredeki ilkini çalıştırır
     await p.addInitScript(() => { window.__tq = []; const ST = window.setTimeout; window.setTimeout = (fn, d, ...a) => { if (d >= 150 && d <= 700) { __tq.push([d, fn]); return 0; } return ST(fn, d, ...a); };
-      window.__run = ms => { const i = __tq.findIndex(x => x[0] === ms); if (i >= 0) { const [, fn] = __tq.splice(i, 1)[0]; fn(); } }; });
+      window.__run = ms => { const i = __tq.findIndex(x => x[0] === ms); if (i >= 0) { const [, fn] = __tq.splice(i, 1)[0]; fn(); } };
+      // ses kaydı: SFX.play / SFX.Music.play (audio.js window.SFX'i yazınca sarılır) ve audio.js'in kuralı: sayfadaki her düğmeye tıklama "menusel" 0,6
+      window.__snd = []; addEventListener('click', e => { if (e.target.closest && e.target.closest('button')) __snd.push(['menusel', 0.6]); }, { capture: true });
+      let S0; Object.defineProperty(window, 'SFX', { configurable: true, get() { return S0; }, set(v) { S0 = v; v.play = (n, vol = 1) => { if (n) __snd.push([n, vol]); }; v.Music.play = n => { if (n) __snd.push(['muzik', n]); }; } }); });
     await p.goto(URL); await p.evaluate(s => { localStorage.clear(); if (s) localStorage.setItem('anrufen_save_v1', s); }, save ? JSON.stringify(SAVE) : null);
     await p.goto(URL); await p.waitForFunction(() => !document.querySelector('#title').classList.contains('hidden'), null, { timeout: 30000 }); await p.waitForTimeout(600);
     return p;
@@ -58,8 +61,9 @@ const CREATE = [
     for (const [code] of steps) await p.evaluate(c => eval(c), code);
     await shoot(p, ad, W); names.push(ad);
     states.push(await p.evaluate(() => { const t = document.querySelector('#tbook').style; return { sozcuk: document.querySelector('#tword').textContent, bilgi: document.querySelector('#tinfo').textContent, kare: t.backgroundPosition + ' ' + t.width + ' ' + t.height }; }));
+    sesH[ad] = await p.evaluate(() => __snd.splice(0));
     await p.context().close();
-    scen.push(`ekran ${W} 360`, `giris ac ${save} Kurt · Savaşçı · Seviye 45`, ...steps.flatMap(s => s[1]), 'giris durum -', 'yazi 0', `giris goruntu ${path.join(OUT, ad + '_yazisiz_cpp.png')}`, 'yazi 1', `giris goruntu ${path.join(OUT, ad + '_yazili_cpp.png')}`);
+    scen.push(`ekran ${W} 360`, `giris ac ${save} Kurt · Savaşçı · Seviye 45`, ...steps.flatMap(s => s[1]), `sesler ${path.join(OUT, ad + '_ses.json')}`, 'giris durum -', 'yazi 0', `giris goruntu ${path.join(OUT, ad + '_yazisiz_cpp.png')}`, 'yazi 1', `giris goruntu ${path.join(OUT, ad + '_yazili_cpp.png')}`);
   }
   const cstates = [];
   for (const [ad, W, clicks, , nm] of CREATE) {
@@ -72,10 +76,11 @@ const CREATE = [
     const boxes = await p.evaluate(sels => sels.map(s => { const r = document.querySelector(s).getBoundingClientRect(); return [r.x + r.width / 2, r.y + r.height / 2]; }), clicks);
     await shoot(p, ad, W); names.push(ad);
     cstates.push(await p.evaluate(() => ({ ad: (document.querySelector('#cname').value.trim() || 'Kahraman').slice(0, 12) })));
+    sesH[ad] = await p.evaluate(() => __snd.splice(0));
     await p.context().close();
-    scen.push(`ekran ${W} 360`, 'olustur ac', ...boxes.map(([x, y]) => `olustur dokun ${x} ${y}`));
+    scen.push(`ekran ${W} 360`, 'giris ac 0', 'giris bekle 0.35', 'giris bekle 0.17', 'giris bekle 0.18', 'giris tus Enter', 'olustur ac', ...boxes.map(([x, y]) => `olustur dokun ${x} ${y}`));
     if (nm) scen.push('olustur dokun 200 82', 'olustur tus Backspace', ...Array(8).fill('olustur tus Backspace'), `olustur yaz ${nm}`, 'olustur tus Enter');
-    scen.push('olustur durum -', 'yazi 0', `olustur goruntu ${path.join(OUT, ad + '_yazisiz_cpp.png')} 0`, 'yazi 1', `olustur goruntu ${path.join(OUT, ad + '_yazili_cpp.png')} 0`);
+    scen.push(`sesler ${path.join(OUT, ad + '_ses.json')}`, 'olustur durum -', 'yazi 0', `olustur goruntu ${path.join(OUT, ad + '_yazisiz_cpp.png')} 0`, 'yazi 1', `olustur goruntu ${path.join(OUT, ad + '_yazili_cpp.png')} 0`);
   }
   await b.close(); if (srv) srv.kill();
   fs.writeFileSync(path.join(OUT, 'senaryo.txt'), scen.join('\n') + '\n');
@@ -91,6 +96,10 @@ const CREATE = [
   const run = (lim, list) => { try { return execFileSync('python3', ['tools/test/goruntu_fark.py', OUT, ...list], { env: Object.assign({}, process.env, { SINIR: lim }) }).toString(); } catch (e) { bad++; return e.stdout.toString(); } };
   process.stdout.write('yazısız (piksel):\n' + run(process.env.SINIR || '1', names.map(n => n + '_yazisiz')));
   process.stdout.write('yazılı (göz denetimi; yan yana: <ad>_yazili_fark.png):\n' + run('100', names.map(n => n + '_yazili')));
+  // sesler: müzik (cover), sayfa çevirme, düğme sesleri
+  let sb = 0; for (const ad of names) { const c = JSON.parse(fs.readFileSync(path.join(OUT, ad + '_ses.json'), 'utf8')).ses;
+    if (JSON.stringify(c) !== JSON.stringify(sesH[ad])) { sb++; console.log(`ses FARKLI ${ad}: HTML ${JSON.stringify(sesH[ad])} · C++ ${JSON.stringify(c)}`); } }
+  console.log(sb ? `ses: ${sb} durum farklı` : `ses: ${names.length} durumun hepsi aynı (${Object.values(sesH).reduce((a, x) => a + x.length, 0)} olay)`); bad += sb;
   if (errs.length) { console.log('HATA', errs); bad++; }
   console.log(bad ? `${bad} denetim farklı` : 'hepsi geçti');
   process.exitCode = bad ? 1 : 0;

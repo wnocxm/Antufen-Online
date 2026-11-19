@@ -25,18 +25,19 @@ static std::string bard80(const std::string& cls, int lv) {
   return "Bir kutsal elçi olarak yaptıkların herkesçe takdir edildi; ama bir kutsal elçinin asıl aradığı, tanrının onayıdır. 80. seviyeye ulaştığında Dindar Seçilmiş seni tanrının yoluna götürebilir; Dindar Seçilmiş, tanrının elçilerini seçmek için Bozbalta Şehri'nde bekliyor.";
 }
 
-void Win::open(World& w, const std::string& name, int npc, const std::string& say) {
-  cur = name; shop_.clear();
-  if (name == "npc") { npc_ = npc; say_ = say; dq_ = -1; dtrv_ = -1; dkey_.clear(); }
+void Win::open(World& w, const std::string& name, int npc, const std::string& say, bool quiet) {
+  cur = name; shop_.clear(); w_ = &w;
+  if (name == "npc") { npc_ = npc; say_ = say; dq_ = -1; dtrv_ = -1; dkey_.clear(); if (!quiet) w.sfx("request", 0.6); }
   if (name == "task") ksel_ = 0;
   if (name == "shop") { H_.tab = 0; H_.sel.clear(); H_.off = 0; }
   if (name == "map") { WM_.mode = "world"; WM_.sel.clear(); }
   if (name == "pet") { auto L = w.petList(); for (size_t i = 0; i < L.size(); i++) if (L[i]->uid == w.P.petOn) PW_.i = int(i); }
   B_.sel.clear(); B_.page = 0;
+  if (!quiet) w.sfx("menu_appear", 0.5);   // HTML: her pencere açılışında
   if (name == "bag") w.questFlag("openBag");
 }
 void Win::close() { cur.clear(); npc_ = -1; say_.clear(); modal_ = Modal(); shop_.clear(); wantText = false; }
-void Win::ask(const std::string& text, std::function<void()> onYes) { modal_.on = true; modal_.text = text; modal_.yes = std::move(onYes); }
+void Win::ask(const std::string& text, std::function<void()> onYes) { modal_.on = true; modal_.text = text; modal_.yes = std::move(onYes); snd("menu_appear", 0.4); }
 
 void Win::hit(const Xf& xf, const std::string& id, float x, float y, float w, float h, std::vector<Hit>* L) { (L ? *L : hits_).push_back({id, xf.X(x), xf.Y(y), w * xf.k, h * xf.k}); }
 const std::vector<float> Win::rect(const std::string& form, int id) const {
@@ -235,8 +236,8 @@ void Win::drawTask(engine::Canvas& c, World& w, float VH) {
 }
 void Win::tapTask(World& w, const std::string& id) {
   const auto list = taskList(w); const auto& Q = w.quests().all();
-  if (id.rfind("mode:", 0) == 0) { kmode_ = id.substr(5); ksel_ = 0; koff_ = 0; return; }
-  for (int i = 0; i < 5; i++) if (std::to_string(K2ROWS[i]) == id && koff_ + i < int(list.size())) { ksel_ = Q[size_t(list[size_t(koff_ + i)])].id; return; }
+  if (id.rfind("mode:", 0) == 0) { kmode_ = id.substr(5); ksel_ = 0; koff_ = 0; w.sfx("skill_pageflip"); return; }
+  for (int i = 0; i < 5; i++) if (std::to_string(K2ROWS[i]) == id && koff_ + i < int(list.size())) { ksel_ = Q[size_t(list[size_t(koff_ + i)])].id; w.sfx("menusel", 0.6); return; }
   if (id == "more") { koff_ = koff_ + 5 >= int(list.size()) ? 0 : koff_ + 5; return; }
   const int qi = ksel_ ? w.quests().indexOf(ksel_) : -1; if (qi < 0) return;
   const Quest& q = Q[size_t(qi)];
@@ -273,6 +274,7 @@ void Win::drawModal(engine::Canvas& c, float vw, float VH) {
 }
 
 void Win::draw(engine::Canvas& c, World& w, float dt) {
+  w_ = &w;
   clock_ += dt; hits_.clear();
   const float vw = float(c.w()), VH = float(engine::VH);
   if (cur == "bag") drawBag(c, w, VH);
@@ -292,9 +294,10 @@ void Win::draw(engine::Canvas& c, World& w, float dt) {
 }
 
 bool Win::tap(World& w, float x, float y) {
+  w_ = &w;
   if (modal_.on) {
     for (const Hit& h : modal_.hits) if (x >= h.x && x < h.x + h.w && y >= h.y && y < h.y + h.h) {
-      pressed_ = h.id; pressT_ = clock_; Modal& m = modal_;
+      pressed_ = h.id; pressT_ = clock_; w.sfx("menusel", 0.6); Modal& m = modal_;
       if (h.id == "m52786") { auto yes = m.yes; modal_ = Modal(); if (yes) yes(); }
       else if (h.id == "m52788" || h.id == "m52792") { modal_ = Modal(); wantText = false; }
       else if (h.id == "m50758") { m.n = m.n > 1 ? m.n - 1 : m.max; m.typed.clear(); }
@@ -311,7 +314,7 @@ bool Win::tap(World& w, float x, float y) {
   if (!h) { if (cur != "dead") close(); return true; }
   const std::string id = h->id; pressed_ = id; pressT_ = clock_;
   if (id.rfind("hub:", 0) == 0) {
-    const std::string k = id.substr(4);
+    const std::string k = id.substr(4); w.sfx("skill_pageflip");
     if (k == "task" || k == "role" || k == "bag" || k == "skill" || k == "map" || k == "sys" || k == "pet") { if (k != cur) { close(); open(w, k); } }
     else if (k != cur) w.toast("Bu pencere yakında.");
     return true;

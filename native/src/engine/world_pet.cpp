@@ -143,7 +143,7 @@ void World::petHatch(const std::string& eggId) {
   P.pets.push_back(petMake(*s, bal_.item(box)->petJ["box"].str())); PetRec& p = P.pets.back(); const std::string uid = p.uid;
   std::string skl; for (const std::string& k : p.sk) skl += (skl.empty() ? "" : ", ") + petSkName(k); if (skl.empty()) skl = "yok";
   char tal[32]; std::snprintf(tal, sizeof tal, "%g", p.tal);
-  toast(petName(p) + " yumurtadan çıktı!"); note("Yeni evcil hayvan: " + petName(p) + " (yetenek ×" + tal + "; rastgele beceriler: " + skl + ")", LOG_Q);
+  sfx("finish_task"); toast(petName(p) + " yumurtadan çıktı!"); note("Yeni evcil hayvan: " + petName(p) + " (yetenek ×" + tal + "; rastgele beceriler: " + skl + ")", LOG_Q);
   questFlag("hatch"); if (P.petOn.empty()) petSummon(uid);
   save();
 }
@@ -372,7 +372,7 @@ int World::petTransform(const std::string& mainUid, const std::string& matUid, c
   main = petByUid(mainUid);
   const bool okk = random() * 100 < r.chance; const std::string n0 = petName(*main);
   if (okk) {
-    main->st = r.next; const PetStats s = petStats(*main); main->hp = s.hp; main->mp = s.mp;
+    main->st = r.next; const PetStats s = petStats(*main); main->hp = s.hp; main->mp = s.mp; sfx("finish_task");
     toast("Dönüşüm başarılı! " + n0 + " → " + petName(*main) + " (düzey " + std::to_string(main->st) + ")");
     note(n0 + " dönüşüm düzeyi " + std::to_string(main->st) + "'e ulaştı!", LOG_Q);
   } else {
@@ -412,7 +412,7 @@ std::string World::petTransfer(const std::string& mainUid, const std::string& ma
   if (slot < int(main->sk.size())) main->sk[size_t(slot)] = k; else main->sk.push_back(k);
   const std::string mu = mat->uid; P.pets.erase(std::remove_if(P.pets.begin(), P.pets.end(), [&](const PetRec& x) { return x.uid == mu; }), P.pets.end());
   main = petByUid(mainUid);
-  toast(petName(*main) + " yeni beceri öğrendi: " + petSkName(k) + (old.empty() ? std::string() : " (" + petSkName(old) + " yerine)"));
+  sfx("finish_task"); toast(petName(*main) + " yeni beceri öğrendi: " + petSkName(k) + (old.empty() ? std::string() : " (" + petSkName(old) + " yerine)"));
   note("Beceri aktarma: " + petName(*main) + " ← " + petSkName(k), LOG_Q);
   save(); return k;
 }

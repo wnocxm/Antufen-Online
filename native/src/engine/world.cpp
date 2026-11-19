@@ -139,7 +139,7 @@ bool World::skillUp(const SkillDef& sk) {
   if (r >= (sk.mx ? sk.mx : 10)) { toast("Bu beceri en yüksek kademede."); return false; }
   if (!skLock(sk).empty()) { toast(skLockMsg(sk)); return false; }
   if (P.sp < 1) { toast("Beceri puanın yok. Seviye atlayınca puan kazanırsın."); return false; }
-  P.sp--; P.sk[sk.id] = r + 1; note(sk.name + ": kademe " + std::to_string(r + 1), LOG_Q); clampVitals(); save(); return true;
+  P.sp--; P.sk[sk.id] = r + 1; sfx("skill_levelup"); note(sk.name + ": kademe " + std::to_string(r + 1), LOG_Q); clampVitals(); save(); return true;
 }
 // her puan, öğrenilebilir beceriler arasında kademesi en düşük olana (eşitse önceki ağaç / önceki yuva); oyuncu gibi önce bir sonraki
 // ağacı açacak kadar (acemi 35, sınıf 40), sonra en üstteki açık ağaç. spec: hangi uzmanlık (öbürü alınmaz)
@@ -171,7 +171,7 @@ bool World::skillReset(bool free) {
   int spent = 0; for (const auto& kv : P.sk) spent += kv.second;
   if (!spent) { toast("Harcanmış beceri puanı yok."); return false; }
   if (!free && !removeItem("30092") && !removeItem("30788")) { toast("Eğitim Kitabı gerekir (beceri eğitmeninde satılır)."); return false; }
-  P.sp += spent; P.sk.clear(); player.buffs.clear();
+  P.sp += spent; P.sk.clear(); player.buffs.clear(); sfx("skill_levelup");
   note("Beceri puanları sıfırlandı: " + std::to_string(spent) + " puan geri geldi.", LOG_Q); clampVitals(); save(); return true;
 }
 
@@ -303,6 +303,7 @@ void World::loadScene(const std::string& sid, const int* arrive) {
   petSpawn();   // çağrılmış evcil hayvan sahibinin yanında (HTML Pet.spawn: oyuncudan hemen sonra)
   camX = map.px(player.x, player.y); camY = map.py(player.x, player.y);
   arriveT = 1.5;
+  music(sc["music"].str());   // HTML SFX.Music.play(sc.music)
   save();
 }
 
@@ -529,6 +530,7 @@ void World::useSkill(int i) {
   p.pending = -1; p.mp -= mpCost; p.cds[sk->id] = sk->cd; p.combatT = 5; if (i == 0) p.atkT = std::max(p.atkT, 0.9);
   if (t >= 0) p.dir = dirOf(ents[t].x - p.x, ents[t].y - p.y);
   p.state = bal_.cls(P.cls).melee && sk->f && (sk->range ? sk->range : 9) < 3 ? "attack" : "cast"; p.animT = 0; p.stateT = 0.5;
+  sfx(sk->snd);
   SkCtx c1{*this, *sk, s, P.lv, t >= 0 ? &ents[size_t(t)] : nullptr};
   const auto F = std::make_shared<SkF>(sk->f ? sk->f(c1) : SkF());
   HitOpt o; o.crit = F->crit; o.add = F->add; o.slow = F->slow ? F->slow : sk->slow; o.pure = F->pure; o.bleed = F->bleed; o.burn = F->burn;
@@ -556,11 +558,12 @@ void World::useSkill(int i) {
   auto hitFx = [this, sk, t](int n) { fxBurst(!sk->hit.empty() ? sk->hit : sk->fx, ents[t].x, ents[t].y, n, sk->hitR); };
   auto mobsNear = [this](double x, double y, double r) { std::vector<int> v; for (size_t k = 0; k < ents.size(); k++) { const Ent& m = ents[k]; if (m.kind == Ent::MOB && !m.dead && jsHypot(m.x - x, m.y - y) <= r) v.push_back(int(k)); } return v; };
   auto land = [this, sk, F, MUL, o, t, per, hitFx, mobsNear, after]() {
+    sfx(sk->snd2);
     hitFx(per);
     if (sk->splash) { for (int m : mobsNear(ents[t].x, ents[t].y, sk->splash)) hitMob(m, MUL, o); }
     else if (MUL || o.add) hitMob(t, MUL, o);
     if (!sk->fx2.empty()) pushFx(sk->fx2, ents[t].x, ents[t].y);
-    if (sk->hits == 2) later(0.28, [this, F, MUL, o, t]() { if (!ents[t].dead) { HitOpt o2 = o; o2.add = F->hasMult2 ? 0 : o.add; hitMob(t, F->hasMult2 ? F->mult2 : MUL, o2); } });
+    if (sk->hits == 2) later(0.28, [this, sk, F, MUL, o, t]() { if (!ents[t].dead) { HitOpt o2 = o; o2.add = F->hasMult2 ? 0 : o.add; hitMob(t, F->hasMult2 ? F->mult2 : MUL, o2); sfx(sk->snd); } });
     after(t);
   };
   // oyuncudaki efekt; yakın dövüşte kılıç izi saldırı hareketinin inişine denk gelsin diye 2 kare sonra
@@ -573,6 +576,7 @@ void World::useSkill(int i) {
     } else if (sk->aoe) {
       const std::vector<int> near = mobsNear(p.x, p.y, sk->aoe);
       if (!sk->fx.empty()) pushFx(sk->fx, p.x, p.y);
+      sfx(sk->snd2);
       if (!sk->totem.empty()) totemAt(sk->totem, p.x, p.y, F->weakT ? F->weakT : 10);
       int dealt = 0;
       for (int m : near) {
@@ -606,6 +610,7 @@ void World::killMob(int i) {
   gainXp(xp); ufloat(i, "+" + std::to_string(xp) + " TP", 0x9fe060);
   const Stats st = stats();
   const long long gold = (long long)jsRound((irnd(m.d->lv, m.d->lv * 3) + m.d->rank * 20) * (1 + st.goldUp / 100)); P.gold += gold;
+  sfx("kill", 0.7); later(0.35, [this] { sfx("coin", 0.5); });
   note(std::to_string(gold) + " altın alındı", LOG_LOOT);
   if (st.lifeEl && bal_.item("30127") && random() * 100 < st.lifeEl) addItem("30127");   // gece elfi: Yaşam Elementi
   if (random() < 0.1) addItem(P.lv > 10 ? "hp2" : "hp1");
@@ -644,14 +649,14 @@ void World::hurtPlayer(int i) {
   p.hp -= r.d; p.combatT = 5; ufloat(-2, "-" + std::to_string(r.d), 0xff5040); hurtT = 0.4f;
   // Kutsanmış Beden (90603): ölümcül darbeyi olasılıkla savuştur, biraz can
   if (p.hp <= 0 && s.cheatDeath && random() * 100 < s.cheatDeath) { p.hp = jsRound(s.hp * 0.2); ufloat(-2, "Kutsandı", 0xffe070); return; }
-  if (p.hp <= 0) { p.hp = 0; p.dead = true; p.deadT = 0; p.state = "dead"; setTarget(-1); died = true; }   // arayüz 1,2 sn sonra ölüm penceresini açar
+  if (p.hp <= 0) { p.hp = 0; p.dead = true; p.deadT = 0; p.state = "dead"; sfx("kill", 0.5); setTarget(-1); died = true; }   // arayüz 1,2 sn sonra ölüm penceresini açar
 }
 
 void World::gainXp(long long n) {
   P.xp += n;
   while (P.xp >= bal_.xpNeed(P.lv)) {
     P.xp -= bal_.xpNeed(P.lv); P.lv++; const Stats s = stats(); player.hp = s.hp; player.mp = s.mp;
-    pushFx("LEVELUP", player.x, player.y); lvlN = P.lv; lvlT = 2.5f; P.sp++;
+    pushFx("LEVELUP", player.x, player.y); lvlN = P.lv; lvlT = 2.5f; sfx("levelup"); P.sp++;
     note("Beceri puanı kazandın! Beceriler ekranından harca.", LOG_Q);
     autoQuests();
     // açılan görevler (HTML questsUnlockedAt: bütün görevlerin açılma seviyesi liste sırasıyla hesaplanır)
@@ -736,10 +741,10 @@ void World::update(double dt, double sx, double sy) {
             p.atkT = 1.1; p.combatT = 5; p.dir = dirOf(t.x - p.x, t.y - p.y);
             if (C.melee) {
               p.state = "attack"; p.animT = 0; p.stateT = 0.45;
-              later(0.25, [this, ti, &C]() { Ent& m = ents[ti]; if (!m.dead && jsHypot(m.x - player.x, m.y - player.y) < C.range + 0.6) { hitMob(ti, 1); pushFx("BLOOD", m.x, m.y); } });
+              later(0.25, [this, ti, &C]() { Ent& m = ents[ti]; if (!m.dead && jsHypot(m.x - player.x, m.y - player.y) < C.range + 0.6) { hitMob(ti, 1); sfx(C.snd); pushFx("BLOOD", m.x, m.y); } });
             } else {
-              p.state = "cast"; p.animT = 0; p.stateT = 0.45;
-              later(0.2, [this, ti, &C]() { shoot(C.bolt, player.x, player.y, ti, [this, ti, &C]() { hitMob(ti, 0.9); if (!C.boltHit.empty()) pushFx(C.boltHit, ents[ti].x, ents[ti].y); }, true); });
+              p.state = "cast"; p.animT = 0; p.stateT = 0.45; sfx(C.snd, 0.6);
+              later(0.2, [this, ti, &C]() { shoot(C.bolt, player.x, player.y, ti, [this, ti, &C]() { hitMob(ti, 0.9); if (!C.boltHit.empty()) pushFx(C.boltHit, ents[ti].x, ents[ti].y); sfx("skill_bomb", 0.4); }, true); });
             }
           }
         }

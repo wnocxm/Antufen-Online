@@ -17,7 +17,7 @@ namespace ui {
 class Win {
  public:
   explicit Win(Forms& f) : F_(f) {}
-  void open(engine::World& w, const std::string& name, int npc = -1, const std::string& say = "");
+  void open(engine::World& w, const std::string& name, int npc = -1, const std::string& say = "", bool quiet = false);   // quiet: sesler çalındı (World::openDialog)
   void openShop(engine::World& w, const std::string& cn) { open(w, "shop"); shop_ = cn; }               // dükkân (kişinin adı)
   void openBag(engine::World& w, int cat, const std::string& shop) { open(w, "bag"); B_.cat = cat; shop_ = shop; }   // çanta (dükkândan: Sat)
   void close();
@@ -33,11 +33,14 @@ class Win {
   float safeL = 0;
   bool wantText = false;                            // adet kutusunun sayısına dokunuldu: ekran klavyesi açılsın (SDL_StartTextInput)
   std::string assignReq, assignName;                // kısayola yerleştirme isteği (HUD yuvaya dokunulmasını bekler)
-  bool optSfx = true, optMusic = true;              // ayarlar (ses sistemi gelince kullanılır)
+  bool optSfx = true, optMusic = true;              // ayarlar: ses efektleri, müzik (uygulama karıştırıcıya uygular ve kaydeder)
+  bool optChanged = false;                          // ayar değişti (uygulama okuyup sıfırlar)
   void openNpcList(engine::World& w);               // bu haritadaki kişiler (dokununca yürür)
   void openPetF(engine::World& w, const std::string& mode, const std::string& main = "");   // dönüşüm / beceri aktarma
 
  private:
+  engine::World* w_ = nullptr;   // son dokunulan/çizilen dünya (sesler; onay kutusu oyun kodundan da açılır)
+  void snd(const std::string& n, double v = 1) { if (w_) w_->sfx(n, v); }
   Forms& F_;
   struct Hit { std::string id; float x, y, w, h; };
   std::vector<Hit> hits_;

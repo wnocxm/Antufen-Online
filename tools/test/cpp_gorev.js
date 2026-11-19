@@ -102,7 +102,7 @@ const BOT = `window.__bot = (() => {
     const Pp = P(), p = Game.player;
     const qs = Object.keys(Pp.quests).map(Number).sort((a, b) => a - b).map(id => { const st = Pp.quests[id]; let s = id + ':' + (st.n || 0) + (st.ready ? 'r' : ''); for (const k of Object.keys(st.c || {}).sort()) if (st.c[k]) s += '/' + k + '=' + st.c[k]; return s; }).join(',');
     const dn = Object.keys(Pp.done).filter(k => Pp.done[k] && /^\\d+$/.test(k)).map(Number).sort((a, b) => a - b).join(',');
-    return { adim: step, eylem: a, sahne: Game.sceneId, lv: Pp.lv, xp: Pp.xp, altin: Pp.gold, ust: Pp.adv || 0, canta: Pp.bag.map(b => b.id + ':' + b.n).join(','), gorev: qs, bitti: dn, x: p.x, y: p.y };
+    return { adim: step, eylem: a, sahne: Game.sceneId, lv: Pp.lv, xp: Pp.xp, altin: Pp.gold, ust: Pp.adv || 0, canta: Pp.bag.map(b => b.id + ':' + b.n).join(','), gorev: qs, bitti: dn, x: p.x, y: p.y, ses: __snd.splice(0) };
   }
   function marks() { sceneIndex(); let m = ''; for (const cn of Object.keys(NPC_SC).sort()) { const k = npcMark(cn); if (k) m += cn + k + ','; } return m; }
   return { talk, decide, act, rec, marks, reset() { tries = {}; } };
@@ -116,7 +116,7 @@ const BOT = `window.__bot = (() => {
   await p.goto(URL); await p.waitForTimeout(2500); await p.keyboard.press('Enter');
   await p.click('[data-cls="战士"]'); await p.fill('#cname', 'GMGorev'); await p.click('#cstart');
   await p.waitForFunction(() => window.__G && window.__G.player, null, { timeout: 30000 }); await p.waitForTimeout(800);
-  await p.evaluate(() => { window.__upd = window.update; window.update = () => {}; SFX.play = () => {}; });
+  await p.evaluate(() => { window.__upd = window.update; window.update = () => {}; window.__snd = []; SFX.play = (n, v = 1) => { if (n) __snd.push([n, v]); }; SFX.Music.play = n => { if (n) __snd.push(['muzik', n]); }; });
   await p.evaluate(BOT);
   const waitScene = () => p.waitForFunction(() => !Game.transit && Game.player, null, { timeout: 30000 });
   // 1) açılma seviyeleri
@@ -130,7 +130,7 @@ const BOT = `window.__bot = (() => {
       Game.flags = {}; Game.god = true; Game.target = null; window.__bot.reset(); Math.random = eval(M)(seed);
     }, [cls, race, sex, seed, MULBERRY]);
     await p.evaluate(s => gotoScene(s, null, [3, 13], null), start); await waitScene();
-    await p.evaluate(() => { Game.time = 0; const s = stats(), pl = Game.player; pl.hp = s.hp; pl.mp = s.mp; pl.doll.set(look()); });
+    await p.evaluate(() => { Game.time = 0; const s = stats(), pl = Game.player; pl.hp = s.hp; pl.mp = s.mp; pl.doll.set(look()); __snd = []; });
     const tr = [];
     for (let step = 0; step < STEPS; step++) {
       let a = 'konus';
@@ -148,7 +148,7 @@ const BOT = `window.__bot = (() => {
     // hata ayıklama: botun sonunda haritadaki canavarlar (C++ tarafı "canavarlar" komutuyla aynı alanlar)
     fs.writeFileSync(path.join(OUT, ad + '_canavar_html.json'), JSON.stringify(await p.evaluate(() => Game.ents.map((e, i) => [e, i]).filter(([e]) => e.kind === 'mob').map(([e, i]) => ({ i, ad: e.name, x: e.x, y: e.y, can: e.hp, sv: e.d.lv, saldiri: e.atk, durum: e.state, olu: !!e.dead })))));
     html[ad] = tr; fs.writeFileSync(path.join(OUT, ad + '_html.json'), JSON.stringify(tr, null, 0).replace(/},{/g, '},\n{'));
-    scen.push(`tohum ${seed}`, `karakter ${cls} ${race} ${sex}`, `sahne ${start} 3 13`, 'zaman0', 'doldur', 'olumsuz 1', `gorevbot ${STEPS} ${DT} ${path.join(OUT, ad + '_bot.json')}`, `canavarlar ${path.join(OUT, ad + '_canavar.json')}`);
+    scen.push(`tohum ${seed}`, `karakter ${cls} ${race} ${sex}`, `sahne ${start} 3 13`, 'zaman0', 'doldur', 'olumsuz 1', 'sestemizle', `gorevbot ${STEPS} ${DT} ${path.join(OUT, ad + '_bot.json')}`, `canavarlar ${path.join(OUT, ad + '_canavar.json')}`);
   }
   // 3) sınıf yükseltme zincirleri
   const CHAINS = [['战士', '人类'], ['战士', '精灵'], ['法师', '人类'], ['法师', '精灵'], ['牧师', '人类'], ['牧师', '精灵']], chainHtml = {};
@@ -175,11 +175,11 @@ const BOT = `window.__bot = (() => {
   const lvDiff = lh.map((l, i) => l !== lcl[i] ? `${l} · C++ ${lcl[i]}` : null).filter(Boolean);
   console.log(`açılma seviyesi: ${lh.length - 1} görev, ${lvDiff.length ? 'FARKLI ' + lvDiff.length + ' (ilk: ' + lvDiff[0] + ')' : 'hepsi aynı'}`);
   if (lvDiff.length) bad++;
-  const near = (a, b) => typeof a === 'number' ? Math.abs(a - b) <= 1e-6 * Math.max(1, Math.abs(a)) : a === b;
+  const near = (a, b) => typeof a === 'number' ? Math.abs(a - b) <= 1e-6 * Math.max(1, Math.abs(a)) : a && typeof a === 'object' ? JSON.stringify(a) === JSON.stringify(b) : a === b;
   for (const [ad] of BOTS) {
     const ct = JSON.parse(fs.readFileSync(path.join(OUT, ad + '_bot.json'), 'utf8')), ht = html[ad];
     let diff = '';
-    for (let i = 0; i < Math.min(ct.length, ht.length) && !diff; i++) for (const k of Object.keys(ht[i])) if (!near(ht[i][k], ct[i][k])) { diff = `${i}. adım ${k}: HTML ${String(ht[i][k]).slice(0, 160)} · C++ ${String(ct[i][k]).slice(0, 160)}`; break; }
+    for (let i = 0; i < Math.min(ct.length, ht.length) && !diff; i++) for (const k of Object.keys(ht[i])) if (!near(ht[i][k], ct[i][k])) { diff = `${i}. adım ${k}: HTML ${JSON.stringify(ht[i][k]).slice(0, 200)} · C++ ${JSON.stringify(ct[i][k]).slice(0, 200)}`; break; }
     if (!diff && ct.length !== ht.length) diff = `adım sayısı ${ht.length}/${ct.length}`;
     const last = ht[ht.length - 2], kinds = {}; for (const r of ht.slice(0, -1)) { const k = r.eylem.split(' ')[0]; kinds[k] = (kinds[k] || 0) + 1; }
     console.log(`${ad.padEnd(14)} ${STEPS} adım: ${diff ? 'FARKLI ' + diff : 'aynı'} (son: Sv ${last.lv}, ${last.bitti ? last.bitti.split(',').length : 0} görev bitti, altın ${last.altin}, harita ${last.sahne}; ${Object.entries(kinds).map(([k, v]) => k + ' ' + v).join(', ')})`);

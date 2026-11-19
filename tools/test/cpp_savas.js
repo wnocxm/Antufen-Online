@@ -3,7 +3,7 @@
 //   1) canavar yerleşimi (ad, yer, yön, can, seviye, saldırı, savunma, gezinme süresi),
 //   2) beceri puanı dağılımı (becerili senaryolarda: puanlar oyuncu gibi dağıtılır, HTML skillAutoSpend),
 //   3) otomatik savaş (her saniye: oyuncu canı/manası, seviye, deneyim, altın, yer, hedef ve canı, yaşayan canavarlar, canavarların
-//      toplam yeri ve canı, güçlendirmeler, ölüm, çanta) — en yakın canavarı hedef al, ölünce sıradakini; becerili senaryolarda her
+//      toplam yeri ve canı, güçlendirmeler, ölüm, çanta, o saniyedeki ses olayları) — en yakın canavarı hedef al, ölünce sıradakini; becerili senaryolarda her
 //      adımda sıradaki hazır beceri de kullanılır (sırayla döner: bir önceki kullanılandan sonraki ilk hazır beceri; bekleme bitmiş,
 //      mana yeter; menzil dışındaysa oyuncu yürür).
 //   node tools/test/cpp_savas.js   (OUT=klasör; URL verilmezse www/ geçici bir sunucuyla açılır; önce: cmake --build native/build)
@@ -55,7 +55,8 @@ const MULBERRY = `(a => () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imu
   await p.click('[data-cls="战士"]'); await p.fill('#cname', 'GMSavas'); await p.click('#cstart');
   await p.waitForFunction(() => window.__G && window.__G.player, null, { timeout: 30000 }); await p.waitForTimeout(800);
   const start = await p.evaluate(() => Game.sceneId);
-  await p.evaluate(() => { window.__upd = window.update; window.update = () => {}; SFX.play = () => {}; });   // döngü durur; ses zar atmasın
+  // döngü durur; ses çağrıları kaydedilir (C++'ın ses olaylarıyla karşılaştırılır)
+  await p.evaluate(() => { window.__upd = window.update; window.update = () => {}; window.__snd = []; SFX.play = (n, v = 1) => { if (n) __snd.push([n, v]); }; SFX.Music.play = n => { if (n) __snd.push(['muzik', n]); }; });
   const scen = ['veri www/assets', `sahne ${start}`], html = {};
   for (let [ad, sid, x, y, cls, race, sex, lv, seed, sec, bec] of CASES) {
     if (!x && !y) [x, y] = await p.evaluate(s => { const D = Assets.D, e = D.scenes[s].ents.find(e => D.mon[e[0]]); return e[2].slice(0, 2); }, sid);
@@ -71,7 +72,7 @@ const MULBERRY = `(a => () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imu
       Game.time = 0;
       const pl = Game.player, s0 = stats(); pl.hp = s0.hp; pl.mp = s0.mp; pl.doll.set(look());
       const mobs = Game.ents.map((e, i) => [e, i]).filter(([e]) => e.kind === 'mob').map(([e, i]) => ({ i, ad: e.name, x: e.x, y: e.y, yon: e.dir, can: e.hp, sv: e.d.lv, saldiri: e.atk, savunma: e.def, gezinme: e.wanderT, durum: e.state }));
-      const trace = [], per = Math.round(1 / DT), steps = Math.round(sec / DT); let rot = 0;   // beceriler sırayla (her biri sırası gelince)
+      const trace = [], per = Math.round(1 / DT), steps = Math.round(sec / DT); let rot = 0; __snd = [];   // beceriler sırayla (her biri sırası gelince)
       for (let k = 1; k <= steps; k++) {
         if (!Game.target || Game.target.dead) { const m = nearestMob(8); if (m) setTarget(m, true); }
         if (bec && !pl.dead && pl.pending == null && pl.state !== 'attack' && pl.state !== 'cast') {
@@ -82,7 +83,7 @@ const MULBERRY = `(a => () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imu
         if (k % per === 0) {
           let alive = 0, sx = 0, sy = 0, mh = 0; for (const e of Game.ents) if (e.kind === 'mob') { alive += !e.dead; sx += e.x; sy += e.y; mh += e.hp; }
           const t = Game.target ? Game.ents.indexOf(Game.target) : -1;
-          trace.push({ s: k * DT, hp: pl.hp, mp: pl.mp, lv: Game.P.lv, xp: Game.P.xp, altin: Game.P.gold, x: pl.x, y: pl.y, hedef: t, hedefCan: t >= 0 ? Game.target.hp : -1, canli: alive, canavarX: sx, canavarY: sy, olu: !!pl.dead, canta: Game.P.bag.map(b => b.id + ':' + b.n).join(','), canavarCan: mh, guc: pl.buffs.map(b => b.id).join(',') });
+          trace.push({ s: k * DT, hp: pl.hp, mp: pl.mp, lv: Game.P.lv, xp: Game.P.xp, altin: Game.P.gold, x: pl.x, y: pl.y, hedef: t, hedefCan: t >= 0 ? Game.target.hp : -1, canli: alive, canavarX: sx, canavarY: sy, olu: !!pl.dead, canta: Game.P.bag.map(b => b.id + ':' + b.n).join(','), canavarCan: mh, guc: pl.buffs.map(b => b.id).join(','), ses: __snd.splice(0) });
         }
       }
       return { mobs, trace, pos: [pl.x, pl.y] };
@@ -91,13 +92,13 @@ const MULBERRY = `(a => () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imu
     scen.push(`tohum ${seed}`, `karakter ${cls} ${race} ${sex}`, `seviye ${lv}`);
     if (bec) scen.push(`ust ${bec[0]}`, `dagit ${lv + 1} ${bec[1]} ${path.join(OUT, ad + '_beceri.txt')}`);
     scen.push(`sahne ${sid} ${x} ${y}`, 'zaman0', 'doldur',
-      `canavarlar ${path.join(OUT, ad + '_canavar.json')}`, `savas ${DT} ${sec} ${path.join(OUT, ad + '_iz.json')} ${bec ? 'beceri' : 'oto'}`);
+      `canavarlar ${path.join(OUT, ad + '_canavar.json')}`, 'sestemizle', `savas ${DT} ${sec} ${path.join(OUT, ad + '_iz.json')} ${bec ? 'beceri' : 'oto'}`);
   }
   await b.close(); if (srv) srv.kill();
   fs.writeFileSync(path.join(OUT, 'senaryo.txt'), scen.join('\n') + '\n');
   execFileSync('native/build/anrufen_test', [path.join(OUT, 'senaryo.txt')], { stdio: ['ignore', 'ignore', 'inherit'] });
   // karşılaştır
-  const near = (a, b) => typeof a === 'number' ? Math.abs(a - b) <= 1e-6 * Math.max(1, Math.abs(a)) : a === b;
+  const near = (a, b) => typeof a === 'number' ? Math.abs(a - b) <= 1e-6 * Math.max(1, Math.abs(a)) : a && typeof a === 'object' ? JSON.stringify(a) === JSON.stringify(b) : a === b;
   let bad = 0;
   for (const [ad, , , , , , , , , , bec] of CASES) {
     const cm = JSON.parse(fs.readFileSync(path.join(OUT, ad + '_canavar.json'), 'utf8')), hm = html[ad].mobs;

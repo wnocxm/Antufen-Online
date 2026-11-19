@@ -22,7 +22,7 @@ let seed = 12345; const rnd = n => { seed = (seed * 1103515245 + 12345) & 0x7fff
   await p.goto(URL); await p.waitForTimeout(2500); await p.keyboard.press('Enter');
   await p.click('[data-cls="战士"]'); await p.fill('#cname', 'Kahraman'); await p.click('#cstart');
   await p.waitForFunction(() => window.__G && window.__G.player, null, { timeout: 30000 }); await p.waitForTimeout(800);
-  await p.evaluate(() => { window.__upd = window.update; window.update = () => {}; SFX.play = () => {}; for (const k of ['log', 'toast', 'zone', 'levelUp', 'float', 'hurt']) UI[k] = () => {}; });
+  await p.evaluate(() => { window.__upd = window.update; window.update = () => {}; window.__snd = []; SFX.play = (n, v = 1) => { if (n) __snd.push([n, v]); }; SFX.Music.play = n => { if (n) __snd.push(['muzik', n]); }; for (const k of ['log', 'toast', 'zone', 'levelUp', 'float', 'hurt']) UI[k] = () => {}; });
   const waitScene = () => p.waitForFunction(() => !Game.transit && Game.player, null, { timeout: 30000 });
   const go = async (sid, x, y) => { await p.evaluate(([s, x, y]) => gotoScene(s, null, [x, y], null), [sid, x, y]); await waitScene(); };
   const scen = ['veri www/assets'];
@@ -50,22 +50,22 @@ let seed = 12345; const rnd = n => { seed = (seed * 1103515245 + 12345) & 0x7fff
       left -= r.k;
       if (r.transit) { await waitScene(); varis.push(await p.evaluate(() => [Game.sceneId, Game.player.x, Game.player.y])); await p.waitForTimeout(500); }
     }
-    return Object.assign({ varis }, await p.evaluate(() => ({ sahne: Game.sceneId, x: Game.player.x, y: Game.player.y, hedef: Game.target ? Game.ents.indexOf(Game.target) : -1, konusma: Win.cur === 'npc' })));
+    return Object.assign({ varis }, await p.evaluate(() => ({ sahne: Game.sceneId, x: Game.player.x, y: Game.player.y, hedef: Game.target ? Game.ents.indexOf(Game.target) : -1, konusma: Win.cur === 'npc', ses: __snd.splice(0) })));
   };
   const html = {};
   // 2) kişiye yürü
   await go('120005', 10, 25);
-  const ki = await p.evaluate(() => { Game.time = 0; Win.close(); const i = Game.ents.findIndex(e => e.kind === 'npc' && !e.hidden && Math.hypot(e.x - 10, e.y - 25) > 12); walkToEnt(Game.ents[i]); return i; });
+  const ki = await p.evaluate(() => { Game.time = 0; Win.close(); __snd = []; const i = Game.ents.findIndex(e => e.kind === 'npc' && !e.hidden && Math.hypot(e.x - 10, e.y - 25) > 12); walkToEnt(Game.ents[i]); return i; });
   html.kisiye = await run(15);
-  scen.push('sahne 120005 10 25', 'zaman0', `kisiyeyuru ${ki}`, `ilerle ${DT} 15 ${path.join(OUT, 'kisiye.json')}`);
+  scen.push('sahne 120005 10 25', 'zaman0', 'sestemizle', `kisiyeyuru ${ki}`, `ilerle ${DT} 15 ${path.join(OUT, 'kisiye.json')}`);
   // 3) görev yol bul: Domuz Avı
-  await p.evaluate(() => { Win.close(); Game.P.quests[80439] = { n: 0, ready: false }; questWalk(QBY[80439]); });
+  await p.evaluate(() => { Win.close(); __snd = []; Game.P.quests[80439] = { n: 0, ready: false }; questWalk(QBY[80439]); });
   html.gorev = await run(60);
-  scen.push('gorevver 80439', 'gorevyuru 80439', `ilerle ${DT} 60 ${path.join(OUT, 'gorev.json')}`);
+  scen.push('sestemizle', 'gorevver 80439', 'gorevyuru 80439', `ilerle ${DT} 60 ${path.join(OUT, 'gorev.json')}`);
   // 4) teslim: görev hazır → muhtara
-  await p.evaluate(() => { Win.close(); Game.P.quests[80439] = { n: 20, ready: true }; questWalk(QBY[80439]); });
+  await p.evaluate(() => { Win.close(); __snd = []; Game.P.quests[80439] = { n: 20, ready: true }; questWalk(QBY[80439]); });
   html.teslim = await run(60);
-  scen.push('gorevhazir 80439 20', 'gorevyuru 80439', `ilerle ${DT} 60 ${path.join(OUT, 'teslim.json')}`);
+  scen.push('sestemizle', 'gorevhazir 80439 20', 'gorevyuru 80439', `ilerle ${DT} 60 ${path.join(OUT, 'teslim.json')}`);
   await b.close(); if (srv) srv.kill();
   fs.writeFileSync(path.join(OUT, 'senaryo.txt'), scen.join('\n') + '\n');
   execFileSync('native/build/anrufen_test', [path.join(OUT, 'senaryo.txt')], { stdio: ['ignore', 'ignore', 'inherit'] });
@@ -80,7 +80,8 @@ let seed = 12345; const rnd = n => { seed = (seed * 1103515245 + 12345) & 0x7fff
     if (c.varis.length !== h.varis.length) diff = `varış sayısı HTML ${h.varis.length} · C++ ${c.varis.length}`;
     for (let i = 0; i < Math.min(c.varis.length, h.varis.length) && !diff; i++) for (let k = 0; k < 3; k++) if (!near(h.varis[i][k], c.varis[i][k])) diff = `${i + 1}. varış: HTML ${h.varis[i]} · C++ ${c.varis[i]}`;
     for (const k of ['sahne', 'x', 'y', 'hedef', 'konusma']) if (!diff && !near(h[k], c[k])) diff = `${k}: HTML ${h[k]} · C++ ${c[k]}`;
-    console.log(`${ad.padEnd(7)} ${diff ? 'FARKLI ' + diff : 'aynı'} (haritalar: ${h.varis.map(v => v[0]).join(' → ') || '-'}; son ${h.sahne} (${(+h.x).toFixed(2)}, ${(+h.y).toFixed(2)}), hedef ${h.hedef}, konuşma ${h.konusma ? 'açık' : 'yok'})`);
+    if (!diff && JSON.stringify(h.ses) !== JSON.stringify(c.ses)) diff = `ses: HTML ${JSON.stringify(h.ses)} · C++ ${JSON.stringify(c.ses)}`;
+    console.log(`${ad.padEnd(7)} ${diff ? 'FARKLI ' + diff : 'aynı'} (haritalar: ${h.varis.map(v => v[0]).join(' → ') || '-'}; son ${h.sahne} (${(+h.x).toFixed(2)}, ${(+h.y).toFixed(2)}), hedef ${h.hedef}, konuşma ${h.konusma ? 'açık' : 'yok'}, ses ${h.ses.map(x => x[0] === 'muzik' ? '♪' + x[1] : x[0]).join(' ') || '-'})`);
     if (diff) bad++;
   }
   if (errs.length) { console.log('HATA', errs); bad++; }
